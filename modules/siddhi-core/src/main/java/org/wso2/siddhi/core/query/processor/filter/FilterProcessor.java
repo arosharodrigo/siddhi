@@ -18,6 +18,7 @@
  */
 package org.wso2.siddhi.core.query.processor.filter;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventIterator;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
@@ -28,6 +29,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 
 public class FilterProcessor implements Processor {
 
+	private static final Logger log = Logger.getLogger(FilterProcessor.class);
     protected Processor next;
     private ExpressionExecutor conditionExecutor;
 
@@ -47,12 +49,15 @@ public class FilterProcessor implements Processor {
     @Override
     public void process(StreamEvent event) {
         StreamEventIterator iterator = event.getIterator();
+        int count = 0;
         while (iterator.hasNext()){
             StreamEvent streamEvent = iterator.next();
+            count++;
             if (!(Boolean) conditionExecutor.execute(streamEvent)){
                 iterator.remove();
             }
         }
+        //log.info("Batch count : " + count);
         if(iterator.getFirstElement() != null){
             this.next.process(iterator.getFirstElement());
         }

@@ -38,11 +38,16 @@ public class SiddhiContext {
     public SiddhiContext() {
         this.eternalReferencedHolders = new ArrayList<EternalReferencedHolder>();
         setSiddhiExtensions(SiddhiExtensionLoader.loadSiddhiExtensions());
+        this.defaultEventBufferSize = 512;
     }
 
 
     public int getDefaultEventBufferSize() {
         return defaultEventBufferSize;
+    }
+    
+    public void setDefaultEventBufferSize(int defaultEventBufferSize) {
+        this.defaultEventBufferSize = defaultEventBufferSize;
     }
 
     public Executor getExecutorService() {
