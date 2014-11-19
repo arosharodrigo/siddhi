@@ -22,12 +22,15 @@ import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
 import org.wso2.siddhi.core.query.processor.window.WindowProcessor;
 import org.wso2.siddhi.core.stream.QueryStreamReceiver;
 import org.wso2.siddhi.core.stream.runtime.SingleStreamRuntime;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
+import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.query.input.handler.Filter;
 import org.wso2.siddhi.query.api.execution.query.input.handler.StreamHandler;
@@ -49,16 +52,17 @@ public class SingleInputStreamParser {
      * @return
      */
     public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream, SiddhiContext context,
-                                                       MetaStreamEvent metaStreamEvent, List<VariableExpressionExecutor> executors) {
+                                                       MetaStreamEvent metaStreamEvent, List<VariableExpressionExecutor> executors,
+                                                       QueryAnnotations queryAnnotations) {
         Processor processor = null;
         int i = 0;
         if (!inputStream.getStreamHandlers().isEmpty()) {
             for (StreamHandler handler : inputStream.getStreamHandlers()) {
                 if (i == 0) {
-                    processor = generateProcessor(handler, context, metaStreamEvent, executors);
+                    processor = generateProcessor(handler, context, metaStreamEvent, executors, queryAnnotations);
                     i++;
                 } else {
-                    processor.setToLast(generateProcessor(handler, context, metaStreamEvent, executors));
+                    processor.setToLast(generateProcessor(handler, context, metaStreamEvent, executors, queryAnnotations));
                 }
             }
         }
@@ -68,10 +72,53 @@ public class SingleInputStreamParser {
     }
 
     private static Processor generateProcessor(StreamHandler handler, SiddhiContext context, MetaStreamEvent metaStreamEvent,
-                                               List<VariableExpressionExecutor> executors) {
+                                               List<VariableExpressionExecutor> executors,
+                                               QueryAnnotations queryAnnotations) {
         if (handler instanceof Filter) {
             Expression condition = ((Filter) handler).getFilterExpression();
-            return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));  //metaStreamEvent has stream definition info
+            
+            if(queryAnnotations.GetAnnotationBooleanValue(SiddhiConstants.ANNOTATION_GPU, SiddhiConstants.ANNOTATION_ELEMENT_GPU_FILTER))
+            {
+            	Integer eventsPerBlock = queryAnnotations.GetAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+            			SiddhiConstants.ANNOTATION_ELEMENT_GPU_BLOCK_SIZE);
+            	
+            	Integer minEventCount = queryAnnotations.GetAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+            			SiddhiConstants.ANNOTATION_ELEMENT_GPU_MIN_EVENT_COUNT);
+            	 
+            	if(eventsPerBlock == null)
+            	{
+            		eventsPerBlock = new Integer(256);
+            	}
+            	
+            	if(minEventCount == null)
+            	{
+            		minEventCount = eventsPerBlock;
+            	}
+            	
+            	SiddhiGpu.GpuEventConsumer gpuEventConsumer = new SiddhiGpu.GpuEventConsumer(
+            			SiddhiGpu.SingleFilterKernel, context.getDefaultEventBufferSize(), eventsPerBlock);
+            	
+            	gpuEventConsumer.Initialize();
+
+            	try	{
+            		
+	            	SiddhiGpu.Filter gpuFilter = GpuExpressionParser.parseExpression(condition, context, metaStreamEvent);
+	            	gpuEventConsumer.AddFilter(gpuFilter);
+	            	gpuEventConsumer.ConfigureFilters();
+	            	
+	            	return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false),
+	            			gpuEventConsumer, minEventCount);
+	            	
+            	} catch(RuntimeException ex) {
+            		
+            		return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));
+            	}
+            }
+            else
+            {
+            	return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));  //metaStreamEvent has stream definition info
+            }
+            
         } else if (handler instanceof Window) {
             WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadSiddhiImplementation(((Window) handler).getFunction(),
                     WindowProcessor.class);

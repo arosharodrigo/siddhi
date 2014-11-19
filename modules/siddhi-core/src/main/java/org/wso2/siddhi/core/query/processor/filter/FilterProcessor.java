@@ -18,12 +18,19 @@
  */
 package org.wso2.siddhi.core.query.processor.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.PointerPointer;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventIterator;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.gpu.jni.SiddhiGpu;
+import org.wso2.siddhi.gpu.jni.SiddhiGpu.CudaEvent;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 
@@ -32,8 +39,28 @@ public class FilterProcessor implements Processor {
 	private static final Logger log = Logger.getLogger(FilterProcessor.class);
     protected Processor next;
     private ExpressionExecutor conditionExecutor;
+    private SiddhiGpu.GpuEventConsumer gpuEventConsumer = null;
+    private int gpuProcessMinimumEventCount = 256;
+    private List<SiddhiGpu.CudaEvent> cudaEventList = null;
+    private StreamEvent [] inputStreamEvents = null;
+    private int inputStreamEventIndex = 0;
 
     public FilterProcessor(ExpressionExecutor conditionExecutor) {
+        if(Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
+            this.conditionExecutor = conditionExecutor;
+        }else{
+            throw new OperationNotSupportedException("Return type of "+conditionExecutor.toString()+" should be of type BOOL. " +
+                    "Actual type: "+conditionExecutor.getReturnType().toString());
+        }
+    }
+    
+    public FilterProcessor(ExpressionExecutor conditionExecutor, SiddhiGpu.GpuEventConsumer gpuEventConsumer, int threshold) {
+    	this.gpuEventConsumer = gpuEventConsumer;
+    	this.gpuProcessMinimumEventCount = threshold;
+    	
+    	this.cudaEventList = new ArrayList<SiddhiGpu.CudaEvent>(gpuEventConsumer.GetMaxBufferSize());
+    	this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxBufferSize()];
+    	
         if(Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
             this.conditionExecutor = conditionExecutor;
         }else{
@@ -48,19 +75,99 @@ public class FilterProcessor implements Processor {
 
     @Override
     public void process(StreamEvent event) {
-        StreamEventIterator iterator = event.getIterator();
-        int count = 0;
-        while (iterator.hasNext()){
-            StreamEvent streamEvent = iterator.next();
-            count++;
-            if (!(Boolean) conditionExecutor.execute(streamEvent)){
-                iterator.remove();
-            }
-        }
-        //log.info("Batch count : " + count);
-        if(iterator.getFirstElement() != null){
-            this.next.process(iterator.getFirstElement());
-        }
+    	
+    	if(gpuEventConsumer == null)
+    	{
+    		StreamEventIterator iterator = event.getIterator();
+    		while (iterator.hasNext()){
+    			StreamEvent streamEvent = iterator.next();
+    			if (!(Boolean) conditionExecutor.execute(streamEvent)){
+    				iterator.remove();
+    			}
+    		}
+    		
+    		if(iterator.getFirstElement() != null){
+    			this.next.process(iterator.getFirstElement());
+    		}
+    	}
+    	else
+    	{
+
+    		// ############################################################################################################
+    		//TODO: check batch size and use GPU processing if size exceed minimum threshold 
+
+    		// process all events with GPU
+    		// remove non matching events OR add matching events to a new StreamEvent
+
+    		cudaEventList.clear();
+    		inputStreamEventIndex = 0;
+
+    		StreamEventIterator iterator = event.getIterator();
+    		while (iterator.hasNext()){
+    			StreamEvent streamEvent = iterator.next();
+
+    			inputStreamEvents[inputStreamEventIndex++] = streamEvent;
+
+    			CudaEvent cudaEvent = new CudaEvent(streamEvent.getTimestamp());
+
+    			int i = 0;
+    			for(Object attrib : streamEvent.getOutputData())
+    			{
+    				if(attrib instanceof Integer)
+    				{
+    					cudaEvent.AddIntAttribute(i++, ((Integer) attrib).intValue());
+    				}
+    				else if(attrib instanceof Long)
+    				{
+    					cudaEvent.AddLongAttribute(i++, ((Long) attrib).longValue());
+    				}
+    				else if(attrib instanceof Boolean)
+    				{
+    					cudaEvent.AddBoolAttribute(i++, ((Boolean) attrib).booleanValue());
+    				}
+    				else if(attrib instanceof Float)
+    				{
+    					cudaEvent.AddFloatAttribute(i++, ((Float) attrib).floatValue());
+    				}
+    				else if(attrib instanceof Double)
+    				{
+    					cudaEvent.AddDoubleAttribute(i++, ((Double) attrib).doubleValue());
+    				}
+    				else if(attrib instanceof String)
+    				{
+    					cudaEvent.AddStringAttribute(i++, attrib.toString());
+    				}
+    			}
+
+    			cudaEventList.add(cudaEvent);
+    		}
+
+    		gpuEventConsumer.OnEvents(
+    				new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
+    				cudaEventList.size());
+
+    		IntPointer matchingEvents = gpuEventConsumer.GetMatchingEvents();
+
+    		if(matchingEvents != null)
+    		{
+    			StreamEvent resultStreamEvent = inputStreamEvents[matchingEvents.get(0)];;
+
+    			for(int i=1; i<matchingEvents.limit(); ++i) {
+    				resultStreamEvent.addToLast(inputStreamEvents[matchingEvents.get(i)]); // optimize
+    			}
+
+    			this.next.process(resultStreamEvent);
+    		}
+    		else
+    		{
+    			log.debug("Result count : Empty");
+    		}
+
+
+    		//log.info("Batch count : " + count);
+
+    		// #############################################################################################################
+    	}
     }
 
     @Override

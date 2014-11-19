@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.QueryCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
@@ -55,7 +56,8 @@ public class QueryParser {
         Element element = null;
         try {
             element = AnnotationHelper.getAnnotationElement("info", "name", query.getAnnotations());
-            StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(), siddhiContext, definitionMap, metaStateEvent, executors);
+            QueryAnnotations queryAnnotations = new QueryAnnotations(query.getAnnotations());
+            StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(), siddhiContext, definitionMap, metaStateEvent, executors, queryAnnotations);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(), siddhiContext, metaStateEvent, executors);
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(), query.getOutputRate());
 

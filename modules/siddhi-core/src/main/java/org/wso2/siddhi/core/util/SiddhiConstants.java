@@ -26,6 +26,12 @@ public final class SiddhiConstants {
 
     public static final String ANNOTATION_CONFIG = "config";
     public static final String ANNOTATION_ELEMENT_ASYNC = "async";
+    
+    public static final String ANNOTATION_GPU = "gpu";
+    public static final String ANNOTATION_ELEMENT_GPU_FILTER = "filter";
+    public static final String ANNOTATION_ELEMENT_GPU_BLOCK_SIZE = "blocksize";
+    public static final String ANNOTATION_ELEMENT_GPU_MIN_EVENT_COUNT = "threshold";
+    
 
     public static final String ANNOTATION_ELEMENT_CALLBACK_ASYNC = "callback.async";
 

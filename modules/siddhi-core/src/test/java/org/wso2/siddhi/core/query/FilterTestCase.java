@@ -3982,4 +3982,34 @@ public class FilterTestCase {
         Assert.assertEquals(1, count);
         Assert.assertTrue(eventArrived);
     }
+    
+//    @Test
+//    public void FilterTest121() throws InterruptedException {
+//    	log.info("filter test121");
+//        SiddhiManager siddhiManager = new SiddhiManager();
+//
+//
+//        String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
+//        String query = "@info(name = 'query1') @gpu(filter='true', blocksize='256') from cseEventStream[150 > volume] select symbol,price insert into outputStream ;";
+//
+//        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+//
+//        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+//            @Override
+//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+//                EventPrinter.print(timeStamp, inEvents, removeEvents);
+//                Assert.assertTrue("IBM".equals(inEvents[0].getData(0)));
+//                count = count + inEvents.length;
+//                eventArrived = true;
+//            }
+//
+//        });
+//
+//        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+//        inputHandler.send(new Object[]{"IBM", 700f, 100l});
+//        inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
+//        Thread.sleep(500);
+//        Assert.assertEquals(1, count);
+//        Assert.assertTrue(eventArrived);
+//    }
 }

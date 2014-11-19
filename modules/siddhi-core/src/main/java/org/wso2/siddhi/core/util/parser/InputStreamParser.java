@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.stream.runtime.SingleStreamRuntime;
 import org.wso2.siddhi.core.stream.runtime.StreamRuntime;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -47,11 +48,12 @@ public class InputStreamParser {
      * @return
      */
     public static StreamRuntime parse(InputStream inputStream, SiddhiContext context, Map<String, AbstractDefinition> definitionMap,
-                                      MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors) {
+                                      MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors,
+                                      QueryAnnotations queryAnnotations) {
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
             MetaStreamEvent metaStreamEvent = generateMetaStreamEvent(inputStream, definitionMap);
             SingleStreamRuntime singleStreamRuntime = SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
-                    context, metaStreamEvent, executors);
+                    context, metaStreamEvent, executors, queryAnnotations);
             metaStateEvent.addEvent(metaStreamEvent);
             return singleStreamRuntime;
         } else {
