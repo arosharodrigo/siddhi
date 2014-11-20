@@ -18,6 +18,8 @@
  */
 package org.wso2.siddhi.performance;
 
+import java.util.concurrent.Executors;
+
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -27,10 +29,14 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 
 public class SimpleFilterMultipleQueryWithDisruptorPerformance {
     private static int count = 0;
+    private static int eventCount = 0;
+    private static int prevEventCount = 0;
     private static volatile long start = System.currentTimeMillis();
 
     public static void main(String[] args) throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.getSiddhiContext().setDefaultEventBufferSize(8192);
+        siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(4));
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String cseEventStream2 = "@config(async = 'true') define stream cseEventStream2 (symbol string, price float, volume int);";
@@ -42,12 +48,16 @@ public class SimpleFilterMultipleQueryWithDisruptorPerformance {
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] inEvents) {
+                eventCount += inEvents.length;
                 count++;
                 if (count % 10000000 == 0) {
                     long end = System.currentTimeMillis();
-                    double tp = (10000000 * 1000.0 / (end - start));
-                    System.out.println("Throughput = " + tp + " Event/sec");
+                    //double tp = (10000000 * 1000.0 / (end - start));
+                    double tp = ((eventCount - prevEventCount) * 1000.0) / (end - start);
+                    System.out.println("Throughput = " + tp + " Event/sec " + (eventCount - prevEventCount));
+                    //System.out.println("," + tp);
                     start = end;
+                    prevEventCount = eventCount;
                 }
             }
 
