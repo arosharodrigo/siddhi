@@ -29,6 +29,8 @@
     <property name="query.dir" value="../../siddhi-query-compiler/target"/>
     <property name="core.dir" value="../../siddhi-core/target"/>
     <property name="lib.dir" value="../target/lib"/>
+	<property name="ringbuffer.size" value="1024" />
+	<property name="threadpool.size" value="4" />
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -69,11 +71,15 @@
     <target name="SimpleFilterMultipleQueryWithDisruptor" depends="compile">
         <java classname="org.wso2.siddhi.performance.SimpleFilterMultipleQueryWithDisruptorPerformance"
               classpathref="classpath" fork="true">
+        	<arg value="${ringbuffer.size}" />
+        	<arg value="${threadpool.size}" />
         </java>
     </target>
     <target name="SimpleFilterSingleQueryWithDisruptor" depends="compile">
         <java classname="org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance"
               classpathref="classpath" fork="true">
+        	<arg value="${ringbuffer.size}" />
+        	<arg value="${threadpool.size}" />
         </java>
     </target>
 

@@ -34,9 +34,25 @@ public class SimpleFilterSingleQueryWithDisruptorPerformance {
     private static volatile long start = System.currentTimeMillis();
 
     public static void main(String[] args) throws InterruptedException {
+    	
+    	int defaultBufferSize = 1204;
+    	int threadPoolSize = 4;
+    	
+    	if(args.length == 1)
+    	{
+    		defaultBufferSize = Integer.parseInt(args[0]);
+    	}
+    	else if(args.length == 2)
+    	{
+    		defaultBufferSize = Integer.parseInt(args[0]);
+    		threadPoolSize = Integer.parseInt(args[1]);
+    	}
+    	
+    	System.out.println("Siddhi.Config = DefaultEventBufferSize: " + defaultBufferSize + " ThreadPoolSize: " + threadPoolSize);
+    	
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().setDefaultEventBufferSize(8192);
-        siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(4));
+        siddhiManager.getSiddhiContext().setDefaultEventBufferSize(defaultBufferSize);
+        siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(threadPoolSize));
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query1 = "@info(name = 'query1') from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
