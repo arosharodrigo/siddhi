@@ -11,14 +11,14 @@ import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 
-public class SimpleFilterSingleQueryWithDisruptorAllCfgPerformance
+public class SimpleFilterSingleQueryWithGpuAllCfgPerformance
 {
 	private static int count = 0;
     private static int eventCount = 0;
     private static int prevEventCount = 0;
     private static volatile long start = System.currentTimeMillis();
 
-    private static void Execution(long eventGenCount, int defaultBufferSize, int threadPoolSize) throws InterruptedException {
+    private static void Execution(long eventGenCount, int defaultBufferSize, int threadPoolSize, int blockSize) throws InterruptedException {
     	
     	count = 0;
     	eventCount = 0;
@@ -28,14 +28,14 @@ public class SimpleFilterSingleQueryWithDisruptorAllCfgPerformance
     	final List<Double> throughputList = new ArrayList<Double>();
     	
     	System.out.println("SimpleFilterSingleQueryWithDisruptorPerformance [RingBufferSize=" + defaultBufferSize + 
-    			" ThreadPoolSize=" + threadPoolSize + "]");
+    			" ThreadPoolSize=" + threadPoolSize + " EventBlockSize=" + blockSize + "]");
     	
         final SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.getSiddhiContext().setDefaultEventBufferSize(defaultBufferSize);
         siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(threadPoolSize));
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
-        String query1 = "@info(name = 'query1') from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
+        String query1 = "@info(name = 'query1') @gpu(filter='true', blocksize='" + blockSize + "') from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1);
 
@@ -85,19 +85,23 @@ public class SimpleFilterSingleQueryWithDisruptorAllCfgPerformance
         
         double avgThroughput = totalThroughput / throughputList.size();
         System.out.println("SimpleFilterSingleQueryWithDisruptorAllCfgPerformance [DefaultEventBufferSize=" + defaultBufferSize +
-        		" ThreadPoolSize=" + threadPoolSize + "] AvgThroughput = " + avgThroughput + " Event/sec");
+        		" ThreadPoolSize=" + threadPoolSize + " EventBlockSize=" + blockSize + "] AvgThroughput = " + avgThroughput + " Event/sec");
     }
     
     public static void main(String[] args) throws InterruptedException {
     	
     	final int [] defaultBufferSizes = { 256, 512, 1024, 2048, 4096, 8192, 16384};
     	final int [] threadPoolSizes = { 2, 4, 8, 16 };
+    	final int [] blockSizes = { 256, 512, 1024 };
     	
     	for (int b : defaultBufferSizes)
 		{
 			for (int t : threadPoolSizes)
 			{
-				Execution(5000000000l, b, t);
+				for (int l : blockSizes)
+				{
+					Execution(5000000000l, b, t, l);
+				}
 			}
 		}
     }
