@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.ComplexMetaEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
@@ -175,9 +176,14 @@ import org.wso2.siddhi.gpu.jni.SiddhiGpu.VariableValue;
 
 public class GpuExpressionParser
 {
+	private static final Logger log = Logger.getLogger(GpuExpressionParser.class);
 
 	public static SiddhiGpu.Filter parseExpression(Expression expression, SiddhiContext siddhiContext,
             ComplexMetaEvent metaEvent) {
+		
+		log.info("parseExpression");
+		log.info("Root Expression = " + expression.toString());
+		log.info("MetaEvent = " + metaEvent.toString());
 		
 		List<SiddhiGpu.ExecutorNode> gpuFilterList = new ArrayList<SiddhiGpu.ExecutorNode>();
 		
@@ -199,7 +205,8 @@ public class GpuExpressionParser
 			ComplexMetaEvent metaEvent,
 			List<SiddhiGpu.ExecutorNode> gpuFilterList)
 	{
-
+		log.info("Expression = " + expression.toString());
+		
 		if (expression instanceof And)
 		{
 			gpuFilterList.add(new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION).SetConditionType(SiddhiGpu.EXECUTOR_AND));
@@ -567,6 +574,7 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("int cannot be compared with " + rhsType);
 				}
+				break;
 			case LONG:
 				switch (rhsType)
 				{
@@ -589,6 +597,7 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("long cannot be compared with " + rhsType);
 				}
+				break;
 			case FLOAT:
 				switch (rhsType)
 				{
@@ -611,6 +620,7 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("float cannot be compared with " + rhsType);
 				}
+				break;
 			case DOUBLE:
 				switch (rhsType)
 				{
@@ -633,6 +643,7 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("double cannot be compared with " + rhsType);
 				}
+				break;
 			case BOOL:
 				throw new OperationNotSupportedException("bool cannot used in greater than comparisons");
 			default:
