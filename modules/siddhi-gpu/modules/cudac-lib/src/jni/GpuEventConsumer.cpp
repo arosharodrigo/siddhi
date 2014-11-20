@@ -41,6 +41,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize,
 
 
 	fprintf(fp_Log, "EventConsumer : MaxBufferSize=[%d events]\n", i_MaxBufferSize);
+	fflush(fp_Log);
 }
 
 GpuEventConsumer::~GpuEventConsumer()
@@ -97,6 +98,7 @@ void GpuEventConsumer::ConfigureFilters()
 		++ite;
 	}
 	p_CudaKernel->CopyFiltersToDevice();
+	fflush(fp_Log);
 }
 
 void GpuEventConsumer::OnEventMatch(CudaEvent * _pEvent, int _iFilterId)

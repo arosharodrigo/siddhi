@@ -18,6 +18,7 @@
  */
 package org.wso2.siddhi.core.util.parser;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
@@ -42,6 +43,8 @@ import java.util.List;
 
 public class SingleInputStreamParser {
 
+	private static final Logger log = Logger.getLogger(SingleInputStreamParser.class);
+	
     /**
      * Parse single InputStream and return SingleStreamRuntime
      *
@@ -110,7 +113,8 @@ public class SingleInputStreamParser {
 	            			gpuEventConsumer, minEventCount);
 	            	
             	} catch(RuntimeException ex) {
-            		
+            		log.info("GPU Filter creation failed : " + ex.getMessage());
+            		ex.printStackTrace();
             		return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));
             	}
             }

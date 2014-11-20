@@ -247,6 +247,7 @@ void Filter::Print(FILE * _fp)
 		fprintf(_fp, "|");
 	}
 	fprintf(_fp, "}\n");
+	fflush(_fp);
 }
 
 };
