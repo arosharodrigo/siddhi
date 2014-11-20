@@ -31,6 +31,7 @@
     <property name="lib.dir" value="../target/lib"/>
 	<property name="ringbuffer.size" value="1024" />
 	<property name="threadpool.size" value="4" />
+	<property name="block.size" value="256" />
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -63,11 +64,13 @@
 
         </java>
     </target>
+	
     <target name="SimpleFilterMultipleQuery" depends="compile">
         <java classname="org.wso2.siddhi.performance.SimpleFilterMultipleQueryPerformance"
               classpathref="classpath" fork="true">
         </java>
     </target>
+	
     <target name="SimpleFilterMultipleQueryWithDisruptor" depends="compile">
         <java classname="org.wso2.siddhi.performance.SimpleFilterMultipleQueryWithDisruptorPerformance"
               classpathref="classpath" fork="true">
@@ -75,11 +78,27 @@
         	<arg value="${threadpool.size}" />
         </java>
     </target>
+	
     <target name="SimpleFilterSingleQueryWithDisruptor" depends="compile">
         <java classname="org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance"
               classpathref="classpath" fork="true">
         	<arg value="${ringbuffer.size}" />
         	<arg value="${threadpool.size}" />
+        </java>
+    </target>
+	
+    <target name="SimpleFilterSingleQueryWithGpuPerformance" depends="compile">
+        <java classname="org.wso2.siddhi.performance.SimpleFilterSingleQueryWithGpuPerformance"
+              classpathref="classpath" fork="true">
+        	<arg value="${ringbuffer.size}" />
+        	<arg value="${threadpool.size}" />
+        	<arg value="${block.size}" />
+        </java>
+    </target>
+	
+    <target name="SimpleFilterSingleQueryWithDisruptorAllCfgPerformance" depends="compile">
+        <java classname="org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorAllCfgPerformance"
+              classpathref="classpath" fork="true">
         </java>
     </target>
 
