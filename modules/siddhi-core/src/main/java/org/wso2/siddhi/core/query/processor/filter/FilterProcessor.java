@@ -95,74 +95,98 @@ public class FilterProcessor implements Processor {
 
     		// ############################################################################################################
     		//TODO: check batch size and use GPU processing if size exceed minimum threshold 
+    		// number of events in batch should at least exceed block size
 
     		// process all events with GPU
     		// remove non matching events OR add matching events to a new StreamEvent
-
-    		cudaEventList.clear();
-    		inputStreamEventIndex = 0;
-
+    		
+    		int eventCount = 0;
     		StreamEventIterator iterator = event.getIterator();
     		while (iterator.hasNext()){
     			StreamEvent streamEvent = iterator.next();
-
-    			inputStreamEvents[inputStreamEventIndex++] = streamEvent;
-
-    			CudaEvent cudaEvent = new CudaEvent(streamEvent.getTimestamp());
-
-    			int i = 0;
-    			for(Object attrib : streamEvent.getOutputData())
-    			{
-    				if(attrib instanceof Integer)
-    				{
-    					cudaEvent.AddIntAttribute(i++, ((Integer) attrib).intValue());
-    				}
-    				else if(attrib instanceof Long)
-    				{
-    					cudaEvent.AddLongAttribute(i++, ((Long) attrib).longValue());
-    				}
-    				else if(attrib instanceof Boolean)
-    				{
-    					cudaEvent.AddBoolAttribute(i++, ((Boolean) attrib).booleanValue());
-    				}
-    				else if(attrib instanceof Float)
-    				{
-    					cudaEvent.AddFloatAttribute(i++, ((Float) attrib).floatValue());
-    				}
-    				else if(attrib instanceof Double)
-    				{
-    					cudaEvent.AddDoubleAttribute(i++, ((Double) attrib).doubleValue());
-    				}
-    				else if(attrib instanceof String)
-    				{
-    					cudaEvent.AddStringAttribute(i++, attrib.toString());
-    				}
-    			}
-
-    			cudaEventList.add(cudaEvent);
+    			eventCount++;
     		}
 
-    		gpuEventConsumer.OnEvents(
-    				new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
-    				cudaEventList.size());
-
-    		IntPointer matchingEvents = gpuEventConsumer.GetMatchingEvents();
-
-    		if(matchingEvents != null)
+    		if(eventCount >= gpuProcessMinimumEventCount)
     		{
-    			StreamEvent resultStreamEvent = inputStreamEvents[matchingEvents.get(0)];;
+    			cudaEventList.clear();
+    			inputStreamEventIndex = 0;
 
-    			for(int i=1; i<matchingEvents.limit(); ++i) {
-    				resultStreamEvent.addToLast(inputStreamEvents[matchingEvents.get(i)]); // optimize
+    			iterator = event.getIterator();
+    			while (iterator.hasNext()){
+    				StreamEvent streamEvent = iterator.next();
+
+    				inputStreamEvents[inputStreamEventIndex++] = streamEvent;
+
+    				CudaEvent cudaEvent = new CudaEvent(streamEvent.getTimestamp());
+
+    				int i = 0;
+    				for(Object attrib : streamEvent.getOutputData())
+    				{
+    					if(attrib instanceof Integer)
+    					{
+    						cudaEvent.AddIntAttribute(i++, ((Integer) attrib).intValue());
+    					}
+    					else if(attrib instanceof Long)
+    					{
+    						cudaEvent.AddLongAttribute(i++, ((Long) attrib).longValue());
+    					}
+    					else if(attrib instanceof Boolean)
+    					{
+    						cudaEvent.AddBoolAttribute(i++, ((Boolean) attrib).booleanValue());
+    					}
+    					else if(attrib instanceof Float)
+    					{
+    						cudaEvent.AddFloatAttribute(i++, ((Float) attrib).floatValue());
+    					}
+    					else if(attrib instanceof Double)
+    					{
+    						cudaEvent.AddDoubleAttribute(i++, ((Double) attrib).doubleValue());
+    					}
+    					else if(attrib instanceof String)
+    					{
+    						cudaEvent.AddStringAttribute(i++, attrib.toString());
+    					}
+    				}
+
+    				cudaEventList.add(cudaEvent);
     			}
 
-    			this.next.process(resultStreamEvent);
+    			gpuEventConsumer.OnEvents(
+    					new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
+    					cudaEventList.size());
+
+    			IntPointer matchingEvents = gpuEventConsumer.GetMatchingEvents();
+
+    			if(matchingEvents != null)
+    			{
+    				StreamEvent resultStreamEvent = inputStreamEvents[matchingEvents.get(0)];;
+
+    				for(int i=1; i<matchingEvents.limit(); ++i) {
+    					resultStreamEvent.addToLast(inputStreamEvents[matchingEvents.get(i)]); // optimize
+    				}
+
+    				this.next.process(resultStreamEvent);
+    			}
+    			else
+    			{
+    				log.debug("Result count : Empty");
+    			}
     		}
     		else
     		{
-    			log.debug("Result count : Empty");
+    			iterator = event.getIterator();
+        		while (iterator.hasNext()){
+        			StreamEvent streamEvent = iterator.next();
+        			if (!(Boolean) conditionExecutor.execute(streamEvent)){
+        				iterator.remove();
+        			}
+        		}
+        		
+        		if(iterator.getFirstElement() != null){
+        			this.next.process(iterator.getFirstElement());
+        		}
     		}
-
 
     		//log.info("Batch count : " + count);
 
