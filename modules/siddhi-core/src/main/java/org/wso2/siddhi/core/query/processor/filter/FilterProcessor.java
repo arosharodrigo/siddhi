@@ -118,7 +118,8 @@ public class FilterProcessor implements Processor {
     				StreamEvent streamEvent = iterator.next();
     				inputStreamEvents[inputStreamEventIndex] = streamEvent;
     				CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex];
-    				log.info("Index : " + inputStreamEventIndex + " CudaEvent : " + cudaEvent + " StreamEvent : " + streamEvent);
+    				log.info("Index : " + inputStreamEventIndex + " cudaEventPool : " + cudaEventPool +
+    						" CudaEvent : " + cudaEvent + " StreamEvent : " + streamEvent);
     				cudaEvent.Reset(streamEvent.getTimestamp());
     				inputStreamEventIndex++;
     				
