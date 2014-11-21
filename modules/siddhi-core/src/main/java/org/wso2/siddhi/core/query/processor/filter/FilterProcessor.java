@@ -116,11 +116,12 @@ public class FilterProcessor implements Processor {
     			iterator = event.getIterator();
     			while (iterator.hasNext()) {
     				StreamEvent streamEvent = iterator.next();
-    				log.info("Index : " + inputStreamEventIndex);
     				inputStreamEvents[inputStreamEventIndex] = streamEvent;
-    				CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex++];
+    				CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex];
+    				log.info("Index : " + inputStreamEventIndex + " CudaEvent : " + cudaEvent + " StreamEvent : " + streamEvent);
     				cudaEvent.Reset(streamEvent.getTimestamp());
-
+    				inputStreamEventIndex++;
+    				
     				int i = 0;
     				for(Object attrib : streamEvent.getOutputData()) {
     					
