@@ -64,6 +64,10 @@ public class FilterProcessor implements Processor {
 //    	this.cudaEventList = new ArrayList<SiddhiGpu.CudaEvent>(gpuEventConsumer.GetMaxBufferSize());
     	this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxBufferSize()];
     	this.cudaEventPool = new SiddhiGpu.CudaEvent[gpuEventConsumer.GetMaxBufferSize()];
+    	for(int i=0; i<gpuEventConsumer.GetMaxBufferSize(); ++i)
+    	{
+    		this.cudaEventPool[i] = new SiddhiGpu.CudaEvent();
+    	}
     	
         if(Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
             this.conditionExecutor = conditionExecutor;
@@ -117,11 +121,10 @@ public class FilterProcessor implements Processor {
     			while (iterator.hasNext()) {
     				StreamEvent streamEvent = iterator.next();
     				inputStreamEvents[inputStreamEventIndex] = streamEvent;
-    				CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex];
-    				log.info("Index : " + inputStreamEventIndex + " cudaEventPool : " + cudaEventPool +
-    						" CudaEvent : " + cudaEvent + " StreamEvent : " + streamEvent);
+    				CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex++];
+//    				log.info("Index : " + inputStreamEventIndex + " cudaEventPool : " + cudaEventPool +
+//    						" CudaEvent : " + cudaEvent + " StreamEvent : " + streamEvent);
     				cudaEvent.Reset(streamEvent.getTimestamp());
-    				inputStreamEventIndex++;
     				
     				int i = 0;
     				for(Object attrib : streamEvent.getOutputData()) {
