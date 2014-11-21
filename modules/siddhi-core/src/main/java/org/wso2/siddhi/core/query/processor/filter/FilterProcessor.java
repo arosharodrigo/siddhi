@@ -44,6 +44,7 @@ public class FilterProcessor implements Processor {
 //    private List<SiddhiGpu.CudaEvent> cudaEventList = null;
     private StreamEvent [] inputStreamEvents = null;
     private SiddhiGpu.CudaEvent [] cudaEventPool = null;
+    private PointerPointer<SiddhiGpu.CudaEvent> ptrPtrCudaEvent = null;
     private int inputStreamEventIndex = 0;
 
     public FilterProcessor(ExpressionExecutor conditionExecutor) {
@@ -68,6 +69,7 @@ public class FilterProcessor implements Processor {
     	{
     		this.cudaEventPool[i] = new SiddhiGpu.CudaEvent();
     	}
+    	ptrPtrCudaEvent = new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventPool);
     	
         if(Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
             this.conditionExecutor = conditionExecutor;
@@ -162,7 +164,7 @@ public class FilterProcessor implements Processor {
 //    					new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
 //    					cudaEventList.size());
     			
-    			gpuEventConsumer.OnEvents(new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventPool), inputStreamEventIndex);
+    			gpuEventConsumer.OnEvents(ptrPtrCudaEvent, inputStreamEventIndex);
 
     			IntPointer matchingEvents = gpuEventConsumer.GetMatchingEvents();
 
