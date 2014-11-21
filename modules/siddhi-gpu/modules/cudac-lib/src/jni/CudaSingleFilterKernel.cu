@@ -109,7 +109,7 @@ CudaSingleFilterKernel::~CudaSingleFilterKernel()
 
 void CudaSingleFilterKernel::Initialize()
 {
-	fprintf(fp_Log, "CudaSingleFilterKernel::Initialize \n");
+	fprintf(fp_Log, "CudaSingleFilterKernel::Initialize [EventsPerBlock=%d]\n", i_EventsPerBlock);
 
 	sdkCreateTimer(&p_StopWatch);
 

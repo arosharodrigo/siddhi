@@ -42,6 +42,12 @@ void CudaEvent::Destroy()
 	}
 }
 
+void CudaEvent::Reset(uint64_t _uiTimeStamp)
+{
+	ui_Timestamp = _uiTimeStamp;
+	ui_NumAttributes = 0;
+}
+
 void CudaEvent::AddBoolAttribute(unsigned int _iPos, bool _bValue)
 {
 	if(_iPos < MAX_ATTR_NUM)

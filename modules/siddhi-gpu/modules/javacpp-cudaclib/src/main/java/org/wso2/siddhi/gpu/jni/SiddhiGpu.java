@@ -107,6 +107,9 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 	private native void allocate(@Cast("uint64_t") long _uiTimeStamp);
 	public native void Destroy();
 
+	public native void Reset(@Cast("uint64_t") long _uiTimeStamp);
+
+	public native void SetTimestamp(@Cast("uint64_t") long _uiTime);
 	public native @Cast("uint64_t") long GetTimestamp();
 	public native @Cast("unsigned int") int GetNumAttributes();
 

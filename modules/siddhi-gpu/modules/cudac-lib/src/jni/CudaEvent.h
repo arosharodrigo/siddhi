@@ -83,6 +83,9 @@ public:
 	CudaEvent(uint64_t _uiTimeStamp);
 	void Destroy();
 
+	void Reset(uint64_t _uiTimeStamp);
+
+	inline void SetTimestamp(uint64_t _uiTime) { ui_Timestamp = _uiTime; }
 	inline uint64_t GetTimestamp() { return ui_Timestamp; }
 	inline unsigned int GetNumAttributes() { return ui_NumAttributes; }
 

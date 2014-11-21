@@ -41,8 +41,9 @@ public class FilterProcessor implements Processor {
     private ExpressionExecutor conditionExecutor;
     private SiddhiGpu.GpuEventConsumer gpuEventConsumer = null;
     private int gpuProcessMinimumEventCount = 256;
-    private List<SiddhiGpu.CudaEvent> cudaEventList = null;
+//    private List<SiddhiGpu.CudaEvent> cudaEventList = null;
     private StreamEvent [] inputStreamEvents = null;
+    private SiddhiGpu.CudaEvent [] cudaEventPool = null;
     private int inputStreamEventIndex = 0;
 
     public FilterProcessor(ExpressionExecutor conditionExecutor) {
@@ -58,8 +59,9 @@ public class FilterProcessor implements Processor {
     	this.gpuEventConsumer = gpuEventConsumer;
     	this.gpuProcessMinimumEventCount = threshold;
     	
-    	this.cudaEventList = new ArrayList<SiddhiGpu.CudaEvent>(gpuEventConsumer.GetMaxBufferSize());
+//    	this.cudaEventList = new ArrayList<SiddhiGpu.CudaEvent>(gpuEventConsumer.GetMaxBufferSize());
     	this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxBufferSize()];
+    	this.cudaEventPool = new CudaEvent[gpuEventConsumer.GetMaxBufferSize()];
     	
         if(Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
             this.conditionExecutor = conditionExecutor;
@@ -93,12 +95,9 @@ public class FilterProcessor implements Processor {
     	else
     	{
 
-    		// ############################################################################################################
     		//TODO: check batch size and use GPU processing if size exceed minimum threshold 
     		// number of events in batch should at least exceed block size
 
-    		// process all events with GPU
-    		// remove non matching events OR add matching events to a new StreamEvent
     		
     		int eventCount = 0;
     		StreamEventIterator iterator = event.getIterator();
@@ -109,16 +108,16 @@ public class FilterProcessor implements Processor {
 
     		if(eventCount >= gpuProcessMinimumEventCount)
     		{
-    			cudaEventList.clear();
+//    			cudaEventList.clear();
     			inputStreamEventIndex = 0;
 
     			iterator = event.getIterator();
     			while (iterator.hasNext()){
     				StreamEvent streamEvent = iterator.next();
 
-    				inputStreamEvents[inputStreamEventIndex++] = streamEvent;
-
-    				CudaEvent cudaEvent = new CudaEvent(streamEvent.getTimestamp());
+    				inputStreamEvents[inputStreamEventIndex] = streamEvent;
+    				CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex++];
+    				cudaEvent.Reset(streamEvent.getTimestamp());
 
     				int i = 0;
     				for(Object attrib : streamEvent.getOutputData())
@@ -149,18 +148,20 @@ public class FilterProcessor implements Processor {
     					}
     				}
 
-    				cudaEventList.add(cudaEvent);
+//    				cudaEventList.add(cudaEvent);
     			}
-
-    			gpuEventConsumer.OnEvents(
-    					new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
-    					cudaEventList.size());
+    			
+//    			gpuEventConsumer.OnEvents(
+//    					new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
+//    					cudaEventList.size());
+    			
+    			gpuEventConsumer.OnEvents(new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventPool), inputStreamEventIndex);
 
     			IntPointer matchingEvents = gpuEventConsumer.GetMatchingEvents();
 
     			if(matchingEvents != null)
     			{
-    				log.info("GPU Matched : " + matchingEvents.limit());
+    				//log.info("GPU Matched : " + matchingEvents.limit());
     				
     				StreamEvent resultStreamEvent = inputStreamEvents[matchingEvents.get(0)];
     				StreamEvent lastEvent = resultStreamEvent;
@@ -173,10 +174,10 @@ public class FilterProcessor implements Processor {
 
     				this.next.process(resultStreamEvent);
     			}
-    			else
-    			{
-    				log.debug("Result count : Empty");
-    			}
+//    			else
+//    			{
+//    				log.debug("Result count : Empty");
+//    			}
     		}
     		else
     		{
@@ -193,9 +194,7 @@ public class FilterProcessor implements Processor {
         		}
     		}
 
-    		//log.info("Batch count : " + count);
 
-    		// #############################################################################################################
     	}
     }
 
