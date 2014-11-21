@@ -160,10 +160,15 @@ public class FilterProcessor implements Processor {
 
     			if(matchingEvents != null)
     			{
-    				StreamEvent resultStreamEvent = inputStreamEvents[matchingEvents.get(0)];;
+    				log.info("GPU Matched : " + matchingEvents.limit());
+    				
+    				StreamEvent resultStreamEvent = inputStreamEvents[matchingEvents.get(0)];
+    				StreamEvent lastEvent = resultStreamEvent;
 
     				for(int i=1; i<matchingEvents.limit(); ++i) {
-    					resultStreamEvent.addToLast(inputStreamEvents[matchingEvents.get(i)]); // optimize
+    					StreamEvent e = inputStreamEvents[matchingEvents.get(i)];
+    					lastEvent.setNext(e);
+    					lastEvent = e;
     				}
 
     				this.next.process(resultStreamEvent);
