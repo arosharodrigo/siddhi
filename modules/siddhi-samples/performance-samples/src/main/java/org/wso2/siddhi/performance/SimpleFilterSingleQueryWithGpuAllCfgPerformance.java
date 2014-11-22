@@ -90,7 +90,7 @@ public class SimpleFilterSingleQueryWithGpuAllCfgPerformance
     
     public static void main(String[] args) throws InterruptedException {
     	
-    	final int [] defaultBufferSizes = { 256, 512, 1024, 2048, 4096, 8192, 16384};
+    	final int [] defaultBufferSizes = { 512, 1024, 2048, 4096, 8192, 16384};
     	final int [] threadPoolSizes = { 2, 4, 8, 16 };
     	final int [] blockSizes = { 256, 512, 1024 };
     	
