@@ -106,64 +106,58 @@ public class FilterProcessor implements Processor {
     		//TODO: check batch size and use GPU processing if size exceed minimum threshold 
     		// number of events in batch should at least exceed block size
 
-    		
-    		int eventCount = 0;
+
+    		//    			cudaEventList.clear();
+    		inputStreamEventIndex = 0;
+
     		StreamEventIterator iterator = event.getIterator();
-    		while (iterator.hasNext()){
+    		while (iterator.hasNext()) {
+    			
     			StreamEvent streamEvent = iterator.next();
-    			eventCount++;
+    			inputStreamEvents[inputStreamEventIndex] = streamEvent;
+    			CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex++];
+    			cudaEvent.Reset(streamEvent.getTimestamp());
+
+    			//TODO: do this using meta eventstream
+    			int i = 0;
+    			for(Object attrib : streamEvent.getOutputData()) {
+
+    				if(attrib instanceof Integer)
+    				{
+    					cudaEvent.AddIntAttribute(i++, ((Integer) attrib).intValue());
+    				}
+    				else if(attrib instanceof Long)
+    				{
+    					cudaEvent.AddLongAttribute(i++, ((Long) attrib).longValue());
+    				}
+    				else if(attrib instanceof Boolean)
+    				{
+    					cudaEvent.AddBoolAttribute(i++, ((Boolean) attrib).booleanValue());
+    				}
+    				else if(attrib instanceof Float)
+    				{
+    					cudaEvent.AddFloatAttribute(i++, ((Float) attrib).floatValue());
+    				}
+    				else if(attrib instanceof Double)
+    				{
+    					cudaEvent.AddDoubleAttribute(i++, ((Double) attrib).doubleValue());
+    				}
+    				else if(attrib instanceof String)
+    				{
+    					cudaEvent.AddStringAttribute(i++, attrib.toString());
+    				}
+    			}
+
+    			//    				cudaEventList.add(cudaEvent);
     		}
 
-    		if(eventCount >= gpuProcessMinimumEventCount)
+    		if(inputStreamEventIndex >= gpuProcessMinimumEventCount)
     		{
-//    			cudaEventList.clear();
-    			inputStreamEventIndex = 0;
 
-    			iterator = event.getIterator();
-    			while (iterator.hasNext()) {
-    				StreamEvent streamEvent = iterator.next();
-    				inputStreamEvents[inputStreamEventIndex] = streamEvent;
-    				CudaEvent cudaEvent = cudaEventPool[inputStreamEventIndex++];
-//    				log.info("Index : " + inputStreamEventIndex + " cudaEventPool : " + cudaEventPool +
-//    						" CudaEvent : " + cudaEvent + " StreamEvent : " + streamEvent);
-    				cudaEvent.Reset(streamEvent.getTimestamp());
-    				
-    				int i = 0;
-    				for(Object attrib : streamEvent.getOutputData()) {
-    					
-    					if(attrib instanceof Integer)
-    					{
-    						cudaEvent.AddIntAttribute(i++, ((Integer) attrib).intValue());
-    					}
-    					else if(attrib instanceof Long)
-    					{
-    						cudaEvent.AddLongAttribute(i++, ((Long) attrib).longValue());
-    					}
-    					else if(attrib instanceof Boolean)
-    					{
-    						cudaEvent.AddBoolAttribute(i++, ((Boolean) attrib).booleanValue());
-    					}
-    					else if(attrib instanceof Float)
-    					{
-    						cudaEvent.AddFloatAttribute(i++, ((Float) attrib).floatValue());
-    					}
-    					else if(attrib instanceof Double)
-    					{
-    						cudaEvent.AddDoubleAttribute(i++, ((Double) attrib).doubleValue());
-    					}
-    					else if(attrib instanceof String)
-    					{
-    						cudaEvent.AddStringAttribute(i++, attrib.toString());
-    					}
-    				}
-
-//    				cudaEventList.add(cudaEvent);
-    			}
-    			
 //    			gpuEventConsumer.OnEvents(
 //    					new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
 //    					cudaEventList.size());
-    			
+
     			gpuEventConsumer.OnEvents(ptrPtrCudaEvent, inputStreamEventIndex);
 
     			IntPointer matchingEvents = gpuEventConsumer.GetMatchingEvents();
@@ -171,7 +165,7 @@ public class FilterProcessor implements Processor {
     			if(matchingEvents != null)
     			{
     				//log.info("GPU Matched : " + matchingEvents.limit());
-    				
+
     				StreamEvent resultStreamEvent = inputStreamEvents[matchingEvents.get(0)];
     				StreamEvent lastEvent = resultStreamEvent;
 
@@ -183,24 +177,26 @@ public class FilterProcessor implements Processor {
 
     				this.next.process(resultStreamEvent);
     			}
-//    			else
-//    			{
-//    				log.debug("Result count : Empty");
-//    			}
+    			//    			else
+    			//    			{
+    			//    				log.debug("Result count : Empty");
+    			//    			}
+
+
     		}
     		else
     		{
     			iterator = event.getIterator();
-        		while (iterator.hasNext()){
-        			StreamEvent streamEvent = iterator.next();
-        			if (!(Boolean) conditionExecutor.execute(streamEvent)){
-        				iterator.remove();
-        			}
-        		}
-        		
-        		if(iterator.getFirstElement() != null){
-        			this.next.process(iterator.getFirstElement());
-        		}
+    			while (iterator.hasNext()){
+    				StreamEvent streamEvent = iterator.next();
+    				if (!(Boolean) conditionExecutor.execute(streamEvent)){
+    					iterator.remove();
+    				}
+    			}
+
+    			if(iterator.getFirstElement() != null){
+    				this.next.process(iterator.getFirstElement());
+    			}
     		}
 
 

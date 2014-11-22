@@ -102,19 +102,19 @@ void CudaEvent::AddStringAttribute(unsigned int _iPos, std::string _sValue)
 {
 	if(_iPos < MAX_ATTR_NUM)
 	{
-		if(_sValue.length() > sizeof(int64_t))
+		if(_sValue.length() <= sizeof(int64_t))
+		{
+			a_Attributes[_iPos].e_Type = DataType::StringIn;
+			memcpy(a_Attributes[_iPos].m_Value.z_StringVal, _sValue.c_str(), sizeof(int64_t));
+			a_Attributes[_iPos].m_Value.z_StringVal[sizeof(int64_t)] = 0;
+		}
+		else
 		{
 			a_Attributes[_iPos].e_Type = DataType::StringExt;
 			int iLen = _sValue.length();
 			a_Attributes[_iPos].m_Value.z_ExtString = new char[iLen + 1];
 			memcpy(a_Attributes[_iPos].m_Value.z_ExtString, _sValue.c_str(), iLen);
 			a_Attributes[_iPos].m_Value.z_ExtString[iLen] = 0;
-		}
-		else
-		{
-			a_Attributes[_iPos].e_Type = DataType::StringIn;
-			memcpy(a_Attributes[_iPos].m_Value.z_StringVal, _sValue.c_str(), sizeof(int64_t));
-			a_Attributes[_iPos].m_Value.z_StringVal[sizeof(int64_t)] = 0;
 		}
 		ui_NumAttributes++;
 	}
