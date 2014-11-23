@@ -45,7 +45,7 @@ public class ComplexFilterSingleQueryPerformance
     	CommandLine cmd = null;
     	
     	boolean gpuEnabled = false;
-    	int defaultBufferSize = 1204;
+    	int defaultBufferSize = 1024;
     	int threadPoolSize = 4;
     	int eventBlockSize = 256;
     	
@@ -94,7 +94,7 @@ public class ComplexFilterSingleQueryPerformance
         {
         	sb.append("@gpu(filter='true', blocksize='").append(eventBlockSize).append("') ");
         }
-        sb.append("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;");
+        sb.append("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
         
         String query1 = sb.toString();
         

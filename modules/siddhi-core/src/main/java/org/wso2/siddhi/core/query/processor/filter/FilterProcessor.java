@@ -116,7 +116,7 @@ public class FilterProcessor implements Processor {
     			// each Add*Attribute call is a JNI call - very expensive
     			// reduce number of calls
     			int i = 0;
-    			for(Object attrib : streamEvent.getBeforeWindowData()) {
+    			for(Object attrib : streamEvent.getOutputData()) {
 
     				if(attrib instanceof Integer)
     				{
