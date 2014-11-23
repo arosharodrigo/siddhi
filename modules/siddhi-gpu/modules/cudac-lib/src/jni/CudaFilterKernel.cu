@@ -193,21 +193,12 @@ void CudaFilterKernel::ProcessEvents()
 	sdkStopTimer(&p_StopWatch);
 
 	// process results
-	fprintf(fp_Log, "[ProcessEvents] Results are : \n");
-	for(int i=0; i<i_FilterCount; ++i)
-	{
-		for(int j=0; j<i_NumEvents; ++j)
-		{
-			if(pi_HostMachedEvents[i * i_MaxEventBufferSize + j])
-			{
-				p_EventConsumer->OnCudaEventMatch(j, i);
-				fprintf(fp_Log, "\t Event %d matched to Filter %d\n", j, i);
-			}
-		}
-	}
+//	fprintf(fp_Log, "[ProcessEvents] Results are : \n");
+
+	int iCount = p_EventConsumer->OnCudaEventMatch(pi_HostMachedEvents, i_NumEvents);
 
 	float fElapsed = sdkGetTimerValue(&p_StopWatch);
-	fprintf(fp_Log, "[ProcessEvents] Stats : Elapsed=%f ms\n", fElapsed);
+	fprintf(fp_Log, "[ProcessEvents] Stats : Elapsed=%f ms Matched=%d\n", fElapsed, iCount);
 	fflush(fp_Log);
 
 	lst_ElapsedTimes.push_back(fElapsed);

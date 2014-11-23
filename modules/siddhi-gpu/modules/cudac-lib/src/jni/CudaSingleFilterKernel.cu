@@ -156,17 +156,7 @@ void CudaSingleFilterKernel::ProcessEvents()
 
 	// process results
 	//fprintf(fp_Log, "[ProcessEvents] Results are : \n");
-	int iCount = 0;
-	for(int j=0; j<i_NumEvents; ++j) // TODO: can use bit map to reduce copy size. Is that efficient??
-	{
-		if(pi_HostMachedEvents[j])
-		{
-			p_EventConsumer->OnCudaEventMatch(j, 0);
-			//fprintf(fp_Log, "\t Event %d matched to Filter %d\n", j, 0);
-			iCount++;
-		}
-	}
-
+	int iCount = p_EventConsumer->OnCudaEventMatch(pi_HostMachedEvents, i_NumEvents);
 
 	float fElapsed = sdkGetTimerValue(&p_StopWatch);
 	fprintf(fp_Log, "[ProcessEvents] Stats : Matched=%d Elapsed=%f ms\n", iCount, fElapsed);

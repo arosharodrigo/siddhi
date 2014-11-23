@@ -42,8 +42,7 @@ public:
 	void AddFilter(Filter * _pFilter);
 	void ConfigureFilters();
 
-	void OnCudaEventMatch(int _iEventPos, int _iFilterId);
-	void OnEventMatch(CudaEvent * _pEvent, int _iFilterId);
+	int OnCudaEventMatch(int * _aiMatchedPositions, int _iNumEvents);
 
 	std::vector<int> GetMatchingEvents();
 

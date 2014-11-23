@@ -58,7 +58,6 @@ public class FilterProcessor implements Processor {
     	
     	log.info("GpuEventConsumer MaxBufferSize : " + gpuEventConsumer.GetMaxBufferSize());
     	
-//    	this.cudaEventList = new ArrayList<SiddhiGpu.CudaEvent>(gpuEventConsumer.GetMaxBufferSize());
     	this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxBufferSize()];
     	this.cudaEventPool = new SiddhiGpu.CudaEvent[gpuEventConsumer.GetMaxBufferSize()];
     	for(int i=0; i<gpuEventConsumer.GetMaxBufferSize(); ++i)
@@ -99,7 +98,7 @@ public class FilterProcessor implements Processor {
     	else
     	{
 
-    		//TODO: check batch size and use GPU processing if size exceed minimum threshold 
+    		// check batch size and use GPU processing if size exceed minimum threshold 
     		// number of events in batch should at least exceed block size
 
 
@@ -114,6 +113,8 @@ public class FilterProcessor implements Processor {
     			cudaEvent.Reset(streamEvent.getTimestamp());
 
     			//TODO: do this using meta eventstream
+    			// each Add*Attribute call is a JNI call - very expensive
+    			// reduce number of calls
     			int i = 0;
     			for(Object attrib : streamEvent.getOutputData()) {
 

@@ -101,16 +101,19 @@ void GpuEventConsumer::ConfigureFilters()
 	fflush(fp_Log);
 }
 
-void GpuEventConsumer::OnEventMatch(CudaEvent * _pEvent, int _iFilterId)
+int GpuEventConsumer::OnCudaEventMatch(int * _aiMatchedPositions, int _iNumEvents)
 {
-//	fprintf(fp_Log, "OnEventMatch : EventId=%" PRIu64 " FilterId=%d \n", _pEvent->ui_Timestamp, _iFilterId);
-}
-
-void GpuEventConsumer::OnCudaEventMatch(int _iEventPos, int _iFilterId)
-{
-//	OnEventMatch(ap_Events[_iEventPos], _iFilterId);
-//	fprintf(fp_Log, "OnEventMatch : EventPos=%d FilterId=%d \n", _iEventPos, _iFilterId);
-	vec_Result.push_back(_iEventPos);
+	int iCount = 0;
+	for(int j=0; j<_iNumEvents; ++j)
+	{
+		if(_aiMatchedPositions[j])
+		{
+			//	fprintf(fp_Log, "OnEventMatch : EventPos=%d \n", j);
+			vec_Result.push_back(j);
+			iCount++;
+		}
+	}
+	return iCount;
 }
 
 void GpuEventConsumer::PrintAverageStats()
