@@ -33,6 +33,7 @@
 	<property name="ringbuffer.size" value="1024" />
 	<property name="threadpool.size" value="4" />
 	<property name="block.size" value="256" />
+	<property name="gpu.enabled" value="false" />
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -107,6 +108,13 @@
     <target name="SimpleFilterSingleQueryWithGpuAllCfgPerformance" depends="compile">
         <java classname="org.wso2.siddhi.performance.SimpleFilterSingleQueryWithGpuAllCfgPerformance"
               classpathref="classpath" fork="true">
+        </java>
+    </target>
+	
+    <target name="ComplexFilterSingleQuery" depends="compile">
+        <java classname="org.wso2.siddhi.performance.ComplexFilterSingleQueryPerformance"
+              classpathref="classpath" fork="true">
+        	<arg line="--enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} --threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
         </java>
     </target>
 </project>

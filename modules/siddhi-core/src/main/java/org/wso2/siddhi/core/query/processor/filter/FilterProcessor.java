@@ -18,9 +18,6 @@
  */
 package org.wso2.siddhi.core.query.processor.filter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.PointerPointer;
@@ -41,7 +38,6 @@ public class FilterProcessor implements Processor {
     private ExpressionExecutor conditionExecutor;
     private SiddhiGpu.GpuEventConsumer gpuEventConsumer = null;
     private int gpuProcessMinimumEventCount = 256;
-//    private List<SiddhiGpu.CudaEvent> cudaEventList = null;
     private StreamEvent [] inputStreamEvents = null;
     private SiddhiGpu.CudaEvent [] cudaEventPool = null;
     private PointerPointer<SiddhiGpu.CudaEvent> ptrPtrCudaEvent = null;
@@ -107,7 +103,6 @@ public class FilterProcessor implements Processor {
     		// number of events in batch should at least exceed block size
 
 
-    		//    			cudaEventList.clear();
     		inputStreamEventIndex = 0;
 
     		StreamEventIterator iterator = event.getIterator();
@@ -147,16 +142,10 @@ public class FilterProcessor implements Processor {
     					cudaEvent.AddStringAttribute(i++, attrib.toString());
     				}
     			}
-
-    			//    				cudaEventList.add(cudaEvent);
     		}
 
     		if(inputStreamEventIndex >= gpuProcessMinimumEventCount)
     		{
-
-//    			gpuEventConsumer.OnEvents(
-//    					new PointerPointer<SiddhiGpu.CudaEvent>(cudaEventList.toArray(new SiddhiGpu.CudaEvent[cudaEventList.size()])), 
-//    					cudaEventList.size());
 
     			gpuEventConsumer.OnEvents(ptrPtrCudaEvent, inputStreamEventIndex);
 
