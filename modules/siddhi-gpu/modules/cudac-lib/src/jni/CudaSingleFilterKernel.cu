@@ -188,16 +188,8 @@ void CudaSingleFilterKernel::AddAndProcessEvents(CudaEvent ** _apEvent, int _iEv
 {
 	for(int i=0; i<_iEventCount; ++i)
 	{
-		// can just do a memcpy for whole structure
-		ap_HostEventBuffer[i].ui_NumAttributes = _apEvent[i]->ui_NumAttributes;
-
-		for(int j=0; j<_apEvent[i]->ui_NumAttributes; ++j)
-		{
-			ap_HostEventBuffer[i].a_Attributes[j].e_Type = _apEvent[i]->a_Attributes[j].e_Type;
-			ap_HostEventBuffer[i].a_Attributes[j].m_Value = _apEvent[i]->a_Attributes[j].m_Value;
-		}
-
-//		printf("CudaKernel::AddAndProcessEvents : EventIndex=%d\n", i_NumEvents);
+//		_apEvent[i]->Print(fp_Log);
+		memcpy(&ap_HostEventBuffer[i], _apEvent[i], sizeof(CudaEvent));
 	}
 	i_NumEvents = _iEventCount;
 	ProcessEvents();
