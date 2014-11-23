@@ -551,8 +551,11 @@ public class GpuExpressionParser
 		switch (lhsType)
 		{
 			case STRING:
+			{
 				throw new OperationNotSupportedException("string cannot used in greater than comparisons");
+			}
 			case INT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -575,7 +578,9 @@ public class GpuExpressionParser
 						throw new OperationNotSupportedException("int cannot be compared with " + rhsType);
 				}
 				break;
+			}
 			case LONG:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -598,7 +603,9 @@ public class GpuExpressionParser
 						throw new OperationNotSupportedException("long cannot be compared with " + rhsType);
 				}
 				break;
+			}
 			case FLOAT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -621,7 +628,9 @@ public class GpuExpressionParser
 						throw new OperationNotSupportedException("float cannot be compared with " + rhsType);
 				}
 				break;
+			}
 			case DOUBLE:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -644,10 +653,15 @@ public class GpuExpressionParser
 						throw new OperationNotSupportedException("double cannot be compared with " + rhsType);
 				}
 				break;
+			}
 			case BOOL:
+			{
 				throw new OperationNotSupportedException("bool cannot used in greater than comparisons");
+			}
 			default:
+			{
 				throw new OperationNotSupportedException(lhsType + " cannot be used in greater than comparisons");
+			}
 		}
 	}
 
@@ -656,8 +670,11 @@ public class GpuExpressionParser
 		switch (lhsType)
 		{
 			case STRING:
+			{
 				throw new OperationNotSupportedException("string cannot used in greater than equal comparisons");
+			}
 			case INT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -679,7 +696,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("int cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case LONG:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -701,7 +721,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("long cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case FLOAT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -723,7 +746,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("float cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case DOUBLE:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -745,10 +771,16 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("double cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case BOOL:
+			{
 				throw new OperationNotSupportedException("bool cannot used in greater than equal comparisons");
+			}
 			default:
+			{
 				throw new OperationNotSupportedException(lhsType + " cannot be used in greater than comparisons");
+			}
 		}
 	}
 
@@ -757,8 +789,11 @@ public class GpuExpressionParser
 		switch (lhsType)
 		{
 			case STRING:
+			{
 				throw new OperationNotSupportedException("string cannot used in less than comparisons");
+			}
 			case INT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -780,7 +815,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("int cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case LONG:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -802,7 +840,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("long cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case FLOAT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -824,7 +865,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("float cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case DOUBLE:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -846,10 +890,16 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("double cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case BOOL:
+			{
 				throw new OperationNotSupportedException("bool cannot used in less than comparisons");
+			}
 			default:
+			{
 				throw new OperationNotSupportedException(lhsType + " cannot be used in less than comparisons");
+			}
 		}
 	}
 
@@ -858,8 +908,11 @@ public class GpuExpressionParser
 		switch (lhsType)
 		{
 			case STRING:
+			{
 				throw new OperationNotSupportedException("string cannot used in less than equal comparisons");
+			}
 			case INT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -881,7 +934,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("int cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case LONG:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -903,7 +959,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("long cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case FLOAT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -925,7 +984,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("float cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case DOUBLE:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -947,10 +1009,16 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("double cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case BOOL:
+			{
 				throw new OperationNotSupportedException("bool cannot used in less than equal comparisons");
+			}
 			default:
+			{
 				throw new OperationNotSupportedException(lhsType + " cannot be used in less than comparisons");
+			}
 		}
 	}
 
@@ -959,6 +1027,7 @@ public class GpuExpressionParser
 		switch (lhsType)
 		{
 			case STRING:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -967,7 +1036,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("sting cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case INT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -989,7 +1061,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("int cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case LONG:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1011,7 +1086,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("long cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case FLOAT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1033,7 +1111,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("float cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case DOUBLE:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1055,7 +1136,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("double cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case BOOL:
+			{
 				switch (rhsType)
 				{
 					case BOOL:
@@ -1064,8 +1148,12 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("bool cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			default:
+			{
 				throw new OperationNotSupportedException(lhsType + " cannot be used in equal comparisons");
+			}
 		}
 	}
 
@@ -1074,6 +1162,7 @@ public class GpuExpressionParser
 		switch (lhsType)
 		{
 			case STRING:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1082,7 +1171,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("sting cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case INT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1104,7 +1196,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("int cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case LONG:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1126,7 +1221,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("long cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case FLOAT:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1148,7 +1246,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("float cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case DOUBLE:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1170,7 +1271,10 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("double cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			case BOOL:
+			{
 				switch (rhsType)
 				{
 					case BOOL:
@@ -1179,8 +1283,12 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException("bool cannot be compared with " + rhsType);
 				}
+				break;
+			}
 			default:
+			{
 				throw new OperationNotSupportedException(lhsType + " cannot be used in not equal comparisons");
+			}
 		}
 	}
 
@@ -1189,6 +1297,7 @@ public class GpuExpressionParser
 		switch (lhsType)
 		{
 			case STRING:
+			{
 				switch (rhsType)
 				{
 					case STRING:
@@ -1197,8 +1306,12 @@ public class GpuExpressionParser
 					default:
 						throw new OperationNotSupportedException(rhsType + " cannot be used in contains comparisons");
 				}
+				break;
+			}
 			default:
+			{
 				throw new OperationNotSupportedException(lhsType + " cannot be used in contains comparisons");
+			}
 		}
 	}
 
