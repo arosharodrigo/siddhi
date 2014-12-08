@@ -19,6 +19,7 @@
 
 package org.wso2.siddhi.core.stream.runtime;
 
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.stream.QueryStreamReceiver;
@@ -60,5 +61,12 @@ public class SingleStreamRuntime implements StreamRuntime {
             }
         }
         return new SingleStreamRuntime(clonedQueryStreamReceiver, clonedProcessorChain);
+    }
+    
+    @Override
+    public void configureRuntime(MetaStateEvent metaEvent) {
+    	if(processorChain != null) {
+    		processorChain.configureProcessor(metaEvent);
+    	}
     }
 }

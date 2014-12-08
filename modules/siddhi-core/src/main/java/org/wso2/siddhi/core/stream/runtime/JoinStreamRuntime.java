@@ -21,6 +21,8 @@ package org.wso2.siddhi.core.stream.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
+
 public class JoinStreamRuntime implements StreamRuntime {
 
     List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
@@ -36,5 +38,10 @@ public class JoinStreamRuntime implements StreamRuntime {
     @Override
     public StreamRuntime clone(String key) {
         return null;  //TODO
+    }
+    
+    @Override
+    public void configureRuntime(MetaStateEvent metaEvent) {
+    	
     }
 }

@@ -66,6 +66,8 @@ public class QueryParser {
 
             queryRuntime = new QueryRuntime(query, siddhiContext, streamRuntime, selector, outputRateLimiter, metaStateEvent);
             validateOutputStream(queryRuntime.getOutputStreamDefinition(), definitionMap);
+            
+            queryRuntime.configureRuntime(); // configure processors with updated MetaData
 
 
         } catch (Exception e) {

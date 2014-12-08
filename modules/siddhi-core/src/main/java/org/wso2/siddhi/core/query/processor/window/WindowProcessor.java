@@ -18,6 +18,7 @@
  */
 package org.wso2.siddhi.core.query.processor.window;
 
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -54,4 +55,7 @@ public abstract class WindowProcessor implements Processor {
     }
 
     public abstract Processor cloneProcessor();
+    
+    public abstract void configureProcessor(MetaStateEvent metaEvent);
+    
 }

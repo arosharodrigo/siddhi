@@ -19,6 +19,7 @@
 
 package org.wso2.siddhi.core.query.processor;
 
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 
 public interface Processor {
@@ -56,5 +57,8 @@ public interface Processor {
      * @return
      */
     public Processor cloneProcessor();
+    
+    
+    public void configureProcessor(MetaStateEvent metaEvent);
 
 }

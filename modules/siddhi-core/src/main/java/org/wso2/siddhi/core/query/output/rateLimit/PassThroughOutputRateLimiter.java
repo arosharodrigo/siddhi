@@ -19,6 +19,7 @@ package org.wso2.siddhi.core.query.output.rateLimit;
 
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.query.processor.Processor;
 
@@ -66,5 +67,9 @@ public class PassThroughOutputRateLimiter extends OutputRateLimiter {
     @Override
     public Processor cloneProcessor() {
         return null;
+    }
+    
+    @Override
+    public void configureProcessor(MetaStateEvent metaEvent) {
     }
 }

@@ -37,6 +37,8 @@ public:
 	virtual ~GpuEventConsumer();
 
 	void Initialize();
+
+	void ProcessEvents();
 	void OnEvents(CudaEvent ** _apEvents, int _iEventCount);
 
 	void AddFilter(Filter * _pFilter);
@@ -50,6 +52,10 @@ public:
 
 	int GetMaxBufferSize() { return i_MaxBufferSize; }
 
+	void CreateByteBuffer(int _iSize);
+	int GetByteBufferSize() { return i_ByteBufferSize; }
+	char * GetByteBuffer() { return p_ByteBuffer; }
+
 private:
 	typedef std::map<int, Filter *> FiltersById;
 	typedef std::vector<int> ResultsEvents;
@@ -62,6 +68,9 @@ private:
 	ResultsEvents vec_Result;
 	Timer m_Timer;
 	FILE * fp_Log;
+
+	char * p_ByteBuffer;
+	int i_ByteBufferSize;
 };
 
 };

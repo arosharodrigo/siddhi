@@ -185,4 +185,8 @@ public class QueryRuntime {
     public QuerySelector getSelector() {
         return selector;
     }
+    
+    public void configureRuntime() {
+    	streamRuntime.configureRuntime(metaStateEvent);
+    }
 }

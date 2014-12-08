@@ -87,6 +87,9 @@ public class SingleInputStreamParser {
             	
             	Integer minEventCount = queryAnnotations.GetAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
             			SiddhiConstants.ANNOTATION_ELEMENT_GPU_MIN_EVENT_COUNT);
+            	
+            	String stringAttributeSizes = queryAnnotations.GetAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
+            			SiddhiConstants.ANNOTATION_ELEMENT_GPU_STRING_SIZES);
             	 
             	if(eventsPerBlock == null)
             	{
@@ -104,13 +107,18 @@ public class SingleInputStreamParser {
             	gpuEventConsumer.Initialize();
 
             	try	{
+            		GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
             		
-	            	SiddhiGpu.Filter gpuFilter = GpuExpressionParser.parseExpression(condition, context, metaStreamEvent);
+	            	SiddhiGpu.Filter gpuFilter = gpuExpressionParser.parseExpression(condition, context, metaStreamEvent);
 	            	gpuEventConsumer.AddFilter(gpuFilter);
 	            	gpuEventConsumer.ConfigureFilters();
 	            	
-	            	return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false),
-	            			gpuEventConsumer, minEventCount);
+	            	FilterProcessor filterProcessor = new FilterProcessor(
+	            			ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false),
+	            			gpuEventConsumer, minEventCount, stringAttributeSizes); 
+	            	filterProcessor.setVariablePositionToAttributeNameMapper(gpuExpressionParser.getVariablePositionToAttributeNameMapper());
+	            	
+	            	return filterProcessor;
 	            	
             	} catch(RuntimeException ex) {
             		log.info("GPU Filter creation failed : " + ex.getMessage());

@@ -1,8 +1,10 @@
 package org.wso2.siddhi.core.util.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
@@ -177,8 +179,15 @@ import org.wso2.siddhi.gpu.jni.SiddhiGpu.VariableValue;
 public class GpuExpressionParser
 {
 	private static final Logger log = Logger.getLogger(GpuExpressionParser.class);
+	private int variableExpressionCount = 0; 
+	private Map<Integer, Attribute> varPositionToAttribNameMap = new HashMap<Integer, Attribute>();
+	
+	public Map<Integer, Attribute> getVariablePositionToAttributeNameMapper()
+	{
+		return varPositionToAttribNameMap;
+	}
 
-	public static SiddhiGpu.Filter parseExpression(Expression expression, SiddhiContext siddhiContext,
+	public SiddhiGpu.Filter parseExpression(Expression expression, SiddhiContext siddhiContext,
             ComplexMetaEvent metaEvent) {
 		
 		log.info("parseExpression");
@@ -201,7 +210,7 @@ public class GpuExpressionParser
 		return filter;
 	}
 
-	public static Attribute.Type parseExpressionTree(Expression expression, SiddhiContext siddhiContext,
+	public Attribute.Type parseExpressionTree(Expression expression, SiddhiContext siddhiContext,
 			ComplexMetaEvent metaEvent,
 			List<SiddhiGpu.ExecutorNode> gpuFilterList)
 	{
@@ -357,7 +366,9 @@ public class GpuExpressionParser
 				
 				StreamDefinition streamDef = (StreamDefinition) (metaStreamEvent.getInputDefinition());
 				Attribute.Type type = streamDef.getAttributeType(attributeName);
-				int position = streamDef.getAttributePosition(attributeName);
+				int position = variableExpressionCount++; //streamDef.getAttributePosition(attributeName);
+				
+				varPositionToAttribNameMap.put(position, new Attribute(attributeName, type));
 				
 				int gpuDataType = SiddhiGpu.DataType.None;
 				
@@ -546,7 +557,7 @@ public class GpuExpressionParser
 
 	}
 	 
-	private static void parseGreaterThanCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
+	private void parseGreaterThanCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
 	{
 		switch (lhsType)
 		{
@@ -665,7 +676,7 @@ public class GpuExpressionParser
 		}
 	}
 
-	private static void parseGreaterThanEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
+	private void parseGreaterThanEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
 	{
 		switch (lhsType)
 		{
@@ -784,7 +795,7 @@ public class GpuExpressionParser
 		}
 	}
 
-	private static void parseLessThanCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
+	private void parseLessThanCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
 	{
 		switch (lhsType)
 		{
@@ -903,7 +914,7 @@ public class GpuExpressionParser
 		}
 	}
 
-	private static void parseLessThanEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
+	private void parseLessThanEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
 	{
 		switch (lhsType)
 		{
@@ -1022,7 +1033,7 @@ public class GpuExpressionParser
 		}
 	}
 
-	private static void parseEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
+	private void parseEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
 	{
 		switch (lhsType)
 		{
@@ -1157,7 +1168,7 @@ public class GpuExpressionParser
 		}
 	}
 
-	private static void parseNotEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
+	private void parseNotEqualCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
 	{
 		switch (lhsType)
 		{
@@ -1292,7 +1303,7 @@ public class GpuExpressionParser
 		}
 	}
 
-	private static void parseContainsCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
+	private void parseContainsCompare(Attribute.Type lhsType, Attribute.Type rhsType, SiddhiGpu.ExecutorNode node)
 	{
 		switch (lhsType)
 		{
@@ -1315,7 +1326,7 @@ public class GpuExpressionParser
 		}
 	}
 
-	private static Attribute.Type parseArithmeticOperationResultType(Attribute.Type lhsType, Attribute.Type rhsType)
+	private Attribute.Type parseArithmeticOperationResultType(Attribute.Type lhsType, Attribute.Type rhsType)
 	{
 		if (lhsType == Attribute.Type.DOUBLE || rhsType == Attribute.Type.DOUBLE)
 		{

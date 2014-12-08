@@ -19,11 +19,15 @@
 
 package org.wso2.siddhi.core.stream.runtime;
 
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
+
 /**
  * Interface for all StreamRuntime s.(Ex: JoinStreamRuntime, SingleStreamRuntime)
  */
 public interface StreamRuntime {
 
     public StreamRuntime clone(String key);
+    
+    public void configureRuntime(MetaStateEvent metaEvent);
 
 }

@@ -19,6 +19,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize,
 	fp_Log = fopen("logs/GpuEventConsumer.log", "w");
 
 	vec_Result.reserve(i_MaxBufferSize);
+	p_ByteBuffer = NULL;
 
 	switch(_eKernelType)
 	{
@@ -56,6 +57,20 @@ GpuEventConsumer::~GpuEventConsumer()
 void GpuEventConsumer::Initialize()
 {
 	p_CudaKernel->Initialize();
+}
+
+void GpuEventConsumer::CreateByteBuffer(int _iSize)
+{
+	p_ByteBuffer = new char[_iSize];
+	i_ByteBufferSize = _iSize;
+	fprintf(fp_Log, "EventConsumer : ByteBuffer Created=[%d]\n", i_ByteBufferSize);
+	fflush(fp_Log);
+}
+
+void GpuEventConsumer::ProcessEvents()
+{
+	// events are filled in bytebuffer
+	// copy them to GPU
 }
 
 void GpuEventConsumer::OnEvents(CudaEvent ** _apEvents, int _iEventCount)

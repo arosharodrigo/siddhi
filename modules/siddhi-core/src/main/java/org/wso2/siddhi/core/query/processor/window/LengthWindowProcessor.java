@@ -18,6 +18,7 @@
  */
 package org.wso2.siddhi.core.query.processor.window;
 
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
@@ -96,6 +97,11 @@ public class LengthWindowProcessor extends WindowProcessor {
 
     public void setLength(int length) {
         this.length = length;
+    }
+    
+    @Override
+    public void configureProcessor(MetaStateEvent metaEvent) {
+
     }
 
 }

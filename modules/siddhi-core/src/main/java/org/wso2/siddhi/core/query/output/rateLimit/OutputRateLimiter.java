@@ -19,6 +19,7 @@
 
 package org.wso2.siddhi.core.query.output.rateLimit;
 
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -72,5 +73,8 @@ public abstract class OutputRateLimiter implements Processor {
     public abstract OutputRateLimiter clone(String key);
 
     public abstract Processor cloneProcessor();
+    
+    public abstract void configureProcessor(MetaStateEvent metaEvent);
+    
 }
 

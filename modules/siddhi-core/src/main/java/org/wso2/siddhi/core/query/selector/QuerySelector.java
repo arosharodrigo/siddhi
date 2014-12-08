@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.query.selector;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventIterator;
 import org.wso2.siddhi.core.exception.QueryCreationException;
@@ -161,4 +162,7 @@ public class QuerySelector implements Processor {
         return clonedQuerySelector;
     }
 
+    @Override
+    public void configureProcessor(MetaStateEvent metaEvent) {
+    }
 }
