@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.PointerPointer;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -37,7 +35,6 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
-import org.wso2.siddhi.gpu.jni.SiddhiGpu.CudaEvent;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 
@@ -94,10 +91,6 @@ public class FilterProcessor implements Processor {
     	}
     	
     	log.info("GpuEventConsumer MaxNumberOfEvents : " + gpuEventConsumer.GetMaxNumberOfEvents());
-    	log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
-    			" HasArray=" + this.eventByteBuffer.hasArray() + 
-    			" Position=" + this.eventByteBuffer.position() + 
-    			" Limit=" + this.eventByteBuffer.limit());
     	
     	this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxNumberOfEvents()];
     	
@@ -363,6 +356,10 @@ public class FilterProcessor implements Processor {
     		// gpuEventConsumer.CreateByteBuffer(byteBufferSize);
     		// eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
     		
+        	log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
+        			" HasArray=" + this.eventByteBuffer.hasArray() + 
+        			" Position=" + this.eventByteBuffer.position() + 
+        			" Limit=" + this.eventByteBuffer.limit());
     		
     		// fill byte buffer preamble
     		
