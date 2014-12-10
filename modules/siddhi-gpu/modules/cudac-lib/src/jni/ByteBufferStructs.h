@@ -15,6 +15,7 @@ typedef struct EventAttributeMeta
 {
 	uint16_t i_Type; // 2 bytes
 	uint16_t i_Length; // 2 bytes
+	uint16_t i_Position; // 2 bytes
 } EventAttributeMeta;
 
 typedef struct EventMeta
@@ -25,9 +26,14 @@ typedef struct EventMeta
 
 typedef struct MatchedEvents
 {
-	uint32_t i_ResultCount; // 4 bytes
+//	uint32_t i_ResultCount; // 4 bytes
 	uint32_t a_ResultEvents[1]; // array of ints
 } MatchedEvents;
+
+typedef struct EventDataBuffer
+{
+	char     data[1]; // event data
+} EventDataBuffer;
 
 #pragma pack()
 

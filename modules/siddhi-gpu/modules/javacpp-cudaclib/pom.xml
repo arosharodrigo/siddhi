@@ -115,7 +115,7 @@
                         <includePath>${basedir}/cppbuild/${platform}/include/</includePath>
                         <linkPath>${basedir}/cppbuild/${platform}/lib/</linkPath>
                         <preloadPath>${basedir}/cppbuild/${platform}/bin/</preloadPath>
-                        <compile>false</compile>
+                        <!--compile>false</compile-->
                     </configuration>
                     <executions>
                         <execution>

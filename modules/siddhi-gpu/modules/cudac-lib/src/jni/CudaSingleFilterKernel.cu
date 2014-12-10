@@ -9,6 +9,7 @@
 #define CUDASINGLEFILTERKERNEL_CU_
 
 #include "GpuEventConsumer.h"
+#include "ByteBufferStructs.h"
 #include "CudaSingleFilterKernel.h"
 #include "Filter.h"
 #include "CudaEvent.h"
@@ -18,7 +19,7 @@
 namespace SiddhiGpu
 {
 
-__global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInput, int * _pMatchedFilters)
+__global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInput)
 {
 	if(threadIdx.x >= _pInput->i_EventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
 		return;
@@ -29,23 +30,30 @@ __global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInpu
 		return;
 	}
 
+	EventMeta * pEventMeta = (EventMeta*) (_pInput->p_ByteBuffer + _pInput->i_EventMetaPosition);
+	/*__shared__*/ EventMeta mEventMeta = *pEventMeta;
+
 	// get assigned event
 	int iEventIdx = (blockIdx.x * _pInput->i_EventsPerBlock) +  threadIdx.x;
-	CudaEvent mEvent = _pInput->ap_EventBuffer[iEventIdx];
+	char * pEvent = (_pInput->p_ByteBuffer + _pInput->i_EventDataPosition) + (_pInput->i_SizeOfEvent * iEventIdx);
 
 	// get assigned filter
-	Filter mFilter = *_pInput->ap_Filter;
+	/*__shared__*/ Filter mFilter = *_pInput->ap_Filter;
+
+	// get results array
+	MatchedEvents * pMatchedEvents = (MatchedEvents*) (_pInput->p_ByteBuffer + _pInput->i_ResultsPosition);
 
 	int iCurrentNodeIdx = 0;
-	bool bResult = Evaluate(mEvent, mFilter, iCurrentNodeIdx);
+	bool bResult = Evaluate(mFilter, mEventMeta, pEvent, iCurrentNodeIdx);
 
+	//TODO improve results sending
 	if(bResult)
 	{
-		_pMatchedFilters[iEventIdx] = 1;
+		pMatchedEvents->a_ResultEvents[iEventIdx] = 1;
 	}
 	else // ~ possible way to avoid cudaMemset from host
 	{
-		_pMatchedFilters[iEventIdx] = 0;
+		pMatchedEvents->a_ResultEvents[iEventIdx] = 0;
 	}
 }
 
@@ -54,24 +62,21 @@ __global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInpu
 
 CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, GpuEventConsumer * _pConsumer, FILE * _fpLog) :
 		CudaKernelBase(_pConsumer, _fpLog),
-		i_MaxEventBufferSize(_iMaxBufferSize),
-		i_NumEvents(0)
+		i_MaxNumberOfEvents(_iMaxBufferSize)
 {
 	i_EventsPerBlock = _iMaxBufferSize / 4; // TODO: change this dynamically based on MaxBuffersize
 
-	ap_HostEventBuffer = NULL;
+	p_HostEventBuffer = NULL;
+	i_EventBufferSize = 0;
 	p_HostInput= NULL;
 	p_DeviceInput = NULL;
 	p_StopWatch = NULL;
 	i_NumAttributes = 0;
-	pi_DeviceMatchedEvents = NULL;
-	pi_HostMachedEvents = NULL;
 }
 
 CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer * _pConsumer, FILE * _fpLog) :
 	CudaKernelBase(_pConsumer, _fpLog),
-	i_MaxEventBufferSize(_iMaxBufferSize),
-	i_NumEvents(0)
+	i_MaxNumberOfEvents(_iMaxBufferSize)
 {
 	if(_iEventsPerBlock > 0)
 	{
@@ -82,29 +87,35 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEvents
 		i_EventsPerBlock = _iMaxBufferSize / 4;
 	}
 
-	ap_HostEventBuffer = NULL;
+	p_HostEventBuffer = NULL;
+	i_EventBufferSize = 0;
 	p_HostInput= NULL;
 	p_DeviceInput = NULL;
 	p_StopWatch = NULL;
 	i_NumAttributes = 0;
-	pi_DeviceMatchedEvents = NULL;
-	pi_HostMachedEvents = NULL;
 }
 
 CudaSingleFilterKernel::~CudaSingleFilterKernel()
 {
-	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput->ap_EventBuffer));
+	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput->p_ByteBuffer));
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput));
 
-	CUDA_CHECK_RETURN(cudaFreeHost(ap_HostEventBuffer));
 	free(p_HostInput);
 
 	CUDA_CHECK_RETURN(cudaDeviceReset());
 
-	CUDA_CHECK_RETURN(cudaFree(pi_DeviceMatchedEvents));
-	free(pi_HostMachedEvents);
-
 	sdkDeleteTimer(&p_StopWatch);
+}
+
+void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
+{
+	p_HostEventBuffer = _pBuffer;
+	i_EventBufferSize = _iSize;
+
+	p_HostInput->i_ResultsPosition = i_ResultsBufferPosition;
+	p_HostInput->i_EventMetaPosition = i_EventMetaBufferPosition;
+	p_HostInput->i_EventDataPosition = i_EventDataBufferPosition;
+	p_HostInput->i_SizeOfEvent = i_SizeOfEvent;
 }
 
 void CudaSingleFilterKernel::Initialize()
@@ -113,86 +124,54 @@ void CudaSingleFilterKernel::Initialize()
 
 	sdkCreateTimer(&p_StopWatch);
 
-	p_HostInput = (SingleFilterKernelInput*) malloc(sizeof(SingleFilterKernelInput));
-	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceInput, sizeof(SingleFilterKernelInput)));
+	p_HostInput = (SingleFilterKernelInput*) malloc(sizeof(SingleFilterKernelInput)); // host allocate Kernel input struct
+	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceInput, sizeof(SingleFilterKernelInput))); // device allocate Kernel input struct
 
-	CUDA_CHECK_RETURN(cudaMallocHost((void**) &ap_HostEventBuffer, sizeof(CudaEvent) * i_MaxEventBufferSize));
-	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_HostInput->ap_EventBuffer, sizeof(CudaEvent) * i_MaxEventBufferSize)); // will be cudaMemCpy later
-	p_HostInput->i_MaxEventCount = i_MaxEventBufferSize;
+	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_HostInput->p_ByteBuffer, sizeof(char) * i_EventBufferSize)); // device allocate ByteBuffer
+	p_HostInput->i_MaxEventCount = i_MaxNumberOfEvents;
+
+	p_HostInput->i_EventsPerBlock = i_EventsPerBlock;
 }
 
-void CudaSingleFilterKernel::ProcessEvents()
+void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 {
 	sdkStartTimer(&p_StopWatch);
 
-	p_HostInput->i_EventCount = i_NumEvents;
+	p_HostInput->i_EventCount = _iNumEvents;
 
 	//TODO: async copy
-	CUDA_CHECK_RETURN(cudaMemcpy(p_HostInput->ap_EventBuffer, ap_HostEventBuffer, sizeof(CudaEvent) * i_MaxEventBufferSize, cudaMemcpyHostToDevice));
+	CUDA_CHECK_RETURN(cudaMemcpy(p_HostInput->p_ByteBuffer, p_HostEventBuffer, sizeof(char) * i_EventBufferSize, cudaMemcpyHostToDevice));
 	CUDA_CHECK_RETURN(cudaMemcpy(p_DeviceInput, p_HostInput, sizeof(SingleFilterKernelInput), cudaMemcpyHostToDevice));
-
-//	CUDA_CHECK_RETURN(cudaMemset(pi_DeviceMatchedEvents, 0, sizeof(int) * i_MaxEventBufferSize * i_FilterCount)); // TODO: do this in 0th thread
 
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	// call entry kernel
-	int numBlocksX = i_NumEvents / i_EventsPerBlock;
+	int numBlocksX = _iNumEvents / i_EventsPerBlock;
 	int numBlocksY = 1;
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_EventsPerBlock, 1);
 
-	ProcessEventsSingleFilterKernel<<<numBlocks, numThreads>>>(p_DeviceInput, pi_DeviceMatchedEvents);
+	ProcessEventsSingleFilterKernel<<<numBlocks, numThreads>>>(p_DeviceInput);
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	//fprintf(fp_Log, "[ProcessEvents] Copying back results\n");
 	CUDA_CHECK_RETURN(cudaMemcpy(
-			pi_HostMachedEvents,
-			pi_DeviceMatchedEvents,
-			sizeof(int) * i_MaxEventBufferSize,
+			p_HostEventBuffer,
+			p_DeviceInput->p_ByteBuffer,
+			sizeof(char) * 4 * i_MaxNumberOfEvents,
 			cudaMemcpyDeviceToHost));
 
 	sdkStopTimer(&p_StopWatch);
 
-	// process results
-	//fprintf(fp_Log, "[ProcessEvents] Results are : \n");
-	int iCount = p_EventConsumer->OnCudaEventMatch(pi_HostMachedEvents, i_NumEvents);
-
 	float fElapsed = sdkGetTimerValue(&p_StopWatch);
-	fprintf(fp_Log, "[ProcessEvents] Stats : Matched=%d Elapsed=%f ms\n", iCount, fElapsed);
+	fprintf(fp_Log, "[ProcessEvents] Stats : Elapsed=%f ms\n", fElapsed);
 	fflush(fp_Log);
 
 	lst_ElapsedTimes.push_back(fElapsed);
 
 	sdkResetTimer(&p_StopWatch);
-	i_NumEvents = 0;
-}
-
-void CudaSingleFilterKernel::AddEvent(const CudaEvent * _pEvent)
-{
-	// can just do a memcpy for whole structure
-	ap_HostEventBuffer[i_NumEvents].ui_NumAttributes = _pEvent->ui_NumAttributes;
-
-	for(int i=0; i<_pEvent->ui_NumAttributes; ++i)
-	{
-		ap_HostEventBuffer[i_NumEvents].a_Attributes[i].e_Type = _pEvent->a_Attributes[i].e_Type;
-		ap_HostEventBuffer[i_NumEvents].a_Attributes[i].m_Value = _pEvent->a_Attributes[i].m_Value;
-	}
-
-	//printf("CudaKernel::AddEvent : EventIndex=%d\n", i_NumEvents);
-
-	i_NumEvents++;
-}
-
-void CudaSingleFilterKernel::AddAndProcessEvents(CudaEvent ** _apEvent, int _iEventCount)
-{
-	for(int i=0; i<_iEventCount; ++i)
-	{
-//		_apEvent[i]->Print(fp_Log);
-		memcpy(&ap_HostEventBuffer[i], _apEvent[i], sizeof(CudaEvent));
-	}
-	i_NumEvents = _iEventCount;
-	ProcessEvents();
+//	i_NumEvents = 0;
 }
 
 void CudaSingleFilterKernel::AddFilterToDevice(Filter * _pFilter)
@@ -242,12 +221,8 @@ void CudaSingleFilterKernel::CopyFiltersToDevice()
 			sizeof(Filter),
 			cudaMemcpyHostToDevice));
 
-	pi_HostMachedEvents = (int*) malloc(sizeof(int) * i_MaxEventBufferSize);
-	CUDA_CHECK_RETURN(cudaMalloc((void**) &pi_DeviceMatchedEvents, sizeof(int) * i_MaxEventBufferSize));
 
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
-
-	p_HostInput->i_EventsPerBlock = i_EventsPerBlock;
 
 	free(apHostFilters);
 	apHostFilters = NULL;

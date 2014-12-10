@@ -26,11 +26,13 @@ public:
 	virtual ~CudaKernelBase();
 
 	virtual void Initialize() = 0;
+	virtual void SetEventBuffer(char * _pBuffer, int _iSize) = 0;
+	void SetResultsBufferPosition(int _iPos) { i_ResultsBufferPosition = _iPos; }
+	void SetEventMetaBufferPosition(int _iPos) { i_EventMetaBufferPosition = _iPos; }
+	void SetSizeOfEvent(int _iSize) { i_SizeOfEvent = _iSize; }
+	void SetEventDataBufferPosition(int _iPos) { i_EventDataBufferPosition = _iPos; }
 
-	virtual void ProcessEvents() = 0;
-
-	virtual void AddEvent(const CudaEvent * _pEvent) = 0;
-	virtual void AddAndProcessEvents(CudaEvent ** _apEvent, int _iEventCount) = 0;
+	virtual void ProcessEvents(int _iNumEvents) = 0;
 
 	virtual void AddFilterToDevice(Filter * _pFilter) = 0;
 	virtual void CopyFiltersToDevice() = 0;
@@ -40,6 +42,11 @@ public:
 protected:
 	GpuEventConsumer * p_EventConsumer;
 	FILE * fp_Log;
+
+	int i_SizeOfEvent;
+	int i_ResultsBufferPosition;
+	int i_EventMetaBufferPosition;
+	int i_EventDataBufferPosition;
 };
 
 };

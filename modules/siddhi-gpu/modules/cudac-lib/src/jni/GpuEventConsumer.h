@@ -38,39 +38,42 @@ public:
 
 	void Initialize();
 
-	void ProcessEvents();
-	void OnEvents(CudaEvent ** _apEvents, int _iEventCount);
-
 	void AddFilter(Filter * _pFilter);
 	void ConfigureFilters();
 
-	int OnCudaEventMatch(int * _aiMatchedPositions, int _iNumEvents);
-
-	std::vector<int> GetMatchingEvents();
+	void ProcessEvents(int _iNumEvents);
 
 	void PrintAverageStats();
 
-	int GetMaxBufferSize() { return i_MaxBufferSize; }
+	int GetMaxNumberOfEvents() { return i_MaxNumOfEvents; }
 
 	void CreateByteBuffer(int _iSize);
+	void SetByteBuffer(char * _pBuffer, int _iSize);
 	int GetByteBufferSize() { return i_ByteBufferSize; }
 	char * GetByteBuffer() { return p_ByteBuffer; }
+	void SetResultsBufferPosition(int _iPos);
+	void SetEventMetaBufferPosition(int _iPos);
+	void SetSizeOfEvent(int _iSize);
+	void SetEventDataBufferPosition(int _iPos);
 
 private:
 	typedef std::map<int, Filter *> FiltersById;
-	typedef std::vector<int> ResultsEvents;
 
-	int i_MaxBufferSize;
+	int i_MaxNumOfEvents;
 	FiltersById map_FiltersById;
 
 	CudaKernelBase * p_CudaKernel;
 
-	ResultsEvents vec_Result;
 	Timer m_Timer;
 	FILE * fp_Log;
 
 	char * p_ByteBuffer;
 	int i_ByteBufferSize;
+
+	int i_SizeOfEvent;
+	int i_ResultsBufferPosition;
+	int i_EventMetaBufferPosition;
+	int i_EventDataBufferPosition;
 };
 
 };

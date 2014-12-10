@@ -17,11 +17,15 @@ namespace SiddhiGpu
 
 typedef struct SingleFilterKernelInput
 {
-	CudaEvent *               ap_EventBuffer;       // input events in device memory
-	int                       i_EventCount;         // number of events in buffer
-	Filter *                  ap_Filter;            // Filters buffer - pre-copied at initialization
+	char * 					  p_ByteBuffer;         // ByteBuffer from java side
+	int                       i_ResultsPosition;    // Results array position in ByteBuffer
+	int                       i_EventMetaPosition;  // EventMeta position in ByteBuffer
+	int                       i_EventDataPosition;  // EventData position in ByteBuffer
+	int                       i_SizeOfEvent;        // Size of an event
 	int                       i_EventsPerBlock;     // number of events allocated per block
+	Filter *                  ap_Filter;            // Filters buffer - pre-copied at initialization
 	int                       i_MaxEventCount;      // used for setting results array
+	int                       i_EventCount;         // Num events in this batch
 } SingleFilterKernelInput;
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -34,10 +38,8 @@ public:
 	virtual ~CudaSingleFilterKernel();
 
 	void Initialize();
-	void ProcessEvents();
-
-	void AddEvent(const CudaEvent * _pEvent);
-	void AddAndProcessEvents(CudaEvent ** _apEvent, int _iEventCount);
+	void SetEventBuffer(char * _pBuffer, int _iSize);
+	void ProcessEvents(int _iNumEvents);
 
 	void AddFilterToDevice(Filter * _pFilter);
 	void CopyFiltersToDevice();
@@ -46,15 +48,17 @@ public:
 
 private:
 	int i_EventsPerBlock;
-	int i_MaxEventBufferSize;
-	int i_NumEvents;
+	int i_MaxNumberOfEvents;
+//	int i_NumEvents;
 	int i_NumAttributes;
 
-	CudaEvent * ap_HostEventBuffer;
+	char * p_HostEventBuffer;
+	int i_EventBufferSize;
+//	CudaEvent * ap_HostEventBuffer;
 	std::list<Filter*> lst_HostFilters;
 
-	int * pi_HostMachedEvents;
-	int * pi_DeviceMatchedEvents;
+//	int * pi_HostMachedEvents;
+//	int * pi_DeviceMatchedEvents;
 
 	::StopWatchInterface * p_StopWatch;
 

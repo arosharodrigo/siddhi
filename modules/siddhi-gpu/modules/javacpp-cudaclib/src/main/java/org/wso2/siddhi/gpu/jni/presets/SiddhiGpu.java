@@ -8,7 +8,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 
 
 @Properties(target="org.wso2.siddhi.gpu.jni.SiddhiGpu", value={
-    @Platform(include={"<CudaEvent.h>", "<Filter.h>", "<GpuEventConsumer.h>","<CudaKernelBase.h>", "<CudaFilterKernel.h>",
+    @Platform(include={"<CudaEvent.h>", "<Filter.h>", "<GpuEventConsumer.h>","<CudaKernelBase.h>", 
     		"<CudaSingleFilterKernel.h>"}, link={"gpueventconsumer"} ),
     @Platform(value="windows", link="gpueventconsumer") })
 public class SiddhiGpu implements InfoMapper {

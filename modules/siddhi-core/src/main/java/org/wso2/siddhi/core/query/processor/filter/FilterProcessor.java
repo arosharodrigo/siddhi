@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.processor.filter;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,14 +54,15 @@ public class FilterProcessor implements Processor {
     private int [] stringAttributeSizes = null;
     
     private ByteBuffer eventByteBuffer = null;
-    private int eventCountBufferPosition = 0;
     private int filterResultsBufferPosition = 0;
     private int eventsDataBufferPosition = 0;
+    private int eventMetaBufferPosition = 0;
     
     private static class AttributeDefinition {
     	public int attributePositionInGpu;
     	public int [] attributePositionInCpu;
     	public Attribute.Type attributeType;
+    	public int attributeLength;
     }
 
     private List<AttributeDefinition> attributeDefinitionList = new ArrayList<AttributeDefinition>();
@@ -78,7 +80,6 @@ public class FilterProcessor implements Processor {
     		int threshold, String stringAttributeSizes) {
     	this.gpuEventConsumer = gpuEventConsumer;
     	this.gpuProcessMinimumEventCount = threshold;
-    	this.eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
     	
     	String [] tokens = stringAttributeSizes.split(",");
     	if(tokens.length > 0)
@@ -92,13 +93,13 @@ public class FilterProcessor implements Processor {
 			}
     	}
     	
-    	log.info("GpuEventConsumer MaxBufferSize : " + gpuEventConsumer.GetMaxBufferSize());
+    	log.info("GpuEventConsumer MaxNumberOfEvents : " + gpuEventConsumer.GetMaxNumberOfEvents());
     	log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
     			" HasArray=" + this.eventByteBuffer.hasArray() + 
     			" Position=" + this.eventByteBuffer.position() + 
     			" Limit=" + this.eventByteBuffer.limit());
     	
-    	this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxBufferSize()];
+    	this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxNumberOfEvents()];
     	
         if(Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
             this.conditionExecutor = conditionExecutor;
@@ -158,8 +159,8 @@ public class FilterProcessor implements Processor {
 					{
 						case BOOL:
 						{
-							eventByteBuffer.put(bufferIndex, (byte)(((Boolean) attrib).booleanValue() ? 1 : 0));
-	    					bufferIndex += 1;
+							eventByteBuffer.putShort(bufferIndex, (short)(((Boolean) attrib).booleanValue() ? 1 : 0));
+	    					bufferIndex += 2;
 						}
 						break;
 						case INT:
@@ -192,7 +193,7 @@ public class FilterProcessor implements Processor {
 	    					eventByteBuffer.putShort(bufferIndex, (short)str.length);
 	    					bufferIndex += 2;
 	    					eventByteBuffer.put(str, bufferIndex, str.length);
-	    					bufferIndex += str.length;
+	    					bufferIndex += attributeDefinition.attributeLength;
 						}
 						break;
 						default:
@@ -201,13 +202,11 @@ public class FilterProcessor implements Processor {
 				}
     		}
     		
-    		eventByteBuffer.putInt(eventCountBufferPosition, inputStreamEventIndex); // set event count
-
     		if(inputStreamEventIndex >= gpuProcessMinimumEventCount)
     		{
 
     			// process events and set results in same buffer
-    			gpuEventConsumer.ProcessEvents();
+    			gpuEventConsumer.ProcessEvents(inputStreamEventIndex);
 
     			// read results from byteBuffer
     			IntBuffer resultsBuffer = eventByteBuffer.asIntBuffer();
@@ -279,7 +278,11 @@ public class FilterProcessor implements Processor {
     		int sizeOfEvent = 0;
     		int stringAttributeIndex = 0;
     		int bufferPreambleSize = 0;
-        	
+    		
+    		filterResultsBufferPosition = 0;
+        	eventMetaBufferPosition = filterResultsBufferPosition + (gpuEventConsumer.GetMaxNumberOfEvents() * 4);
+    		    		
+        	bufferPreambleSize = eventMetaBufferPosition;
     		bufferPreambleSize += 2; // attribute count
 
     		// calculate max byte buffer size
@@ -291,46 +294,47 @@ public class FilterProcessor implements Processor {
 					{
 						case BOOL:
 						{
-							bufferPreambleSize += 4; // type + length
-							sizeOfEvent += 1;
+							bufferPreambleSize += 6; // type + length + position
+							sizeOfEvent += 2;
 						}
 						break;
 						case INT:
 						{
-							bufferPreambleSize += 4; // type + length
+							bufferPreambleSize += 6; // type + length + position
 							sizeOfEvent += 4;
 						}
 						break;
 						case LONG:
 						{
-							bufferPreambleSize += 4; // type + length
+							bufferPreambleSize += 6; // type + length + position
 							sizeOfEvent += 8;
 						}
 						break;
 						case FLOAT:
 						{
-							bufferPreambleSize += 4; // type + length
+							bufferPreambleSize += 6; // type + length + position
 							sizeOfEvent += 4;
 						}
 						break;
 						case DOUBLE:
 						{
-							bufferPreambleSize += 4; // type + length
+							bufferPreambleSize += 6; // type + length + position
 							sizeOfEvent += 8;
 						}
 						break;
 						case STRING:
 						{
+							sizeOfEvent += 2; // actual string length
 							if(stringAttributeSizes != null)
 							{
 								int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
-								sizeOfEvent += sizeOfString;
+								sizeOfEvent += sizeOfString; // max size
 							}
 							else
 							{
 								sizeOfEvent += 8;
 							}
-							bufferPreambleSize += 4; // type + length
+							bufferPreambleSize += 6; // type + length + position
 						}
 						break;
 						default:
@@ -339,23 +343,30 @@ public class FilterProcessor implements Processor {
     			}
     		}
     		
-    		filterResultsBufferPosition = bufferPreambleSize + 4; 
-    		eventCountBufferPosition = filterResultsBufferPosition + 4 + (gpuEventConsumer.GetMaxBufferSize() * 4);
-    		eventsDataBufferPosition = eventCountBufferPosition + 4;
+    		eventsDataBufferPosition = bufferPreambleSize;
     		
     		log.info("GpuEventConsumer : Filter results buffer position is " + filterResultsBufferPosition);
-    		log.info("GpuEventConsumer : EventCount buffer position is " + eventCountBufferPosition);
+    		log.info("GpuEventConsumer : EventMeta buffer position is " + eventMetaBufferPosition);
     		log.info("GpuEventConsumer : EventData buffer position is " + eventsDataBufferPosition);
     		log.info("GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
-    		int byteBufferSize = eventsDataBufferPosition + (sizeOfEvent * gpuEventConsumer.GetMaxBufferSize());
+    		int byteBufferSize = eventsDataBufferPosition + (sizeOfEvent * gpuEventConsumer.GetMaxNumberOfEvents());
     		
+    		gpuEventConsumer.SetSizeOfEvent(sizeOfEvent);
+    		gpuEventConsumer.SetResultsBufferPosition(filterResultsBufferPosition);
+    		gpuEventConsumer.SetEventMetaBufferPosition(eventMetaBufferPosition);
+    		gpuEventConsumer.SetEventDataBufferPosition(eventsDataBufferPosition);
+
     		// allocate byte buffer
     		log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
-    		gpuEventConsumer.CreateByteBuffer(byteBufferSize);
+    		eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
+    		gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
+    		// gpuEventConsumer.CreateByteBuffer(byteBufferSize);
+    		// eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
+    		
     		
     		// fill byte buffer preamble
     		
-    		int bufferIndex = 0;
+    		int bufferIndex = eventMetaBufferPosition;
         	eventByteBuffer.putShort(bufferIndex, (short)count); // put attribute count
         	bufferIndex += 2;
     		
@@ -395,16 +406,16 @@ public class FilterProcessor implements Processor {
         				continue;
         			}
     				
-    				attributeDefinitionList.add(attributeDefinition);
-    				
     				switch(attributeDefinition.attributeType)
 					{
 						case BOOL:
 						{
 							eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Boolean); // type - 2 bytes
 							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)1); // length - 2 bytes
+							eventByteBuffer.putShort(bufferIndex, (short)2); // length - 2 bytes
 							bufferIndex += 2;
+							
+							attributeDefinition.attributeLength = 2;
 						}
 						break;
 						case INT:
@@ -413,6 +424,8 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
 							bufferIndex += 2;
+							
+							attributeDefinition.attributeLength = 4;
 						}
 						break;
 						case LONG:
@@ -421,6 +434,8 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
 							bufferIndex += 2;
+							
+							attributeDefinition.attributeLength = 8;
 						}
 						break;
 						case FLOAT:
@@ -429,6 +444,8 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
 							bufferIndex += 2;
+							
+							attributeDefinition.attributeLength = 4;
 						}
 						break;
 						case DOUBLE:
@@ -437,6 +454,8 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
 							bufferIndex += 2;
+							
+							attributeDefinition.attributeLength = 8;
 						}
 						break;
 						case STRING:
@@ -449,11 +468,15 @@ public class FilterProcessor implements Processor {
 								int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
 								eventByteBuffer.putShort(bufferIndex, (short)sizeOfString); // length - n bytes
 								bufferIndex += 2;
+								
+								attributeDefinition.attributeLength = sizeOfString;
 							}
 							else
 							{
 								eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
 								bufferIndex += 2;
+								
+								attributeDefinition.attributeLength = 8;
 							}
 						}
 						break;
@@ -461,10 +484,9 @@ public class FilterProcessor implements Processor {
 							break;
 					}
     				
+    				attributeDefinitionList.add(attributeDefinition);
     			}
     		}
-    		
-    		eventByteBuffer.putInt(bufferIndex, sizeOfEvent); // put size of an event
     		
     	}
     	

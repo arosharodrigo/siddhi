@@ -14,11 +14,15 @@ namespace SiddhiGpu
 
 
 GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize, int _iEventsPerBlock) :
-	i_MaxBufferSize(_iMaxBufferSize)
+	i_MaxNumOfEvents(_iMaxBufferSize),
+	i_ByteBufferSize(0),
+	i_SizeOfEvent(0),
+	i_ResultsBufferPosition(0),
+	i_EventMetaBufferPosition(0),
+	i_EventDataBufferPosition(0)
 {
 	fp_Log = fopen("logs/GpuEventConsumer.log", "w");
 
-	vec_Result.reserve(i_MaxBufferSize);
 	p_ByteBuffer = NULL;
 
 	switch(_eKernelType)
@@ -26,13 +30,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize,
 		case SingleFilterKernel:
 		{
 			fprintf(fp_Log, "EventConsumerGpu created for SingleFilterKernel\n");
-			p_CudaKernel = new CudaSingleFilterKernel(i_MaxBufferSize, _iEventsPerBlock, this, fp_Log);
-		}
-		break;
-		case MultiFilterKernel:
-		{
-			fprintf(fp_Log, "EventConsumerGpu created for MultiFilterKernel\n");
-			p_CudaKernel = new CudaFilterKernel(i_MaxBufferSize, this, fp_Log);
+			p_CudaKernel = new CudaSingleFilterKernel(i_MaxNumOfEvents, _iEventsPerBlock, this, fp_Log);
 		}
 		break;
 		default:
@@ -41,7 +39,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize,
 	}
 
 
-	fprintf(fp_Log, "EventConsumer : MaxBufferSize=[%d events]\n", i_MaxBufferSize);
+	fprintf(fp_Log, "EventConsumer : MaxBufferSize=[%d events]\n", i_MaxNumOfEvents);
 	fflush(fp_Log);
 }
 
@@ -63,30 +61,54 @@ void GpuEventConsumer::CreateByteBuffer(int _iSize)
 {
 	p_ByteBuffer = new char[_iSize];
 	i_ByteBufferSize = _iSize;
+
+	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
+
 	fprintf(fp_Log, "EventConsumer : ByteBuffer Created=[%d]\n", i_ByteBufferSize);
 	fflush(fp_Log);
 }
 
-void GpuEventConsumer::ProcessEvents()
+void GpuEventConsumer::SetByteBuffer(char * _pBuffer, int _iSize)
+{
+	p_ByteBuffer = _pBuffer;
+	i_ByteBufferSize = _iSize;
+
+	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
+
+	fprintf(fp_Log, "EventConsumer : ByteBuffer Set=[%d]\n", i_ByteBufferSize);
+	fflush(fp_Log);
+}
+
+void GpuEventConsumer::SetResultsBufferPosition(int _iPos)
+{
+	i_ResultsBufferPosition = _iPos;
+	p_CudaKernel->SetResultsBufferPosition(_iPos);
+}
+
+void GpuEventConsumer::SetEventMetaBufferPosition(int _iPos)
+{
+	i_EventMetaBufferPosition = _iPos;
+	p_CudaKernel->SetEventMetaBufferPosition(_iPos);
+}
+
+void GpuEventConsumer::SetSizeOfEvent(int _iSize)
+{
+	i_SizeOfEvent = _iSize;
+	p_CudaKernel->SetSizeOfEvent(_iSize);
+}
+
+void GpuEventConsumer::SetEventDataBufferPosition(int _iPos)
+{
+	i_EventDataBufferPosition = _iPos;
+	p_CudaKernel->SetEventDataBufferPosition(_iPos);
+}
+
+void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 {
 	// events are filled in bytebuffer
 	// copy them to GPU
-}
-
-void GpuEventConsumer::OnEvents(CudaEvent ** _apEvents, int _iEventCount)
-{
-	fprintf(fp_Log, "OnEvents : Event batch size [%d] \n", _iEventCount);
-	vec_Result.clear();
-	p_CudaKernel->AddAndProcessEvents(_apEvents, _iEventCount);
-
-	// release internally allocated string memory
-	for(int i=0; i<_iEventCount; ++i)
-	{
-		if(_apEvents[i])
-		{
-			_apEvents[i]->Destroy();
-		}
-	}
+	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
+	p_CudaKernel->ProcessEvents(_iNumEvents);
 }
 
 void GpuEventConsumer::AddFilter(Filter * _pFilter)
@@ -116,33 +138,14 @@ void GpuEventConsumer::ConfigureFilters()
 	fflush(fp_Log);
 }
 
-int GpuEventConsumer::OnCudaEventMatch(int * _aiMatchedPositions, int _iNumEvents)
-{
-	int iCount = 0;
-	for(int j=0; j<_iNumEvents; ++j)
-	{
-		if(_aiMatchedPositions[j])
-		{
-			//	fprintf(fp_Log, "OnEventMatch : EventPos=%d \n", j);
-			vec_Result.push_back(j);
-			iCount++;
-		}
-	}
-	return iCount;
-}
-
 void GpuEventConsumer::PrintAverageStats()
 {
 	float f = p_CudaKernel->GetElapsedTimeAverage();
-	float fpe = f / i_MaxBufferSize;
+	float fpe = f / i_MaxNumOfEvents;
 //	printf("Average Elapsed Time (Event Batch Size : %d - %f ms) : %f ms per event\n", i_MaxBufferSize, f, fpe);
-	fprintf(fp_Log, "GPU Average Elapsed Time (Event Batch Size : %d - %f ms) : %f ms per event\n", i_MaxBufferSize, f, fpe);
+	fprintf(fp_Log, "GPU Average Elapsed Time (Event Batch Size : %d - %f ms) : %f ms per event\n", i_MaxNumOfEvents, f, fpe);
 	fflush(fp_Log);
 }
 
-std::vector<int> GpuEventConsumer::GetMatchingEvents()
-{
-	return vec_Result;
-}
 
 };

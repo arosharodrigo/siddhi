@@ -67,264 +67,264 @@ __device__ bool cuda_contains(const char *s1, const char *s2)
 
 // ========================= INT ==============================================
 
-__device__ int AddExpressionInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ int AddExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex) +
-			ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) +
+			ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ int MinExpressionInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ int MinExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex) -
-			ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) -
+			ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ int MulExpressionInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ int MulExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex) *
-			ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) *
+			ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ int DivExpressionInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ int DivExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex) /
-			ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) /
+			ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ int ModExpressionInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ int ModExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex) %
-			ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) %
+			ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 // ========================= LONG ==============================================
 
-__device__ long AddExpressionLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ long AddExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex) +
-			ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) +
+			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long MinExpressionLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ long MinExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex) -
-			ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) -
+			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long MulExpressionLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ long MulExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex) *
-			ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) *
+			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long DivExpressionLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ long DivExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex) /
-			ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) /
+			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long ModExpressionLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ long ModExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex) %
-			ExecuteLongExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) %
+			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 
 // ========================= FLOAT ==============================================
 
-__device__ float AddExpressionFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ float AddExpressionFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex) +
-			ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) +
+			ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ float MinExpressionFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ float MinExpressionFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex) -
-			ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) -
+			ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ float MulExpressionFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ float MulExpressionFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex) *
-			ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) *
+			ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ float DivExpressionFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ float DivExpressionFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex) /
-			ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) /
+			ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ float ModExpressionFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ float ModExpressionFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-//	return ((int64_t)ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex) %
-//			(int64_t)ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+//	return ((int64_t)ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) %
+//			(int64_t)ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 
-	return fmod(ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex),
-			ExecuteFloatExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return fmod(ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex),
+			ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 // ========================= DOUBLE ===========================================
 
-__device__ double AddExpressionDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ double AddExpressionDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex) +
-			ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) +
+			ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ double MinExpressionDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ double MinExpressionDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex) -
-			ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) -
+			ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ double MulExpressionDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ double MulExpressionDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex) *
-			ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) *
+			ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ double DivExpressionDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ double DivExpressionDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex) /
-			ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) /
+			ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ double ModExpressionDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ double ModExpressionDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
-//	return ((int64_t)ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex) %
-//			(int64_t)ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+//	return ((int64_t)ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) %
+//			(int64_t)ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 
-	return fmod(ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex),
-				ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return fmod(ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex),
+				ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 /// ============================ CONDITION EXECUTORS ==========================
 
-__device__ bool InvalidOperator(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool InvalidOperator(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	return false;
 }
 
-__device__ bool NoopOperator(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NoopOperator(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	return true;
 }
 
 // Equal operators
 
-__device__ bool EqualCompareBoolBool(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareBoolBool(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareIntInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareIntLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareIntFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareIntDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareLongInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareLongLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareLongFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareLongDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareFloatInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareFloatLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareFloatFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareFloatDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareDoubleInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareDoubleLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareDoubleFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareDoubleDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) == ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool EqualCompareStringString(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareStringString(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (cuda_strcmp(ExecuteStringExpression(_mEvent, _mFilter, _iCurrentNodeIndex), ExecuteStringExpression(_mEvent, _mFilter, _iCurrentNodeIndex)));
+	return (cuda_strcmp(ExecuteStringExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex), ExecuteStringExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex)));
 }
 
-//__device__ bool EqualCompareExecutorExecutor(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+//__device__ bool EqualCompareExecutorExecutor(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 //{
 //	switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex + 1].e_NodeType)
 //	{
@@ -334,8 +334,8 @@ __device__ bool EqualCompareStringString(CudaEvent & _mEvent, Filter & _mFilter,
 //			{
 //			case INT:
 //			{
-////				return (ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex++) ==
-////						ExecuteIntExpression(_mEvent, _mFilter, _iCurrentNodeIndex++));
+////				return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex++) ==
+////						ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex++));
 //			}
 //			break;
 //			case LONG:
@@ -361,451 +361,451 @@ __device__ bool EqualCompareStringString(CudaEvent & _mEvent, Filter & _mFilter,
 //		}
 //		break;
 //		case EXECUTOR_NODE_CONDITION:
-////			return ExecuteDoubleExpression(_mEvent, _mFilter, _iCurrentNodeIndex++);
+////			return ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex++);
 //		default:
 //			break;
 //	}
-////	return (Execute(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex) ==
-////			Execute(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex));
+////	return (Execute(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex) ==
+////			Execute(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex));
 //}
 
 /// ============================================================================
 // NotEqual operator
 
-__device__ bool NotEqualCompareBoolBool(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareBoolBool(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareIntInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareIntLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareIntFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareIntDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareLongInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareLongLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareLongFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareLongDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareFloatInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareFloatLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareFloatFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareFloatDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareDoubleInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareDoubleLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareDoubleFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareDoubleDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) != ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotEqualCompareStringString(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareStringString(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (!cuda_strcmp(ExecuteStringExpression(_mEvent, _mFilter,_iCurrentNodeIndex),ExecuteStringExpression(_mEvent, _mFilter,_iCurrentNodeIndex)));
+	return (!cuda_strcmp(ExecuteStringExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex),ExecuteStringExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex)));
 }
 
 /// ============================================================================
 
 // GreaterThan operator
 
-__device__ bool GreaterThanCompareIntInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareIntLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareIntFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareIntDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareLongInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareLongLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareLongFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareLongDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareFloatInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareFloatLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareFloatFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareFloatDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareDoubleInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareDoubleLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareDoubleFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterThanCompareDoubleDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) > ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 
 /// ============================================================================
 // LessThan operator
 
-__device__ bool LessThanCompareIntInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareIntLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareIntFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareIntDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareLongInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareLongLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareLongFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareLongDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareFloatInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareFloatLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareFloatFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareFloatDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareDoubleInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareDoubleLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareDoubleFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessThanCompareDoubleDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) < ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 /// ============================================================================
 // GreaterAndEqual operator
 
-__device__ bool GreaterAndEqualCompareIntInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareIntLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareIntFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareIntDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareLongInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareLongLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareLongFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareLongDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareFloatInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareFloatLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareFloatFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareFloatDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) >= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 /// ============================================================================
 // LessAndEqual operator
 
-__device__ bool LessAndEqualCompareIntInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareIntLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareIntFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareIntDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareLongInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareLongLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareLongFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareLongDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareFloatInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareFloatLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareFloatFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareFloatDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareDoubleInt(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteIntExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareDoubleLong(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteLongExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareDoubleFloat(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteFloatExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool LessAndEqualCompareDoubleDouble(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleDouble(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex) <= ExecuteDoubleExpression(_mEvent, _mFilter,_iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 
-__device__ bool ContainsOperator(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool ContainsOperator(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (cuda_contains(ExecuteStringExpression(_mEvent, _mFilter, _iCurrentNodeIndex), ExecuteStringExpression(_mEvent, _mFilter, _iCurrentNodeIndex)));
+	return (cuda_contains(ExecuteStringExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex), ExecuteStringExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex)));
 }
 
 
 /// ============================================================================
 
-__device__ bool ExecuteBoolExpression(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool ExecuteBoolExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
@@ -821,11 +821,15 @@ __device__ bool ExecuteBoolExpression(CudaEvent & _mEvent, Filter & _mFilter, in
 		break;
 		case EXPRESSION_VARIABLE:
 		{
+			// if filter data type matches event attribute data type, return attribute value
 			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Boolean &&
-					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.ui_NumAttributes &&
-					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DataType::Boolean)
+					_mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
 			{
-				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.b_BoolVal;
+				// get attribute value
+				int16_t i;
+				memcpy(&i, _pEvent + _mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
+				_iCurrentNodeIndex++;
+				return i;
 			}
 		}
 		break;
@@ -838,7 +842,7 @@ __device__ bool ExecuteBoolExpression(CudaEvent & _mEvent, Filter & _mFilter, in
 	return false;
 }
 
-__device__ int ExecuteIntExpression(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ int ExecuteIntExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
@@ -855,32 +859,34 @@ __device__ int ExecuteIntExpression(CudaEvent & _mEvent, Filter & _mFilter, int 
 		case EXPRESSION_VARIABLE:
 		{
 			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Int &&
-					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.ui_NumAttributes &&
-					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DataType::Int)
+					_mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Int)
 			{
-				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.i_IntVal;
+				int32_t i;
+				memcpy(&i, _pEvent + _mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				_iCurrentNodeIndex++;
+				return i;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_INT:
 		{
-			return AddExpressionInt(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return AddExpressionInt(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_SUB_INT:
 		{
-			return MinExpressionInt(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MinExpressionInt(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MUL_INT:
 		{
-			return MulExpressionInt(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MulExpressionInt(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_DIV_INT:
 		{
-			return DivExpressionInt(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return DivExpressionInt(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MOD_INT:
 		{
-			return ModExpressionInt(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return ModExpressionInt(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		default:
 			break;
@@ -891,7 +897,7 @@ __device__ int ExecuteIntExpression(CudaEvent & _mEvent, Filter & _mFilter, int 
 	return INT_MIN;
 }
 
-__device__ long ExecuteLongExpression(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ long ExecuteLongExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
@@ -908,32 +914,34 @@ __device__ long ExecuteLongExpression(CudaEvent & _mEvent, Filter & _mFilter, in
 		case EXPRESSION_VARIABLE:
 		{
 			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Long &&
-					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.ui_NumAttributes &&
-					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DataType::Long)
+					_mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Long)
 			{
-				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.l_LongVal;
+				int64_t i;
+				memcpy(&i, _pEvent + _mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				_iCurrentNodeIndex++;
+				return i;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_LONG:
 		{
-			return AddExpressionLong(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return AddExpressionLong(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_SUB_LONG:
 		{
-			return MinExpressionLong(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MinExpressionLong(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MUL_LONG:
 		{
-			return MulExpressionLong(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MulExpressionLong(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_DIV_LONG:
 		{
-			return DivExpressionLong(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return DivExpressionLong(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MOD_LONG:
 		{
-			return ModExpressionLong(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return ModExpressionLong(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		default:
 			break;
@@ -944,7 +952,7 @@ __device__ long ExecuteLongExpression(CudaEvent & _mEvent, Filter & _mFilter, in
 	return LLONG_MIN;
 }
 
-__device__ float ExecuteFloatExpression(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ float ExecuteFloatExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
@@ -961,32 +969,34 @@ __device__ float ExecuteFloatExpression(CudaEvent & _mEvent, Filter & _mFilter, 
 		case EXPRESSION_VARIABLE:
 		{
 			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Float &&
-					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.ui_NumAttributes &&
-					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DataType::Float)
+					_mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Float)
 			{
-				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.f_FloatVal;
+				float f;
+				memcpy(&f, _pEvent + _mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				_iCurrentNodeIndex++;
+				return f;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_FLOAT:
 		{
-			return AddExpressionFloat(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return AddExpressionFloat(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_SUB_FLOAT:
 		{
-			return MinExpressionFloat(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MinExpressionFloat(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MUL_FLOAT:
 		{
-			return MulExpressionFloat(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MulExpressionFloat(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_DIV_FLOAT:
 		{
-			return DivExpressionFloat(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return DivExpressionFloat(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MOD_FLOAT:
 		{
-			return ModExpressionFloat(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return ModExpressionFloat(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		default:
 			break;
@@ -997,7 +1007,7 @@ __device__ float ExecuteFloatExpression(CudaEvent & _mEvent, Filter & _mFilter, 
 	return FLT_MIN;
 }
 
-__device__ double ExecuteDoubleExpression(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ double ExecuteDoubleExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
@@ -1014,32 +1024,34 @@ __device__ double ExecuteDoubleExpression(CudaEvent & _mEvent, Filter & _mFilter
 		case EXPRESSION_VARIABLE:
 		{
 			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Double &&
-					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.ui_NumAttributes &&
-					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DataType::Double)
+					_mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Double)
 			{
-				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.d_DoubleVal;
+				double f;
+				memcpy(&f, _pEvent + _mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				_iCurrentNodeIndex++;
+				return f;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_DOUBLE:
 		{
-			return AddExpressionDouble(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return AddExpressionDouble(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_SUB_DOUBLE:
 		{
-			return MinExpressionDouble(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MinExpressionDouble(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MUL_DOUBLE:
 		{
-			return MulExpressionDouble(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return MulExpressionDouble(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_DIV_DOUBLE:
 		{
-			return DivExpressionDouble(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return DivExpressionDouble(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		case EXPRESSION_MOD_DOUBLE:
 		{
-			return ModExpressionDouble(_mEvent, _mFilter, _iCurrentNodeIndex);
+			return ModExpressionDouble(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 		}
 		default:
 			break;
@@ -1050,7 +1062,7 @@ __device__ double ExecuteDoubleExpression(CudaEvent & _mEvent, Filter & _mFilter
 	return DBL_MIN;
 }
 
-__device__ const char * ExecuteStringExpression(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ const char * ExecuteStringExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
@@ -1071,16 +1083,14 @@ __device__ const char * ExecuteStringExpression(CudaEvent & _mEvent, Filter & _m
 		case EXPRESSION_VARIABLE:
 		{
 			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::StringIn &&
-					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.ui_NumAttributes &&
-					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DataType::StringIn)
+					_mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
 			{
-				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.z_StringVal;
-			}
-			else if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::StringExt &&
-					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.ui_NumAttributes &&
-					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DataType::StringExt)
-			{
-				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.z_ExtString;
+				int16_t i;
+				memcpy(&i, _pEvent + _mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
+				char * z = _pEvent + _mEventMeta.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position + 2;
+				z[i] = 0;
+				_iCurrentNodeIndex++;
+				return z;
 			}
 		}
 		break;
@@ -1095,24 +1105,24 @@ __device__ const char * ExecuteStringExpression(CudaEvent & _mEvent, Filter & _m
 
 // ==================================================================================================
 
-__device__ bool AndCondition(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool AndCondition(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (Evaluate(_mEvent, _mFilter, _iCurrentNodeIndex) && Evaluate(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (Evaluate(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) && Evaluate(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool OrCondition(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool OrCondition(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (Evaluate(_mEvent, _mFilter, _iCurrentNodeIndex) || Evaluate(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (Evaluate(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) || Evaluate(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool NotCondition(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool NotCondition(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (!Evaluate(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (!Evaluate(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ bool BooleanCondition(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool BooleanCondition(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (Evaluate(_mEvent, _mFilter, _iCurrentNodeIndex));
+	return (Evaluate(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
 // =========================================
@@ -1240,9 +1250,9 @@ __device__ ExecutorFuncPointer mExecutors[EXECUTOR_CONDITION_COUNT] = {
 // =========================================
 
 // evaluate event with an executor tree
-__device__ bool Evaluate(CudaEvent & _mEvent, Filter & _mFilter, int & _iCurrentNodeIndex)
+__device__ bool Evaluate(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
-	return (*mExecutors[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].e_ConditionType])(_mEvent, _mFilter, _iCurrentNodeIndex);
+	return (*mExecutors[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].e_ConditionType])(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex);
 }
 
 };
