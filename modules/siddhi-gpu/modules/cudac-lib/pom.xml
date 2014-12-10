@@ -69,6 +69,23 @@
                             </target>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="make">
+                                <exec executable="make" failonerror="true" dir="${project.basedir}/src/jni">
+                                    <arg line="-f ${makefile.name} clean" />
+                                    <arg value="CPPBUILD=${project.basedir}/../javacpp-cudaclib/cppbuild" />
+                                    <arg value="PLATFORM=${platform}" />
+                                    <!--arg value="dbg=1" /-->
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
