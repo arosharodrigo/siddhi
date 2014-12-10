@@ -116,6 +116,12 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
 	p_HostInput->i_EventMetaPosition = i_EventMetaBufferPosition;
 	p_HostInput->i_EventDataPosition = i_EventDataBufferPosition;
 	p_HostInput->i_SizeOfEvent = i_SizeOfEvent;
+
+	fprintf(fp_Log, "CudaSingleFilterKernel EventBuffer [Ptr=%p Size=%d]\n", p_HostEventBuffer, i_EventBufferSize);
+	fprintf(fp_Log, "CudaSingleFilterKernel ResultsBufferPosition   : %d\n", i_ResultsBufferPosition);
+	fprintf(fp_Log, "CudaSingleFilterKernel EventMetaBufferPosition : %d\n", i_EventMetaBufferPosition);
+	fprintf(fp_Log, "CudaSingleFilterKernel EventDataBufferPosition : %d\n", i_EventDataBufferPosition);
+	fprintf(fp_Log, "CudaSingleFilterKernel SizeOfEvent             : %d\n", i_SizeOfEvent);
 }
 
 void CudaSingleFilterKernel::Initialize()
