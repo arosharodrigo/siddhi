@@ -46,7 +46,8 @@ public class SimpleFilterSingleQueryWithGpuPerformance
         siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(threadPoolSize));
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
-        String query1 = "@info(name = 'query1') @gpu(filter='true', blocksize='" + eventBlockSize + "') from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
+        String query1 = "@info(name = 'query1') @gpu(filter='true', block.size='" + eventBlockSize + "', string.sizes='8') "
+        		+ " from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1);
 
