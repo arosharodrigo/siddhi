@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "Filter.h"
 #include "CudaEvent.h"
+#include "ByteBufferStructs.h"
 
 #include <cuda_profiler_api.h>
 
