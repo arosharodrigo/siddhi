@@ -232,7 +232,7 @@ public class FilterProcessor implements Processor {
 
     			if(resultStreamEvent != null)
     			{
-    				log.info("ResultCount : " + resultCount);
+    				log.info("InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
     				this.next.process(resultStreamEvent);
     			}
     			
