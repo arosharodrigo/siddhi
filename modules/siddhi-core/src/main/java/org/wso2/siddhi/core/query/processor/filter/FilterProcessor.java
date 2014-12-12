@@ -497,6 +497,10 @@ public class FilterProcessor implements Processor {
 							break;
 					}
     				
+    				log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
+    						" CpuPos=" + attributeDefinition.attributePositionInCpu.toString() + 
+    						" Type=" + attributeDefinition.attributeType + 
+    						" Length=" + attributeDefinition.attributeLength);
     				attributeDefinitionList.add(attributeDefinition);
     			}
     		}
