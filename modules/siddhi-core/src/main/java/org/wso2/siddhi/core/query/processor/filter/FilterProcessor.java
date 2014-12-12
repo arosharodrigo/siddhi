@@ -202,25 +202,41 @@ public class FilterProcessor implements Processor {
     			gpuEventConsumer.ProcessEvents(inputStreamEventIndex);
 
     			// read results from byteBuffer
+    			// max number of result is number of input events to kernel
     			IntBuffer resultsBuffer = eventByteBuffer.asIntBuffer();
-    			int resultCount = resultsBuffer.get(filterResultsBufferPosition);
-    			if(resultCount > 0)
+    			
+    			StreamEvent resultStreamEvent = null;
+    			StreamEvent lastEvent = null;
+    			
+    			int resultCount = 0;
+    			
+    			for(int resultsIndex = 0; resultsIndex<inputStreamEventIndex; ++resultsIndex)
     			{
-    				int resultsIndex = filterResultsBufferPosition + 4;
-    				
-    				StreamEvent resultStreamEvent = inputStreamEvents[resultsBuffer.get(resultsIndex++)];
-    				StreamEvent lastEvent = resultStreamEvent;
-
-    				for(int i=1; i<resultCount; ++i) {
-    					StreamEvent e = inputStreamEvents[resultsBuffer.get(resultsIndex++)];
-    					lastEvent.setNext(e);
-    					lastEvent = e;
+    				if(resultsBuffer.get(resultsIndex) == 1)
+    				{
+    					StreamEvent e = inputStreamEvents[resultsIndex];
+    					resultCount++;
+    					
+    					if(lastEvent != null)
+    					{
+    						lastEvent.setNext(e);
+    						lastEvent = e;
+    					}
+    					else
+    					{
+    						resultStreamEvent = e;
+    						lastEvent = resultStreamEvent;
+    					}
     				}
-
-    				this.next.process(resultStreamEvent);
     			}
 
-    		}
+    			if(resultStreamEvent != null)
+    			{
+    				log.info("ResultCount : " + resultCount);
+    				this.next.process(resultStreamEvent);
+    			}
+    			
+      		}
     		else
     		{
     			iterator = event.getIterator();

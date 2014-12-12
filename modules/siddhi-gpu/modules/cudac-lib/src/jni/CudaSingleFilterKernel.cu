@@ -154,7 +154,7 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	p_HostInput->i_EventCount = _iNumEvents;
 
 
-	fprintf(fp_Log, "Device byte buffer ptr : %p \n", p_HostInput->p_ByteBuffer);
+//	fprintf(fp_Log, "Device byte buffer ptr : %p \n", p_HostInput->p_ByteBuffer);
 
 	//TODO: async copy
 	CUDA_CHECK_RETURN(cudaMemcpy(p_HostInput->p_ByteBuffer, p_HostEventBuffer, sizeof(char) * i_EventBufferSize, cudaMemcpyHostToDevice));
@@ -168,21 +168,21 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_EventsPerBlock, 1);
 
-	fprintf(fp_Log, "Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_EventsPerBlock, 1);
-	fprintf(fp_Log, "DeviceInput : %p \n", p_DeviceInput);
-	fprintf(fp_Log, "DeviceInput : EventCount=%d MaxCount=%d PerBlockCount=%d ResultsPosition=%d EventMetaPosition=%d"
-			" EventDataPosition=%d SizeOfEvent=%d ByteBuffer=%p Filter=%p \n", p_HostInput->i_EventCount,
-			p_HostInput->i_MaxEventCount, p_HostInput->i_EventsPerBlock,
-			p_HostInput->i_ResultsPosition, p_HostInput->i_EventMetaPosition, p_HostInput->i_EventDataPosition,
-			p_HostInput->i_SizeOfEvent, p_HostInput->p_ByteBuffer, p_HostInput->ap_Filter);
-	fflush(fp_Log);
+//	fprintf(fp_Log, "Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_EventsPerBlock, 1);
+//	fprintf(fp_Log, "DeviceInput : %p \n", p_DeviceInput);
+//	fprintf(fp_Log, "DeviceInput : EventCount=%d MaxCount=%d PerBlockCount=%d ResultsPosition=%d EventMetaPosition=%d"
+//			" EventDataPosition=%d SizeOfEvent=%d ByteBuffer=%p Filter=%p \n", p_HostInput->i_EventCount,
+//			p_HostInput->i_MaxEventCount, p_HostInput->i_EventsPerBlock,
+//			p_HostInput->i_ResultsPosition, p_HostInput->i_EventMetaPosition, p_HostInput->i_EventDataPosition,
+//			p_HostInput->i_SizeOfEvent, p_HostInput->p_ByteBuffer, p_HostInput->ap_Filter);
+//	fflush(fp_Log);
 
 	ProcessEventsSingleFilterKernel<<<numBlocks, numThreads>>>(p_DeviceInput);
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-	fprintf(fp_Log, "Kernel complete \n");
-	fflush(fp_Log);
+//	fprintf(fp_Log, "Kernel complete \n");
+//	fflush(fp_Log);
 
 	CUDA_CHECK_RETURN(cudaMemcpy(
 			p_HostEventBuffer,
@@ -190,8 +190,8 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 			sizeof(char) * 4 * i_MaxNumberOfEvents,
 			cudaMemcpyDeviceToHost));
 
-	fprintf(fp_Log, "Results copied \n");
-	fflush(fp_Log);
+//	fprintf(fp_Log, "Results copied \n");
+//	fflush(fp_Log);
 
 	sdkStopTimer(&p_StopWatch);
 
