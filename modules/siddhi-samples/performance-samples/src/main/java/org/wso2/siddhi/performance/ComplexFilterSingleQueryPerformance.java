@@ -92,7 +92,7 @@ public class ComplexFilterSingleQueryPerformance
         sb.append("@info(name = 'query1') ");
         if(gpuEnabled)
         {
-        	sb.append("@gpu(filter='true', blocksize='").append(eventBlockSize).append("') ");
+        	sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
         }
         sb.append("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
         
