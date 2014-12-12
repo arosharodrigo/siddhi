@@ -169,11 +169,12 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	dim3 numThreads = dim3(i_EventsPerBlock, 1);
 
 	fprintf(fp_Log, "Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_EventsPerBlock, 1);
+	fprintf(fp_Log, "DeviceInput : %p \n", p_DeviceInput);
 	fprintf(fp_Log, "DeviceInput : EventCount=%d MaxCount=%d PerBlockCount=%d ResultsPosition=%d EventMetaPosition=%d"
-			" EventDataPosition=%d SizeOfEvent=%d ByteBuffer=%p Filter=%p \n", p_DeviceInput->i_EventCount,
-			p_DeviceInput->i_MaxEventCount, p_DeviceInput->i_EventsPerBlock,
-			p_DeviceInput->i_ResultsPosition, p_DeviceInput->i_EventMetaPosition, p_DeviceInput->i_EventDataPosition,
-			p_DeviceInput->i_SizeOfEvent, p_DeviceInput->p_ByteBuffer, p_DeviceInput->ap_Filter);
+			" EventDataPosition=%d SizeOfEvent=%d ByteBuffer=%p Filter=%p \n", p_HostInput->i_EventCount,
+			p_HostInput->i_MaxEventCount, p_HostInput->i_EventsPerBlock,
+			p_HostInput->i_ResultsPosition, p_HostInput->i_EventMetaPosition, p_HostInput->i_EventDataPosition,
+			p_HostInput->i_SizeOfEvent, p_HostInput->p_ByteBuffer, p_HostInput->ap_Filter);
 	fflush(fp_Log);
 
 	ProcessEventsSingleFilterKernel<<<numBlocks, numThreads>>>(p_DeviceInput);
@@ -185,7 +186,7 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 
 	CUDA_CHECK_RETURN(cudaMemcpy(
 			p_HostEventBuffer,
-			p_DeviceInput->p_ByteBuffer,
+			p_HostInput->p_ByteBuffer,
 			sizeof(char) * 4 * i_MaxNumberOfEvents,
 			cudaMemcpyDeviceToHost));
 
