@@ -116,12 +116,17 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
 	p_HostInput->i_EventMetaPosition = i_EventMetaBufferPosition;
 	p_HostInput->i_EventDataPosition = i_EventDataBufferPosition;
 	p_HostInput->i_SizeOfEvent = i_SizeOfEvent;
+	
+	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_HostInput->p_ByteBuffer, sizeof(char) * i_EventBufferSize)); // device allocate ByteBuffer
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	fprintf(fp_Log, "CudaSingleFilterKernel EventBuffer [Ptr=%p Size=%d]\n", p_HostEventBuffer, i_EventBufferSize);
 	fprintf(fp_Log, "CudaSingleFilterKernel ResultsBufferPosition   : %d\n", i_ResultsBufferPosition);
 	fprintf(fp_Log, "CudaSingleFilterKernel EventMetaBufferPosition : %d\n", i_EventMetaBufferPosition);
 	fprintf(fp_Log, "CudaSingleFilterKernel EventDataBufferPosition : %d\n", i_EventDataBufferPosition);
 	fprintf(fp_Log, "CudaSingleFilterKernel SizeOfEvent             : %d\n", i_SizeOfEvent);
+	fprintf(fp_Log, "Device byte buffer ptr : %p \n", p_HostInput->p_ByteBuffer);
 }
 
 void CudaSingleFilterKernel::Initialize()
@@ -133,10 +138,13 @@ void CudaSingleFilterKernel::Initialize()
 	p_HostInput = (SingleFilterKernelInput*) malloc(sizeof(SingleFilterKernelInput)); // host allocate Kernel input struct
 	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceInput, sizeof(SingleFilterKernelInput))); // device allocate Kernel input struct
 
-	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_HostInput->p_ByteBuffer, sizeof(char) * i_EventBufferSize)); // device allocate ByteBuffer
 	p_HostInput->i_MaxEventCount = i_MaxNumberOfEvents;
 
 	p_HostInput->i_EventsPerBlock = i_EventsPerBlock;
+
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
 }
 
 void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
@@ -144,6 +152,9 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	sdkStartTimer(&p_StopWatch);
 
 	p_HostInput->i_EventCount = _iNumEvents;
+
+
+	fprintf(fp_Log, "Device byte buffer ptr : %p \n", p_HostInput->p_ByteBuffer);
 
 	//TODO: async copy
 	CUDA_CHECK_RETURN(cudaMemcpy(p_HostInput->p_ByteBuffer, p_HostEventBuffer, sizeof(char) * i_EventBufferSize, cudaMemcpyHostToDevice));
