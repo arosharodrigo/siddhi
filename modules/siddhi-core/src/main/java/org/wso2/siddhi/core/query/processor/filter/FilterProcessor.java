@@ -115,151 +115,145 @@ public class FilterProcessor implements Processor {
 
     @Override
     public void process(StreamEvent event) {
-    	
-    	if(gpuEventConsumer == null)
-    	{
-    		StreamEventIterator iterator = event.getIterator();
-    		while (iterator.hasNext()){
-    			StreamEvent streamEvent = iterator.next();
-    			if (!(Boolean) conditionExecutor.execute(streamEvent)){
-    				iterator.remove();
-    			}
-    		}
-    		
-    		if(iterator.getFirstElement() != null){
-    			this.next.process(iterator.getFirstElement());
-    		}
-    	}
-    	else
-    	{
 
-    		// check batch size and use GPU processing if size exceed minimum threshold 
-    		// number of events in batch should at least exceed block size
+	if (gpuEventConsumer == null) {
+	    StreamEventIterator iterator = event.getIterator();
+	    while (iterator.hasNext()) {
+		StreamEvent streamEvent = iterator.next();
+		if (!(Boolean) conditionExecutor.execute(streamEvent)) {
+		    iterator.remove();
+		}
+	    }
 
+	    if (iterator.getFirstElement() != null) {
+		this.next.process(iterator.getFirstElement());
+	    }
+	} else {
 
-    		inputStreamEventIndex = 0;
-    		int bufferIndex = eventsDataBufferPosition; // set to eventMeta + eventCount + resultCount + resultsMaxSize
+	    // check batch size and use GPU processing if size exceed minimum
+	    // threshold
+	    // number of events in batch should at least exceed block size
+	    
+	    long preStartTime = System.nanoTime();
 
-    		StreamEventIterator iterator = event.getIterator();
-    		while (iterator.hasNext()) {
-    			
-    			StreamEvent streamEvent = iterator.next();
-    			inputStreamEvents[inputStreamEventIndex++] = streamEvent;
+	    inputStreamEventIndex = 0;
+	    int bufferIndex = eventsDataBufferPosition; 
 
-    			for (AttributeDefinition attributeDefinition : attributeDefinitionList)
-				{
-					Object attrib = streamEvent.getAttribute(attributeDefinition.attributePositionInCpu);
-					
-					switch(attributeDefinition.attributeType)
-					{
-						case BOOL:
-						{
-							eventByteBuffer.putShort(bufferIndex, (short)(((Boolean) attrib).booleanValue() ? 1 : 0));
-	    					bufferIndex += 2;
-						}
-						break;
-						case INT:
-						{
-							eventByteBuffer.putInt(bufferIndex, ((Integer) attrib).intValue());
-	    					bufferIndex += 4;
-						}
-						break;
-						case LONG:
-						{
-							eventByteBuffer.putLong(bufferIndex, ((Long) attrib).longValue());
-	    					bufferIndex += 8;
-						}
-						break;
-						case FLOAT:
-						{
-							eventByteBuffer.putFloat(bufferIndex, ((Float) attrib).floatValue());
-	    					bufferIndex += 4;
-						}
-						break;
-						case DOUBLE:
-						{
-							eventByteBuffer.putDouble(bufferIndex, ((Double) attrib).doubleValue());
-	    					bufferIndex += 8;
-						}
-						break;
-						case STRING:
-						{
-							byte [] str = attrib.toString().getBytes();
-	    					eventByteBuffer.putShort(bufferIndex, (short)str.length);
-	    					bufferIndex += 2;
-	    					eventByteBuffer.put(str, bufferIndex, str.length);
-	    					bufferIndex += attributeDefinition.attributeLength;
-						}
-						break;
-						default:
-							break;
-					}
-				}
-    		}
-    		
-    		if(inputStreamEventIndex >= gpuProcessMinimumEventCount)
-    		{
+	    StreamEventIterator iterator = event.getIterator();
+	    while (iterator.hasNext()) {
 
-    			// process events and set results in same buffer
-    			gpuEventConsumer.ProcessEvents(inputStreamEventIndex);
+		StreamEvent streamEvent = iterator.next();
+		inputStreamEvents[inputStreamEventIndex++] = streamEvent;
 
-    			// read results from byteBuffer
-    			// max number of result is number of input events to kernel
-    			IntBuffer resultsBuffer = eventByteBuffer.asIntBuffer();
-    			
-    			StreamEvent resultStreamEvent = null;
-    			StreamEvent lastEvent = null;
-    			
-    			int resultCount = 0;
-    			
-    			for(int resultsIndex = 0; resultsIndex<inputStreamEventIndex; ++resultsIndex)
-    			{
-    				if(resultsBuffer.get(resultsIndex) == 1)
-    				{
-    					StreamEvent e = inputStreamEvents[resultsIndex];
-    					resultCount++;
-    					
-    					if(lastEvent != null)
-    					{
-    						lastEvent.setNext(e);
-    						lastEvent = e;
-    					}
-    					else
-    					{
-    						resultStreamEvent = e;
-    						lastEvent = resultStreamEvent;
-    					}
-    				}
-    			}
+		for (AttributeDefinition attributeDefinition : attributeDefinitionList) {
+		    Object attrib = streamEvent
+			    .getAttribute(attributeDefinition.attributePositionInCpu);
 
-    			if(resultStreamEvent != null)
-    			{
-    				log.info("InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
-    				this.next.process(resultStreamEvent);
-    			}
-			else
-			{
-				log.info("InputCount=" + inputStreamEventIndex + " ResultCount=0");
+		    switch (attributeDefinition.attributeType) {
+    		    case BOOL: {
+    			eventByteBuffer.putShort(bufferIndex, (short) (((Boolean) attrib).booleanValue() ? 1 : 0));
+    			bufferIndex += 2;
+    		    }
+    		    break;
+    		    case INT: {
+    			eventByteBuffer.putInt(bufferIndex, ((Integer) attrib).intValue()); 
+    			bufferIndex += 4;
+    		    }
+    		    break;
+    		    case LONG: {
+    			eventByteBuffer.putLong(bufferIndex, ((Long) attrib).longValue());
+    			bufferIndex += 8;
+    		    }
+    		    break;
+    		    case FLOAT: {
+    			eventByteBuffer.putFloat(bufferIndex, ((Float) attrib).floatValue());
+    			bufferIndex += 4;
+    		    }
+    		    break;
+    		    case DOUBLE: {
+    			eventByteBuffer.putDouble(bufferIndex, ((Double) attrib).doubleValue());
+    			bufferIndex += 8;
+    		    }
+    		    break;
+    		    case STRING: {
+    			byte[] str = attrib.toString().getBytes();
+    			eventByteBuffer.putShort(bufferIndex, (short) str.length);
+    			bufferIndex += 2;
+    			eventByteBuffer.put(str, bufferIndex, str.length);
+    			bufferIndex += attributeDefinition.attributeLength;
+    		    }
+    		    break;
+    		    default:
+    			break;
+		    }
+		}
+	    }
+
+	    if (inputStreamEventIndex >= gpuProcessMinimumEventCount) {
+
+		long preStopTime = System.nanoTime();
+		
+		// process events and set results in same buffer
+		gpuEventConsumer.ProcessEvents(inputStreamEventIndex);
+		
+		long postStartTime = System.nanoTime();
+
+		// read results from byteBuffer
+		// max number of result is number of input events to kernel
+		IntBuffer resultsBuffer = eventByteBuffer.asIntBuffer();
+
+		StreamEvent resultStreamEvent = null;
+		StreamEvent lastEvent = null;
+
+		int resultCount = 0;
+
+		for (int resultsIndex = 0; resultsIndex < inputStreamEventIndex; ++resultsIndex) {
+		    if (resultsBuffer.get(resultsIndex) == 1) {
+			StreamEvent e = inputStreamEvents[resultsIndex];
+			resultCount++;
+
+			if (lastEvent != null) {
+			    lastEvent.setNext(e);
+			    lastEvent = e;
+			} else {
+			    resultStreamEvent = e;
+			    lastEvent = resultStreamEvent;
 			}
-    			
-      		}
-    		else
-    		{
-    			iterator = event.getIterator();
-    			while (iterator.hasNext()){
-    				StreamEvent streamEvent = iterator.next();
-    				if (!(Boolean) conditionExecutor.execute(streamEvent)){
-    					iterator.remove();
-    				}
-    			}
+		    }
+		}
 
-    			if(iterator.getFirstElement() != null){
-    				this.next.process(iterator.getFirstElement());
-    			}
-    		}
+		long postStopTime = System.nanoTime();
+		
+		if (resultStreamEvent != null) {
+		    log.info("InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
+		    log.info("Times : Pre=" + (preStopTime - preStartTime) + 
+			    " Gpu=" + (postStartTime - preStopTime) + 
+			    " Post=" + (postStopTime - postStartTime) + 
+			    " Total=" + (postStopTime - preStartTime));
+		    this.next.process(resultStreamEvent);
+		} else {
+		    log.info("InputCount=" + inputStreamEventIndex + " ResultCount=0");
+		    log.info("Times : Pre=" + (preStopTime - preStartTime) +
+			    " Gpu=" + (postStartTime - preStopTime) + 
+			    " Post=" + (postStopTime - postStartTime) + 
+			    " Total=" + (postStopTime - preStartTime));
+		}
 
+	    } else {
+		iterator = event.getIterator();
+		while (iterator.hasNext()) {
+		    StreamEvent streamEvent = iterator.next();
+		    if (!(Boolean) conditionExecutor.execute(streamEvent)) {
+			iterator.remove();
+		    }
+		}
 
-    	}
+		if (iterator.getFirstElement() != null) {
+		    this.next.process(iterator.getFirstElement());
+		}
+	    }
+
+	}
     }
 
     @Override
