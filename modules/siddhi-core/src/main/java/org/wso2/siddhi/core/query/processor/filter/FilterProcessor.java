@@ -388,6 +388,7 @@ public class FilterProcessor implements Processor {
     		int bufferIndex = eventMetaBufferPosition;
         	eventByteBuffer.putShort(bufferIndex, (short)count); // put attribute count
         	bufferIndex += 2;
+		int bufferPosition = 0;
     		
         	// fill attribute type - length (2 + 2 bytes)
     		for(int index = 0; index < count; ++index) {
@@ -433,6 +434,9 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)2); // length - 2 bytes
 							bufferIndex += 2;
+							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                                                        bufferIndex += 2;
+							bufferPosition += 2;
 							
 							attributeDefinition.attributeLength = 2;
 						}
@@ -443,7 +447,10 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
 							bufferIndex += 2;
-							
+							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                                                        bufferIndex += 2;
+                                                        bufferPosition += 4;
+
 							attributeDefinition.attributeLength = 4;
 						}
 						break;
@@ -453,7 +460,10 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
 							bufferIndex += 2;
-							
+							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                                                        bufferIndex += 2;
+                                                        bufferPosition += 8;							
+
 							attributeDefinition.attributeLength = 8;
 						}
 						break;
@@ -463,7 +473,10 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
 							bufferIndex += 2;
-							
+							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                                                        bufferIndex += 2;
+                                                        bufferPosition += 4;
+
 							attributeDefinition.attributeLength = 4;
 						}
 						break;
@@ -473,6 +486,9 @@ public class FilterProcessor implements Processor {
 							bufferIndex += 2;
 							eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
 							bufferIndex += 2;
+							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                                                        bufferIndex += 2;
+                                                        bufferPosition += 8;
 							
 							attributeDefinition.attributeLength = 8;
 						}
@@ -487,13 +503,19 @@ public class FilterProcessor implements Processor {
 								int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
 								eventByteBuffer.putShort(bufferIndex, (short)sizeOfString); // length - n bytes
 								bufferIndex += 2;
-								
+								eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+	                                                        bufferIndex += 2;
+        	                                                bufferPosition += sizeOfString;
+
 								attributeDefinition.attributeLength = sizeOfString;
 							}
 							else
 							{
 								eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
 								bufferIndex += 2;
+								eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                                                                bufferIndex += 2;
+                                                                bufferPosition += 8;
 								
 								attributeDefinition.attributeLength = 8;
 							}

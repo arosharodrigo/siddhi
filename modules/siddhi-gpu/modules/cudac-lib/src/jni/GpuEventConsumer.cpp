@@ -6,6 +6,7 @@
  */
 
 #include "GpuEventConsumer.h"
+#include "ByteBufferStructs.h"
 #include <stdlib.h>
 #include <vector>
 
@@ -108,7 +109,7 @@ void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 	// events are filled in bytebuffer
 	// copy them to GPU
 	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
-	PrintByteBuffer(_iNumEvents);
+	//PrintByteBuffer(_iNumEvents);
 	p_CudaKernel->ProcessEvents(_iNumEvents);
 }
 
@@ -180,35 +181,35 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 				{
 					int16_t i;
 					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 2);
-					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d]\n", pEventMeta->a_Attributes[a].i_Position, i);
+					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d] ", pEventMeta->a_Attributes[a].i_Position, i);
 				}
 				break;
 				case DataType::Int:
 				{
 					int32_t i;
 					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 4);
-					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d]\n", pEventMeta->a_Attributes[a].i_Position, i);
+					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d] ", pEventMeta->a_Attributes[a].i_Position, i);
 				}
 				break;
 				case DataType::Long:
 				{
 					int64_t i;
 					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 8);
-					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%lld]\n", pEventMeta->a_Attributes[a].i_Position, i);
+					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%lld] ", pEventMeta->a_Attributes[a].i_Position, i);
 				}
 				break;
 				case DataType::Float:
 				{
 					float f;
 					memcpy(&f, pEvent + pEventMeta->a_Attributes[a].i_Position, 4);
-					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f]\n", pEventMeta->a_Attributes[a].i_Position, f);
+					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f] ", pEventMeta->a_Attributes[a].i_Position, f);
 				}
 				break;
 				case DataType::Double:
 				{
 					double f;
 					memcpy(&f, pEvent + pEventMeta->a_Attributes[a].i_Position, 8);
-					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f]\n", pEventMeta->a_Attributes[a].i_Position, f);
+					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f] ", pEventMeta->a_Attributes[a].i_Position, f);
 				}
 				break;
 				case DataType::StringIn:
@@ -217,13 +218,15 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 2);
 					char * z = pEvent + pEventMeta->a_Attributes[a].i_Position + 2;
 					z[i] = 0;
-					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s]\n", pEventMeta->a_Attributes[a].i_Position, i, z);
+					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s] ", pEventMeta->a_Attributes[a].i_Position, i, z);
 				}
 				break;
 				default:
 					break;
 			}
 		}
+
+		fprintf(fp_Log, "\n");
 	}
 }
 
