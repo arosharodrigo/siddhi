@@ -108,6 +108,7 @@ void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 	// events are filled in bytebuffer
 	// copy them to GPU
 	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
+	PrintByteBuffer(_iNumEvents);
 	p_CudaKernel->ProcessEvents(_iNumEvents);
 }
 
@@ -147,5 +148,83 @@ void GpuEventConsumer::PrintAverageStats()
 	fflush(fp_Log);
 }
 
+void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
+{
+	EventMeta * pEventMeta = (EventMeta*) (p_ByteBuffer + i_EventMetaBufferPosition);
+
+	char * pEventDataStart = (p_ByteBuffer + i_EventDataBufferPosition);
+
+	fprintf(fp_Log, "[PrintByteBuffer] EventMeta %d [", pEventMeta->i_AttributeCount);
+	for(int i=0; i<pEventMeta->i_AttributeCount; ++i)
+	{
+		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
+				pEventMeta->a_Attributes[i].i_Position,
+				pEventMeta->a_Attributes[i].i_Type,
+				pEventMeta->a_Attributes[i].i_Length);
+	}
+	fprintf(fp_Log, "]\n");
+
+
+	fprintf(fp_Log, "[PrintByteBuffer] Events Count : %d\n", _iNumEvents);
+	for(int e=0; e<_iNumEvents; ++e)
+	{
+		char * pEvent = pEventDataStart + (i_SizeOfEvent * e);
+
+		fprintf(fp_Log, "[PrintByteBuffer] Event_%d <%p> ", e, pEvent);
+
+		for(int a=0; a<pEventMeta->i_AttributeCount; ++a)
+		{
+			switch(pEventMeta->a_Attributes[a].i_Type)
+			{
+				case DataType::Boolean:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 2);
+					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d]\n", pEventMeta->a_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Int:
+				{
+					int32_t i;
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d]\n", pEventMeta->a_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Long:
+				{
+					int64_t i;
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%lld]\n", pEventMeta->a_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Float:
+				{
+					float f;
+					memcpy(&f, pEvent + pEventMeta->a_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f]\n", pEventMeta->a_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::Double:
+				{
+					double f;
+					memcpy(&f, pEvent + pEventMeta->a_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f]\n", pEventMeta->a_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::StringIn:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 2);
+					char * z = pEvent + pEventMeta->a_Attributes[a].i_Position + 2;
+					z[i] = 0;
+					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s]\n", pEventMeta->a_Attributes[a].i_Position, i, z);
+				}
+				break;
+				default:
+					break;
+			}
+		}
+	}
+}
 
 };
