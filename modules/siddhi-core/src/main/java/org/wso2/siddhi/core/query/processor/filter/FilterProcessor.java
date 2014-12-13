@@ -18,10 +18,12 @@
  */
 package org.wso2.siddhi.core.query.processor.filter;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -498,7 +500,7 @@ public class FilterProcessor implements Processor {
 					}
     				
     				log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
-    						" CpuPos=" + attributeDefinition.attributePositionInCpu.toString() + 
+    						" CpuPos=" + Arrays.toString(attributeDefinition.attributePositionInCpu) + 
     						" Type=" + attributeDefinition.attributeType + 
     						" Length=" + attributeDefinition.attributeLength);
     				attributeDefinitionList.add(attributeDefinition);
