@@ -237,6 +237,10 @@ public class FilterProcessor implements Processor {
     				log.info("InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
     				this.next.process(resultStreamEvent);
     			}
+			else
+			{
+				log.info("InputCount=" + inputStreamEventIndex + " ResultCount=0");
+			}
     			
       		}
     		else
