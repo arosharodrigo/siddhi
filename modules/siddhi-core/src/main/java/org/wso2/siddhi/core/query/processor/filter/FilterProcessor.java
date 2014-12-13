@@ -130,8 +130,7 @@ public class FilterProcessor implements Processor {
 	    }
 	} else {
 
-	    // check batch size and use GPU processing if size exceed minimum
-	    // threshold
+	    // check batch size and use GPU processing if size exceed minimum threshold
 	    // number of events in batch should at least exceed block size
 	    
 	    long preStartTime = System.nanoTime();
@@ -146,8 +145,7 @@ public class FilterProcessor implements Processor {
 		inputStreamEvents[inputStreamEventIndex++] = streamEvent;
 
 		for (AttributeDefinition attributeDefinition : attributeDefinitionList) {
-		    Object attrib = streamEvent
-			    .getAttribute(attributeDefinition.attributePositionInCpu);
+		    Object attrib = streamEvent.getAttribute(attributeDefinition.attributePositionInCpu);
 
 		    switch (attributeDefinition.attributeType) {
     		    case BOOL: {

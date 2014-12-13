@@ -13,7 +13,7 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 
 public class SimpleFilterSingleQueryWithGpuAllCfgPerformance
 {
-	private static int count = 0;
+    private static int count = 0;
     private static int eventCount = 0;
     private static int prevEventCount = 0;
     private static volatile long start = System.currentTimeMillis();
@@ -35,7 +35,7 @@ public class SimpleFilterSingleQueryWithGpuAllCfgPerformance
         siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(threadPoolSize));
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
-        String query1 = "@info(name = 'query1') @gpu(filter='true', blocksize='" + blockSize + "') from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
+        String query1 = "@info(name = 'query1') @gpu(filter='true', block.size='" + blockSize + "') from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1);
 
@@ -78,10 +78,9 @@ public class SimpleFilterSingleQueryWithGpuAllCfgPerformance
         }
         
         double totalThroughput = 0;
-        for (Double tp : throughputList)
-		{
-			totalThroughput += tp;
-		}
+	for (Double tp : throughputList) {
+	    totalThroughput += tp;
+	}
         
         double avgThroughput = totalThroughput / throughputList.size();
         System.out.println("SimpleFilterSingleQueryWithDisruptorAllCfgPerformance [DefaultEventBufferSize=" + defaultBufferSize +
@@ -90,19 +89,16 @@ public class SimpleFilterSingleQueryWithGpuAllCfgPerformance
     
     public static void main(String[] args) throws InterruptedException {
     	
-    	final int [] defaultBufferSizes = { 512, 1024, 2048, 4096, 8192, 16384};
-    	final int [] threadPoolSizes = { 2, 4, 8, 16 };
-    	final int [] blockSizes = { 256, 512, 1024 };
-    	
-    	for (int b : defaultBufferSizes)
-		{
-			for (int t : threadPoolSizes)
-			{
-				for (int l : blockSizes)
-				{
-					Execution(5000000000l, b, t, l);
-				}
-			}
+	final int[] defaultBufferSizes = { 512, 1024, 2048, 4096, 8192, 16384 };
+	final int[] threadPoolSizes = { 2, 4, 8, 16 };
+	final int[] blockSizes = { 256, 512, 1024 };
+
+	for (int b : defaultBufferSizes) {
+	    for (int t : threadPoolSizes) {
+		for (int l : blockSizes) {
+		    Execution(5000000000l, b, t, l);
 		}
+	    }
+	}
     }
 }
