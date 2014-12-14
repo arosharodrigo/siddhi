@@ -108,7 +108,7 @@ void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 {
 	// events are filled in bytebuffer
 	// copy them to GPU
-	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
+	//fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
 	//PrintByteBuffer(_iNumEvents);
 	p_CudaKernel->ProcessEvents(_iNumEvents);
 }

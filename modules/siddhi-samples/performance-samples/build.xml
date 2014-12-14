@@ -117,4 +117,11 @@
         	<arg line="--enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} --threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
         </java>
     </target>
+
+    <target name="ComplexFilterSingleQueryAllCfgPerformance" depends="compile">
+        <java classname="org.wso2.siddhi.performance.ComplexFilterSingleQueryAllCfgPerformance"
+              classpathref="classpath" fork="true">
+        </java>
+    </target>
+
 </project>

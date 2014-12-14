@@ -133,7 +133,7 @@ public class FilterProcessor implements Processor {
 	    // check batch size and use GPU processing if size exceed minimum threshold
 	    // number of events in batch should at least exceed block size
 	    
-	    long preStartTime = System.nanoTime();
+	    //long preStartTime = System.nanoTime();
 
 	    inputStreamEventIndex = 0;
 	    int bufferIndex = eventsDataBufferPosition; 
@@ -189,12 +189,12 @@ public class FilterProcessor implements Processor {
 
 	    if (inputStreamEventIndex >= gpuProcessMinimumEventCount) {
 
-		long preStopTime = System.nanoTime();
+		//long preStopTime = System.nanoTime();
 		
 		// process events and set results in same buffer
 		gpuEventConsumer.ProcessEvents(inputStreamEventIndex);
 		
-		long postStartTime = System.nanoTime();
+		//long postStartTime = System.nanoTime();
 
 		// read results from byteBuffer
 		// max number of result is number of input events to kernel
@@ -220,22 +220,22 @@ public class FilterProcessor implements Processor {
 		    }
 		}
 
-		long postStopTime = System.nanoTime();
+		//long postStopTime = System.nanoTime();
 		
 		if (resultStreamEvent != null) {
-		    log.info("InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
-		    log.info("Times : Pre=" + (preStopTime - preStartTime) + 
+		    //log.info("InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
+		    /*log.info("Times : Pre=" + (preStopTime - preStartTime) + 
 			    " Gpu=" + (postStartTime - preStopTime) + 
 			    " Post=" + (postStopTime - postStartTime) + 
-			    " Total=" + (postStopTime - preStartTime));
+			    " Total=" + (postStopTime - preStartTime));*/
 		    this.next.process(resultStreamEvent);
-		} else {
+		} /*else {
 		    log.info("InputCount=" + inputStreamEventIndex + " ResultCount=0");
 		    log.info("Times : Pre=" + (preStopTime - preStartTime) +
 			    " Gpu=" + (postStartTime - preStopTime) + 
 			    " Post=" + (postStopTime - postStartTime) + 
 			    " Total=" + (postStopTime - preStartTime));
-		}
+		}*/
 
 	    } else {
 		iterator = event.getIterator();

@@ -196,8 +196,8 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	sdkStopTimer(&p_StopWatch);
 
 	float fElapsed = sdkGetTimerValue(&p_StopWatch);
-	fprintf(fp_Log, "[ProcessEvents] Stats : Elapsed=%f ms\n", fElapsed);
-	fflush(fp_Log);
+	//fprintf(fp_Log, "[ProcessEvents] Stats : Elapsed=%f ms\n", fElapsed);
+	//fflush(fp_Log);
 
 	lst_ElapsedTimes.push_back(fElapsed);
 

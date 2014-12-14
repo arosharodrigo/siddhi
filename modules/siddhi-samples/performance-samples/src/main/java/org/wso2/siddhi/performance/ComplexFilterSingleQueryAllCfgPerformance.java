@@ -99,6 +99,7 @@ public class ComplexFilterSingleQueryAllCfgPerformance {
         
         double avgThroughput = totalThroughput / throughputList.size();
         System.out.println("ComplexFilterSingleQueryAllCfgPerformance [GPUEnabled=" + gpuEnabled + 
+		" TotalEventCount=" + eventGenCount +
         	" DefaultEventBufferSize=" + defaultBufferSize +
         	" ThreadPoolSize=" + threadPoolSize + 
         	" EventBlockSize=" + blockSize + 
@@ -107,16 +108,16 @@ public class ComplexFilterSingleQueryAllCfgPerformance {
     
     public static void main(String[] args) throws InterruptedException {
     	
-	final int[] defaultBufferSizes = { 512, 1024, 2048, 4096, 8192, 16384 };
+	final int[] defaultBufferSizes = { 1024, 2048, 4096, 8192, 16384 };
 	final int[] threadPoolSizes = { 2, 4, 8, 16 };
 	final int[] blockSizes = { 64, 128, 256, 512, 1024 };
 
 	for (int b : defaultBufferSizes) {
 	    for (int t : threadPoolSizes) {
 		for (int l : blockSizes) {
-		    if(b / l >= 128) // limit GPU thread blocks
+		    if(b > l*2 && b / l <= 128) // limit GPU thread blocks
 		    {
-			long eventCount = 500000 * b; 
+			long eventCount = 5000000l * b; 
 			Execution(eventCount, false, b, t, l);
 			Execution(eventCount, true, b, t, l);
 		    }
