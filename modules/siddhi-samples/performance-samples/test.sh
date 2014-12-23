@@ -15,12 +15,24 @@ LOG=logs/ComplexFilterSingleQueryPerformance
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} &>${LOG}
 #nohup ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} &>${LOG} &
 
-for r in 512 1024 2048 4096 8192 16384; do
+#for r in 512 1024 2048 4096 8192 16384; do
+#	for t in 2 4 8 16; do
+#		for b in 64 128 256 512 1024; do
+#			c=$((5000000 * r)) 
+#			echo "Executing --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b}"
+#			${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-gpu false --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_${r}_${t}_${b}.log			
+#			${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-gpu true  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_gpu_${r}_${t}_${b}.log			
+#		done
+#	done
+#done
+
+for r in 2048 4096 8192 16384; do
 	for t in 2 4 8 16; do
 		for b in 64 128 256 512 1024; do
-			echo "Executing --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b}"
-			${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-gpu false --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_${r}_${t}_${b}.log			
-			${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-gpu true  --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_gpu_${r}_${t}_${b}.log			
+			c=$((5000000 * r)) 
+			echo "Executing --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b}"
+			${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-gpu false --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_${r}_${t}_${b}.log			
+			${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-gpu true  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_gpu_${r}_${t}_${b}.log			
 		done
 	done
 done

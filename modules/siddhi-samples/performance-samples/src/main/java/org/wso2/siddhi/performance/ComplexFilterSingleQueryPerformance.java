@@ -62,7 +62,7 @@ public class ComplexFilterSingleQueryPerformance
 	    }
 	    
 	    if (cmd.hasOption("e")) {
-		totalEventCount = Integer.parseInt(cmd.getOptionValue("e"));
+		totalEventCount = Long.parseLong(cmd.getOptionValue("e"));
 	    }
 
 	    if (cmd.hasOption("r")) {
@@ -158,5 +158,11 @@ public class ComplexFilterSingleQueryPerformance
         	" ThreadPoolSize=" + threadPoolSize + 
         	" EventBlockSize=" + eventBlockSize + 
         	"] AvgThroughput = " + avgThroughput + " Event/sec");
+
+
+	System.exit(0);
+
+
+
     }
 }
