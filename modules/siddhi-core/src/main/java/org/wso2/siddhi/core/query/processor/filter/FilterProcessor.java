@@ -81,16 +81,14 @@ public class FilterProcessor implements Processor {
     	this.gpuProcessMinimumEventCount = threshold;
     	
     	String [] tokens = stringAttributeSizes.split(",");
-    	if(tokens.length > 0)
-    	{
-    		this.stringAttributeSizes = new int[tokens.length];
-    		
-    		int index = 0;
-    		for (String string : tokens)
-			{
-    			this.stringAttributeSizes[index++] = Integer.parseInt(string);
-			}
-    	}
+	if (tokens.length > 0) {
+	    this.stringAttributeSizes = new int[tokens.length];
+
+	    int index = 0;
+	    for (String string : tokens) {
+		this.stringAttributeSizes[index++] = Integer.parseInt(string);
+	    }
+	}
     	
     	log.info("GpuEventConsumer MaxNumberOfEvents : " + gpuEventConsumer.GetMaxNumberOfEvents());
     	

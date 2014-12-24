@@ -34,6 +34,7 @@
 	<property name="threadpool.size" value="4" />
 	<property name="block.size" value="256" />
 	<property name="gpu.enabled" value="false" />
+	<property name="async.enabled" value="true" /> 
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -114,10 +115,18 @@
     <target name="ComplexFilterSingleQuery" depends="compile">
         <java classname="org.wso2.siddhi.performance.ComplexFilterSingleQueryPerformance"
               classpathref="classpath" fork="true">
-        	<arg line="--enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} --threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
+        	<arg line="--enable-async ${async.enabled} --enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} --threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
         </java>
     </target>
 
+	
+    <target name="ComplexFilterMultipleQuery" depends="compile">
+        <java classname="org.wso2.siddhi.performance.ComplexFilterMultipleQueryPerformance"
+              classpathref="classpath" fork="true">
+        	<arg line="--enable-async ${async.enabled} --enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} --threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
+        </java>
+    </target>
+	
     <target name="ComplexFilterSingleQueryAllCfgPerformance" depends="compile">
         <java classname="org.wso2.siddhi.performance.ComplexFilterSingleQueryAllCfgPerformance"
               classpathref="classpath" fork="true">
