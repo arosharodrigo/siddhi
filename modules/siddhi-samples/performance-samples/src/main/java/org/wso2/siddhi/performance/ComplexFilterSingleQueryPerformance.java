@@ -37,6 +37,7 @@ public class ComplexFilterSingleQueryPerformance
     public static void main(String[] args) throws InterruptedException {
     	
     	cliOptions = new Options();
+	cliOptions.addOption("a", "enable-async", true, "Enable Async processing");
     	cliOptions.addOption("g", "enable-gpu", true, "Enable GPU processing");
     	cliOptions.addOption("e", "event-count", true, "Total number of events to be generated");
     	cliOptions.addOption("r", "ringbuffer-size", true, "Disruptor RingBuffer size - in power of two");
@@ -46,6 +47,7 @@ public class ComplexFilterSingleQueryPerformance
     	CommandLineParser cliParser = new BasicParser();
     	CommandLine cmd = null;
     	
+	boolean asyncEnabled = true;
     	boolean gpuEnabled = false;
     	long totalEventCount = 50000000l;
     	int defaultBufferSize = 1024;
@@ -56,6 +58,10 @@ public class ComplexFilterSingleQueryPerformance
     	
 	try {
 	    cmd = cliParser.parse(cliOptions, args);
+
+	    if (cmd.hasOption("a")) {
+		asyncEnabled = Boolean.parseBoolean(cmd.getOptionValue("a"));
+	    }
 
 	    if (cmd.hasOption("g")) {
 		gpuEnabled = Boolean.parseBoolean(cmd.getOptionValue("g"));
@@ -92,7 +98,8 @@ public class ComplexFilterSingleQueryPerformance
         siddhiManager.getSiddhiContext().setDefaultEventBufferSize(defaultBufferSize);
         siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(threadPoolSize));
 
-        String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int, change float, pctchange float);";
+        String cseEventStream = "@config(async = '" + (asyncEnabled ? "true" : "false" ) + "') define stream cseEventStream (symbol string, price float, volume int, change float, pctchange float);";
+	
         StringBuilder sb = new StringBuilder();
         sb.append("@info(name = 'query1') ");
         if(gpuEnabled)
@@ -102,11 +109,23 @@ public class ComplexFilterSingleQueryPerformance
         sb.append("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
         
         String query1 = sb.toString();
+
+	sb.setLength(0); // clear buffer
+	
+	sb.append("@info(name = 'query2') ");
+        if(gpuEnabled)
+        {
+            sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
+        }
+        sb.append("from cseEventStream[pctchange > 0.1 and change < 2.3 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
+
+	String query2 = sb.toString();
         
         System.out.println("Stream def   = [ " + cseEventStream + " ]");
-        System.out.println("Filter query = [ " + query1 + " ]");
+        System.out.println("Filter query1 = [ " + query1 + " ]");
+        System.out.println("Filter query2 = [ " + query2 + " ]");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1 + query2);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override

@@ -12,6 +12,15 @@ CLASSPATH=/home/prabodha/project/siddhi-git-dev/modules/siddhi-samples/performan
 APP=org.wso2.siddhi.performance.ComplexFilterSingleQueryPerformance
 LOG=logs/ComplexFilterSingleQueryPerformance
 
+a="false"
+g="true"
+r=2048
+t=8
+b=128
+c=$((5000000 * r))
+#${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-gpu true  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_gpu_${r}_${t}_${b}.log
+${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async false --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_singlethread_${r}_${t}_${b}.log
+exit
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} &>${LOG}
 #nohup ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} &>${LOG} &
 
