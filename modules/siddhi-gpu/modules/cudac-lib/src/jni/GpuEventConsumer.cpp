@@ -14,7 +14,7 @@ namespace SiddhiGpu
 {
 
 
-GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize, int _iEventsPerBlock) :
+GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, const char * _zName, int _iMaxBufferSize, int _iEventsPerBlock) :
 	i_MaxNumOfEvents(_iMaxBufferSize),
 	i_ByteBufferSize(0),
 	i_SizeOfEvent(0),
@@ -22,7 +22,11 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize,
 	i_EventMetaBufferPosition(0),
 	i_EventDataBufferPosition(0)
 {
-	fp_Log = fopen("logs/GpuEventConsumer.log", "w");
+	char zLogFile[256];
+	sprintf(zLogFile, "logs/GpuEventConsumer_%s.log", _zName);
+	fp_Log = fopen(zLogFile, "w");
+
+	strncpy(z_Name, _zName, 256);
 
 	p_ByteBuffer = NULL;
 
@@ -30,7 +34,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize,
 	{
 		case SingleFilterKernel:
 		{
-			fprintf(fp_Log, "EventConsumerGpu created for SingleFilterKernel\n");
+			fprintf(fp_Log, "[%s] EventConsumerGpu created for SingleFilterKernel\n", z_Name);
 			p_CudaKernel = new CudaSingleFilterKernel(i_MaxNumOfEvents, _iEventsPerBlock, this, fp_Log);
 		}
 		break;
@@ -40,7 +44,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize,
 	}
 
 
-	fprintf(fp_Log, "EventConsumer : MaxBufferSize=[%d events]\n", i_MaxNumOfEvents);
+	fprintf(fp_Log, "[%s] EventConsumer : MaxBufferSize=[%d events]\n", z_Name, i_MaxNumOfEvents);
 	fflush(fp_Log);
 }
 
@@ -65,7 +69,7 @@ void GpuEventConsumer::CreateByteBuffer(int _iSize)
 
 	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
 
-	fprintf(fp_Log, "EventConsumer : ByteBuffer Created=[%d]\n", i_ByteBufferSize);
+	fprintf(fp_Log, "[%s] EventConsumer : ByteBuffer Created=[%d]\n", z_Name, i_ByteBufferSize);
 	fflush(fp_Log);
 }
 
@@ -76,7 +80,7 @@ void GpuEventConsumer::SetByteBuffer(char * _pBuffer, int _iSize)
 
 	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
 
-	fprintf(fp_Log, "EventConsumer : ByteBuffer Set=[%d]\n", i_ByteBufferSize);
+	fprintf(fp_Log, "[%s] EventConsumer : ByteBuffer Set=[%d]\n", z_Name, i_ByteBufferSize);
 	fflush(fp_Log);
 }
 
@@ -126,7 +130,7 @@ void GpuEventConsumer::AddFilter(Filter * _pFilter)
 
 void GpuEventConsumer::ConfigureFilters()
 {
-	fprintf(fp_Log, "ConfigureFilters : FilterCount=%d\n", (int)map_FiltersById.size());
+	fprintf(fp_Log, "[%s] ConfigureFilters : FilterCount=%d\n", z_Name, (int)map_FiltersById.size());
 
 	FiltersById::iterator ite = map_FiltersById.begin();
 	while(ite != map_FiltersById.end())
@@ -145,7 +149,7 @@ void GpuEventConsumer::PrintAverageStats()
 	float f = p_CudaKernel->GetElapsedTimeAverage();
 	float fpe = f / i_MaxNumOfEvents;
 //	printf("Average Elapsed Time (Event Batch Size : %d - %f ms) : %f ms per event\n", i_MaxBufferSize, f, fpe);
-	fprintf(fp_Log, "GPU Average Elapsed Time (Event Batch Size : %d - %f ms) : %f ms per event\n", i_MaxNumOfEvents, f, fpe);
+	fprintf(fp_Log, "[%s] GPU Average Elapsed Time (Event Batch Size : %d - %f ms) : %f ms per event\n", z_Name, i_MaxNumOfEvents, f, fpe);
 	fflush(fp_Log);
 }
 
@@ -155,7 +159,7 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 
 	char * pEventDataStart = (p_ByteBuffer + i_EventDataBufferPosition);
 
-	fprintf(fp_Log, "[PrintByteBuffer] EventMeta %d [", pEventMeta->i_AttributeCount);
+	fprintf(fp_Log, "[%s] [PrintByteBuffer] EventMeta %d [", z_Name, pEventMeta->i_AttributeCount);
 	for(int i=0; i<pEventMeta->i_AttributeCount; ++i)
 	{
 		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
@@ -166,12 +170,12 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 	fprintf(fp_Log, "]\n");
 
 
-	fprintf(fp_Log, "[PrintByteBuffer] Events Count : %d\n", _iNumEvents);
+	fprintf(fp_Log, "[%s] [PrintByteBuffer] Events Count : %d\n", z_Name, _iNumEvents);
 	for(int e=0; e<_iNumEvents; ++e)
 	{
 		char * pEvent = pEventDataStart + (i_SizeOfEvent * e);
 
-		fprintf(fp_Log, "[PrintByteBuffer] Event_%d <%p> ", e, pEvent);
+		fprintf(fp_Log, "[%s] [PrintByteBuffer] Event_%d <%p> ", z_Name, e, pEvent);
 
 		for(int a=0; a<pEventMeta->i_AttributeCount; ++a)
 		{

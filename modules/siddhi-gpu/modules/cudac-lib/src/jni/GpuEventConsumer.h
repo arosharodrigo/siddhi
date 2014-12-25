@@ -33,7 +33,7 @@ enum KernelType
 class GpuEventConsumer
 {
 public:
-	GpuEventConsumer(KernelType _eKernelType, int _iMaxBufferSize, int _iEventsPerBlock);
+	GpuEventConsumer(KernelType _eKernelType, const char * _zName, int _iMaxBufferSize, int _iEventsPerBlock);
 	virtual ~GpuEventConsumer();
 
 	void Initialize();
@@ -76,6 +76,8 @@ private:
 	int i_ResultsBufferPosition;
 	int i_EventMetaBufferPosition;
 	int i_EventDataBufferPosition;
+
+	char z_Name[256];
 };
 
 };
