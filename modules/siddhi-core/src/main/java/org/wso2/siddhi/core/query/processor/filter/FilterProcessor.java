@@ -275,257 +275,257 @@ public class FilterProcessor implements Processor {
     public void configureProcessor(MetaStateEvent metaEvent) {
 
     	// configure GPU related data structures
-    	if (metaEvent.getEventCount() == 1 && varPositionToAttribNameMap != null && gpuEventConsumer != null)
-    	{
-    		MetaStreamEvent metaStreamEvent = metaEvent.getMetaEvent(0);
+	if (metaEvent.getEventCount() == 1 && varPositionToAttribNameMap != null && gpuEventConsumer != null)
+	{
+	    MetaStreamEvent metaStreamEvent = metaEvent.getMetaEvent(0);
 
-    		int count = varPositionToAttribNameMap.size();
-    		int sizeOfEvent = 0;
-    		int stringAttributeIndex = 0;
-    		int bufferPreambleSize = 0;
-    		
-    		filterResultsBufferPosition = 0;
-        	eventMetaBufferPosition = filterResultsBufferPosition + (gpuEventConsumer.GetMaxNumberOfEvents() * 4);
-    		    		
-        	bufferPreambleSize = eventMetaBufferPosition;
-    		bufferPreambleSize += 2; // attribute count
+	    int count = varPositionToAttribNameMap.size();
+	    int sizeOfEvent = 0;
+	    int stringAttributeIndex = 0;
+	    int bufferPreambleSize = 0;
 
-    		// calculate max byte buffer size
-    		for(int index = 0; index < count; ++index) {
-    			Attribute attribute = varPositionToAttribNameMap.get(index);
-    			if(attribute != null)
-    			{
-    				switch(attribute.getType())
-					{
-						case BOOL:
-						{
-							bufferPreambleSize += 6; // type + length + position
-							sizeOfEvent += 2;
-						}
-						break;
-						case INT:
-						{
-							bufferPreambleSize += 6; // type + length + position
-							sizeOfEvent += 4;
-						}
-						break;
-						case LONG:
-						{
-							bufferPreambleSize += 6; // type + length + position
-							sizeOfEvent += 8;
-						}
-						break;
-						case FLOAT:
-						{
-							bufferPreambleSize += 6; // type + length + position
-							sizeOfEvent += 4;
-						}
-						break;
-						case DOUBLE:
-						{
-							bufferPreambleSize += 6; // type + length + position
-							sizeOfEvent += 8;
-						}
-						break;
-						case STRING:
-						{
-							sizeOfEvent += 2; // actual string length
-							if(stringAttributeSizes != null)
-							{
-								int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
-								sizeOfEvent += sizeOfString; // max size
-							}
-							else
-							{
-								sizeOfEvent += 8;
-							}
-							bufferPreambleSize += 6; // type + length + position
-						}
-						break;
-						default:
-							break;
-					}
-    			}
-    		}
-    		
-    		eventsDataBufferPosition = bufferPreambleSize;
-    		
-    		log.info("GpuEventConsumer : Filter results buffer position is " + filterResultsBufferPosition);
-    		log.info("GpuEventConsumer : EventMeta buffer position is " + eventMetaBufferPosition);
-    		log.info("GpuEventConsumer : EventData buffer position is " + eventsDataBufferPosition);
-    		log.info("GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
-    		int byteBufferSize = eventsDataBufferPosition + (sizeOfEvent * gpuEventConsumer.GetMaxNumberOfEvents());
-    		
-    		gpuEventConsumer.SetSizeOfEvent(sizeOfEvent);
-    		gpuEventConsumer.SetResultsBufferPosition(filterResultsBufferPosition);
-    		gpuEventConsumer.SetEventMetaBufferPosition(eventMetaBufferPosition);
-    		gpuEventConsumer.SetEventDataBufferPosition(eventsDataBufferPosition);
+	    filterResultsBufferPosition = 0;
+	    eventMetaBufferPosition = filterResultsBufferPosition + (gpuEventConsumer.GetMaxNumberOfEvents() * 4);
 
-    		// allocate byte buffer
-    		log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
-    		eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
-    		gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
-    		// gpuEventConsumer.CreateByteBuffer(byteBufferSize);
-    		// eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
-    		
-        	log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
-        			" HasArray=" + this.eventByteBuffer.hasArray() + 
-        			" Position=" + this.eventByteBuffer.position() + 
-        			" Limit=" + this.eventByteBuffer.limit());
-    		
-    		// fill byte buffer preamble
-    		
-    		int bufferIndex = eventMetaBufferPosition;
-        	eventByteBuffer.putShort(bufferIndex, (short)count); // put attribute count
-        	bufferIndex += 2;
-		int bufferPosition = 0;
-    		
-        	// fill attribute type - length (2 + 2 bytes)
-    		for(int index = 0; index < count; ++index) {
-    			
-    			Attribute attribute = varPositionToAttribNameMap.get(index);
-    			
-    			if(attribute != null)
-    			{
-    				AttributeDefinition attributeDefinition = new AttributeDefinition();
-    				attributeDefinition.attributePositionInGpu = index;
-    				attributeDefinition.attributeType = attribute.getType();
-    				
-    				if (metaStreamEvent.getOutputData().contains(attribute)) {
-        				
-        				attributeDefinition.attributePositionInCpu = new int[] {
-        						-1, -1,
-        						SiddhiConstants.OUTPUT_DATA_INDEX, 
-        						metaStreamEvent.getOutputData().indexOf(attribute)};
-        				
-        			} else if (metaStreamEvent.getAfterWindowData().contains(attribute)) {
-        				
-        				attributeDefinition.attributePositionInCpu = new int[] {
-        						-1, -1,
-        						SiddhiConstants.AFTER_WINDOW_DATA_INDEX, 
-        						metaStreamEvent.getAfterWindowData().indexOf(attribute)};
+	    bufferPreambleSize = eventMetaBufferPosition;
+	    bufferPreambleSize += 2; // attribute count
 
-        			} else if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
+	    // calculate max byte buffer size
+	    for(int index = 0; index < count; ++index) {
+		Attribute attribute = varPositionToAttribNameMap.get(index);
+		if(attribute != null)
+		{
+		    switch(attribute.getType())
+		    {
+		    case BOOL:
+		    {
+			bufferPreambleSize += 6; // type + length + position
+			sizeOfEvent += 2;
+		    }
+		    break;
+		    case INT:
+		    {
+			bufferPreambleSize += 6; // type + length + position
+			sizeOfEvent += 4;
+		    }
+		    break;
+		    case LONG:
+		    {
+			bufferPreambleSize += 6; // type + length + position
+			sizeOfEvent += 8;
+		    }
+		    break;
+		    case FLOAT:
+		    {
+			bufferPreambleSize += 6; // type + length + position
+			sizeOfEvent += 4;
+		    }
+		    break;
+		    case DOUBLE:
+		    {
+			bufferPreambleSize += 6; // type + length + position
+			sizeOfEvent += 8;
+		    }
+		    break;
+		    case STRING:
+		    {
+			sizeOfEvent += 2; // actual string length
+			if(stringAttributeSizes != null)
+			{
+			    int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
+			    sizeOfEvent += sizeOfString; // max size
+			}
+			else
+			{
+			    sizeOfEvent += 8;
+			}
+			bufferPreambleSize += 6; // type + length + position
+		    }
+		    break;
+		    default:
+			break;
+		    }
+		}
+	    }
 
-        				attributeDefinition.attributePositionInCpu = new int[] {
-        						-1, -1,
-        						SiddhiConstants.BEFORE_WINDOW_DATA_INDEX, 
-        						metaStreamEvent.getBeforeWindowData().indexOf(attribute)};
-        			} else {
-        				
-        				continue;
-        			}
-    				
-    				switch(attributeDefinition.attributeType)
-					{
-						case BOOL:
-						{
-							eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Boolean); // type - 2 bytes
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)2); // length - 2 bytes
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-                                                        bufferIndex += 2;
-							bufferPosition += 2;
-							
-							attributeDefinition.attributeLength = 2;
-						}
-						break;
-						case INT:
-						{
-							eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Int);
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-                                                        bufferIndex += 2;
-                                                        bufferPosition += 4;
+	    eventsDataBufferPosition = bufferPreambleSize;
 
-							attributeDefinition.attributeLength = 4;
-						}
-						break;
-						case LONG:
-						{
-							eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Long);
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-                                                        bufferIndex += 2;
-                                                        bufferPosition += 8;							
+	    log.info("GpuEventConsumer : Filter results buffer position is " + filterResultsBufferPosition);
+	    log.info("GpuEventConsumer : EventMeta buffer position is " + eventMetaBufferPosition);
+	    log.info("GpuEventConsumer : EventData buffer position is " + eventsDataBufferPosition);
+	    log.info("GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
+	    int byteBufferSize = eventsDataBufferPosition + (sizeOfEvent * gpuEventConsumer.GetMaxNumberOfEvents());
 
-							attributeDefinition.attributeLength = 8;
-						}
-						break;
-						case FLOAT:
-						{
-							eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Float);
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-                                                        bufferIndex += 2;
-                                                        bufferPosition += 4;
+	    gpuEventConsumer.SetSizeOfEvent(sizeOfEvent);
+	    gpuEventConsumer.SetResultsBufferPosition(filterResultsBufferPosition);
+	    gpuEventConsumer.SetEventMetaBufferPosition(eventMetaBufferPosition);
+	    gpuEventConsumer.SetEventDataBufferPosition(eventsDataBufferPosition);
 
-							attributeDefinition.attributeLength = 4;
-						}
-						break;
-						case DOUBLE:
-						{
-							eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Double);
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
-							bufferIndex += 2;
-							eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-                                                        bufferIndex += 2;
-                                                        bufferPosition += 8;
-							
-							attributeDefinition.attributeLength = 8;
-						}
-						break;
-						case STRING:
-						{
-							eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.StringIn);
-							bufferIndex += 2;
-							
-							if(stringAttributeSizes != null)
-							{
-								int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
-								eventByteBuffer.putShort(bufferIndex, (short)sizeOfString); // length - n bytes
-								bufferIndex += 2;
-								eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-	                                                        bufferIndex += 2;
-        	                                                bufferPosition += sizeOfString;
+	    // allocate byte buffer
+	    log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
+	    eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
+	    gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
+	    // gpuEventConsumer.CreateByteBuffer(byteBufferSize);
+	    // eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
 
-								attributeDefinition.attributeLength = sizeOfString;
-							}
-							else
-							{
-								eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
-								bufferIndex += 2;
-								eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-                                                                bufferIndex += 2;
-                                                                bufferPosition += 8;
-								
-								attributeDefinition.attributeLength = 8;
-							}
-						}
-						break;
-						default:
-							break;
-					}
-    				
-    				log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
-    						" CpuPos=" + Arrays.toString(attributeDefinition.attributePositionInCpu) + 
-    						" Type=" + attributeDefinition.attributeType + 
-    						" Length=" + attributeDefinition.attributeLength);
-    				attributeDefinitionList.add(attributeDefinition);
-    			}
-    		}
-    		
-    	}
+	    log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
+		    " HasArray=" + this.eventByteBuffer.hasArray() + 
+		    " Position=" + this.eventByteBuffer.position() + 
+		    " Limit=" + this.eventByteBuffer.limit());
+
+	    // fill byte buffer preamble
+
+	    int bufferIndex = eventMetaBufferPosition;
+	    eventByteBuffer.putShort(bufferIndex, (short)count); // put attribute count
+	    bufferIndex += 2;
+	    int bufferPosition = 0;
+
+	    // fill attribute type - length (2 + 2 bytes)
+	    for(int index = 0; index < count; ++index) {
+
+		Attribute attribute = varPositionToAttribNameMap.get(index);
+
+		if(attribute != null)
+		{
+		    AttributeDefinition attributeDefinition = new AttributeDefinition();
+		    attributeDefinition.attributePositionInGpu = index;
+		    attributeDefinition.attributeType = attribute.getType();
+
+		    if (metaStreamEvent.getOutputData().contains(attribute)) {
+
+			attributeDefinition.attributePositionInCpu = new int[] {
+				-1, -1,
+				SiddhiConstants.OUTPUT_DATA_INDEX, 
+				metaStreamEvent.getOutputData().indexOf(attribute)};
+
+		    } else if (metaStreamEvent.getAfterWindowData().contains(attribute)) {
+
+			attributeDefinition.attributePositionInCpu = new int[] {
+				-1, -1,
+				SiddhiConstants.AFTER_WINDOW_DATA_INDEX, 
+				metaStreamEvent.getAfterWindowData().indexOf(attribute)};
+
+		    } else if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
+
+			attributeDefinition.attributePositionInCpu = new int[] {
+				-1, -1,
+				SiddhiConstants.BEFORE_WINDOW_DATA_INDEX, 
+				metaStreamEvent.getBeforeWindowData().indexOf(attribute)};
+		    } else {
+
+			continue;
+		    }
+
+		    switch(attributeDefinition.attributeType)
+		    {
+		    case BOOL:
+		    {
+			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Boolean); // type - 2 bytes
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)2); // length - 2 bytes
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+			bufferIndex += 2;
+			bufferPosition += 2;
+
+			attributeDefinition.attributeLength = 2;
+		    }
+		    break;
+		    case INT:
+		    {
+			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Int);
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+			bufferIndex += 2;
+			bufferPosition += 4;
+
+			attributeDefinition.attributeLength = 4;
+		    }
+		    break;
+		    case LONG:
+		    {
+			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Long);
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+			bufferIndex += 2;
+			bufferPosition += 8;							
+
+			attributeDefinition.attributeLength = 8;
+		    }
+		    break;
+		    case FLOAT:
+		    {
+			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Float);
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+			bufferIndex += 2;
+			bufferPosition += 4;
+
+			attributeDefinition.attributeLength = 4;
+		    }
+		    break;
+		    case DOUBLE:
+		    {
+			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Double);
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
+			bufferIndex += 2;
+			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+			bufferIndex += 2;
+			bufferPosition += 8;
+
+			attributeDefinition.attributeLength = 8;
+		    }
+		    break;
+		    case STRING:
+		    {
+			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.StringIn);
+			bufferIndex += 2;
+
+			if(stringAttributeSizes != null)
+			{
+			    int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
+			    eventByteBuffer.putShort(bufferIndex, (short)sizeOfString); // length - n bytes
+			    bufferIndex += 2;
+			    eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+			    bufferIndex += 2;
+			    bufferPosition += sizeOfString;
+
+			    attributeDefinition.attributeLength = sizeOfString;
+			}
+			else
+			{
+			    eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
+			    bufferIndex += 2;
+			    eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+			    bufferIndex += 2;
+			    bufferPosition += 8;
+
+			    attributeDefinition.attributeLength = 8;
+			}
+		    }
+		    break;
+		    default:
+			break;
+		    }
+
+		    log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
+			    " CpuPos=" + Arrays.toString(attributeDefinition.attributePositionInCpu) + 
+			    " Type=" + attributeDefinition.attributeType + 
+			    " Length=" + attributeDefinition.attributeLength);
+		    attributeDefinitionList.add(attributeDefinition);
+		}
+	    }
+
+	}
     	
     	if(this.next != null)
-    		this.next.configureProcessor(metaEvent);
+    	    this.next.configureProcessor(metaEvent);
     }
 }

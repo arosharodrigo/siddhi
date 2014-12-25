@@ -78,10 +78,11 @@ void GpuEventConsumer::SetByteBuffer(char * _pBuffer, int _iSize)
 	p_ByteBuffer = _pBuffer;
 	i_ByteBufferSize = _iSize;
 
-	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
-
 	fprintf(fp_Log, "[%s] EventConsumer : ByteBuffer Set=[%d]\n", z_Name, i_ByteBufferSize);
 	fflush(fp_Log);
+
+	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
+
 }
 
 void GpuEventConsumer::SetResultsBufferPosition(int _iPos)
