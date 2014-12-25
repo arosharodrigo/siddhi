@@ -42,7 +42,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 
 public class FilterProcessor implements Processor {
 
-	private static final Logger log = Logger.getLogger(FilterProcessor.class);
+    private static final Logger log = Logger.getLogger(FilterProcessor.class);
     protected Processor next;
     private ExpressionExecutor conditionExecutor;
     private SiddhiGpu.GpuEventConsumer gpuEventConsumer = null;
@@ -362,8 +362,8 @@ public class FilterProcessor implements Processor {
 	    gpuEventConsumer.SetEventDataBufferPosition(eventsDataBufferPosition);
 
 	    // allocate byte buffer
-	    log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
 	    eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
+	    log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
 	    gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
 	    // gpuEventConsumer.CreateByteBuffer(byteBufferSize);
 	    // eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
