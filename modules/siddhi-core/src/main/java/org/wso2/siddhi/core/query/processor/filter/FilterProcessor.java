@@ -18,7 +18,6 @@
  */
 package org.wso2.siddhi.core.query.processor.filter;
 
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -362,6 +361,7 @@ public class FilterProcessor implements Processor {
 	    gpuEventConsumer.SetEventDataBufferPosition(eventsDataBufferPosition);
 
 	    // allocate byte buffer
+	    log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
 	    eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
 	    log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
 	    gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
