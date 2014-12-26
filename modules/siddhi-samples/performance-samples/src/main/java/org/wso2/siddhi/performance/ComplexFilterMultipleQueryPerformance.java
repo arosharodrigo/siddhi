@@ -131,13 +131,25 @@ public class ComplexFilterMultipleQueryPerformance {
         sb.append("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
 
 	String query3 = sb.toString();
+
+    sb.setLength(0); // clear buffer
+
+    sb.append("@info(name = 'query4') ");
+        if(gpuEnabled)
+        {
+            sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
+        }
+        sb.append("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
+
+    String query4 = sb.toString();
         
         System.out.println("Stream def   = [ " + cseEventStream + " ]");
         System.out.println("Filter query1 = [ " + query1 + " ]");
         System.out.println("Filter query2 = [ " + query2 + " ]");
         System.out.println("Filter query3 = [ " + query3 + " ]");
+        System.out.println("Filter query4 = [ " + query4 + " ]");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1 + query2 + query3);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1 + query2 + query3 + query4);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
