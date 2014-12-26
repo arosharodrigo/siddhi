@@ -97,6 +97,9 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEvents
 
 CudaSingleFilterKernel::~CudaSingleFilterKernel()
 {
+	fprintf(fp_Log, "CudaSingleFilterKernel destroy\n");
+	fflush(fp_Log);
+
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput->p_ByteBuffer));
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput));
 
@@ -220,6 +223,7 @@ void CudaSingleFilterKernel::CopyFiltersToDevice()
 	{
 		fprintf(fp_Log, "[ERROR] More than one filter defined in CudaSingleFilterKernel : FilterCount=%lu", lst_HostFilters.size());
 		fprintf(fp_Log, "[ERROR] Using the first filter for processing");
+		fflush(fp_Log);
 	}
 
 	CUDA_CHECK_RETURN(cudaMalloc(
@@ -257,6 +261,7 @@ void CudaSingleFilterKernel::CopyFiltersToDevice()
 			cudaMemcpyHostToDevice));
 
 
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	free(apHostFilters);

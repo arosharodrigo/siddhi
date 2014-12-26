@@ -215,18 +215,29 @@ Filter::Filter(int _iFilterId, int _iNodeCount) :
 
 void Filter::Destroy()
 {
-	delete [] ap_ExecutorNodes;
+	if(ap_ExecutorNodes)
+	{
+		delete [] ap_ExecutorNodes;
+		ap_ExecutorNodes = NULL;
+	}
 }
 
 void Filter::AddExecutorNode(int _iPos, ExecutorNode & _pNode)
 {
-	ap_ExecutorNodes[_iPos].e_NodeType = _pNode.e_NodeType;
-	ap_ExecutorNodes[_iPos].e_ConditionType = _pNode.e_ConditionType;
-	ap_ExecutorNodes[_iPos].e_ExpressionType = _pNode.e_ExpressionType;
-	ap_ExecutorNodes[_iPos].m_ConstValue.e_Type = _pNode.m_ConstValue.e_Type;
-	ap_ExecutorNodes[_iPos].m_ConstValue.m_Value = _pNode.m_ConstValue.m_Value;
-	ap_ExecutorNodes[_iPos].m_VarValue.e_Type = _pNode.m_VarValue.e_Type;
-	ap_ExecutorNodes[_iPos].m_VarValue.i_AttributePosition = _pNode.m_VarValue.i_AttributePosition;
+	if(_iPos < i_NodeCount)
+	{
+		ap_ExecutorNodes[_iPos].e_NodeType = _pNode.e_NodeType;
+		ap_ExecutorNodes[_iPos].e_ConditionType = _pNode.e_ConditionType;
+		ap_ExecutorNodes[_iPos].e_ExpressionType = _pNode.e_ExpressionType;
+		ap_ExecutorNodes[_iPos].m_ConstValue.e_Type = _pNode.m_ConstValue.e_Type;
+		ap_ExecutorNodes[_iPos].m_ConstValue.m_Value = _pNode.m_ConstValue.m_Value;
+		ap_ExecutorNodes[_iPos].m_VarValue.e_Type = _pNode.m_VarValue.e_Type;
+		ap_ExecutorNodes[_iPos].m_VarValue.i_AttributePosition = _pNode.m_VarValue.i_AttributePosition;
+	}
+	else
+	{
+		printf("[ERROR] [Filter::AddExecutorNode] array out of bound : %d >= %d", _iPos, i_NodeCount);
+	}
 }
 
 Filter * Filter::Clone()
@@ -240,7 +251,7 @@ Filter * Filter::Clone()
 
 void Filter::Print(FILE * _fp)
 {
-	fprintf(_fp, "AddFilter : FilterId=%d NodeCount=%d {", i_FilterId, i_NodeCount);
+	fprintf(_fp, "AddFilter : [%p] FilterId=%d NodeCount=%d {", this, i_FilterId, i_NodeCount);
 	for(int i=0; i<i_NodeCount; ++i)
 	{
 		ap_ExecutorNodes[i].Print(_fp);

@@ -43,8 +43,8 @@ import java.util.List;
 
 public class SingleInputStreamParser {
 
-	private static final Logger log = Logger.getLogger(SingleInputStreamParser.class);
-	
+    private static final Logger log = Logger.getLogger(SingleInputStreamParser.class);
+
     /**
      * Parse single InputStream and return SingleStreamRuntime
      *
@@ -55,8 +55,8 @@ public class SingleInputStreamParser {
      * @return
      */
     public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream, SiddhiContext context,
-                                                       MetaStreamEvent metaStreamEvent, List<VariableExpressionExecutor> executors,
-                                                       QueryAnnotations queryAnnotations) {
+            MetaStreamEvent metaStreamEvent, List<VariableExpressionExecutor> executors,
+            QueryAnnotations queryAnnotations) {
         Processor processor = null;
         int i = 0;
         if (!inputStream.getStreamHandlers().isEmpty()) {
@@ -75,65 +75,70 @@ public class SingleInputStreamParser {
     }
 
     private static Processor generateProcessor(StreamHandler handler, SiddhiContext context, MetaStreamEvent metaStreamEvent,
-                                               List<VariableExpressionExecutor> executors,
-                                               QueryAnnotations queryAnnotations) {
+            List<VariableExpressionExecutor> executors,
+            QueryAnnotations queryAnnotations) {
         if (handler instanceof Filter) {
             Expression condition = ((Filter) handler).getFilterExpression();
-            
+
             if(queryAnnotations.GetAnnotationBooleanValue(SiddhiConstants.ANNOTATION_GPU, SiddhiConstants.ANNOTATION_ELEMENT_GPU_FILTER))
             {
-            	Integer eventsPerBlock = queryAnnotations.GetAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
-            			SiddhiConstants.ANNOTATION_ELEMENT_GPU_BLOCK_SIZE);
-            	
-            	Integer minEventCount = queryAnnotations.GetAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
-            			SiddhiConstants.ANNOTATION_ELEMENT_GPU_MIN_EVENT_COUNT);
-            	
-            	String stringAttributeSizes = queryAnnotations.GetAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
-            			SiddhiConstants.ANNOTATION_ELEMENT_GPU_STRING_SIZES);
-            	
-            	String queryName = queryAnnotations.GetAnnotationStringValue(SiddhiConstants.ANNOTATION_INFO, 
-            		SiddhiConstants.ANNOTATION_ELEMENT_INFO_NAME);
-            	 
-            	if(eventsPerBlock == null)
-            	{
-            		eventsPerBlock = new Integer(256);
-            	}
-            	
-            	if(minEventCount == null)
-            	{
-            		minEventCount = eventsPerBlock;
-            	}
-            	
-            	SiddhiGpu.GpuEventConsumer gpuEventConsumer = new SiddhiGpu.GpuEventConsumer(
-            			SiddhiGpu.SingleFilterKernel, queryName, context.getDefaultEventBufferSize(), eventsPerBlock);
-            	
-            	gpuEventConsumer.Initialize();
+                Integer eventsPerBlock = queryAnnotations.GetAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+                        SiddhiConstants.ANNOTATION_ELEMENT_GPU_BLOCK_SIZE);
 
-            	try {
-            	    GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
+                Integer minEventCount = queryAnnotations.GetAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+                        SiddhiConstants.ANNOTATION_ELEMENT_GPU_MIN_EVENT_COUNT);
 
-            	    SiddhiGpu.Filter gpuFilter = gpuExpressionParser.parseExpression(condition, context, metaStreamEvent);
-            	    gpuEventConsumer.AddFilter(gpuFilter);
-            	    gpuEventConsumer.ConfigureFilters();
+                String stringAttributeSizes = queryAnnotations.GetAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
+                        SiddhiConstants.ANNOTATION_ELEMENT_GPU_STRING_SIZES);
 
-            	    FilterProcessor filterProcessor = new FilterProcessor(
-            		    ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false),
-            		    gpuEventConsumer, minEventCount, stringAttributeSizes); 
-            	    filterProcessor.setVariablePositionToAttributeNameMapper(gpuExpressionParser.getVariablePositionToAttributeNameMapper());
+                String queryName = queryAnnotations.GetAnnotationStringValue(SiddhiConstants.ANNOTATION_INFO, 
+                        SiddhiConstants.ANNOTATION_ELEMENT_INFO_NAME);
 
-            	    return filterProcessor;
+                if(eventsPerBlock == null)
+                {
+                    eventsPerBlock = new Integer(256);
+                }
 
-            	} catch(RuntimeException ex) {
-            	    log.info("GPU Filter creation failed : " + ex.getMessage());
-            	    ex.printStackTrace();
-            	    return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));
-            	}
+                if(minEventCount == null)
+                {
+                    minEventCount = eventsPerBlock;
+                }
+
+                SiddhiGpu.GpuEventConsumer gpuEventConsumer = new SiddhiGpu.GpuEventConsumer(
+                        SiddhiGpu.SingleFilterKernel, queryName, context.getDefaultEventBufferSize(), eventsPerBlock);
+                
+                log.info("Created SiddhiGpu.GpuEventConsumer [Type=SingleFilterKernel|Query=" + queryName + "|BufferSize=" + 
+                        context.getDefaultEventBufferSize() + "|EventsPerBlock=" + eventsPerBlock + "] ");
+
+                gpuEventConsumer.Initialize();
+                
+                log.info("Created SiddhiGpu.GpuEventConsumer Initialized");
+
+                try {
+                    GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
+
+                    SiddhiGpu.Filter gpuFilter = gpuExpressionParser.parseExpression(condition, context, metaStreamEvent);
+                    gpuEventConsumer.AddFilter(gpuFilter);
+                    gpuEventConsumer.ConfigureFilters();
+
+                    FilterProcessor filterProcessor = new FilterProcessor(
+                            ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false),
+                            gpuEventConsumer, minEventCount, stringAttributeSizes); 
+                    filterProcessor.setVariablePositionToAttributeNameMapper(gpuExpressionParser.getVariablePositionToAttributeNameMapper());
+
+                    return filterProcessor;
+
+                } catch(RuntimeException ex) {
+                    log.info("GPU Filter creation failed : " + ex.getMessage());
+                    ex.printStackTrace();
+                    return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));
+                }
             }
             else
             {
-            	return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));  //metaStreamEvent has stream definition info
+                return new FilterProcessor(ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false));  //metaStreamEvent has stream definition info
             }
-            
+
         } else if (handler instanceof Window) {
             WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadSiddhiImplementation(((Window) handler).getFunction(),
                     WindowProcessor.class);

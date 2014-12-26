@@ -120,12 +120,14 @@ void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 
 void GpuEventConsumer::AddFilter(Filter * _pFilter)
 {
-	_pFilter->Print(fp_Log);
+	Filter * pFilter = _pFilter->Clone();
+	//_pFilter->Destroy();
+	pFilter->Print(fp_Log);
 
-	FiltersById::iterator ite = map_FiltersById.find(_pFilter->i_FilterId);
+	FiltersById::iterator ite = map_FiltersById.find(pFilter->i_FilterId);
 	if(ite == map_FiltersById.end())
 	{
-		map_FiltersById.insert(std::make_pair(_pFilter->i_FilterId, _pFilter));
+		map_FiltersById.insert(std::make_pair(pFilter->i_FilterId, pFilter));
 	}
 }
 
