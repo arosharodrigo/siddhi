@@ -15,7 +15,6 @@
 #include <vector>
 #include "Timer.h"
 #include "CudaKernelBase.h"
-#include "CudaFilterKernel.h"
 #include "CudaSingleFilterKernel.h"
 
 namespace SiddhiGpu

@@ -12,7 +12,7 @@
 #include "ByteBufferStructs.h"
 #include "CudaSingleFilterKernel.h"
 #include "Filter.h"
-#include "CudaEvent.h"
+#include "CudaCommon.h"
 #include "helper_timer.h"
 #include "CudaFilterKernelCore.h"
 
@@ -102,12 +102,15 @@ CudaSingleFilterKernel::~CudaSingleFilterKernel()
 
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput->p_ByteBuffer));
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput));
+	p_DeviceInput = NULL;
 
 	free(p_HostInput);
+	p_HostInput = NULL;
 
 	CUDA_CHECK_RETURN(cudaDeviceReset());
 
 	sdkDeleteTimer(&p_StopWatch);
+	p_StopWatch = NULL;
 }
 
 void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
@@ -120,7 +123,7 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
 	p_HostInput->i_EventDataPosition = i_EventDataBufferPosition;
 	p_HostInput->i_SizeOfEvent = i_SizeOfEvent;
 	
-	fprintf(fp_Log, "CudaSingleFilterKernel Allocating ByteBuffer in GPU : %d \n", (sizeof(char) * i_EventBufferSize));
+	fprintf(fp_Log, "CudaSingleFilterKernel Allocating ByteBuffer in GPU : %d \n", (int)(sizeof(char) * i_EventBufferSize));
 	fflush(fp_Log);
 
 	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_HostInput->p_ByteBuffer, sizeof(char) * i_EventBufferSize)); // device allocate ByteBuffer

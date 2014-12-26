@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "CudaEvent.h"
+#include "CudaCommon.h"
 #include "Filter.h"
 
 namespace SiddhiGpu

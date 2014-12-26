@@ -9,6 +9,8 @@
 #include "ByteBufferStructs.h"
 #include <stdlib.h>
 #include <vector>
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 
 namespace SiddhiGpu
 {
@@ -145,6 +147,8 @@ void GpuEventConsumer::ConfigureFilters()
 	}
 	p_CudaKernel->CopyFiltersToDevice();
 	fflush(fp_Log);
+
+	map_FiltersById.clear();
 }
 
 void GpuEventConsumer::PrintAverageStats()
@@ -202,7 +206,7 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 				{
 					int64_t i;
 					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 8);
-					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%lld] ", pEventMeta->a_Attributes[a].i_Position, i);
+					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%" PRIi64 "] ", pEventMeta->a_Attributes[a].i_Position, i);
 				}
 				break;
 				case DataType::Float:

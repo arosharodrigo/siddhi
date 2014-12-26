@@ -8,7 +8,7 @@
 #ifndef FILTER_H_
 #define FILTER_H_
 
-#include "CudaEvent.h"
+#include "CudaCommon.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

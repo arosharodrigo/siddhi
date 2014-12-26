@@ -16,7 +16,7 @@ deploy: build
 	cp *.so $(CPPBUILD)/$(PLATFORM)/lib
 
 build: clean
-	g++ CudaEvent.cpp Filter.cpp GpuEventConsumer.cpp Timer.cpp -march=x86-64 -m64 -Wall -O3 -fPIC -shared -s -o libgpueventconsumer.so
+	g++ Filter.cpp GpuEventConsumer.cpp Timer.cpp -march=x86-64 -m64 -Wall -O3 -fPIC -shared -s -o libgpueventconsumer.so
 	
 clean:
 	-rm *.o *.so 

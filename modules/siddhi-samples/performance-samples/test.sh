@@ -17,13 +17,19 @@ LOG=logs/ComplexFilterMultipleQueryPerformance
 
 a="false"
 g="true"
-r=2048
+r=4096
 t=16
 b=128
 c=$((5000000 * r))
 echo "${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_gpu_${r}_${t}_${b}.log"
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async false --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_singlethread_${r}_${t}_${b}.log
+#${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async false --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_singlethread_${r}_${t}_${b}.log
+#${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_${r}_${t}_${b}.log
+${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} #&>${LOG}_gpu_${r}_${t}_${b}.log
 exit
+
+
+
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} &>${LOG}
 #nohup ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} &>${LOG} &
 

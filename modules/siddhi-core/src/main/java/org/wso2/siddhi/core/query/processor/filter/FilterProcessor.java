@@ -362,7 +362,7 @@ public class FilterProcessor implements Processor {
 
             // allocate byte buffer
             log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
-            synchronized (metaEvent) {
+            synchronized (metaEvent) { // TODO: remove this
                 eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
             }
             log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
@@ -377,156 +377,153 @@ public class FilterProcessor implements Processor {
 
             // fill byte buffer preamble
 
-            /*
+            int bufferIndex = eventMetaBufferPosition;
+            eventByteBuffer.putShort(bufferIndex, (short)count); // put attribute count
+            bufferIndex += 2;
+            int bufferPosition = 0;
 
-	    int bufferIndex = eventMetaBufferPosition;
-	    eventByteBuffer.putShort(bufferIndex, (short)count); // put attribute count
-	    bufferIndex += 2;
-	    int bufferPosition = 0;
+            // fill attribute type - length (2 + 2 bytes)
+            for(int index = 0; index < count; ++index) {
 
-	    // fill attribute type - length (2 + 2 bytes)
-	    for(int index = 0; index < count; ++index) {
+                Attribute attribute = varPositionToAttribNameMap.get(index);
 
-		Attribute attribute = varPositionToAttribNameMap.get(index);
+                if(attribute != null)
+                {
+                    AttributeDefinition attributeDefinition = new AttributeDefinition();
+                    attributeDefinition.attributePositionInGpu = index;
+                    attributeDefinition.attributeType = attribute.getType();
 
-		if(attribute != null)
-		{
-		    AttributeDefinition attributeDefinition = new AttributeDefinition();
-		    attributeDefinition.attributePositionInGpu = index;
-		    attributeDefinition.attributeType = attribute.getType();
+                    if (metaStreamEvent.getOutputData().contains(attribute)) {
 
-		    if (metaStreamEvent.getOutputData().contains(attribute)) {
+                        attributeDefinition.attributePositionInCpu = new int[] {
+                                -1, -1,
+                                SiddhiConstants.OUTPUT_DATA_INDEX, 
+                                metaStreamEvent.getOutputData().indexOf(attribute)};
 
-			attributeDefinition.attributePositionInCpu = new int[] {
-				-1, -1,
-				SiddhiConstants.OUTPUT_DATA_INDEX, 
-				metaStreamEvent.getOutputData().indexOf(attribute)};
+                    } else if (metaStreamEvent.getAfterWindowData().contains(attribute)) {
 
-		    } else if (metaStreamEvent.getAfterWindowData().contains(attribute)) {
+                        attributeDefinition.attributePositionInCpu = new int[] {
+                                -1, -1,
+                                SiddhiConstants.AFTER_WINDOW_DATA_INDEX, 
+                                metaStreamEvent.getAfterWindowData().indexOf(attribute)};
 
-			attributeDefinition.attributePositionInCpu = new int[] {
-				-1, -1,
-				SiddhiConstants.AFTER_WINDOW_DATA_INDEX, 
-				metaStreamEvent.getAfterWindowData().indexOf(attribute)};
+                    } else if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
 
-		    } else if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
+                        attributeDefinition.attributePositionInCpu = new int[] {
+                                -1, -1,
+                                SiddhiConstants.BEFORE_WINDOW_DATA_INDEX, 
+                                metaStreamEvent.getBeforeWindowData().indexOf(attribute)};
+                    } else {
 
-			attributeDefinition.attributePositionInCpu = new int[] {
-				-1, -1,
-				SiddhiConstants.BEFORE_WINDOW_DATA_INDEX, 
-				metaStreamEvent.getBeforeWindowData().indexOf(attribute)};
-		    } else {
+                        continue;
+                    }
 
-			continue;
-		    }
+                    switch(attributeDefinition.attributeType)
+                    {
+                    case BOOL:
+                    {
+                        eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Boolean); // type - 2 bytes
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)2); // length - 2 bytes
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                        bufferIndex += 2;
+                        bufferPosition += 2;
 
-		    switch(attributeDefinition.attributeType)
-		    {
-		    case BOOL:
-		    {
-			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Boolean); // type - 2 bytes
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)2); // length - 2 bytes
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-			bufferIndex += 2;
-			bufferPosition += 2;
+                        attributeDefinition.attributeLength = 2;
+                    }
+                    break;
+                    case INT:
+                    {
+                        eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Int);
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                        bufferIndex += 2;
+                        bufferPosition += 4;
 
-			attributeDefinition.attributeLength = 2;
-		    }
-		    break;
-		    case INT:
-		    {
-			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Int);
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-			bufferIndex += 2;
-			bufferPosition += 4;
+                        attributeDefinition.attributeLength = 4;
+                    }
+                    break;
+                    case LONG:
+                    {
+                        eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Long);
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                        bufferIndex += 2;
+                        bufferPosition += 8;							
 
-			attributeDefinition.attributeLength = 4;
-		    }
-		    break;
-		    case LONG:
-		    {
-			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Long);
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-			bufferIndex += 2;
-			bufferPosition += 8;							
+                        attributeDefinition.attributeLength = 8;
+                    }
+                    break;
+                    case FLOAT:
+                    {
+                        eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Float);
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                        bufferIndex += 2;
+                        bufferPosition += 4;
 
-			attributeDefinition.attributeLength = 8;
-		    }
-		    break;
-		    case FLOAT:
-		    {
-			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Float);
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)4); // length - 4 bytes
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-			bufferIndex += 2;
-			bufferPosition += 4;
+                        attributeDefinition.attributeLength = 4;
+                    }
+                    break;
+                    case DOUBLE:
+                    {
+                        eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Double);
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
+                        bufferIndex += 2;
+                        eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                        bufferIndex += 2;
+                        bufferPosition += 8;
 
-			attributeDefinition.attributeLength = 4;
-		    }
-		    break;
-		    case DOUBLE:
-		    {
-			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.Double);
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
-			bufferIndex += 2;
-			eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-			bufferIndex += 2;
-			bufferPosition += 8;
+                        attributeDefinition.attributeLength = 8;
+                    }
+                    break;
+                    case STRING:
+                    {
+                        eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.StringIn);
+                        bufferIndex += 2;
 
-			attributeDefinition.attributeLength = 8;
-		    }
-		    break;
-		    case STRING:
-		    {
-			eventByteBuffer.putShort(bufferIndex, (short)SiddhiGpu.DataType.StringIn);
-			bufferIndex += 2;
+                        if(stringAttributeSizes != null)
+                        {
+                            int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
+                            eventByteBuffer.putShort(bufferIndex, (short)sizeOfString); // length - n bytes
+                            bufferIndex += 2;
+                            eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                            bufferIndex += 2;
+                            bufferPosition += sizeOfString;
 
-			if(stringAttributeSizes != null)
-			{
-			    int sizeOfString = stringAttributeSizes[stringAttributeIndex++];
-			    eventByteBuffer.putShort(bufferIndex, (short)sizeOfString); // length - n bytes
-			    bufferIndex += 2;
-			    eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-			    bufferIndex += 2;
-			    bufferPosition += sizeOfString;
+                            attributeDefinition.attributeLength = sizeOfString;
+                        }
+                        else
+                        {
+                            eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
+                            bufferIndex += 2;
+                            eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
+                            bufferIndex += 2;
+                            bufferPosition += 8;
 
-			    attributeDefinition.attributeLength = sizeOfString;
-			}
-			else
-			{
-			    eventByteBuffer.putShort(bufferIndex, (short)8); // length - 8 bytes
-			    bufferIndex += 2;
-			    eventByteBuffer.putShort(bufferIndex, (short)bufferPosition); // position - 2 bytes
-			    bufferIndex += 2;
-			    bufferPosition += 8;
+                            attributeDefinition.attributeLength = 8;
+                        }
+                    }
+                    break;
+                    default:
+                        break;
+                    }
 
-			    attributeDefinition.attributeLength = 8;
-			}
-		    }
-		    break;
-		    default:
-			break;
-		    }
-
-		    log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
-			    " CpuPos=" + Arrays.toString(attributeDefinition.attributePositionInCpu) + 
-			    " Type=" + attributeDefinition.attributeType + 
-			    " Length=" + attributeDefinition.attributeLength);
-		    attributeDefinitionList.add(attributeDefinition);
-		}
-	    }
-             */
+                    log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
+                            " CpuPos=" + Arrays.toString(attributeDefinition.attributePositionInCpu) + 
+                            " Type=" + attributeDefinition.attributeType + 
+                            " Length=" + attributeDefinition.attributeLength);
+                    attributeDefinitionList.add(attributeDefinition);
+                }
+            }
         }
 
         if(this.next != null)

@@ -9,6 +9,8 @@
 #define CUDASINGLEFILTERKERNEL_H_
 
 #include "CudaKernelBase.h"
+#include <list>
+#include "helper_timer.h"
 
 namespace SiddhiGpu
 {
