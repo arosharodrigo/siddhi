@@ -25,6 +25,15 @@ public class ComplexFilterMultipleQueryPerformance {
 
     private static Options cliOptions;
 
+    private static String [] queries = {
+        "from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
+        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
+        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
+        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
+        "from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
+        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;"
+    };
+    
     private static void Help() {
         // This prints out some help
         HelpFormatter formater = new HelpFormatter();
@@ -39,6 +48,7 @@ public class ComplexFilterMultipleQueryPerformance {
         cliOptions.addOption("a", "enable-async", true, "Enable Async processing");
         cliOptions.addOption("g", "enable-gpu", true, "Enable GPU processing");
         cliOptions.addOption("e", "event-count", true, "Total number of events to be generated");
+        cliOptions.addOption("q", "query-count", true, "Number of Siddhi Queries to be generated");
         cliOptions.addOption("r", "ringbuffer-size", true, "Disruptor RingBuffer size - in power of two");
         cliOptions.addOption("t", "threadpool-size", true, "Executor service pool size");
         cliOptions.addOption("b", "events-per-tblock", true, "Number of Events per thread block in GPU");
@@ -49,6 +59,7 @@ public class ComplexFilterMultipleQueryPerformance {
         boolean asyncEnabled = true;
         boolean gpuEnabled = false;
         long totalEventCount = 50000000l;
+        int queryCount = 1;
         int defaultBufferSize = 1024;
         int threadPoolSize = 4;
         int eventBlockSize = 256;
@@ -68,6 +79,10 @@ public class ComplexFilterMultipleQueryPerformance {
 
             if (cmd.hasOption("e")) {
                 totalEventCount = Long.parseLong(cmd.getOptionValue("e"));
+            }
+            
+            if (cmd.hasOption("q")) {
+                queryCount = Integer.parseInt(cmd.getOptionValue("q"));
             }
 
             if (cmd.hasOption("r")) {
@@ -90,6 +105,7 @@ public class ComplexFilterMultipleQueryPerformance {
         System.out.println("Siddhi.Config [EnableAsync=" + asyncEnabled +
                 "|GPUEnabled=" + gpuEnabled + 
                 "|EventCount=" + totalEventCount +
+                "|QueryCount=" + queryCount +
                 "|RingBufferSize=" + defaultBufferSize + 
                 "|ThreadPoolSize=" + threadPoolSize + 
                 "|EventBlockSize=" + eventBlockSize + "]");
@@ -100,56 +116,28 @@ public class ComplexFilterMultipleQueryPerformance {
 
         String cseEventStream = "@config(async = '" + (asyncEnabled ? "true" : "false" ) + "') define stream cseEventStream (symbol string, price float, volume int, change float, pctchange float);";
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("@info(name = 'query1') ");
-        if(gpuEnabled)
-        {
-            sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
-        }
-        sb.append("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
-
-        String query1 = sb.toString();
-
-        sb.setLength(0); // clear buffer
-
-        sb.append("@info(name = 'query2') ");
-        if(gpuEnabled)
-        {
-            sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
-        }
-        sb.append("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
-
-        String query2 = sb.toString();
-
-        sb.setLength(0); // clear buffer
-
-        sb.append("@info(name = 'query3') ");
-        if(gpuEnabled)
-        {
-            sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
-        }
-        sb.append("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
-
-        String query3 = sb.toString();
-
-        sb.setLength(0); // clear buffer
-
-        sb.append("@info(name = 'query4') ");
-        if(gpuEnabled)
-        {
-            sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
-        }
-        sb.append("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;");
-
-        String query4 = sb.toString();
-
         System.out.println("Stream def    = [ " + cseEventStream + " ]");
-        System.out.println("Filter query1 = [ " + query1 + " ]");
-        System.out.println("Filter query2 = [ " + query2 + " ]");
-        System.out.println("Filter query3 = [ " + query3 + " ]");
-        System.out.println("Filter query4 = [ " + query4 + " ]");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1 + query2 + query3 + query4);
+        StringBuffer execString = new StringBuffer();
+        execString.append(cseEventStream);
+        
+        for(int i=0; i<queryCount; ++i) {
+            StringBuilder sb = new StringBuilder();
+            
+            sb.append("@info(name = 'query" + (i + 1) + "') ");
+            if(gpuEnabled)
+            {
+                sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
+            }
+            sb.append(queries[i]);
+
+            String query = sb.toString();
+            System.out.println("Filter query" + (i+1) + " = [ " + query + " ]");
+            
+            execString.append(query);
+        }
+        
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(execString.toString());
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -198,6 +186,7 @@ public class ComplexFilterMultipleQueryPerformance {
         System.out.println("ComplexFilterMultipleQueryPerformance [EnableAsync=" + asyncEnabled + 
                 " GPUEnabled=" + gpuEnabled + 
                 " TotalEventCount=" + totalEventCount +
+                " QueryCount=" + queryCount +
                 " DefaultEventBufferSize=" + defaultBufferSize +
                 " ThreadPoolSize=" + threadPoolSize + 
                 " EventBlockSize=" + eventBlockSize + 
