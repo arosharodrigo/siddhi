@@ -35,7 +35,7 @@ public:
 	GpuEventConsumer(KernelType _eKernelType, const char * _zName, int _iMaxBufferSize, int _iEventsPerBlock);
 	virtual ~GpuEventConsumer();
 
-	void Initialize();
+	bool Initialize(int _iCudaDeviceId);
 
 	void AddFilter(Filter * _pFilter);
 	void ConfigureFilters();

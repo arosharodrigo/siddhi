@@ -25,7 +25,7 @@ public:
 	CudaKernelBase(GpuEventConsumer * _pConsumer, FILE * _fpLog);
 	virtual ~CudaKernelBase();
 
-	virtual void Initialize() = 0;
+	virtual bool Initialize(int _iCudaDeviceId) = 0;
 	virtual void SetEventBuffer(char * _pBuffer, int _iSize) = 0;
 	void SetResultsBufferPosition(int _iPos) { i_ResultsBufferPosition = _iPos; }
 	void SetEventMetaBufferPosition(int _iPos) { i_EventMetaBufferPosition = _iPos; }
