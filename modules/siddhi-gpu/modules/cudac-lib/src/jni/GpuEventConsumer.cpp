@@ -8,6 +8,8 @@
 #include "GpuEventConsumer.h"
 #include "ByteBufferStructs.h"
 #include <stdlib.h>
+#include <unistd.h>
+#include <syscall.h>
 #include <vector>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -47,6 +49,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, const char * _zName,
 
 
 	fprintf(fp_Log, "[%s] EventConsumer : MaxBufferSize=[%d events]\n", z_Name, i_MaxNumOfEvents);
+	PrintThreadInfo();
 	fflush(fp_Log);
 }
 
@@ -61,6 +64,7 @@ GpuEventConsumer::~GpuEventConsumer()
 
 bool GpuEventConsumer::Initialize(int _iCudaDeviceId)
 {
+	PrintThreadInfo();
 	return p_CudaKernel->Initialize(_iCudaDeviceId);
 }
 
@@ -81,6 +85,7 @@ void GpuEventConsumer::SetByteBuffer(char * _pBuffer, int _iSize)
 	i_ByteBufferSize = _iSize;
 
 	fprintf(fp_Log, "[%s] EventConsumer : ByteBuffer Set=[%d]\n", z_Name, i_ByteBufferSize);
+	PrintThreadInfo();
 	fflush(fp_Log);
 
 	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
@@ -115,8 +120,10 @@ void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 {
 	// events are filled in bytebuffer
 	// copy them to GPU
-	//fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
+	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
 	//PrintByteBuffer(_iNumEvents);
+	PrintThreadInfo();
+	fflush(fp_Log);
 	p_CudaKernel->ProcessEvents(_iNumEvents);
 }
 
@@ -136,6 +143,7 @@ void GpuEventConsumer::AddFilter(Filter * _pFilter)
 void GpuEventConsumer::ConfigureFilters()
 {
 	fprintf(fp_Log, "[%s] ConfigureFilters : FilterCount=%d\n", z_Name, (int)map_FiltersById.size());
+	PrintThreadInfo();
 
 	FiltersById::iterator ite = map_FiltersById.begin();
 	while(ite != map_FiltersById.end())
@@ -239,6 +247,13 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 
 		fprintf(fp_Log, "\n");
 	}
+}
+
+void GpuEventConsumer::PrintThreadInfo()
+{
+	pid_t pid = getpid();
+	int tid = syscall(__NR_gettid);
+	fprintf(fp_Log, "[%s] EventConsumer : PID=%d TID=%d\n", z_Name, pid, tid);
 }
 
 };

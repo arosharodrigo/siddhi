@@ -59,6 +59,7 @@ private:
 	typedef std::map<int, Filter *> FiltersById;
 
 	void PrintByteBuffer(int _iNumEvents);
+	void PrintThreadInfo();
 
 	int i_MaxNumOfEvents;
 	FiltersById map_FiltersById;
