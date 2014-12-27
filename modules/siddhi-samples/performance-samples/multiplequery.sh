@@ -25,8 +25,8 @@ q=2
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async false --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_singlethread_${r}_${t}_${b}.log
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async false --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_singlethread_${r}_${t}_${b}.log
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu false  --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_${r}_${t}_${b}.log
-#${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} #&>${LOG}_gpu_${r}_${t}_${b}.log
-#exit
+${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} #&>${LOG}_gpu_${r}_${t}_${b}.log
+exit
 
 
 

@@ -138,8 +138,8 @@ public class ComplexFilterMultipleQueryPerformance {
             sb.append("@info(name = 'query" + (i + 1) + "') ");
             if(gpuEnabled)
             {
-                sb.append("@gpu(filter='true', cuda.device=").append(queries[i].cudaDeviceId)
-                    .append("block.size='").append(eventBlockSize).append("', string.sizes='8')");
+                sb.append("@gpu(filter='true', cuda.device='").append(queries[i].cudaDeviceId)
+                    .append("', block.size='").append(eventBlockSize).append("', string.sizes='8') ");
             }
             sb.append(queries[i].query);
 
