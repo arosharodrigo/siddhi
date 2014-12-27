@@ -157,7 +157,7 @@ public class StreamEvent implements ComplexEvent {
     
     @Override
     public String toString() {
-        return "StreamEvent{timestamp=" + timestamp + " isExpired=" + isExpired + " outputData=" + outputData.toString() +
-                " beforeWindowData=" + beforeWindowData.toString() + " afterWindowData=" + onAfterWindowData.toString() + "}";
+        return "StreamEvent{timestamp=" + timestamp + " isExpired=" + isExpired + " outputData=" + Arrays.toString(outputData) +
+                " beforeWindowData=" + Arrays.toString(beforeWindowData) + " afterWindowData=" + Arrays.toString(onAfterWindowData) + "}";
     }
 }
