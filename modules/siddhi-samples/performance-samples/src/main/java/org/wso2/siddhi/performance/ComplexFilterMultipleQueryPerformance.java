@@ -25,13 +25,24 @@ public class ComplexFilterMultipleQueryPerformance {
 
     private static Options cliOptions;
 
-    private static String [] queries = {
-        "from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
-        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
-        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
-        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
-        "from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;",
-        "from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;"
+    private static class TestQuery {
+        public String query;
+        public int cudaDeviceId;
+        
+        public TestQuery(String query, int cudaDeviceId) {
+            this.query = query;
+            this.cudaDeviceId = cudaDeviceId;
+        }
+        
+    }
+    
+    private static TestQuery [] queries = {
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume,change,pctchange insert into outputStream ;", 1)
     };
     
     private static void Help() {
@@ -127,9 +138,10 @@ public class ComplexFilterMultipleQueryPerformance {
             sb.append("@info(name = 'query" + (i + 1) + "') ");
             if(gpuEnabled)
             {
-                sb.append("@gpu(filter='true', block.size='").append(eventBlockSize).append("', string.sizes='8')");
+                sb.append("@gpu(filter='true', cuda.device=").append(queries[i].cudaDeviceId)
+                    .append("block.size='").append(eventBlockSize).append("', string.sizes='8')");
             }
-            sb.append(queries[i]);
+            sb.append(queries[i].query);
 
             String query = sb.toString();
             System.out.println("Filter query" + (i+1) + " = [ " + query + " ]");

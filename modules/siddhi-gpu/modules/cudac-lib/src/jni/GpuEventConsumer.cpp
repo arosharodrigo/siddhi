@@ -59,9 +59,9 @@ GpuEventConsumer::~GpuEventConsumer()
 }
 
 
-void GpuEventConsumer::Initialize()
+bool GpuEventConsumer::Initialize(int _iCudaDeviceId)
 {
-	p_CudaKernel->Initialize();
+	return p_CudaKernel->Initialize(_iCudaDeviceId);
 }
 
 void GpuEventConsumer::CreateByteBuffer(int _iSize)

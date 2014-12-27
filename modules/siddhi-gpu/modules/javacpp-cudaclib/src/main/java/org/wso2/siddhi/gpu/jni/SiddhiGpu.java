@@ -9,24 +9,19 @@ import org.bytedeco.javacpp.annotation.*;
 public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
     static { Loader.load(); }
 
-// Parsed from <CudaEvent.h>
+// Parsed from <CudaCommon.h>
 
 /*
- * CudaEvent.h
+ * CudaCommon.h
  *
- *  Created on: Oct 23, 2014
+ *  Created on: Dec 26, 2014
  *      Author: prabodha
  */
 
-// #ifndef CUDAEVENT_H_
-// #define CUDAEVENT_H_
+// #ifndef CUDACOMMON_H_
+// #define CUDACOMMON_H_
 
-// #include <string.h>
-// #include <string>
 // #include <stdint.h>
-// #include <stdio.h>
-// #define __STDC_FORMAT_MACROS
-// #include <inttypes.h>
 
 @Namespace("SiddhiGpu") public static class DataType extends Pointer {
     static { Loader.load(); }
@@ -74,72 +69,10 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 	public native @Cast("char*") BytePointer z_ExtString(); public native Values z_ExtString(BytePointer z_ExtString); // set this if strlen > 8
 }
 
-@Namespace("SiddhiGpu") public static class AttibuteValue extends Pointer {
-    static { Loader.load(); }
-    public AttibuteValue() { allocate(); }
-    public AttibuteValue(int size) { allocateArray(size); }
-    public AttibuteValue(Pointer p) { super(p); }
-    private native void allocate();
-    private native void allocateArray(int size);
-    @Override public AttibuteValue position(int position) {
-        return (AttibuteValue)super.position(position);
-    }
-
-	public native @ByRef Values m_Value(); public native AttibuteValue m_Value(Values m_Value);
-	public native @Cast("SiddhiGpu::DataType::Value") int e_Type(); public native AttibuteValue e_Type(int e_Type);
-}
-
-@Namespace("SiddhiGpu") @NoOffset public static class CudaEvent extends Pointer {
-    static { Loader.load(); }
-    public CudaEvent(Pointer p) { super(p); }
-    public CudaEvent(int size) { allocateArray(size); }
-    private native void allocateArray(int size);
-    @Override public CudaEvent position(int position) {
-        return (CudaEvent)super.position(position);
-    }
-
-	/** enum SiddhiGpu::CudaEvent:: */
-	public static final int MAX_ATTR_NUM = 10;
-
-	public CudaEvent() { allocate(); }
-	private native void allocate();
-	public CudaEvent(@Cast("uint64_t") long _uiTimeStamp) { allocate(_uiTimeStamp); }
-	private native void allocate(@Cast("uint64_t") long _uiTimeStamp);
-	public native void Destroy();
-
-	public native void Reset(@Cast("uint64_t") long _uiTimeStamp);
-
-	public native void SetTimestamp(@Cast("uint64_t") long _uiTime);
-	public native @Cast("uint64_t") long GetTimestamp();
-	public native @Cast("unsigned int") int GetNumAttributes();
-
-	public native void AddBoolAttribute(@Cast("unsigned int") int _iPos, @Cast("bool") boolean _bValue);
-	public native void AddIntAttribute(@Cast("unsigned int") int _iPos, int _iValue);
-	public native void AddLongAttribute(@Cast("unsigned int") int _iPos, long _lValue);
-	public native void AddFloatAttribute(@Cast("unsigned int") int _iPos, float _fValue);
-	public native void AddDoubleAttribute(@Cast("unsigned int") int _iPos, double _dValue);
-	public native void AddStringAttribute(@Cast("unsigned int") int _iPos, @StdString BytePointer _sValue);
-	public native void AddStringAttribute(@Cast("unsigned int") int _iPos, @StdString String _sValue);
-
-	public native @Cast("bool") boolean GetBoolAttribute(@Cast("unsigned int") int _iPos);
-	public native int GetIntAttribute(@Cast("unsigned int") int _iPos);
-	public native long GetLongAttribute(@Cast("unsigned int") int _iPos);
-	public native float GetFloatAttribute(@Cast("unsigned int") int _iPos);
-	public native double GetDoubleAttribute(@Cast("unsigned int") int _iPos);
-	public native @Cast("const char*") BytePointer GetStringAttribute(@Cast("unsigned int") int _iPos);
-
-	public native void Print();
-	public native void Print(@Cast("FILE*") Pointer _fp);
-
-	public native @Cast("uint64_t") long ui_Timestamp(); public native CudaEvent ui_Timestamp(long ui_Timestamp);
-	public native @Cast("unsigned int") int ui_NumAttributes(); public native CudaEvent ui_NumAttributes(int ui_NumAttributes);
-	public native @ByRef AttibuteValue a_Attributes(int i); public native CudaEvent a_Attributes(int i, AttibuteValue a_Attributes);
-	@MemberGetter public native AttibuteValue a_Attributes(); // index based values, use a enum schema to access
-}
 
 
 
-// #endif /* CUDAEVENT_H_ */
+// #endif /* CUDACOMMON_H_ */
 
 
 // Parsed from <Filter.h>
@@ -154,7 +87,7 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 // #ifndef FILTER_H_
 // #define FILTER_H_
 
-// #include "CudaEvent.h"
+// #include "CudaCommon.h"
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <string>
@@ -459,8 +392,12 @@ public static final int
 // #include <vector>
 // #include "Timer.h"
 // #include "CudaKernelBase.h"
-// #include "CudaFilterKernel.h"
 // #include "CudaSingleFilterKernel.h"
+
+@Namespace("SiddhiGpu") @Opaque public static class CudaEvent extends Pointer {
+    public CudaEvent() { }
+    public CudaEvent(Pointer p) { super(p); }
+}
 
 /** enum SiddhiGpu::KernelType */
 public static final int
@@ -472,24 +409,32 @@ public static final int
     public GpuEventConsumer() { }
     public GpuEventConsumer(Pointer p) { super(p); }
 
-	public GpuEventConsumer(@Cast("SiddhiGpu::KernelType") int _eKernelType, int _iMaxBufferSize, int _iEventsPerBlock) { allocate(_eKernelType, _iMaxBufferSize, _iEventsPerBlock); }
-	private native void allocate(@Cast("SiddhiGpu::KernelType") int _eKernelType, int _iMaxBufferSize, int _iEventsPerBlock);
+	public GpuEventConsumer(@Cast("SiddhiGpu::KernelType") int _eKernelType, @Cast("const char*") BytePointer _zName, int _iMaxBufferSize, int _iEventsPerBlock) { allocate(_eKernelType, _zName, _iMaxBufferSize, _iEventsPerBlock); }
+	private native void allocate(@Cast("SiddhiGpu::KernelType") int _eKernelType, @Cast("const char*") BytePointer _zName, int _iMaxBufferSize, int _iEventsPerBlock);
+	public GpuEventConsumer(@Cast("SiddhiGpu::KernelType") int _eKernelType, String _zName, int _iMaxBufferSize, int _iEventsPerBlock) { allocate(_eKernelType, _zName, _iMaxBufferSize, _iEventsPerBlock); }
+	private native void allocate(@Cast("SiddhiGpu::KernelType") int _eKernelType, String _zName, int _iMaxBufferSize, int _iEventsPerBlock);
 
-	public native void Initialize();
-	public native void OnEvents(@Cast("SiddhiGpu::CudaEvent**") PointerPointer _apEvents, int _iEventCount);
-	public native void OnEvents(@ByPtrPtr CudaEvent _apEvents, int _iEventCount);
+	public native @Cast("bool") boolean Initialize(int _iCudaDeviceId);
 
 	public native void AddFilter(Filter _pFilter);
 	public native void ConfigureFilters();
 
-	public native void OnCudaEventMatch(int _iEventPos, int _iFilterId);
-	public native void OnEventMatch(CudaEvent _pEvent, int _iFilterId);
-
-	public native @StdVector IntPointer GetMatchingEvents();
+	public native void ProcessEvents(int _iNumEvents);
 
 	public native void PrintAverageStats();
 
-	public native int GetMaxBufferSize();
+	public native int GetMaxNumberOfEvents();
+
+	public native void CreateByteBuffer(int _iSize);
+	public native void SetByteBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
+	public native void SetByteBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
+	public native void SetByteBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
+	public native int GetByteBufferSize();
+	public native @Cast("char*") BytePointer GetByteBuffer();
+	public native void SetResultsBufferPosition(int _iPos);
+	public native void SetEventMetaBufferPosition(int _iPos);
+	public native void SetSizeOfEvent(int _iSize);
+	public native void SetEventDataBufferPosition(int _iPos);
 }
 
 
@@ -512,7 +457,7 @@ public static final int
 // #include <stdlib.h>
 // #include <stdio.h>
 // #include <string.h>
-// #include "CudaEvent.h"
+// #include "CudaCommon.h"
 // #include "Filter.h"
 
 @Namespace("SiddhiGpu") @NoOffset public static class CudaKernelBase extends Pointer {
@@ -521,13 +466,16 @@ public static final int
     public CudaKernelBase(Pointer p) { super(p); }
 
 
-	public native void Initialize();
+	public native @Cast("bool") boolean Initialize(int _iCudaDeviceId);
+	public native void SetEventBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
+	public native void SetEventBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
+	public native void SetEventBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
+	public native void SetResultsBufferPosition(int _iPos);
+	public native void SetEventMetaBufferPosition(int _iPos);
+	public native void SetSizeOfEvent(int _iSize);
+	public native void SetEventDataBufferPosition(int _iPos);
 
-	public native void ProcessEvents();
-
-	public native void AddEvent(@Const CudaEvent _pEvent);
-	public native void AddAndProcessEvents(@Cast("SiddhiGpu::CudaEvent**") PointerPointer _apEvent, int _iEventCount);
-	public native void AddAndProcessEvents(@ByPtrPtr CudaEvent _apEvent, int _iEventCount);
+	public native void ProcessEvents(int _iNumEvents);
 
 	public native void AddFilterToDevice(Filter _pFilter);
 	public native void CopyFiltersToDevice();
@@ -538,85 +486,6 @@ public static final int
 
 
 // #endif /* CUDAKERNELBASE_H_ */
-
-
-// Parsed from <CudaFilterKernel.h>
-
-/*
- * CudaFilterKernel.h
- *
- *  Created on: Oct 18, 2014
- *      Author: prabodha
- */
-
-// #ifndef CUDAFILTERKERNEL_H_
-// #define CUDAFILTERKERNEL_H_
-
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <string.h>
-// #include <list>
-// #include "CudaEvent.h"
-// #include "Filter.h"
-// #include "CudaKernelBase.h"
-
-// #define __STDC_FORMAT_MACROS
-// #include <inttypes.h>
-
-@Opaque public static class StopWatchInterface extends Pointer {
-    public StopWatchInterface() { }
-    public StopWatchInterface(Pointer p) { super(p); }
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-@Namespace("SiddhiGpu") public static class MultipleFilterKernelInput extends Pointer {
-    static { Loader.load(); }
-    public MultipleFilterKernelInput() { allocate(); }
-    public MultipleFilterKernelInput(int size) { allocateArray(size); }
-    public MultipleFilterKernelInput(Pointer p) { super(p); }
-    private native void allocate();
-    private native void allocateArray(int size);
-    @Override public MultipleFilterKernelInput position(int position) {
-        return (MultipleFilterKernelInput)super.position(position);
-    }
-
-	public native CudaEvent ap_EventBuffer(); public native MultipleFilterKernelInput ap_EventBuffer(CudaEvent ap_EventBuffer);       // input events in device memory
-	public native int i_EventCount(); public native MultipleFilterKernelInput i_EventCount(int i_EventCount);         // number of events in buffer
-	public native Filter ap_Filters(); public native MultipleFilterKernelInput ap_Filters(Filter ap_Filters);           // Filters buffer - pre-copied at initialization
-	public native int i_FilterCount(); public native MultipleFilterKernelInput i_FilterCount(int i_FilterCount);        // number of filters in buffer
-	public native int i_MaxEventCount(); public native MultipleFilterKernelInput i_MaxEventCount(int i_MaxEventCount);      // used for setting results array
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-@Namespace("SiddhiGpu") @NoOffset public static class CudaFilterKernel extends CudaKernelBase {
-    static { Loader.load(); }
-    public CudaFilterKernel() { }
-    public CudaFilterKernel(Pointer p) { super(p); }
-
-	public CudaFilterKernel(int _iMaxBufferSize, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog) { allocate(_iMaxBufferSize, _pConsumer, _fpLog); }
-	private native void allocate(int _iMaxBufferSize, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog);
-
-	public native void Initialize();
-
-	public native void ProcessEvents();
-
-	public native void AddEvent(@Const CudaEvent _pEvent);
-	public native void AddAndProcessEvents(@Cast("SiddhiGpu::CudaEvent**") PointerPointer _apEvent, int _iEventCount);
-	public native void AddAndProcessEvents(@ByPtrPtr CudaEvent _apEvent, int _iEventCount);
-
-	public native void AddFilterToDevice(Filter _pFilter);
-	public native void CopyFiltersToDevice();
-
-	public native float GetElapsedTimeAverage();
-
-	public static native void OnExit();
-}
-
-
-
-// #endif /* CUDAFILTERKERNEL_H_ */
 
 
 // Parsed from <CudaSingleFilterKernel.h>
@@ -632,6 +501,8 @@ public static final int
 // #define CUDASINGLEFILTERKERNEL_H_
 
 // #include "CudaKernelBase.h"
+// #include <list>
+// #include "helper_timer.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -646,11 +517,15 @@ public static final int
         return (SingleFilterKernelInput)super.position(position);
     }
 
-	public native CudaEvent ap_EventBuffer(); public native SingleFilterKernelInput ap_EventBuffer(CudaEvent ap_EventBuffer);       // input events in device memory
-	public native int i_EventCount(); public native SingleFilterKernelInput i_EventCount(int i_EventCount);         // number of events in buffer
-	public native Filter ap_Filter(); public native SingleFilterKernelInput ap_Filter(Filter ap_Filter);            // Filters buffer - pre-copied at initialization
+	public native @Cast("char*") BytePointer p_ByteBuffer(); public native SingleFilterKernelInput p_ByteBuffer(BytePointer p_ByteBuffer);         // ByteBuffer from java side
+	public native int i_ResultsPosition(); public native SingleFilterKernelInput i_ResultsPosition(int i_ResultsPosition);    // Results array position in ByteBuffer
+	public native int i_EventMetaPosition(); public native SingleFilterKernelInput i_EventMetaPosition(int i_EventMetaPosition);  // EventMeta position in ByteBuffer
+	public native int i_EventDataPosition(); public native SingleFilterKernelInput i_EventDataPosition(int i_EventDataPosition);  // EventData position in ByteBuffer
+	public native int i_SizeOfEvent(); public native SingleFilterKernelInput i_SizeOfEvent(int i_SizeOfEvent);        // Size of an event
 	public native int i_EventsPerBlock(); public native SingleFilterKernelInput i_EventsPerBlock(int i_EventsPerBlock);     // number of events allocated per block
+	public native Filter ap_Filter(); public native SingleFilterKernelInput ap_Filter(Filter ap_Filter);            // Filters buffer - pre-copied at initialization
 	public native int i_MaxEventCount(); public native SingleFilterKernelInput i_MaxEventCount(int i_MaxEventCount);      // used for setting results array
+	public native int i_EventCount(); public native SingleFilterKernelInput i_EventCount(int i_EventCount);         // Num events in this batch
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -665,12 +540,11 @@ public static final int
 	public CudaSingleFilterKernel(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog) { allocate(_iMaxBufferSize, _iEventsPerBlock, _pConsumer, _fpLog); }
 	private native void allocate(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog);
 
-	public native void Initialize();
-	public native void ProcessEvents();
-
-	public native void AddEvent(@Const CudaEvent _pEvent);
-	public native void AddAndProcessEvents(@Cast("SiddhiGpu::CudaEvent**") PointerPointer _apEvent, int _iEventCount);
-	public native void AddAndProcessEvents(@ByPtrPtr CudaEvent _apEvent, int _iEventCount);
+	public native @Cast("bool") boolean Initialize(int _iCudaDeviceId);
+	public native void SetEventBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
+	public native void SetEventBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
+	public native void SetEventBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
+	public native void ProcessEvents(int _iNumEvents);
 
 	public native void AddFilterToDevice(Filter _pFilter);
 	public native void CopyFiltersToDevice();

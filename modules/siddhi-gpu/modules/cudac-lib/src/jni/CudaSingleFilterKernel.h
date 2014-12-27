@@ -39,7 +39,7 @@ public:
 	CudaSingleFilterKernel(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer * _pConsumer, FILE * _fpLog);
 	virtual ~CudaSingleFilterKernel();
 
-	void Initialize();
+	bool Initialize(int _iCudaDeviceId);
 	void SetEventBuffer(char * _pBuffer, int _iSize);
 	void ProcessEvents(int _iNumEvents);
 
@@ -49,6 +49,8 @@ public:
 	float GetElapsedTimeAverage();
 
 private:
+	bool SelectDevice(int _iDeviceId);
+
 	int i_EventsPerBlock;
 	int i_MaxNumberOfEvents;
 //	int i_NumEvents;
