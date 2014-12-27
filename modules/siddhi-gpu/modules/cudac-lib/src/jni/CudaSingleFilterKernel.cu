@@ -72,6 +72,7 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, GpuEventCons
 	p_DeviceInput = NULL;
 	p_StopWatch = NULL;
 	i_NumAttributes = 0;
+	i_CudaDeviceId = -1;
 }
 
 CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer * _pConsumer, FILE * _fpLog) :
@@ -93,6 +94,7 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEvents
 	p_DeviceInput = NULL;
 	p_StopWatch = NULL;
 	i_NumAttributes = 0;
+	i_CudaDeviceId = -1;
 }
 
 CudaSingleFilterKernel::~CudaSingleFilterKernel()
@@ -158,8 +160,10 @@ bool CudaSingleFilterKernel::SelectDevice(int _iDeviceId)
 
 	if(_iDeviceId < iDevCount)
 	{
-		CUDA_CHECK_RETURN(cudaSetDevice(_iDeviceId));
-		fprintf(fp_Log, "CUDA device set to %d\n", _iDeviceId);
+		i_CudaDeviceId = _iDeviceId;
+
+		CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId));
+		fprintf(fp_Log, "CUDA device set to %d\n", i_CudaDeviceId);
 		fflush(fp_Log);
 		return true;
 	}
@@ -211,6 +215,8 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
 
 void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 {
+	CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId)); // TODO: do this only at start
+
 	sdkStartTimer(&p_StopWatch);
 
 	p_HostInput->i_EventCount = _iNumEvents;

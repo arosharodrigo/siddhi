@@ -24,7 +24,8 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, const char * _zName,
 	i_SizeOfEvent(0),
 	i_ResultsBufferPosition(0),
 	i_EventMetaBufferPosition(0),
-	i_EventDataBufferPosition(0)
+	i_EventDataBufferPosition(0),
+	i_CudaDeviceId(-1)
 {
 	char zLogFile[256];
 	sprintf(zLogFile, "logs/GpuEventConsumer_%s.log", _zName);

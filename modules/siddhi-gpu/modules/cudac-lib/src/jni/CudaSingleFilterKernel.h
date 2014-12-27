@@ -51,6 +51,8 @@ public:
 private:
 	bool SelectDevice(int _iDeviceId);
 
+	int i_CudaDeviceId;
+
 	int i_EventsPerBlock;
 	int i_MaxNumberOfEvents;
 //	int i_NumEvents;
