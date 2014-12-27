@@ -64,6 +64,8 @@
                                     <arg line="-f ${makefile.name}" />
                                     <arg value="CPPBUILD=${project.basedir}/../javacpp-cudaclib/cppbuild" />
                                     <arg value="PLATFORM=${platform}" />
+                                    <!--arg value="GPU_DEBUG=1" /-->
+                                    <!--arg value="KERNEL_TIME=1" /-->
                                     <!--arg value="dbg=1" /-->
                                 </exec>
                             </target>
@@ -81,6 +83,8 @@
                                     <arg line="-f ${makefile.name} clean" />
                                     <arg value="CPPBUILD=${project.basedir}/../javacpp-cudaclib/cppbuild" />
                                     <arg value="PLATFORM=${platform}" />
+                                    <!--arg value="GPU_DEBUG=1" /-->
+                                    <!--arg value="KERNEL_TIME=1" /-->
                                     <!--arg value="dbg=1" /-->
                                 </exec>
                             </target>

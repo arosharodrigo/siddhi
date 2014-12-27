@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.event.stream;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -152,5 +153,11 @@ public class StreamEvent implements ComplexEvent {
         } else {
             next.addToLast(event);
         }
+    }
+    
+    @Override
+    public String toString() {
+        return "StreamEvent{timestamp=" + timestamp + " isExpired=" + isExpired + " outputData=" + outputData.toString() +
+                " beforeWindowData=" + beforeWindowData.toString() + " afterWindowData=" + onAfterWindowData.toString() + "}";
     }
 }

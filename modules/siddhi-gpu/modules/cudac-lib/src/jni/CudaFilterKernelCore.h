@@ -156,11 +156,11 @@ extern __device__ int MulExpressionInt(Filter & _mFilter, EventMeta & _mEventMet
 extern __device__ int DivExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 extern __device__ int ModExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 
-extern __device__ long AddExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
-extern __device__ long MinExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
-extern __device__ long MulExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
-extern __device__ long DivExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
-extern __device__ long ModExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
+extern __device__ int64_t AddExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
+extern __device__ int64_t MinExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
+extern __device__ int64_t MulExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
+extern __device__ int64_t DivExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
+extern __device__ int64_t ModExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 
 extern __device__ float AddExpressionFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 extern __device__ float MinExpressionFloat(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
@@ -176,7 +176,7 @@ extern __device__ double ModExpressionDouble(Filter & _mFilter, EventMeta & _mEv
 
 extern __device__ bool ExecuteBoolExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 extern __device__ int ExecuteIntExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
-extern __device__ long ExecuteLongExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
+extern __device__ int64_t ExecuteLongExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 extern __device__ float ExecuteFloatExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 extern __device__ double ExecuteDoubleExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 extern __device__ const char * ExecuteStringExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex);

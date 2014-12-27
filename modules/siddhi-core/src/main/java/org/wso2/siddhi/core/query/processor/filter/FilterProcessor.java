@@ -50,6 +50,7 @@ public class FilterProcessor implements Processor {
     private Map<Integer, Attribute> varPositionToAttribNameMap = null;
     private int inputStreamEventIndex = 0;
     private int [] stringAttributeSizes = null;
+    private String queryName = null;
 
     private ByteBuffer eventByteBuffer = null;
     private int filterResultsBufferPosition = 0;
@@ -75,9 +76,10 @@ public class FilterProcessor implements Processor {
     }
 
     public FilterProcessor(ExpressionExecutor conditionExecutor, SiddhiGpu.GpuEventConsumer gpuEventConsumer, 
-            int threshold, String stringAttributeSizes) {
+            String queryName, int threshold, String stringAttributeSizes) {
         this.gpuEventConsumer = gpuEventConsumer;
         this.gpuProcessMinimumEventCount = threshold;
+        this.queryName = queryName;
 
         String [] tokens = stringAttributeSizes.split(",");
         if (tokens.length > 0) {
@@ -89,7 +91,7 @@ public class FilterProcessor implements Processor {
             }
         }
 
-        log.info("GpuEventConsumer MaxNumberOfEvents : " + gpuEventConsumer.GetMaxNumberOfEvents());
+        log.info("[" + this.queryName + "] GpuEventConsumer MaxNumberOfEvents : " + gpuEventConsumer.GetMaxNumberOfEvents());
 
         this.inputStreamEvents = new StreamEvent[gpuEventConsumer.GetMaxNumberOfEvents()];
 
@@ -130,7 +132,7 @@ public class FilterProcessor implements Processor {
             // check batch size and use GPU processing if size exceed minimum threshold
             // number of events in batch should at least exceed block size
 
-            //long preStartTime = System.nanoTime();
+            long preStartTime = System.nanoTime();
 
             inputStreamEventIndex = 0;
             int bufferIndex = eventsDataBufferPosition; 
@@ -139,6 +141,7 @@ public class FilterProcessor implements Processor {
             while (iterator.hasNext()) {
 
                 StreamEvent streamEvent = iterator.next();
+                log.info("[" + queryName + "] Into GPU " + streamEvent.toString()); 
                 inputStreamEvents[inputStreamEventIndex++] = streamEvent;
 
                 for (AttributeDefinition attributeDefinition : attributeDefinitionList) {
@@ -186,12 +189,12 @@ public class FilterProcessor implements Processor {
 
             if (inputStreamEventIndex >= gpuProcessMinimumEventCount) {
 
-                //long preStopTime = System.nanoTime();
+                long preStopTime = System.nanoTime();
 
                 // process events and set results in same buffer
                 gpuEventConsumer.ProcessEvents(inputStreamEventIndex);
 
-                //long postStartTime = System.nanoTime();
+                long postStartTime = System.nanoTime();
 
                 // read results from byteBuffer
                 // max number of result is number of input events to kernel
@@ -206,6 +209,8 @@ public class FilterProcessor implements Processor {
                     if (resultsBuffer.get(resultsIndex) == 1) {
                         StreamEvent e = inputStreamEvents[resultsIndex];
                         resultCount++;
+                        
+                        log.info("[" + queryName + "] Out from GPU " + e.toString());
 
                         if (lastEvent != null) {
                             lastEvent.setNext(e);
@@ -217,22 +222,22 @@ public class FilterProcessor implements Processor {
                     }
                 }
 
-                //long postStopTime = System.nanoTime();
+                long postStopTime = System.nanoTime();
 
                 if (resultStreamEvent != null) {
-                    //log.info("InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
-                    /*log.info("Times : Pre=" + (preStopTime - preStartTime) + 
-			    " Gpu=" + (postStartTime - preStopTime) + 
-			    " Post=" + (postStopTime - postStartTime) + 
-			    " Total=" + (postStopTime - preStartTime));*/
+                    log.info("[" + this.queryName + "] InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
+                    log.info("[" + this.queryName + "] Times : Pre=" + (preStopTime - preStartTime) + 
+                            " Gpu=" + (postStartTime - preStopTime) + 
+                            " Post=" + (postStopTime - postStartTime) + 
+                            " Total=" + (postStopTime - preStartTime));
                     this.next.process(resultStreamEvent);
-                } /*else {
-		    log.info("InputCount=" + inputStreamEventIndex + " ResultCount=0");
-		    log.info("Times : Pre=" + (preStopTime - preStartTime) +
-			    " Gpu=" + (postStartTime - preStopTime) + 
-			    " Post=" + (postStopTime - postStartTime) + 
-			    " Total=" + (postStopTime - preStartTime));
-		}*/
+                } else {
+                    log.info("[" + this.queryName + "] InputCount=" + inputStreamEventIndex + " ResultCount=0");
+                    log.info("[" + this.queryName + "] Times : Pre=" + (preStopTime - preStartTime) +
+                            " Gpu=" + (postStartTime - preStopTime) + 
+                            " Post=" + (postStopTime - postStartTime) + 
+                            " Total=" + (postStopTime - preStartTime));
+                }
 
             } else {
                 iterator = event.getIterator();

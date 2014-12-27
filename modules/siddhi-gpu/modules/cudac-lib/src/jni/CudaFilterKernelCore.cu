@@ -104,35 +104,35 @@ __device__ int ModExpressionInt(Filter & _mFilter, EventMeta & _mEventMeta, char
 
 // ========================= LONG ==============================================
 
-__device__ long AddExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t AddExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
 	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) +
 			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long MinExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t MinExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
 	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) -
 			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long MulExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t MulExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
 	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) *
 			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long DivExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t DivExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
 	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) /
 			ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex));
 }
 
-__device__ long ModExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t ModExpressionLong(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;
 	return (ExecuteLongExpression(_mFilter, _mEventMeta, _pEvent, _iCurrentNodeIndex) %
@@ -897,7 +897,7 @@ __device__ int ExecuteIntExpression(Filter & _mFilter, EventMeta & _mEventMeta, 
 	return INT_MIN;
 }
 
-__device__ long ExecuteLongExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t ExecuteLongExpression(Filter & _mFilter, EventMeta & _mEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
 {
 	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{

@@ -129,7 +129,7 @@ public class SingleInputStreamParser {
 
                         FilterProcessor filterProcessor = new FilterProcessor(
                                 ExpressionParser.parseExpression(condition, context, metaStreamEvent, executors, false),
-                                gpuEventConsumer, minEventCount, stringAttributeSizes); 
+                                gpuEventConsumer, queryName, minEventCount, stringAttributeSizes); 
                         filterProcessor.setVariablePositionToAttributeNameMapper(gpuExpressionParser.getVariablePositionToAttributeNameMapper());
 
                         return filterProcessor;

@@ -24,8 +24,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, const char * _zName,
 	i_SizeOfEvent(0),
 	i_ResultsBufferPosition(0),
 	i_EventMetaBufferPosition(0),
-	i_EventDataBufferPosition(0),
-	i_CudaDeviceId(-1)
+	i_EventDataBufferPosition(0)
 {
 	char zLogFile[256];
 	sprintf(zLogFile, "logs/GpuEventConsumer_%s.log", _zName);
@@ -120,11 +119,12 @@ void GpuEventConsumer::SetEventDataBufferPosition(int _iPos)
 void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 {
 	// events are filled in bytebuffer
-	// copy them to GPU
-	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
-	//PrintByteBuffer(_iNumEvents);
+#ifdef GPU_DEBUG
 	PrintThreadInfo();
+	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
+	PrintByteBuffer(_iNumEvents);
 	fflush(fp_Log);
+#endif
 	p_CudaKernel->ProcessEvents(_iNumEvents);
 }
 
@@ -247,14 +247,17 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 		}
 
 		fprintf(fp_Log, "\n");
+		fflush(fp_Log);
 	}
 }
 
 void GpuEventConsumer::PrintThreadInfo()
 {
+#ifdef GPU_DEBUG
 	pid_t pid = getpid();
 	int tid = syscall(__NR_gettid);
 	fprintf(fp_Log, "[%s] EventConsumer : PID=%d TID=%d\n", z_Name, pid, tid);
+#endif
 }
 
 };

@@ -64,6 +64,10 @@ else
       TARGET := release
 endif
 
+ifeq ($(GPU_DEBUG),1)
+	CCFLAGS += -DGPU_DEBUG
+endif
+
 ALL_CCFLAGS := 
 ALL_CCFLAGS += $(NVCCFLAGS)
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
