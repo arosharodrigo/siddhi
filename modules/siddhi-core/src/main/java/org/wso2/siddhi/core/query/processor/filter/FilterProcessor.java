@@ -53,6 +53,7 @@ public class FilterProcessor implements Processor {
     private String queryName = null;
 
     private ByteBuffer eventByteBuffer = null;
+    private IntBuffer resultsBuffer = null;
     private int filterResultsBufferPosition = 0;
     private int eventsDataBufferPosition = 0;
     private int eventMetaBufferPosition = 0;
@@ -182,7 +183,11 @@ public class FilterProcessor implements Processor {
                     }
                     break;
                     default:
-                        break;
+                    {
+                        log.warn("[" + queryName + "] Unknown attribute [CpuPos=" + attributeDefinition.attributePositionInCpu + 
+                                "|Type=" + attributeDefinition.attributeType + "|Attr=" + attrib + "]");
+                    }
+                    break;
                     }
                 }
             }
@@ -198,7 +203,7 @@ public class FilterProcessor implements Processor {
 
                 // read results from byteBuffer
                 // max number of result is number of input events to kernel
-                IntBuffer resultsBuffer = eventByteBuffer.asIntBuffer();
+                resultsBuffer.position(0);
 
                 StreamEvent resultStreamEvent = null;
                 StreamEvent lastEvent = null;
@@ -240,6 +245,8 @@ public class FilterProcessor implements Processor {
                 }
 
             } else {
+                log.info("GPU Threshold not met : [InputCount=" + inputStreamEventIndex + "|Threshold=" + gpuProcessMinimumEventCount + "]");
+                
                 iterator = event.getIterator();
                 while (iterator.hasNext()) {
                     StreamEvent streamEvent = iterator.next();
@@ -367,9 +374,8 @@ public class FilterProcessor implements Processor {
 
             // allocate byte buffer
             log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
-            synchronized (metaEvent) { // TODO: remove this
-                eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
-            }
+            eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
+            resultsBuffer = eventByteBuffer.asIntBuffer();
             log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
             gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
             // gpuEventConsumer.CreateByteBuffer(byteBufferSize);
@@ -379,6 +385,7 @@ public class FilterProcessor implements Processor {
                     " HasArray=" + this.eventByteBuffer.hasArray() + 
                     " Position=" + this.eventByteBuffer.position() + 
                     " Limit=" + this.eventByteBuffer.limit());
+            
 
             // fill byte buffer preamble
 

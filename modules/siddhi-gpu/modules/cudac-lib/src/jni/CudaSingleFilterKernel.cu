@@ -15,6 +15,7 @@
 #include "CudaCommon.h"
 #include "helper_timer.h"
 #include "CudaFilterKernelCore.h"
+#include <math.h>
 
 namespace SiddhiGpu
 {
@@ -213,6 +214,14 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
 	fflush(fp_Log);
 }
 
+/**
+ * This function is in critical path - calls frequently
+ * Logging should be avoided. Only with GPU_DEBUG defined
+ * Performance metrics gathering only when compiled with KERNEL_TIME defined
+ *
+ * Optimize for memory transfer
+ * TODO: async operations / overlapped operations / streams
+ */
 void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 {
 	CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId)); // TODO: do this only at start
@@ -230,7 +239,7 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	// call entry kernel
-	int numBlocksX = _iNumEvents / i_EventsPerBlock;
+	int numBlocksX = ceil(_iNumEvents / i_EventsPerBlock);
 	int numBlocksY = 1;
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_EventsPerBlock, 1);
