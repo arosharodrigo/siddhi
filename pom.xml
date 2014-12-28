@@ -113,10 +113,6 @@
                     <useFile>false</useFile>
                     <forkMode>once</forkMode>
                     <argLine>-ea -Xmx512m</argLine>
-                    <systemPropertyVariables>
-                        <debug.log.enable>false</debug.log.enable>
-                        <performance.log.enable>false</performance.log.enable>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 <!--             <plugin>
@@ -145,6 +141,31 @@
                     </execution>
                 </executions>
             </plugin> -->
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>debug.log.enable</name>
+                                    <value>false</value>
+                                </property>
+                                <property>
+                                    <name>performance.log.enable</name>
+                                    <value>true</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
