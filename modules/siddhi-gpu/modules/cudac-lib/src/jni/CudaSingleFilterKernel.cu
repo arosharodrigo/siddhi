@@ -50,11 +50,11 @@ __global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInpu
 	//TODO improve results sending
 	if(bResult)
 	{
-		pMatchedEvents->a_ResultEvents[iEventIdx] = 1;
+		pMatchedEvents->a_ResultEvents[iEventIdx] = iEventIdx;
 	}
 	else // ~ possible way to avoid cudaMemset from host
 	{
-		pMatchedEvents->a_ResultEvents[iEventIdx] = 0;
+		pMatchedEvents->a_ResultEvents[iEventIdx] = -1 * iEventIdx;
 	}
 }
 
@@ -239,7 +239,7 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	// call entry kernel
-	int numBlocksX = ceil(_iNumEvents / i_EventsPerBlock);
+	int numBlocksX = ceil((float)_iNumEvents / (float)i_EventsPerBlock);
 	int numBlocksY = 1;
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_EventsPerBlock, 1);

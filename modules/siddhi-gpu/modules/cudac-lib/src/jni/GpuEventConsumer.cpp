@@ -7,10 +7,12 @@
 
 #include "GpuEventConsumer.h"
 #include "ByteBufferStructs.h"
+#include "CpuFilterKernel.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <syscall.h>
 #include <vector>
+#include <math.h>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
@@ -21,6 +23,7 @@ namespace SiddhiGpu
 GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, const char * _zName, int _iMaxBufferSize, int _iEventsPerBlock) :
 	i_MaxNumOfEvents(_iMaxBufferSize),
 	i_ByteBufferSize(0),
+	i_EventsPerBlock(_iEventsPerBlock),
 	i_SizeOfEvent(0),
 	i_ResultsBufferPosition(0),
 	i_EventMetaBufferPosition(0),
@@ -39,7 +42,7 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, const char * _zName,
 		case SingleFilterKernel:
 		{
 			fprintf(fp_Log, "[%s] EventConsumerGpu created for SingleFilterKernel\n", z_Name);
-			p_CudaKernel = new CudaSingleFilterKernel(i_MaxNumOfEvents, _iEventsPerBlock, this, fp_Log);
+			p_CudaKernel = new CudaSingleFilterKernel(i_MaxNumOfEvents, i_EventsPerBlock, this, fp_Log);
 		}
 		break;
 		default:
@@ -123,6 +126,7 @@ void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 	PrintThreadInfo();
 	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
 	PrintByteBuffer(_iNumEvents);
+	EvaluateEvenetsInCpu(_iNumEvents);
 	fflush(fp_Log);
 #endif
 	p_CudaKernel->ProcessEvents(_iNumEvents);
@@ -150,6 +154,7 @@ void GpuEventConsumer::ConfigureFilters()
 	while(ite != map_FiltersById.end())
 	{
 		Filter * pFilter = ite->second;
+		p_Filter = pFilter;
 		p_CudaKernel->AddFilterToDevice(pFilter);
 
 		++ite;
@@ -248,6 +253,40 @@ void GpuEventConsumer::PrintByteBuffer(int _iNumEvents)
 
 		fprintf(fp_Log, "\n");
 		fflush(fp_Log);
+	}
+}
+
+void GpuEventConsumer::EvaluateEvenetsInCpu(int _iNumEvents)
+{
+	EventMeta * pEventMeta = (EventMeta*) (p_ByteBuffer + i_EventMetaBufferPosition);
+	EventMeta mEventMeta = *pEventMeta;
+
+	int iNumBlocks = ceil((float)_iNumEvents / (float)i_EventsPerBlock);
+
+	for(int blockidx=0; blockidx<iNumBlocks; ++blockidx)
+	{
+		for(int threadidx=0; threadidx<i_EventsPerBlock; ++threadidx)
+		{
+			// get assigned event
+			int iEventIdx = (blockidx * i_EventsPerBlock) +  threadidx;
+			char * pEvent = (p_ByteBuffer + i_EventDataBufferPosition) + (i_SizeOfEvent * iEventIdx);
+
+			// get assigned filter
+			Filter mFilter = *p_Filter;
+
+			int iCurrentNodeIdx = 0;
+			bool bResult = Evaluate(mFilter, mEventMeta, pEvent, iCurrentNodeIdx);
+
+			if(bResult)
+			{
+				fprintf(fp_Log, "Matched [%d] \n", iEventIdx);
+			}
+			else // ~ possible way to avoid cudaMemset from host
+			{
+				fprintf(fp_Log, "Not Matched [%d] \n", iEventIdx);
+			}
+
+		}
 	}
 }
 

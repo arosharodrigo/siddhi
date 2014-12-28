@@ -59,10 +59,12 @@ private:
 	typedef std::map<int, Filter *> FiltersById;
 
 	void PrintByteBuffer(int _iNumEvents);
+	void EvaluateEvenetsInCpu(int _iNumEvents);
 	void PrintThreadInfo();
 
 	int i_MaxNumOfEvents;
 	FiltersById map_FiltersById;
+	Filter * p_Filter;
 
 	CudaKernelBase * p_CudaKernel;
 
@@ -72,6 +74,7 @@ private:
 	char * p_ByteBuffer;
 	int i_ByteBufferSize;
 
+	int i_EventsPerBlock;
 	int i_SizeOfEvent;
 	int i_ResultsBufferPosition;
 	int i_EventMetaBufferPosition;

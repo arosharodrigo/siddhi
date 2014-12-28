@@ -97,7 +97,7 @@ GENCODE_FLAGS   := $(GENCODE_SM20)
 .SUFFIXES: .cu
 
 OUT=libgpueventconsumer.so
-SRC = Filter.cpp  GpuEventConsumer.cpp  Timer.cpp CudaKernelBase.cpp
+SRC = Filter.cpp  GpuEventConsumer.cpp  Timer.cpp CudaKernelBase.cpp CpuFilterKernel.cpp
 CULIBS = CudaFilterKernelCore CudaSingleFilterKernel
 #SRCCU = CudaFilterKernelCore.cu CudaFilterKernel.cu CudaSingleFilterKernel.cu 
 CULIBSRC = $(addsuffix .cu , $(CULIBS))

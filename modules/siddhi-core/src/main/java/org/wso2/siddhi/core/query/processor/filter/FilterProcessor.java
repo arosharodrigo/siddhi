@@ -211,11 +211,12 @@ public class FilterProcessor implements Processor {
                 int resultCount = 0;
 
                 for (int resultsIndex = 0; resultsIndex < inputStreamEventIndex; ++resultsIndex) {
-                    if (resultsBuffer.get(resultsIndex) == 1) {
+                    int matched = resultsBuffer.get(); 
+                    if (matched >= 0) {
                         StreamEvent e = inputStreamEvents[resultsIndex];
                         resultCount++;
                         
-                        log.info("[" + queryName + "] Out from GPU " + e.toString());
+                        log.info("[" + matched + "] Out from GPU [" + resultsIndex + "]" + e.toString());
 
                         if (lastEvent != null) {
                             lastEvent.setNext(e);
@@ -224,6 +225,9 @@ public class FilterProcessor implements Processor {
                             resultStreamEvent = e;
                             lastEvent = resultStreamEvent;
                         }
+                    } else {
+                        StreamEvent e = inputStreamEvents[resultsIndex];
+                        log.info("[" + matched + "] Not matched from GPU [" + resultsIndex + "]" + e.toString());
                     }
                 }
 
