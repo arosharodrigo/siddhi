@@ -261,15 +261,14 @@ void GpuEventConsumer::EvaluateEvenetsInCpu(int _iNumEvents)
 	fprintf(fp_Log, "EvaluateEvenetsInCpu [NumEvents=%d] \n", _iNumEvents);
 
 	EventMeta * pEventMeta = (EventMeta*) (p_ByteBuffer + i_EventMetaBufferPosition);
-	EventMeta mEventMeta = *pEventMeta;
 
-	fprintf(fp_Log, "EventMeta %d [", mEventMeta.i_AttributeCount);
-	for(int i=0; i<mEventMeta.i_AttributeCount; ++i)
+	fprintf(fp_Log, "EventMeta %d [", pEventMeta->i_AttributeCount);
+	for(int i=0; i<pEventMeta->i_AttributeCount; ++i)
 	{
 		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
-				mEventMeta.a_Attributes[i].i_Position,
-				mEventMeta.a_Attributes[i].i_Type,
-				mEventMeta.a_Attributes[i].i_Length);
+				pEventMeta->a_Attributes[i].i_Position,
+				pEventMeta->a_Attributes[i].i_Type,
+				pEventMeta->a_Attributes[i].i_Length);
 	}
 	fprintf(fp_Log, "]\n");
 	fflush(fp_Log);
@@ -293,52 +292,52 @@ void GpuEventConsumer::EvaluateEvenetsInCpu(int _iNumEvents)
 
 			fprintf(fp_Log, "Event_%d <%p> ", iEventIdx, pEvent);
 
-			for(int a=0; a<mEventMeta.i_AttributeCount; ++a)
+			for(int a=0; a<pEventMeta->i_AttributeCount; ++a)
 			{
-				switch(mEventMeta.a_Attributes[a].i_Type)
+				switch(pEventMeta->a_Attributes[a].i_Type)
 				{
 				case DataType::Boolean:
 				{
 					int16_t i;
-					memcpy(&i, pEvent + mEventMeta.a_Attributes[a].i_Position, 2);
-					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d] ", mEventMeta.a_Attributes[a].i_Position, i);
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 2);
+					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d] ", pEventMeta->a_Attributes[a].i_Position, i);
 				}
 				break;
 				case DataType::Int:
 				{
 					int32_t i;
-					memcpy(&i, pEvent + mEventMeta.a_Attributes[a].i_Position, 4);
-					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d] ", mEventMeta.a_Attributes[a].i_Position, i);
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d] ", pEventMeta->a_Attributes[a].i_Position, i);
 				}
 				break;
 				case DataType::Long:
 				{
 					int64_t i;
-					memcpy(&i, pEvent + mEventMeta.a_Attributes[a].i_Position, 8);
-					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%" PRIi64 "] ", mEventMeta.a_Attributes[a].i_Position, i);
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%" PRIi64 "] ", pEventMeta->a_Attributes[a].i_Position, i);
 				}
 				break;
 				case DataType::Float:
 				{
 					float f;
-					memcpy(&f, pEvent + mEventMeta.a_Attributes[a].i_Position, 4);
-					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f] ", mEventMeta.a_Attributes[a].i_Position, f);
+					memcpy(&f, pEvent + pEventMeta->a_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f] ", pEventMeta->a_Attributes[a].i_Position, f);
 				}
 				break;
 				case DataType::Double:
 				{
 					double f;
-					memcpy(&f, pEvent + mEventMeta.a_Attributes[a].i_Position, 8);
-					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f] ", mEventMeta.a_Attributes[a].i_Position, f);
+					memcpy(&f, pEvent + pEventMeta->a_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f] ", pEventMeta->a_Attributes[a].i_Position, f);
 				}
 				break;
 				case DataType::StringIn:
 				{
 					int16_t i;
-					memcpy(&i, pEvent + mEventMeta.a_Attributes[a].i_Position, 2);
-					char * z = pEvent + mEventMeta.a_Attributes[a].i_Position + 2;
+					memcpy(&i, pEvent + pEventMeta->a_Attributes[a].i_Position, 2);
+					char * z = pEvent + pEventMeta->a_Attributes[a].i_Position + 2;
 					z[i] = 0;
-					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s] ", mEventMeta.a_Attributes[a].i_Position, i, z);
+					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s] ", pEventMeta->a_Attributes[a].i_Position, i, z);
 				}
 				break;
 				default:
@@ -350,7 +349,7 @@ void GpuEventConsumer::EvaluateEvenetsInCpu(int _iNumEvents)
 			fflush(fp_Log);
 
 			int iCurrentNodeIdx = 0;
-			bool bResult = SiddhiCpu::Evaluate(mFilter, mEventMeta, pEvent, iCurrentNodeIdx, fp_Log);
+			bool bResult = SiddhiCpu::Evaluate(mFilter, pEventMeta, pEvent, iCurrentNodeIdx, fp_Log);
 			fflush(fp_Log);
 
 			if(bResult)
