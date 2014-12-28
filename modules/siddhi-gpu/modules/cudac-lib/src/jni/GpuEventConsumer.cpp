@@ -286,6 +286,12 @@ void GpuEventConsumer::EvaluateEvenetsInCpu(int _iNumEvents)
 	{
 		for(int threadidx=0; threadidx<i_EventsPerBlock; ++threadidx)
 		{
+			if((blockidx == _iNumEvents / i_EventsPerBlock) && // last thread block
+					(threadidx >= _iNumEvents % i_EventsPerBlock))
+			{
+				continue;
+			}
+
 			// get assigned event
 			int iEventIdx = (blockidx * i_EventsPerBlock) +  threadidx;
 			char * pEvent = (p_ByteBuffer + i_EventDataBufferPosition) + (i_SizeOfEvent * iEventIdx);

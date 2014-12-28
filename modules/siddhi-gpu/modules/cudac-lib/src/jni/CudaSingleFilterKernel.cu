@@ -32,7 +32,6 @@ __global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInpu
 	}
 
 	EventMeta * pEventMeta = (EventMeta*) (_pInput->p_ByteBuffer + _pInput->i_EventMetaPosition);
-	/*__shared__*/ EventMeta mEventMeta = *pEventMeta;
 
 	// get assigned event
 	int iEventIdx = (blockIdx.x * _pInput->i_EventsPerBlock) +  threadIdx.x;
@@ -45,7 +44,7 @@ __global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInpu
 	MatchedEvents * pMatchedEvents = (MatchedEvents*) (_pInput->p_ByteBuffer + _pInput->i_ResultsPosition);
 
 	int iCurrentNodeIdx = 0;
-	bool bResult = Evaluate(mFilter, mEventMeta, pEvent, iCurrentNodeIdx);
+	bool bResult = Evaluate(mFilter, pEventMeta, pEvent, iCurrentNodeIdx);
 
 	//TODO improve results sending
 	if(bResult)
