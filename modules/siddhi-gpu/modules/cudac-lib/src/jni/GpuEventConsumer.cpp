@@ -275,7 +275,7 @@ void GpuEventConsumer::EvaluateEvenetsInCpu(int _iNumEvents)
 			Filter mFilter = *p_Filter;
 
 			int iCurrentNodeIdx = 0;
-			bool bResult = Evaluate(mFilter, mEventMeta, pEvent, iCurrentNodeIdx);
+			bool bResult = SiddhiCpu::Evaluate(mFilter, mEventMeta, pEvent, iCurrentNodeIdx);
 
 			if(bResult)
 			{
@@ -286,6 +286,7 @@ void GpuEventConsumer::EvaluateEvenetsInCpu(int _iNumEvents)
 				fprintf(fp_Log, "Not Matched [%d] \n", iEventIdx);
 			}
 
+			fflush(fp_Log);
 		}
 	}
 }
