@@ -113,6 +113,9 @@
                     <useFile>false</useFile>
                     <forkMode>once</forkMode>
                     <argLine>-ea -Xmx512m</argLine>
+                    <systemPropertyVariables>
+                        <debug.log.enable>false</debug.log.enable>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 <!--             <plugin>

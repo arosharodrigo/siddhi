@@ -28,7 +28,7 @@ namespace SiddhiGpu
 
 
 // executor function pointer type
-typedef bool (*ExecutorFuncPointer)(Filter &, EventMeta &, char *, int &);
+typedef bool (*ExecutorFuncPointer)(Filter &, EventMeta *, char *, int &);
 
 extern __device__ bool cuda_strcmp(const char *s1, const char *s2);
 

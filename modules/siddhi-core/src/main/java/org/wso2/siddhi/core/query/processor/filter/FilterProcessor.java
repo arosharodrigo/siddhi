@@ -42,6 +42,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 public class FilterProcessor implements Processor {
 
     private static final Logger log = Logger.getLogger(FilterProcessor.class);
+    private static final boolean debugLogEnabled = "true".equals(System.getProperty("debug.log.enable"));
     protected Processor next;
     private ExpressionExecutor conditionExecutor;
     private SiddhiGpu.GpuEventConsumer gpuEventConsumer = null;
@@ -142,7 +143,9 @@ public class FilterProcessor implements Processor {
             while (iterator.hasNext()) {
 
                 StreamEvent streamEvent = iterator.next();
-                log.info("[" + queryName + "] Into GPU " + streamEvent.toString()); 
+                if(debugLogEnabled) {
+                    log.info("[" + queryName + "] Into GPU " + streamEvent.toString());
+                }
                 inputStreamEvents[inputStreamEventIndex++] = streamEvent;
 
                 for (AttributeDefinition attributeDefinition : attributeDefinitionList) {
@@ -216,7 +219,9 @@ public class FilterProcessor implements Processor {
                         StreamEvent e = inputStreamEvents[resultsIndex];
                         resultCount++;
                         
-                        log.info("[" + matched + "] Out from GPU [" + resultsIndex + "]" + e.toString());
+                        if(debugLogEnabled) {
+                            log.info("[" + matched + "] Out from GPU [" + resultsIndex + "]" + e.toString());
+                        }
 
                         if (lastEvent != null) {
                             lastEvent.setNext(e);
@@ -225,7 +230,7 @@ public class FilterProcessor implements Processor {
                             resultStreamEvent = e;
                             lastEvent = resultStreamEvent;
                         }
-                    } else {
+                    } else if(debugLogEnabled) {
                         StreamEvent e = inputStreamEvents[resultsIndex];
                         log.info("[" + matched + "] Not matched from GPU [" + resultsIndex + "]" + e.toString());
                     }

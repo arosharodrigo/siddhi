@@ -126,7 +126,7 @@ void GpuEventConsumer::ProcessEvents(int _iNumEvents)
 	PrintThreadInfo();
 	fprintf(fp_Log, "ProcessEvents : NumEvents=%d\n", _iNumEvents);
 	PrintByteBuffer(_iNumEvents);
-	EvaluateEvenetsInCpu(_iNumEvents);
+	//EvaluateEvenetsInCpu(_iNumEvents);
 	fflush(fp_Log);
 #endif
 	p_CudaKernel->ProcessEvents(_iNumEvents);
