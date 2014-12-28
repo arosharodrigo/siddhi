@@ -115,6 +115,7 @@
                     <argLine>-ea -Xmx512m</argLine>
                     <systemPropertyVariables>
                         <debug.log.enable>false</debug.log.enable>
+                        <performance.log.enable>false</performance.log.enable>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

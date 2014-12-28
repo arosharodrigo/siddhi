@@ -43,6 +43,7 @@ public class FilterProcessor implements Processor {
 
     private static final Logger log = Logger.getLogger(FilterProcessor.class);
     private static final boolean debugLogEnabled = "true".equals(System.getProperty("debug.log.enable"));
+    private static final boolean performanceLogEnabled = "true".equals(System.getProperty("performance.log.enable"));
     protected Processor next;
     private ExpressionExecutor conditionExecutor;
     private SiddhiGpu.GpuEventConsumer gpuEventConsumer = null;
@@ -58,6 +59,8 @@ public class FilterProcessor implements Processor {
     private int filterResultsBufferPosition = 0;
     private int eventsDataBufferPosition = 0;
     private int eventMetaBufferPosition = 0;
+    
+    private long preStartTime = 0, preStopTime = 0, postStartTime = 0, postStopTime = 0;
 
     private static class AttributeDefinition {
         public int attributePositionInGpu;
@@ -133,8 +136,10 @@ public class FilterProcessor implements Processor {
 
             // check batch size and use GPU processing if size exceed minimum threshold
             // number of events in batch should at least exceed block size
-
-            long preStartTime = System.nanoTime();
+            
+            if(performanceLogEnabled) {
+                preStartTime = System.nanoTime();
+            }
 
             inputStreamEventIndex = 0;
             int bufferIndex = eventsDataBufferPosition; 
@@ -197,12 +202,16 @@ public class FilterProcessor implements Processor {
 
             if (inputStreamEventIndex >= gpuProcessMinimumEventCount) {
 
-                long preStopTime = System.nanoTime();
+                if(performanceLogEnabled) {
+                    preStopTime = System.nanoTime();
+                }
 
                 // process events and set results in same buffer
                 gpuEventConsumer.ProcessEvents(inputStreamEventIndex);
 
-                long postStartTime = System.nanoTime();
+                if(performanceLogEnabled) {
+                    postStartTime = System.nanoTime();
+                }
 
                 // read results from byteBuffer
                 // max number of result is number of input events to kernel
@@ -236,16 +245,22 @@ public class FilterProcessor implements Processor {
                     }
                 }
 
-                long postStopTime = System.nanoTime();
+                if(performanceLogEnabled) {
+                    postStopTime = System.nanoTime();
+                }
 
                 if (resultStreamEvent != null) {
-                    log.info("[" + this.queryName + "] InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
-                    log.info("[" + this.queryName + "] Times : Pre=" + (preStopTime - preStartTime) + 
-                            " Gpu=" + (postStartTime - preStopTime) + 
-                            " Post=" + (postStopTime - postStartTime) + 
-                            " Total=" + (postStopTime - preStartTime));
+                    if(performanceLogEnabled) {
+                        log.info("[" + this.queryName + "] InputCount=" + inputStreamEventIndex + " ResultCount=" + resultCount);
+                        log.info("[" + this.queryName + "] Times : Pre=" + (preStopTime - preStartTime) + 
+                                " Gpu=" + (postStartTime - preStopTime) + 
+                                " Post=" + (postStopTime - postStartTime) + 
+                                " Total=" + (postStopTime - preStartTime));
+                    }
+                    
                     this.next.process(resultStreamEvent);
-                } else {
+                    
+                } else if (performanceLogEnabled) {
                     log.info("[" + this.queryName + "] InputCount=" + inputStreamEventIndex + " ResultCount=0");
                     log.info("[" + this.queryName + "] Times : Pre=" + (preStopTime - preStartTime) +
                             " Gpu=" + (postStartTime - preStopTime) + 
@@ -254,7 +269,9 @@ public class FilterProcessor implements Processor {
                 }
 
             } else {
-                log.info("GPU Threshold not met : [InputCount=" + inputStreamEventIndex + "|Threshold=" + gpuProcessMinimumEventCount + "]");
+                if(debugLogEnabled) {
+                    log.info("GPU Threshold not met : [InputCount=" + inputStreamEventIndex + "|Threshold=" + gpuProcessMinimumEventCount + "]");
+                }
                 
                 iterator = event.getIterator();
                 while (iterator.hasNext()) {
