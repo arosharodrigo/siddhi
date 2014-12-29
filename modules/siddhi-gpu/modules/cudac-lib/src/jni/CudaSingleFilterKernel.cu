@@ -178,8 +178,9 @@ bool CudaSingleFilterKernel::SelectDevice(int _iDeviceId)
 	{
 		i_CudaDeviceId = _iDeviceId;
 
+		CUDA_CHECK_WARN(cudaSetDeviceFlags(cudaDeviceMapHost));
+		CUDA_CHECK_WARN(cudaPeekAtLastError());
 		CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId));
-		CUDA_CHECK_RETURN(cudaSetDeviceFlags(cudaDeviceMapHost));
 		fprintf(fp_Log, "CUDA device set to %d\n", i_CudaDeviceId);
 		fflush(fp_Log);
 		return true;
