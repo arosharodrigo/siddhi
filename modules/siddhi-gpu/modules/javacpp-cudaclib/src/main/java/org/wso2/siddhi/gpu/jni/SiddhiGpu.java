@@ -553,6 +553,9 @@ public static final int
 	public native void CopyFiltersToDevice();
 
 	public native float GetElapsedTimeAverage();
+
+//	SingleFilterKernelInput * p_DeviceInput;
+//	SingleFilterKernelInput * p_HostInput;
 }
 
 

@@ -57,24 +57,22 @@ private:
 
 	int i_EventsPerBlock;
 	int i_MaxNumberOfEvents;
-//	int i_NumEvents;
 	int i_NumAttributes;
 
 	char * p_HostEventBuffer;
 	char * p_UnalignedBuffer;
-	int i_EventBufferSize;
-//	CudaEvent * ap_HostEventBuffer;
-	std::list<Filter*> lst_HostFilters;
+	char * p_DeviceEventBuffer;
+	Filter * p_DeviceFilter;
 
-//	int * pi_HostMachedEvents;
-//	int * pi_DeviceMatchedEvents;
+	int i_EventBufferSize;
+	std::list<Filter*> lst_HostFilters;
 
 	::StopWatchInterface * p_StopWatch;
 
 	std::list<float> lst_ElapsedTimes;
 
-	SingleFilterKernelInput * p_DeviceInput;
-	SingleFilterKernelInput * p_HostInput;
+//	SingleFilterKernelInput * p_DeviceInput;
+//	SingleFilterKernelInput * p_HostInput;
 };
 
 };
