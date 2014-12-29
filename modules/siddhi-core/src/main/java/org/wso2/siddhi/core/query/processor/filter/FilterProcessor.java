@@ -399,26 +399,32 @@ public class FilterProcessor implements Processor {
             gpuEventConsumer.SetResultsBufferPosition(filterResultsBufferPosition);
             gpuEventConsumer.SetEventMetaBufferPosition(eventMetaBufferPosition);
             gpuEventConsumer.SetEventDataBufferPosition(eventsDataBufferPosition);
-
-            // allocate byte buffer
-//            log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
-//            eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
-//            resultsBuffer = eventByteBuffer.asIntBuffer();
-//            log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
-//            gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
             
-            // get bytebuffer from CUDA-C Lib
-            log.info("GpuEventConsumer : Get ByteBuffer of " + byteBufferSize + " bytes");
-            BytePointer bytePointer = gpuEventConsumer.CreateByteBuffer(byteBufferSize);
-            eventByteBuffer = bytePointer.asBuffer();
-            resultsBuffer = eventByteBuffer.asIntBuffer();
-            log.info("GpuEventConsumer : Got ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
+            try {
 
-            log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
-                    " HasArray=" + this.eventByteBuffer.hasArray() + 
-                    " Position=" + this.eventByteBuffer.position() + 
-                    " Limit=" + this.eventByteBuffer.limit());
+                // allocate byte buffer
+                //            log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
+                //            eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
+                //            resultsBuffer = eventByteBuffer.asIntBuffer();
+                //            log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
+                //            gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
+
+                // get bytebuffer from CUDA-C Lib
+                log.info("GpuEventConsumer : Get ByteBuffer of " + byteBufferSize + " bytes");
+                BytePointer bytePointer = gpuEventConsumer.CreateByteBuffer(byteBufferSize);
+                eventByteBuffer = bytePointer.asBuffer();
+                resultsBuffer = eventByteBuffer.asIntBuffer();
+                log.info("GpuEventConsumer : Got ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
+
+                log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
+                        " HasArray=" + this.eventByteBuffer.hasArray() + 
+                        " Position=" + this.eventByteBuffer.position() + 
+                        " Limit=" + this.eventByteBuffer.limit());
             
+            } catch (Exception ex) {
+                log.error("Exception in allocating ByteBuffer : " + ex);
+                ex.printStackTrace();
+            }
 
             // fill byte buffer preamble
 

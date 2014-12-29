@@ -76,7 +76,7 @@ char * GpuEventConsumer::CreateByteBuffer(int _iSize)
 	p_ByteBuffer = p_CudaKernel->GetEventBuffer(_iSize);
 	i_ByteBufferSize = _iSize;
 
-	fprintf(fp_Log, "[%s] EventConsumer : ByteBuffer Created=[%d]\n", z_Name, i_ByteBufferSize);
+	fprintf(fp_Log, "[%s] EventConsumer : ByteBuffer Created=[%d] [%p]\n", z_Name, i_ByteBufferSize, p_ByteBuffer);
 	PrintThreadInfo();
 	fflush(fp_Log);
 

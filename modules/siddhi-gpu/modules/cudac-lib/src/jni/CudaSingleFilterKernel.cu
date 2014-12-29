@@ -244,6 +244,8 @@ char * CudaSingleFilterKernel::GetEventBuffer(int _iSize)
 	fprintf(fp_Log, "CudaSingleFilterKernel SizeOfEvent             : %d\n", i_SizeOfEvent);
 	fprintf(fp_Log, "Device byte buffer ptr : %p \n", p_HostInput->p_ByteBuffer);
 	fflush(fp_Log);
+
+	return p_HostEventBuffer;
 }
 
 /**
