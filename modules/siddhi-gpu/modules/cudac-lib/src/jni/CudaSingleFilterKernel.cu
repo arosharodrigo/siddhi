@@ -16,6 +16,8 @@
 #include "helper_timer.h"
 #include "CudaFilterKernelCore.h"
 #include <math.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
 
 #define MEMORY_ALIGNMENT  4096
 #define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
@@ -70,6 +72,7 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, GpuEventCons
 	i_EventsPerBlock = _iMaxBufferSize / 4; // TODO: change this dynamically based on MaxBuffersize
 
 	p_HostEventBuffer = NULL;
+	p_UnalignedBuffer = NULL;
 	i_EventBufferSize = 0;
 	p_HostInput= NULL;
 	p_DeviceInput = NULL;
@@ -93,6 +96,7 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEvents
 	}
 
 	p_HostEventBuffer = NULL;
+	p_UnalignedBuffer = NULL;
 	i_EventBufferSize = 0;
 	p_HostInput= NULL;
 	p_DeviceInput = NULL;
@@ -107,7 +111,14 @@ CudaSingleFilterKernel::~CudaSingleFilterKernel()
 	fprintf(fp_Log, "CudaSingleFilterKernel destroy\n");
 	fflush(fp_Log);
 
-	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput->p_ByteBuffer));
+	if(p_UnalignedBuffer)
+	{
+		CUDA_CHECK_RETURN(cudaHostUnregister(p_HostEventBuffer));
+		free(p_UnalignedBuffer);
+		p_UnalignedBuffer = NULL;
+	}
+
+//	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput->p_ByteBuffer));
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceInput));
 	p_DeviceInput = NULL;
 
@@ -220,9 +231,16 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
 
 char * CudaSingleFilterKernel::GetEventBuffer(int _iSize)
 {
-	//CUDA_CHECK_RETURN(cudaSetDeviceFlags(cudaDeviceMapHost));
+	fprintf(fp_Log, "CudaSingleFilterKernel Allocating ByteBuffer in GPU : %d \n", (int)(sizeof(char) * i_EventBufferSize));
+	fflush(fp_Log);
 
-	p_HostEventBuffer = (char*) malloc(sizeof(char) * _iSize);
+	CUDA_CHECK_RETURN(cudaSetDeviceFlags(cudaDeviceMapHost));
+
+	p_UnalignedBuffer = (char*) malloc(_iSize + MEMORY_ALIGNMENT);
+	p_HostEventBuffer = (char*) ALIGN_UP(p_UnalignedBuffer, MEMORY_ALIGNMENT); // address aligned for page size (4k)
+
+	CUDA_CHECK_RETURN(cudaHostRegister(p_HostEventBuffer, _iSize, CU_MEMHOSTALLOC_DEVICEMAP));
+
 	i_EventBufferSize = _iSize;
 
 	p_HostInput->i_ResultsPosition = i_ResultsBufferPosition;
@@ -230,12 +248,16 @@ char * CudaSingleFilterKernel::GetEventBuffer(int _iSize)
 	p_HostInput->i_EventDataPosition = i_EventDataBufferPosition;
 	p_HostInput->i_SizeOfEvent = i_SizeOfEvent;
 
-	fprintf(fp_Log, "CudaSingleFilterKernel Allocating ByteBuffer in GPU : %d \n", (int)(sizeof(char) * i_EventBufferSize));
+	fprintf(fp_Log, "Get the device pointers for the pinned CPU memory mapped into the GPU memory space \n");
 	fflush(fp_Log);
 
-	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_HostInput->p_ByteBuffer, sizeof(char) * i_EventBufferSize)); // device allocate ByteBuffer
-	CUDA_CHECK_RETURN(cudaPeekAtLastError());
-	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+	/* Get the device pointers for the pinned CPU memory mapped into the GPU memory space. */
+
+	CUDA_CHECK_RETURN(cudaHostGetDevicePointer((void **)&p_HostInput->p_ByteBuffer, (void *)p_HostEventBuffer, 0));
+
+	//CUDA_CHECK_RETURN(cudaMalloc((void**) &p_HostInput->p_ByteBuffer, sizeof(char) * i_EventBufferSize)); // device allocate ByteBuffer
+	//CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	//CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	fprintf(fp_Log, "CudaSingleFilterKernel EventBuffer [Ptr=%p Size=%d]\n", p_HostEventBuffer, i_EventBufferSize);
 	fprintf(fp_Log, "CudaSingleFilterKernel ResultsBufferPosition   : %d\n", i_ResultsBufferPosition);

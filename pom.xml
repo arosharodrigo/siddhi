@@ -159,7 +159,7 @@
                                 </property>
                                 <property>
                                     <name>performance.log.enable</name>
-                                    <value>true</value>
+                                    <value>false</value>
                                 </property>
                             </properties>
                         </configuration>

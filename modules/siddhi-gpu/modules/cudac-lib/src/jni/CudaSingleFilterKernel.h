@@ -61,6 +61,7 @@ private:
 	int i_NumAttributes;
 
 	char * p_HostEventBuffer;
+	char * p_UnalignedBuffer;
 	int i_EventBufferSize;
 //	CudaEvent * ap_HostEventBuffer;
 	std::list<Filter*> lst_HostFilters;
