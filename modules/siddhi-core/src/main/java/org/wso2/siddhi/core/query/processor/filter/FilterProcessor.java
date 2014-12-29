@@ -393,19 +393,25 @@ public class FilterProcessor implements Processor {
             log.info("GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
             int byteBufferSize = eventsDataBufferPosition + (sizeOfEvent * gpuEventConsumer.GetMaxNumberOfEvents());
 
+            // Should set these before buffer allocation
             gpuEventConsumer.SetSizeOfEvent(sizeOfEvent);
             gpuEventConsumer.SetResultsBufferPosition(filterResultsBufferPosition);
             gpuEventConsumer.SetEventMetaBufferPosition(eventMetaBufferPosition);
             gpuEventConsumer.SetEventDataBufferPosition(eventsDataBufferPosition);
 
             // allocate byte buffer
-            log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
-            eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
+//            log.info("GpuEventConsumer : Creating ByteBuffer of " + byteBufferSize + " bytes");
+//            eventByteBuffer = ByteBuffer.allocateDirect(byteBufferSize).order(ByteOrder.nativeOrder());
+//            resultsBuffer = eventByteBuffer.asIntBuffer();
+//            log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
+//            gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
+            
+            // get bytebuffer from CUDA-C Lib
+            log.info("GpuEventConsumer : Get ByteBuffer of " + byteBufferSize + " bytes");
+            gpuEventConsumer.CreateByteBuffer(byteBufferSize);
+            eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
             resultsBuffer = eventByteBuffer.asIntBuffer();
-            log.info("GpuEventConsumer : Created ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
-            gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
-            // gpuEventConsumer.CreateByteBuffer(byteBufferSize);
-            // eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
+            log.info("GpuEventConsumer : Got ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
 
             log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
                     " HasArray=" + this.eventByteBuffer.hasArray() + 

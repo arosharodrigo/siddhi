@@ -27,6 +27,8 @@ public:
 
 	virtual bool Initialize(int _iCudaDeviceId) = 0;
 	virtual void SetEventBuffer(char * _pBuffer, int _iSize) = 0;
+	virtual char * GetEventBuffer(int _iSize) = 0;
+
 	void SetResultsBufferPosition(int _iPos) { i_ResultsBufferPosition = _iPos; }
 	void SetEventMetaBufferPosition(int _iPos) { i_EventMetaBufferPosition = _iPos; }
 	void SetSizeOfEvent(int _iSize) { i_SizeOfEvent = _iSize; }

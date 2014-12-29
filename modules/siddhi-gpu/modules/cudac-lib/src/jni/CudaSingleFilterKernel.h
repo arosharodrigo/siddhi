@@ -41,6 +41,7 @@ public:
 
 	bool Initialize(int _iCudaDeviceId);
 	void SetEventBuffer(char * _pBuffer, int _iSize);
+	char * GetEventBuffer(int _iSize);
 	void ProcessEvents(int _iNumEvents);
 
 	void AddFilterToDevice(Filter * _pFilter);
@@ -52,6 +53,7 @@ private:
 	bool SelectDevice(int _iDeviceId);
 
 	int i_CudaDeviceId;
+	bool b_DeviceSet;
 
 	int i_EventsPerBlock;
 	int i_MaxNumberOfEvents;

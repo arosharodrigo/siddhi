@@ -73,12 +73,11 @@ bool GpuEventConsumer::Initialize(int _iCudaDeviceId)
 
 void GpuEventConsumer::CreateByteBuffer(int _iSize)
 {
-	p_ByteBuffer = new char[_iSize];
+	p_ByteBuffer = p_CudaKernel->GetEventBuffer(_iSize);
 	i_ByteBufferSize = _iSize;
 
-	p_CudaKernel->SetEventBuffer(p_ByteBuffer, i_ByteBufferSize);
-
 	fprintf(fp_Log, "[%s] EventConsumer : ByteBuffer Created=[%d]\n", z_Name, i_ByteBufferSize);
+	PrintThreadInfo();
 	fflush(fp_Log);
 }
 
