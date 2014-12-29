@@ -231,6 +231,8 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
 
 char * CudaSingleFilterKernel::GetEventBuffer(int _iSize)
 {
+	i_EventBufferSize = _iSize;
+
 	fprintf(fp_Log, "CudaSingleFilterKernel Allocating ByteBuffer in GPU : %d \n", (int)(sizeof(char) * i_EventBufferSize));
 	fflush(fp_Log);
 
@@ -241,7 +243,6 @@ char * CudaSingleFilterKernel::GetEventBuffer(int _iSize)
 
 	CUDA_CHECK_RETURN(cudaHostRegister(p_HostEventBuffer, _iSize, CU_MEMHOSTALLOC_DEVICEMAP));
 
-	i_EventBufferSize = _iSize;
 
 	p_HostInput->i_ResultsPosition = i_ResultsBufferPosition;
 	p_HostInput->i_EventMetaPosition = i_EventMetaBufferPosition;
