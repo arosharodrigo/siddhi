@@ -179,7 +179,8 @@ bool CudaSingleFilterKernel::SelectDevice(int _iDeviceId)
 		i_CudaDeviceId = _iDeviceId;
 
 		CUDA_CHECK_WARN(cudaSetDeviceFlags(cudaDeviceMapHost));
-		CUDA_CHECK_WARN(cudaPeekAtLastError());
+		cudaGetLastError();
+
 		CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId));
 		fprintf(fp_Log, "CUDA device set to %d\n", i_CudaDeviceId);
 		fflush(fp_Log);
@@ -293,8 +294,7 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 
 	p_HostInput->i_EventCount = _iNumEvents;
 
-	//TODO: async copy
-	CUDA_CHECK_RETURN(cudaMemcpy(p_HostInput->p_ByteBuffer, p_HostEventBuffer, sizeof(char) * i_EventBufferSize, cudaMemcpyHostToDevice));
+	//CUDA_CHECK_RETURN(cudaMemcpy(p_HostInput->p_ByteBuffer, p_HostEventBuffer, sizeof(char) * i_EventBufferSize, cudaMemcpyHostToDevice));
 	CUDA_CHECK_RETURN(cudaMemcpy(p_DeviceInput, p_HostInput, sizeof(SingleFilterKernelInput), cudaMemcpyHostToDevice));
 
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
@@ -325,11 +325,11 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 	fflush(fp_Log);
 #endif
 
-	CUDA_CHECK_RETURN(cudaMemcpy(
-			p_HostEventBuffer,
-			p_HostInput->p_ByteBuffer,
-			sizeof(char) * 4 * i_MaxNumberOfEvents,
-			cudaMemcpyDeviceToHost));
+//	CUDA_CHECK_RETURN(cudaMemcpy(
+//			p_HostEventBuffer,
+//			p_HostInput->p_ByteBuffer,
+//			sizeof(char) * 4 * i_MaxNumberOfEvents,
+//			cudaMemcpyDeviceToHost));
 
 #ifdef GPU_DEBUG
 	fprintf(fp_Log, "Results copied \n");
