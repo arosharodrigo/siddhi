@@ -179,6 +179,7 @@ bool CudaSingleFilterKernel::SelectDevice(int _iDeviceId)
 		i_CudaDeviceId = _iDeviceId;
 
 		CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId));
+		CUDA_CHECK_RETURN(cudaSetDeviceFlags(cudaDeviceMapHost));
 		fprintf(fp_Log, "CUDA device set to %d\n", i_CudaDeviceId);
 		fflush(fp_Log);
 		return true;
@@ -235,8 +236,6 @@ char * CudaSingleFilterKernel::GetEventBuffer(int _iSize)
 
 	fprintf(fp_Log, "CudaSingleFilterKernel Allocating ByteBuffer in GPU : %d \n", (int)(sizeof(char) * i_EventBufferSize));
 	fflush(fp_Log);
-
-	CUDA_CHECK_RETURN(cudaSetDeviceFlags(cudaDeviceMapHost));
 
 	p_UnalignedBuffer = (char*) malloc(_iSize + MEMORY_ALIGNMENT);
 	p_HostEventBuffer = (char*) ALIGN_UP(p_UnalignedBuffer, MEMORY_ALIGNMENT); // address aligned for page size (4k)

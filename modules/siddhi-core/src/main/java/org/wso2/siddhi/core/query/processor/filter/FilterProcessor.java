@@ -311,7 +311,7 @@ public class FilterProcessor implements Processor {
 
     @Override
     public void configureProcessor(MetaStateEvent metaEvent) {
-
+        
         // configure GPU related data structures
         if (metaEvent.getEventCount() == 1 && varPositionToAttribNameMap != null && gpuEventConsumer != null)
         {
@@ -388,10 +388,10 @@ public class FilterProcessor implements Processor {
 
             eventsDataBufferPosition = bufferPreambleSize;
 
-            log.info("GpuEventConsumer : Filter results buffer position is " + filterResultsBufferPosition);
-            log.info("GpuEventConsumer : EventMeta buffer position is " + eventMetaBufferPosition);
-            log.info("GpuEventConsumer : EventData buffer position is " + eventsDataBufferPosition);
-            log.info("GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
+            log.info("[" + queryName + "] GpuEventConsumer : Filter results buffer position is " + filterResultsBufferPosition);
+            log.info("[" + queryName + "] GpuEventConsumer : EventMeta buffer position is " + eventMetaBufferPosition);
+            log.info("[" + queryName + "] GpuEventConsumer : EventData buffer position is " + eventsDataBufferPosition);
+            log.info("[" + queryName + "] GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
             int byteBufferSize = eventsDataBufferPosition + (sizeOfEvent * gpuEventConsumer.GetMaxNumberOfEvents());
 
             // Should set these before buffer allocation
@@ -410,22 +410,22 @@ public class FilterProcessor implements Processor {
                 //            gpuEventConsumer.SetByteBuffer(eventByteBuffer, byteBufferSize);
 
                 // get bytebuffer from CUDA-C Lib
-                log.info("GpuEventConsumer : Get ByteBuffer of " + byteBufferSize + " bytes");
+                log.info("[" + queryName + "] GpuEventConsumer : Get ByteBuffer of " + byteBufferSize + " bytes");
                 BytePointer bytePointer = gpuEventConsumer.CreateByteBuffer(byteBufferSize);
                 bytePointer.capacity(byteBufferSize);
                 bytePointer.limit(byteBufferSize);
                 bytePointer.position(0);
                 eventByteBuffer = bytePointer.asBuffer();
                 resultsBuffer = eventByteBuffer.asIntBuffer();
-                log.info("GpuEventConsumer : Got ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
+                log.info("[" + queryName + "] GpuEventConsumer : Got ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
 
-                log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
+                log.info("[" + queryName + "] EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
                         " HasArray=" + this.eventByteBuffer.hasArray() + 
                         " Position=" + this.eventByteBuffer.position() + 
                         " Limit=" + this.eventByteBuffer.limit());
             
             } catch (Exception ex) {
-                log.error("Exception in allocating ByteBuffer : " + ex);
+                log.error("[" + queryName + "] Exception in allocating ByteBuffer : " + ex);
                 ex.printStackTrace();
             }
 
@@ -571,7 +571,7 @@ public class FilterProcessor implements Processor {
                         break;
                     }
 
-                    log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
+                    log.info("[" + queryName + "] Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
                             " CpuPos=" + Arrays.toString(attributeDefinition.attributePositionInCpu) + 
                             " Type=" + attributeDefinition.attributeType + 
                             " Length=" + attributeDefinition.attributeLength);

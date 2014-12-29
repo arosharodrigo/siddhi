@@ -50,7 +50,6 @@ GpuEventConsumer::GpuEventConsumer(KernelType _eKernelType, const char * _zName,
 			break;
 	}
 
-
 	fprintf(fp_Log, "[%s] EventConsumer : MaxBufferSize=[%d events]\n", z_Name, i_MaxNumOfEvents);
 	PrintThreadInfo();
 	fflush(fp_Log);
