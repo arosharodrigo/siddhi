@@ -59,17 +59,16 @@
     #define JavaCPP_hidden
 #endif
 
-#include <CudaEvent.h>
+#include <CudaCommon.h>
 #include <Filter.h>
 #include <GpuEventConsumer.h>
 #include <CudaKernelBase.h>
-#include <CudaFilterKernel.h>
 #include <CudaSingleFilterKernel.h>
 
 static JavaVM* JavaCPP_vm = NULL;
 static bool JavaCPP_haveAllocObject = false;
 static bool JavaCPP_haveNonvirtual = false;
-static const char* JavaCPP_classNames[29] = {
+static const char* JavaCPP_classNames[25] = {
         "org/bytedeco/javacpp/Pointer",
         "org/bytedeco/javacpp/Loader",
         "java/lang/Object",
@@ -88,18 +87,14 @@ static const char* JavaCPP_classNames[29] = {
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$CudaSingleFilterKernel",
         "java/lang/RuntimeException",
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$SingleFilterKernelInput",
-        "org/wso2/siddhi/gpu/jni/SiddhiGpu$CudaEvent",
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$Filter",
-        "org/wso2/siddhi/gpu/jni/SiddhiGpu$CudaFilterKernel",
-        "org/wso2/siddhi/gpu/jni/SiddhiGpu$MultipleFilterKernelInput",
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$GpuEventConsumer",
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$ExecutorNode",
-        "org/wso2/siddhi/gpu/jni/SiddhiGpu$ConstValue",
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$VariableValue",
+        "org/wso2/siddhi/gpu/jni/SiddhiGpu$ConstValue",
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$Values",
-        "org/wso2/siddhi/gpu/jni/SiddhiGpu$AttibuteValue",
         "org/wso2/siddhi/gpu/jni/SiddhiGpu$DataType" };
-static jclass JavaCPP_classes[29] = { NULL };
+static jclass JavaCPP_classes[25] = { NULL };
 static jfieldID JavaCPP_addressFID = NULL;
 static jfieldID JavaCPP_positionFID = NULL;
 static jfieldID JavaCPP_limitFID = NULL;
@@ -241,89 +236,15 @@ static JavaCPP_noinline jthrowable JavaCPP_handleException(JNIEnv* env, int i) {
     return (jthrowable)env->NewObject(JavaCPP_getClass(env, i), mid, str);
 }
 
-#include <vector>
-template<typename P, typename T = P> class JavaCPP_hidden VectorAdapter {
-public:
-    VectorAdapter(const P* ptr, typename std::vector<T>::size_type size) : ptr((P*)ptr), size(size),
-        vec2(ptr ? std::vector<T>((P*)ptr, (P*)ptr + size) : std::vector<T>()), vec(vec2) { }
-    VectorAdapter(const std::vector<T>& vec) : ptr(0), size(0), vec2(vec), vec(vec2) { }
-    VectorAdapter(      std::vector<T>& vec) : ptr(0), size(0), vec(vec) { }
-    void assign(P* ptr, typename std::vector<T>::size_type size) {
-        this->ptr = ptr;
-        this->size = size;
-        vec.assign(ptr, ptr + size);
-    }
-    static void deallocate(void* ptr) { delete[] (P*)ptr; }
-    operator P*() {
-        if (vec.size() > size) {
-            ptr = new (std::nothrow) P[vec.size()];
-        }
-        if (ptr) {
-            std::copy(vec.begin(), vec.end(), ptr);
-        }
-        size = vec.size();
-        return ptr;
-    }
-    operator const P*()        { return &vec[0]; }
-    operator std::vector<T>&() { return vec; }
-    operator std::vector<T>*() { return ptr ? &vec : 0; }
-    P* ptr;
-    typename std::vector<T>::size_type size;
-    std::vector<T> vec2;
-    std::vector<T>& vec;
-};
-
-#include <string>
-class JavaCPP_hidden StringAdapter {
-public:
-    StringAdapter(const          char* ptr, size_t size) : ptr((char*)ptr), size(size),
-        str2(ptr ? (char*)ptr : ""), str(str2) { }
-    StringAdapter(const signed   char* ptr, size_t size) : ptr((char*)ptr), size(size),
-        str2(ptr ? (char*)ptr : ""), str(str2) { }
-    StringAdapter(const unsigned char* ptr, size_t size) : ptr((char*)ptr), size(size),
-        str2(ptr ? (char*)ptr : ""), str(str2) { }
-    StringAdapter(const std::string& str) : ptr(0), size(0), str2(str), str(str2) { }
-    StringAdapter(      std::string& str) : ptr(0), size(0), str(str) { }
-    void assign(char* ptr, size_t size) {
-        this->ptr = ptr;
-        this->size = size;
-        str.assign(ptr ? ptr : "");
-    }
-    static void deallocate(void* ptr) { free(ptr); }
-    operator char*() {
-        const char* c_str = str.c_str();
-        if (ptr == NULL || strcmp(c_str, ptr) != 0) {
-            ptr = strdup(c_str);
-        }
-        size = strlen(c_str) + 1;
-        return ptr;
-    }
-    operator       signed   char*() { return (signed   char*)(operator char*)(); }
-    operator       unsigned char*() { return (unsigned char*)(operator char*)(); }
-    operator const          char*() { return                 str.c_str(); }
-    operator const signed   char*() { return (signed   char*)str.c_str(); }
-    operator const unsigned char*() { return (unsigned char*)str.c_str(); }
-    operator         std::string&() { return str; }
-    operator         std::string*() { return ptr ? &str : 0; }
-    char* ptr;
-    size_t size;
-    std::string str2;
-    std::string& str;
-};
-
 
 
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_deallocate(void *p) { delete (::SiddhiGpu::CudaSingleFilterKernel*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_deallocate(void *p) { delete (::SiddhiGpu::SingleFilterKernelInput*)p; }
-static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_deallocate(void *p) { delete (::SiddhiGpu::CudaFilterKernel*)p; }
-static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_deallocate(void *p) { delete (::SiddhiGpu::MultipleFilterKernelInput*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_deallocate(void *p) { delete (::SiddhiGpu::GpuEventConsumer*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_deallocate(void *p) { delete (::SiddhiGpu::Filter*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_deallocate(void *p) { delete (::SiddhiGpu::ExecutorNode*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_deallocate(void *p) { delete (::SiddhiGpu::ConstValue*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_deallocate(void *p) { delete (::SiddhiGpu::VariableValue*)p; }
-static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_deallocate(void *p) { delete (::SiddhiGpu::CudaEvent*)p; }
-static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_deallocate(void *p) { delete (::SiddhiGpu::AttibuteValue*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_deallocate(void *p) { delete (::SiddhiGpu::Values*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024DataType_deallocate(void *p) { delete (::SiddhiGpu::DataType*)p; }
 static void JavaCPP_org_bytedeco_javacpp_BytePointer_deallocateArray(void* p) { delete[] (signed char*)p; }
@@ -338,12 +259,9 @@ static void JavaCPP_org_bytedeco_javacpp_BoolPointer_deallocateArray(void* p) { 
 static void JavaCPP_org_bytedeco_javacpp_CLongPointer_deallocateArray(void* p) { delete[] (long*)p; }
 static void JavaCPP_org_bytedeco_javacpp_SizeTPointer_deallocateArray(void* p) { delete[] (size_t*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_deallocateArray(void* p) { delete[] (::SiddhiGpu::SingleFilterKernelInput*)p; }
-static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_deallocateArray(void* p) { delete[] (::SiddhiGpu::MultipleFilterKernelInput*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_deallocateArray(void* p) { delete[] (::SiddhiGpu::ExecutorNode*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_deallocateArray(void* p) { delete[] (::SiddhiGpu::ConstValue*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_deallocateArray(void* p) { delete[] (::SiddhiGpu::VariableValue*)p; }
-static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_deallocateArray(void* p) { delete[] (::SiddhiGpu::CudaEvent*)p; }
-static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_deallocateArray(void* p) { delete[] (::SiddhiGpu::AttibuteValue*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_deallocateArray(void* p) { delete[] (::SiddhiGpu::Values*)p; }
 static void JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024DataType_deallocateArray(void* p) { delete[] (::SiddhiGpu::DataType*)p; }
 
@@ -361,7 +279,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     JavaCPP_vm = vm;
     JavaCPP_haveAllocObject = env->functions->AllocObject != NULL;
     JavaCPP_haveNonvirtual = env->functions->CallNonvirtualVoidMethodA != NULL;
-    const char* members[29][8] = {
+    const char* members[25][10] = {
             { "sizeof" },
             {  },
             {  },
@@ -379,19 +297,15 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
             { "sizeof" },
             { "sizeof" },
             {  },
-            { "sizeof", "ap_EventBuffer", "i_EventCount", "i_MaxEventCount", "ap_Filter", "i_EventsPerBlock" },
-            { "sizeof" },
-            { "sizeof" },
-            { "sizeof" },
-            { "sizeof", "ap_Filters", "ap_EventBuffer", "i_EventCount", "i_FilterCount", "i_MaxEventCount" },
+            { "sizeof", "p_ByteBuffer", "i_ResultsPosition", "i_EventDataPosition", "ap_Filter", "i_EventMetaPosition", "i_SizeOfEvent", "i_EventsPerBlock", "i_MaxEventCount", "i_EventCount" },
             { "sizeof" },
             { "sizeof" },
             { "sizeof" },
             { "sizeof" },
-            { "sizeof", "z_ExtString", "b_BoolVal", "i_IntVal", "l_LongVal", "f_FloatVal", "d_DoubleVal", "z_StringVal" },
-            { "sizeof", "m_Value", "e_Type" },
+            { "sizeof" },
+            { "sizeof", "b_BoolVal", "i_IntVal", "l_LongVal", "f_FloatVal", "d_DoubleVal", "z_StringVal", "z_ExtString" },
             { "sizeof" } };
-    int offsets[29][8] = {
+    int offsets[25][10] = {
             { sizeof(void*) },
             {  },
             {  },
@@ -409,24 +323,20 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
             { sizeof(size_t) },
             { sizeof(::SiddhiGpu::CudaSingleFilterKernel) },
             {  },
-            { sizeof(::SiddhiGpu::SingleFilterKernelInput), offsetof(::SiddhiGpu::SingleFilterKernelInput, ap_EventBuffer), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_EventCount), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_MaxEventCount), offsetof(::SiddhiGpu::SingleFilterKernelInput, ap_Filter), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_EventsPerBlock) },
-            { sizeof(::SiddhiGpu::CudaEvent) },
+            { sizeof(::SiddhiGpu::SingleFilterKernelInput), offsetof(::SiddhiGpu::SingleFilterKernelInput, p_ByteBuffer), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_ResultsPosition), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_EventDataPosition), offsetof(::SiddhiGpu::SingleFilterKernelInput, ap_Filter), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_EventMetaPosition), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_SizeOfEvent), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_EventsPerBlock), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_MaxEventCount), offsetof(::SiddhiGpu::SingleFilterKernelInput, i_EventCount) },
             { sizeof(::SiddhiGpu::Filter) },
-            { sizeof(::SiddhiGpu::CudaFilterKernel) },
-            { sizeof(::SiddhiGpu::MultipleFilterKernelInput), offsetof(::SiddhiGpu::MultipleFilterKernelInput, ap_Filters), offsetof(::SiddhiGpu::MultipleFilterKernelInput, ap_EventBuffer), offsetof(::SiddhiGpu::MultipleFilterKernelInput, i_EventCount), offsetof(::SiddhiGpu::MultipleFilterKernelInput, i_FilterCount), offsetof(::SiddhiGpu::MultipleFilterKernelInput, i_MaxEventCount) },
             { sizeof(::SiddhiGpu::GpuEventConsumer) },
             { sizeof(::SiddhiGpu::ExecutorNode) },
-            { sizeof(::SiddhiGpu::ConstValue) },
             { sizeof(::SiddhiGpu::VariableValue) },
-            { sizeof(::SiddhiGpu::Values), offsetof(::SiddhiGpu::Values, z_ExtString), offsetof(::SiddhiGpu::Values, b_BoolVal), offsetof(::SiddhiGpu::Values, i_IntVal), offsetof(::SiddhiGpu::Values, l_LongVal), offsetof(::SiddhiGpu::Values, f_FloatVal), offsetof(::SiddhiGpu::Values, d_DoubleVal), offsetof(::SiddhiGpu::Values, z_StringVal) },
-            { sizeof(::SiddhiGpu::AttibuteValue), offsetof(::SiddhiGpu::AttibuteValue, m_Value), offsetof(::SiddhiGpu::AttibuteValue, e_Type) },
+            { sizeof(::SiddhiGpu::ConstValue) },
+            { sizeof(::SiddhiGpu::Values), offsetof(::SiddhiGpu::Values, b_BoolVal), offsetof(::SiddhiGpu::Values, i_IntVal), offsetof(::SiddhiGpu::Values, l_LongVal), offsetof(::SiddhiGpu::Values, f_FloatVal), offsetof(::SiddhiGpu::Values, d_DoubleVal), offsetof(::SiddhiGpu::Values, z_StringVal), offsetof(::SiddhiGpu::Values, z_ExtString) },
             { sizeof(::SiddhiGpu::DataType) } };
-    int memberOffsetSizes[29] = { 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 6, 1, 1, 1, 6, 1, 1, 1, 1, 8, 3, 1 };
+    int memberOffsetSizes[25] = { 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 10, 1, 1, 1, 1, 1, 8, 1 };
     jmethodID putMemberOffsetMID = JavaCPP_getStaticMethodID(env, 1, "putMemberOffset", "(Ljava/lang/String;Ljava/lang/String;I)V");
     if (putMemberOffsetMID == NULL) {
         return JNI_ERR;
     }
-    for (int i = 0; i < 29 && !env->ExceptionCheck(); i++) {
+    for (int i = 0; i < 25 && !env->ExceptionCheck(); i++) {
         for (int j = 0; j < memberOffsetSizes[i] && !env->ExceptionCheck(); j++) {
             if (env->PushLocalFrame(2) == 0) {
                 jvalue args[3];
@@ -472,7 +382,7 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved) {
         JavaCPP_log("Could not get JNIEnv for JNI_VERSION_1_4 inside JNI_OnUnLoad().");
         return;
     }
-    for (int i = 0; i < 29; i++) {
+    for (int i = 0; i < 25; i++) {
         env->DeleteWeakGlobalRef(JavaCPP_classes[i]);
         JavaCPP_classes[i] = NULL;
     }
@@ -1223,7 +1133,29 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFil
         env->Throw(exc);
     }
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_Initialize(JNIEnv* env, jobject obj) {
+JNIEXPORT jboolean JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_Initialize(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::CudaSingleFilterKernel* ptr = (::SiddhiGpu::CudaSingleFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jboolean rarg = 0;
+    jthrowable exc = NULL;
+    try {
+        bool rvalue = (bool)ptr->Initialize(arg0);
+        rarg = (jboolean)rvalue;
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_SetEventBuffer___3BI(JNIEnv* env, jobject obj, jbyteArray arg0, jint arg1) {
     ::SiddhiGpu::CudaSingleFilterKernel* ptr = (::SiddhiGpu::CudaSingleFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1231,9 +1163,31 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFil
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : env->GetByteArrayElements(arg0, NULL);
     jthrowable exc = NULL;
     try {
-        ptr->Initialize();
+        ptr->SetEventBuffer((char*)ptr0, arg1);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (arg0 != NULL) env->ReleaseByteArrayElements(arg0, (jbyte*)ptr0, 0);
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_SetEventBuffer__Ljava_nio_ByteBuffer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+    ::SiddhiGpu::CudaSingleFilterKernel* ptr = (::SiddhiGpu::CudaSingleFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)env->GetDirectBufferAddress(arg0);
+    jthrowable exc = NULL;
+    try {
+        ptr->SetEventBuffer((char*)ptr0, arg1);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -1242,7 +1196,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFil
         env->Throw(exc);
     }
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_ProcessEvents(JNIEnv* env, jobject obj) {
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_SetEventBuffer__Lorg_bytedeco_javacpp_BytePointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
     ::SiddhiGpu::CudaSingleFilterKernel* ptr = (::SiddhiGpu::CudaSingleFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1250,31 +1204,12 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFil
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->ProcessEvents();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_AddEvent(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::CudaSingleFilterKernel* ptr = (::SiddhiGpu::CudaSingleFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
     jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
     ptr0 += position0;
     jthrowable exc = NULL;
     try {
-        ptr->AddEvent((const ::SiddhiGpu::CudaEvent*)ptr0);
+        ptr->SetEventBuffer((char*)ptr0, arg1);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -1283,31 +1218,33 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFil
         env->Throw(exc);
     }
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_AddAndProcessEvents__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_GetEventBuffer(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::CudaSingleFilterKernel* ptr = (::SiddhiGpu::CudaSingleFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
+        return 0;
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
+    jobject rarg = NULL;
+    char* rptr;
     jthrowable exc = NULL;
     try {
-        ptr->AddAndProcessEvents((arg0 == NULL ? NULL : &ptr0), arg1);
+        rptr = (char*)ptr->GetEventBuffer(arg0);
+        if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 4);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
 
-    ptr0 -= position0;
-    if (arg0 != NULL) env->SetLongField(arg0, JavaCPP_addressFID, ptr_to_jlong(ptr0));
     if (exc != NULL) {
         env->Throw(exc);
     }
+    return rarg;
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_AddAndProcessEvents__Lorg_bytedeco_javacpp_PointerPointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFilterKernel_ProcessEvents(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::CudaSingleFilterKernel* ptr = (::SiddhiGpu::CudaSingleFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1315,12 +1252,9 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaSingleFil
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    void** ptr0 = arg0 == NULL ? NULL : (void**)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
     jthrowable exc = NULL;
     try {
-        ptr->AddAndProcessEvents((SiddhiGpu::CudaEvent**)ptr0, arg1);
+        ptr->ProcessEvents(arg0);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -1427,22 +1361,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterK
         env->Throw(exc);
     }
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_ap_1EventBuffer__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_2(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jobject rarg = obj;
-    ptr->ap_EventBuffer = ptr0;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_ap_1EventBuffer__(JNIEnv* env, jobject obj) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_p_1ByteBuffer__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1451,15 +1370,15 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilt
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = NULL;
-    ::SiddhiGpu::CudaEvent* rptr;
-    rptr = ptr->ap_EventBuffer;
+    char* rptr;
+    rptr = (char*)ptr->p_ByteBuffer;
     if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 18);
+        rarg = JavaCPP_createPointer(env, 4);
         env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
     }
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventCount__I(JNIEnv* env, jobject obj, jint arg0) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_p_1ByteBuffer__Lorg_bytedeco_javacpp_BytePointer_2(JNIEnv* env, jobject obj, jobject arg0) {
     ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1467,11 +1386,14 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilt
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
+    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
+    ptr0 += position0;
     jobject rarg = obj;
-    ptr->i_EventCount = arg0;
+    ptr->p_ByteBuffer = (char*)ptr0;
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventCount__(JNIEnv* env, jobject obj) {
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1ResultsPosition__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1480,11 +1402,11 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterK
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jint rarg = 0;
-    int rvalue = ptr->i_EventCount;
+    int rvalue = ptr->i_ResultsPosition;
     rarg = (jint)rvalue;
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1MaxEventCount__I(JNIEnv* env, jobject obj, jint arg0) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1ResultsPosition__I(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1493,10 +1415,22 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilt
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = obj;
-    ptr->i_MaxEventCount = arg0;
+    ptr->i_ResultsPosition = arg0;
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1MaxEventCount__(JNIEnv* env, jobject obj) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventDataPosition__I(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = obj;
+    ptr->i_EventDataPosition = arg0;
+    return rarg;
+}
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventDataPosition__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1505,7 +1439,7 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterK
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jint rarg = 0;
-    int rvalue = ptr->i_MaxEventCount;
+    int rvalue = ptr->i_EventDataPosition;
     rarg = (jint)rvalue;
     return rarg;
 }
@@ -1536,12 +1470,12 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilt
     ::SiddhiGpu::Filter* rptr;
     rptr = ptr->ap_Filter;
     if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 19);
+        rarg = JavaCPP_createPointer(env, 18);
         env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
     }
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventsPerBlock__I(JNIEnv* env, jobject obj, jint arg0) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventMetaPosition__I(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1550,7 +1484,45 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilt
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = obj;
-    ptr->i_EventsPerBlock = arg0;
+    ptr->i_EventMetaPosition = arg0;
+    return rarg;
+}
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventMetaPosition__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jint rarg = 0;
+    int rvalue = ptr->i_EventMetaPosition;
+    rarg = (jint)rvalue;
+    return rarg;
+}
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1SizeOfEvent__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jint rarg = 0;
+    int rvalue = ptr->i_SizeOfEvent;
+    rarg = (jint)rvalue;
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1SizeOfEvent__I(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = obj;
+    ptr->i_SizeOfEvent = arg0;
     return rarg;
 }
 JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventsPerBlock__(JNIEnv* env, jobject obj) {
@@ -1566,312 +1538,8 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterK
     rarg = (jint)rvalue;
     return rarg;
 }
-
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_allocate(JNIEnv* env, jobject obj, jint arg0, jobject arg1, jobject arg2) {
-    ::SiddhiGpu::GpuEventConsumer* ptr1 = arg1 == NULL ? NULL : (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(arg1, JavaCPP_addressFID));
-    jint position1 = arg1 == NULL ? 0 : env->GetIntField(arg1, JavaCPP_positionFID);
-    ptr1 += position1;
-    char* ptr2 = arg2 == NULL ? NULL : (char*)jlong_to_ptr(env->GetLongField(arg2, JavaCPP_addressFID));
-    jint position2 = arg2 == NULL ? 0 : env->GetIntField(arg2, JavaCPP_positionFID);
-    ptr2 += position2;
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 20))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::CudaFilterKernel* rptr = new ::SiddhiGpu::CudaFilterKernel(arg0, ptr1, (FILE*)ptr2);
-        jint rcapacity = 1;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_deallocate);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_Initialize(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->Initialize();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_ProcessEvents(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->ProcessEvents();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_AddEvent(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddEvent((const ::SiddhiGpu::CudaEvent*)ptr0);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_AddAndProcessEvents__Lorg_bytedeco_javacpp_PointerPointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    void** ptr0 = arg0 == NULL ? NULL : (void**)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddAndProcessEvents((SiddhiGpu::CudaEvent**)ptr0, arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_AddAndProcessEvents__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddAndProcessEvents((arg0 == NULL ? NULL : &ptr0), arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    ptr0 -= position0;
-    if (arg0 != NULL) env->SetLongField(arg0, JavaCPP_addressFID, ptr_to_jlong(ptr0));
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_AddFilterToDevice(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::Filter* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddFilterToDevice(ptr0);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_CopyFiltersToDevice(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->CopyFiltersToDevice();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT jfloat JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_GetElapsedTimeAverage(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaFilterKernel* ptr = (::SiddhiGpu::CudaFilterKernel*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jfloat rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        float rvalue = ptr->GetElapsedTimeAverage();
-        rarg = (jfloat)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaFilterKernel_OnExit(JNIEnv* env, jclass cls) {
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::CudaFilterKernel::OnExit();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_allocate(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 21))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::MultipleFilterKernelInput* rptr = new ::SiddhiGpu::MultipleFilterKernelInput();
-        jint rcapacity = 1;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_deallocate);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 21))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::MultipleFilterKernelInput* rptr = new ::SiddhiGpu::MultipleFilterKernelInput[arg0];
-        jint rcapacity = arg0;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_deallocateArray);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_ap_1Filters__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::Filter* rptr;
-    rptr = ptr->ap_Filters;
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 19);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_ap_1Filters__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_2(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::Filter* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jobject rarg = obj;
-    ptr->ap_Filters = ptr0;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_ap_1EventBuffer__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::CudaEvent* rptr;
-    rptr = ptr->ap_EventBuffer;
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 18);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_ap_1EventBuffer__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_2(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jobject rarg = obj;
-    ptr->ap_EventBuffer = ptr0;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_i_1EventCount__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventsPerBlock__I(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
         return 0;
@@ -1879,24 +1547,11 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFi
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = obj;
-    ptr->i_EventCount = arg0;
+    ptr->i_EventsPerBlock = arg0;
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_i_1EventCount__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jint rarg = 0;
-    int rvalue = ptr->i_EventCount;
-    rarg = (jint)rvalue;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_i_1FilterCount__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1MaxEventCount__I(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
         return 0;
@@ -1904,24 +1559,11 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFi
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = obj;
-    ptr->i_FilterCount = arg0;
+    ptr->i_MaxEventCount = arg0;
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_i_1FilterCount__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jint rarg = 0;
-    int rvalue = ptr->i_FilterCount;
-    rarg = (jint)rvalue;
-    return rarg;
-}
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_i_1MaxEventCount__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1MaxEventCount__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
         return 0;
@@ -1933,8 +1575,21 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilte
     rarg = (jint)rvalue;
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFilterKernelInput_i_1MaxEventCount__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::MultipleFilterKernelInput* ptr = (::SiddhiGpu::MultipleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventCount__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jint rarg = 0;
+    int rvalue = ptr->i_EventCount;
+    rarg = (jint)rvalue;
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024SingleFilterKernelInput_i_1EventCount__I(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::SingleFilterKernelInput* ptr = (::SiddhiGpu::SingleFilterKernelInput*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
         return 0;
@@ -1942,22 +1597,23 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024MultipleFi
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = obj;
-    ptr->i_MaxEventCount = arg0;
+    ptr->i_EventCount = arg0;
     return rarg;
 }
 
-
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_Initialize(JNIEnv* env, jobject obj) {
+JNIEXPORT jboolean JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_Initialize(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
+        return 0;
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
+    jboolean rarg = 0;
     jthrowable exc = NULL;
     try {
-        ptr->Initialize();
+        bool rvalue = (bool)ptr->Initialize(arg0);
+        rarg = (jboolean)rvalue;
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -1965,8 +1621,9 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBas
     if (exc != NULL) {
         env->Throw(exc);
     }
+    return rarg;
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_ProcessEvents(JNIEnv* env, jobject obj) {
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_SetEventBuffer__Lorg_bytedeco_javacpp_BytePointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
     ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -1974,31 +1631,12 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBas
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->ProcessEvents();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_AddEvent(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
     jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
     ptr0 += position0;
     jthrowable exc = NULL;
     try {
-        ptr->AddEvent((const ::SiddhiGpu::CudaEvent*)ptr0);
+        ptr->SetEventBuffer((char*)ptr0, arg1);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -2007,7 +1645,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBas
         env->Throw(exc);
     }
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_AddAndProcessEvents__Lorg_bytedeco_javacpp_PointerPointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_SetEventBuffer___3BI(JNIEnv* env, jobject obj, jbyteArray arg0, jint arg1) {
     ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2015,12 +1653,31 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBas
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    void** ptr0 = arg0 == NULL ? NULL : (void**)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
+    signed char* ptr0 = arg0 == NULL ? NULL : env->GetByteArrayElements(arg0, NULL);
     jthrowable exc = NULL;
     try {
-        ptr->AddAndProcessEvents((SiddhiGpu::CudaEvent**)ptr0, arg1);
+        ptr->SetEventBuffer((char*)ptr0, arg1);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (arg0 != NULL) env->ReleaseByteArrayElements(arg0, (jbyte*)ptr0, 0);
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_SetEventBuffer__Ljava_nio_ByteBuffer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+    ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)env->GetDirectBufferAddress(arg0);
+    jthrowable exc = NULL;
+    try {
+        ptr->SetEventBuffer((char*)ptr0, arg1);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -2029,7 +1686,33 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBas
         env->Throw(exc);
     }
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_AddAndProcessEvents__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_GetEventBuffer(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    char* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = (char*)ptr->GetEventBuffer(arg0);
+        if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 4);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_SetResultsBufferPosition(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2037,18 +1720,89 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBas
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
     jthrowable exc = NULL;
     try {
-        ptr->AddAndProcessEvents((arg0 == NULL ? NULL : &ptr0), arg1);
+        ptr->SetResultsBufferPosition(arg0);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
 
-    ptr0 -= position0;
-    if (arg0 != NULL) env->SetLongField(arg0, JavaCPP_addressFID, ptr_to_jlong(ptr0));
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_SetEventMetaBufferPosition(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetEventMetaBufferPosition(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_SetSizeOfEvent(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetSizeOfEvent(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_SetEventDataBufferPosition(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetEventDataBufferPosition(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelBase_ProcessEvents(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::CudaKernelBase* ptr = (::SiddhiGpu::CudaKernelBase*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->ProcessEvents(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
     if (exc != NULL) {
         env->Throw(exc);
     }
@@ -2117,102 +1871,37 @@ JNIEXPORT jfloat JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaKernelB
     return rarg;
 }
 
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_allocate(JNIEnv* env, jobject obj, jint arg0, jint arg1, jint arg2) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 22))) {
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_allocate__ILjava_lang_String_2II(JNIEnv* env, jobject obj, jint arg0, jstring arg1, jint arg2, jint arg3) {
+    const char* ptr1 = arg1 == NULL ? NULL : env->GetStringUTFChars(arg1, NULL);
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 19))) {
         return;
     }
     jthrowable exc = NULL;
     try {
-        ::SiddhiGpu::GpuEventConsumer* rptr = new ::SiddhiGpu::GpuEventConsumer((SiddhiGpu::KernelType)arg0, arg1, arg2);
+        ::SiddhiGpu::GpuEventConsumer* rptr = new ::SiddhiGpu::GpuEventConsumer((SiddhiGpu::KernelType)arg0, ptr1, arg2, arg3);
         jint rcapacity = 1;
         JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_deallocate);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
 
+    if (arg1 != NULL) env->ReleaseStringUTFChars(arg1, ptr1);
     if (exc != NULL) {
         env->Throw(exc);
     }
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_PrintAverageStats(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_allocate__ILorg_bytedeco_javacpp_BytePointer_2II(JNIEnv* env, jobject obj, jint arg0, jobject arg1, jint arg2, jint arg3) {
+    signed char* ptr1 = arg1 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg1, JavaCPP_addressFID));
+    jint position1 = arg1 == NULL ? 0 : env->GetIntField(arg1, JavaCPP_positionFID);
+    ptr1 += position1;
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 19))) {
         return;
     }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
     jthrowable exc = NULL;
     try {
-        ptr->PrintAverageStats();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_GetMaxBufferSize(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jint rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        int rvalue = ptr->GetMaxBufferSize();
-        rarg = (jint)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_OnEvents__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
-    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::CudaEvent* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jthrowable exc = NULL;
-    try {
-        ptr->OnEvents((arg0 == NULL ? NULL : &ptr0), arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    ptr0 -= position0;
-    if (arg0 != NULL) env->SetLongField(arg0, JavaCPP_addressFID, ptr_to_jlong(ptr0));
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_OnEvents__Lorg_bytedeco_javacpp_PointerPointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
-    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    void** ptr0 = arg0 == NULL ? NULL : (void**)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jthrowable exc = NULL;
-    try {
-        ptr->OnEvents((SiddhiGpu::CudaEvent**)ptr0, arg1);
+        ::SiddhiGpu::GpuEventConsumer* rptr = new ::SiddhiGpu::GpuEventConsumer((SiddhiGpu::KernelType)arg0, (const char*)ptr1, arg2, arg3);
+        jint rcapacity = 1;
+        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_deallocate);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -2243,6 +1932,123 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsu
         env->Throw(exc);
     }
 }
+JNIEXPORT jboolean JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_Initialize(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jboolean rarg = 0;
+    jthrowable exc = NULL;
+    try {
+        bool rvalue = (bool)ptr->Initialize(arg0);
+        rarg = (jboolean)rvalue;
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_SetResultsBufferPosition(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetResultsBufferPosition(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_SetEventMetaBufferPosition(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetEventMetaBufferPosition(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_SetSizeOfEvent(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetSizeOfEvent(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_SetEventDataBufferPosition(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetEventDataBufferPosition(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_ProcessEvents(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->ProcessEvents(arg0);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_ConfigureFilters(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
@@ -2262,31 +2068,26 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsu
         env->Throw(exc);
     }
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_OnCudaEventMatch___3II(JNIEnv* env, jobject obj, jintArray arg0, jint arg1) {
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_PrintAverageStats(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
+        return;
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    int* ptr0 = arg0 == NULL ? NULL : env->GetIntArrayElements(arg0, NULL);
-    jint rarg = 0;
     jthrowable exc = NULL;
     try {
-        int rvalue = ptr->OnCudaEventMatch(ptr0, arg1);
-        rarg = (jint)rvalue;
+        ptr->PrintAverageStats();
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
 
-    if (arg0 != NULL) env->ReleaseIntArrayElements(arg0, (jint*)ptr0, 0);
     if (exc != NULL) {
         env->Throw(exc);
     }
-    return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_OnCudaEventMatch__Lorg_bytedeco_javacpp_IntPointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_GetMaxNumberOfEvents(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2294,13 +2095,10 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsu
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    int* ptr0 = arg0 == NULL ? NULL : (int*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
     jint rarg = 0;
     jthrowable exc = NULL;
     try {
-        int rvalue = ptr->OnCudaEventMatch(ptr0, arg1);
+        int rvalue = ptr->GetMaxNumberOfEvents();
         rarg = (jint)rvalue;
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
@@ -2311,30 +2109,7 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsu
     }
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_OnCudaEventMatch__Ljava_nio_IntBuffer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
-    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    int* ptr0 = arg0 == NULL ? NULL : (int*)env->GetDirectBufferAddress(arg0);
-    jint rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        int rvalue = ptr->OnCudaEventMatch(ptr0, arg1);
-        rarg = (jint)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_GetMatchingEvents(JNIEnv* env, jobject obj) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_CreateByteBuffer(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2343,16 +2118,13 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventCo
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = NULL;
-    int* rptr;
+    char* rptr;
     jthrowable exc = NULL;
     try {
-        VectorAdapter< int > radapter(ptr->GetMatchingEvents());
-        rptr = radapter;
-        jint rcapacity = (jint)radapter.size;
-        void (*deallocator)(void*) = &VectorAdapter< int >::deallocate;
+        rptr = (char*)ptr->CreateByteBuffer(arg0);
         if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 6);
-            JavaCPP_initPointer(env, rarg, rptr, rcapacity, deallocator);
+            rarg = JavaCPP_createPointer(env, 4);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
@@ -2363,7 +2135,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventCo
     }
     return rarg;
 }
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_Initialize(JNIEnv* env, jobject obj) {
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_SetByteBuffer__Ljava_nio_ByteBuffer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
     ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2371,9 +2143,10 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsu
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)env->GetDirectBufferAddress(arg0);
     jthrowable exc = NULL;
     try {
-        ptr->Initialize();
+        ptr->SetByteBuffer((char*)ptr0, arg1);
     } catch (...) {
         exc = JavaCPP_handleException(env, 16);
     }
@@ -2382,6 +2155,98 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsu
         env->Throw(exc);
     }
 }
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_SetByteBuffer__Lorg_bytedeco_javacpp_BytePointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
+    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
+    ptr0 += position0;
+    jthrowable exc = NULL;
+    try {
+        ptr->SetByteBuffer((char*)ptr0, arg1);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_SetByteBuffer___3BI(JNIEnv* env, jobject obj, jbyteArray arg0, jint arg1) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : env->GetByteArrayElements(arg0, NULL);
+    jthrowable exc = NULL;
+    try {
+        ptr->SetByteBuffer((char*)ptr0, arg1);
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (arg0 != NULL) env->ReleaseByteArrayElements(arg0, (jbyte*)ptr0, 0);
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_GetByteBufferSize(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jint rarg = 0;
+    jthrowable exc = NULL;
+    try {
+        int rvalue = ptr->GetByteBufferSize();
+        rarg = (jint)rvalue;
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024GpuEventConsumer_GetByteBuffer(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::GpuEventConsumer* ptr = (::SiddhiGpu::GpuEventConsumer*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    char* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = (char*)ptr->GetByteBuffer();
+        if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 4);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+
 
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_Print__Lorg_bytedeco_javacpp_Pointer_2(JNIEnv* env, jobject obj, jobject arg0) {
     ::SiddhiGpu::Filter* ptr = (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
@@ -2425,7 +2290,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_Print_
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_allocate(JNIEnv* env, jobject obj, jint arg0, jint arg1) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 19))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 18))) {
         return;
     }
     jthrowable exc = NULL;
@@ -2483,7 +2348,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_Clo
         if (rptr == ptr) {
             rarg = obj;
         } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 19);
+            rarg = JavaCPP_createPointer(env, 18);
             env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
@@ -2493,6 +2358,38 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_Clo
     if (exc != NULL) {
         env->Throw(exc);
     }
+    return rarg;
+}
+JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_Destroy(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::Filter* ptr = (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jthrowable exc = NULL;
+    try {
+        ptr->Destroy();
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+}
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_i_1FilterId__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::Filter* ptr = (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jint rarg = 0;
+    int rvalue = ptr->i_FilterId;
+    rarg = (jint)rvalue;
     return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_i_1FilterId__I(JNIEnv* env, jobject obj, jint arg0) {
@@ -2507,7 +2404,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_i_1
     ptr->i_FilterId = arg0;
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_i_1FilterId__(JNIEnv* env, jobject obj) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_ap_1ExecutorNodes__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::Filter* ptr = (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2515,9 +2412,13 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_i_1Fil
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    jint rarg = 0;
-    int rvalue = ptr->i_FilterId;
-    rarg = (jint)rvalue;
+    jobject rarg = NULL;
+    ::SiddhiGpu::ExecutorNode* rptr;
+    rptr = ptr->ap_ExecutorNodes;
+    if (rptr != NULL) {
+        rarg = JavaCPP_createPointer(env, 20);
+        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+    }
     return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_ap_1ExecutorNodes__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_2(JNIEnv* env, jobject obj, jobject arg0) {
@@ -2533,23 +2434,6 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_ap_
     ptr0 += position0;
     jobject rarg = obj;
     ptr->ap_ExecutorNodes = ptr0;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_ap_1ExecutorNodes__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::Filter* ptr = (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ExecutorNode* rptr;
-    rptr = ptr->ap_ExecutorNodes;
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 23);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
     return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_i_1NodeCount__I(JNIEnv* env, jobject obj, jint arg0) {
@@ -2576,25 +2460,6 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_i_1Nod
     int rvalue = ptr->i_NodeCount;
     rarg = (jint)rvalue;
     return rarg;
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Filter_Destroy(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::Filter* ptr = (::SiddhiGpu::Filter*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->Destroy();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
 }
 
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_Print__Lorg_bytedeco_javacpp_Pointer_2(JNIEnv* env, jobject obj, jobject arg0) {
@@ -2639,7 +2504,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_allocate(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 23))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 20))) {
         return;
     }
     jthrowable exc = NULL;
@@ -2656,7 +2521,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 23))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 20))) {
         return;
     }
     jthrowable exc = NULL;
@@ -2671,6 +2536,42 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_
     if (exc != NULL) {
         env->Throw(exc);
     }
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_m_1VarValue__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    ::SiddhiGpu::VariableValue* rptr;
+    rptr = &ptr->m_VarValue;
+    if (rptr != NULL) {
+        rarg = JavaCPP_createPointer(env, 21);
+        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+    }
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_m_1VarValue__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_2(JNIEnv* env, jobject obj, jobject arg0) {
+    ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    ::SiddhiGpu::VariableValue* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::VariableValue*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
+    if (ptr0 == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "Pointer address of argument 0 is NULL.");
+        return 0;
+    }
+    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
+    ptr0 += position0;
+    jobject rarg = obj;
+    ptr->m_VarValue = *ptr0;
+    return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_SetNodeType(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
@@ -2688,35 +2589,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
         if (rptr == ptr) {
             rarg = obj;
         } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 23);
-            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-        }
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_SetConditionType(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ExecutorNode* rptr;
-    jthrowable exc = NULL;
-    try {
-        rptr = &ptr->SetConditionType((SiddhiGpu::ConditionType)arg0);
-        if (rptr == ptr) {
-            rarg = obj;
-        } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 23);
+            rarg = JavaCPP_createPointer(env, 20);
             env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
@@ -2744,7 +2617,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
         if (rptr == ptr) {
             rarg = obj;
         } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 23);
+            rarg = JavaCPP_createPointer(env, 20);
             env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
@@ -2779,7 +2652,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
         if (rptr == ptr) {
             rarg = obj;
         } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 23);
+            rarg = JavaCPP_createPointer(env, 20);
             env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
@@ -2814,7 +2687,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
         if (rptr == ptr) {
             rarg = obj;
         } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 23);
+            rarg = JavaCPP_createPointer(env, 20);
             env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
@@ -2876,18 +2749,6 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
     ptr->e_ConditionType = (SiddhiGpu::ConditionType)arg0;
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_e_1ExpressionType__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = obj;
-    ptr->e_ExpressionType = (SiddhiGpu::ExpressionType)arg0;
-    return rarg;
-}
 JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_e_1ExpressionType__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
@@ -2901,7 +2762,7 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_
     rarg = (jint)rvalue;
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_m_1ConstValue__(JNIEnv* env, jobject obj) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_e_1ExpressionType__I(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2909,13 +2770,8 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ConstValue* rptr;
-    rptr = &ptr->m_ConstValue;
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 24);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
+    jobject rarg = obj;
+    ptr->e_ExpressionType = (SiddhiGpu::ExpressionType)arg0;
     return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_m_1ConstValue__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_2(JNIEnv* env, jobject obj, jobject arg0) {
@@ -2937,7 +2793,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
     ptr->m_ConstValue = *ptr0;
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_m_1VarValue__(JNIEnv* env, jobject obj) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_m_1ConstValue__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2946,15 +2802,15 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jobject rarg = NULL;
-    ::SiddhiGpu::VariableValue* rptr;
-    rptr = &ptr->m_VarValue;
+    ::SiddhiGpu::ConstValue* rptr;
+    rptr = &ptr->m_ConstValue;
     if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 25);
+        rarg = JavaCPP_createPointer(env, 22);
         env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
     }
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_m_1VarValue__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_2(JNIEnv* env, jobject obj, jobject arg0) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNode_SetConditionType(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::ExecutorNode* ptr = (::SiddhiGpu::ExecutorNode*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -2962,15 +2818,24 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ExecutorNo
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    ::SiddhiGpu::VariableValue* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::VariableValue*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    if (ptr0 == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "Pointer address of argument 0 is NULL.");
-        return 0;
+    jobject rarg = NULL;
+    ::SiddhiGpu::ExecutorNode* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = &ptr->SetConditionType((SiddhiGpu::ConditionType)arg0);
+        if (rptr == ptr) {
+            rarg = obj;
+        } else if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 20);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
     }
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jobject rarg = obj;
-    ptr->m_VarValue = *ptr0;
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
     return rarg;
 }
 
@@ -3016,7 +2881,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_Pr
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_allocate(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 24))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 22))) {
         return;
     }
     jthrowable exc = NULL;
@@ -3031,62 +2896,6 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_al
     if (exc != NULL) {
         env->Throw(exc);
     }
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetFloat(JNIEnv* env, jobject obj, jfloat arg0) {
-    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ConstValue* rptr;
-    jthrowable exc = NULL;
-    try {
-        rptr = &ptr->SetFloat(arg0);
-        if (rptr == ptr) {
-            rarg = obj;
-        } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 24);
-            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-        }
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetDouble(JNIEnv* env, jobject obj, jdouble arg0) {
-    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ConstValue* rptr;
-    jthrowable exc = NULL;
-    try {
-        rptr = &ptr->SetDouble(arg0);
-        if (rptr == ptr) {
-            rarg = obj;
-        } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 24);
-            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-        }
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetString__Lorg_bytedeco_javacpp_BytePointer_2I(JNIEnv* env, jobject obj, jobject arg0, jint arg1) {
     ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
@@ -3107,7 +2916,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue
         if (rptr == ptr) {
             rarg = obj;
         } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 24);
+            rarg = JavaCPP_createPointer(env, 22);
             env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
@@ -3136,7 +2945,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue
         if (rptr == ptr) {
             rarg = obj;
         } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 24);
+            rarg = JavaCPP_createPointer(env, 22);
             env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
         }
     } catch (...) {
@@ -3150,7 +2959,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue
     return rarg;
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 24))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 22))) {
         return;
     }
     jthrowable exc = NULL;
@@ -3165,90 +2974,6 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_al
     if (exc != NULL) {
         env->Throw(exc);
     }
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetBool(JNIEnv* env, jobject obj, jboolean arg0) {
-    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ConstValue* rptr;
-    jthrowable exc = NULL;
-    try {
-        rptr = &ptr->SetBool((bool)arg0);
-        if (rptr == ptr) {
-            rarg = obj;
-        } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 24);
-            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-        }
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetInt(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ConstValue* rptr;
-    jthrowable exc = NULL;
-    try {
-        rptr = &ptr->SetInt(arg0);
-        if (rptr == ptr) {
-            rarg = obj;
-        } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 24);
-            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-        }
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetLong(JNIEnv* env, jobject obj, jlong arg0) {
-    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::ConstValue* rptr;
-    jthrowable exc = NULL;
-    try {
-        rptr = &ptr->SetLong(arg0);
-        if (rptr == ptr) {
-            rarg = obj;
-        } else if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 24);
-            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-        }
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_m_1Value__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_2(JNIEnv* env, jobject obj, jobject arg0) {
     ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
@@ -3281,9 +3006,22 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue
     ::SiddhiGpu::Values* rptr;
     rptr = &ptr->m_Value;
     if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 26);
+        rarg = JavaCPP_createPointer(env, 23);
         env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
     }
+    return rarg;
+}
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_e_1Type__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jint rarg = 0;
+    SiddhiGpu::DataType::Value rvalue = (SiddhiGpu::DataType::Value)ptr->e_Type;
+    rarg = (jint)rvalue;
     return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_e_1Type__I(JNIEnv* env, jobject obj, jint arg0) {
@@ -3298,7 +3036,7 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue
     ptr->e_Type = (SiddhiGpu::DataType::Value)arg0;
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_e_1Type__(JNIEnv* env, jobject obj) {
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetBool(JNIEnv* env, jobject obj, jboolean arg0) {
     ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
@@ -3306,9 +3044,136 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_e_
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    jint rarg = 0;
-    SiddhiGpu::DataType::Value rvalue = (SiddhiGpu::DataType::Value)ptr->e_Type;
-    rarg = (jint)rvalue;
+    jobject rarg = NULL;
+    ::SiddhiGpu::ConstValue* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = &ptr->SetBool((bool)arg0);
+        if (rptr == ptr) {
+            rarg = obj;
+        } else if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 22);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetInt(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    ::SiddhiGpu::ConstValue* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = &ptr->SetInt(arg0);
+        if (rptr == ptr) {
+            rarg = obj;
+        } else if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 22);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetLong(JNIEnv* env, jobject obj, jlong arg0) {
+    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    ::SiddhiGpu::ConstValue* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = &ptr->SetLong(arg0);
+        if (rptr == ptr) {
+            rarg = obj;
+        } else if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 22);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetFloat(JNIEnv* env, jobject obj, jfloat arg0) {
+    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    ::SiddhiGpu::ConstValue* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = &ptr->SetFloat(arg0);
+        if (rptr == ptr) {
+            rarg = obj;
+        } else if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 22);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024ConstValue_SetDouble(JNIEnv* env, jobject obj, jdouble arg0) {
+    ::SiddhiGpu::ConstValue* ptr = (::SiddhiGpu::ConstValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    ::SiddhiGpu::ConstValue* rptr;
+    jthrowable exc = NULL;
+    try {
+        rptr = &ptr->SetDouble(arg0);
+        if (rptr == ptr) {
+            rarg = obj;
+        } else if (rptr != NULL) {
+            rarg = JavaCPP_createPointer(env, 22);
+            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+        }
+    } catch (...) {
+        exc = JavaCPP_handleException(env, 16);
+    }
+
+    if (exc != NULL) {
+        env->Throw(exc);
+    }
     return rarg;
 }
 
@@ -3354,7 +3219,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_allocate__II(JNIEnv* env, jobject obj, jint arg0, jint arg1) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 25))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 21))) {
         return;
     }
     jthrowable exc = NULL;
@@ -3371,7 +3236,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_allocate__(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 25))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 21))) {
         return;
     }
     jthrowable exc = NULL;
@@ -3388,7 +3253,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 25))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 21))) {
         return;
     }
     jthrowable exc = NULL;
@@ -3403,31 +3268,6 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue
     if (exc != NULL) {
         env->Throw(exc);
     }
-}
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_i_1AttributePosition__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::VariableValue* ptr = (::SiddhiGpu::VariableValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jint rarg = 0;
-    int rvalue = ptr->i_AttributePosition;
-    rarg = (jint)rvalue;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_i_1AttributePosition__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::VariableValue* ptr = (::SiddhiGpu::VariableValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = obj;
-    ptr->i_AttributePosition = arg0;
-    return rarg;
 }
 JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_e_1Type__I(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::VariableValue* ptr = (::SiddhiGpu::VariableValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
@@ -3454,237 +3294,20 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue
     rarg = (jint)rvalue;
     return rarg;
 }
-
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_Print__Lorg_bytedeco_javacpp_Pointer_2(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    char* ptr0 = arg0 == NULL ? NULL : (char*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jthrowable exc = NULL;
-    try {
-        ptr->Print((FILE*)ptr0);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_Print__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->Print();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_allocate__(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 18))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::CudaEvent* rptr = new ::SiddhiGpu::CudaEvent();
-        jint rcapacity = 1;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_deallocate);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_allocate__J(JNIEnv* env, jobject obj, jlong arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 18))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::CudaEvent* rptr = new ::SiddhiGpu::CudaEvent((uint64_t)arg0);
-        jint rcapacity = 1;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_deallocate);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_AddIntAttribute(JNIEnv* env, jobject obj, jint arg0, jint arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddIntAttribute((unsigned int)arg0, arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_AddLongAttribute(JNIEnv* env, jobject obj, jint arg0, jlong arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddLongAttribute((unsigned int)arg0, arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_AddFloatAttribute(JNIEnv* env, jobject obj, jint arg0, jfloat arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddFloatAttribute((unsigned int)arg0, arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_AddDoubleAttribute(JNIEnv* env, jobject obj, jint arg0, jdouble arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddDoubleAttribute((unsigned int)arg0, arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_AddStringAttribute__ILjava_lang_String_2(JNIEnv* env, jobject obj, jint arg0, jstring arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    const char* ptr1 = arg1 == NULL ? NULL : env->GetStringUTFChars(arg1, NULL);
-    jint size1 = 0;
-    StringAdapter adapter1(ptr1, size1);
-    jthrowable exc = NULL;
-    try {
-        ptr->AddStringAttribute((unsigned int)arg0, (std::string&)adapter1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (arg1 != NULL) env->ReleaseStringUTFChars(arg1, ptr1);
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_AddStringAttribute__ILorg_bytedeco_javacpp_BytePointer_2(JNIEnv* env, jobject obj, jint arg0, jobject arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    signed char* ptr1 = arg1 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg1, JavaCPP_addressFID));
-    jint size1 = arg1 == NULL ? 0 : env->GetIntField(arg1, JavaCPP_limitFID);
-    jint position1 = arg1 == NULL ? 0 : env->GetIntField(arg1, JavaCPP_positionFID);
-    ptr1 += position1;
-    size1 -= position1;
-    StringAdapter adapter1(ptr1, size1);
-    jthrowable exc = NULL;
-    try {
-        ptr->AddStringAttribute((unsigned int)arg0, (std::string&)adapter1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    signed char* rptr1 = adapter1;
-    jint rsize1 = (jint)adapter1.size;
-    if (rptr1 != ptr1) {
-        JavaCPP_initPointer(env, arg1, rptr1, rsize1, &StringAdapter::deallocate);
-    } else {
-        env->SetIntField(arg1, JavaCPP_limitFID, rsize1 + position1);
-    }
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT jboolean JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetBoolAttribute(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_i_1AttributePosition__I(JNIEnv* env, jobject obj, jint arg0) {
+    ::SiddhiGpu::VariableValue* ptr = (::SiddhiGpu::VariableValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
         return 0;
     }
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
-    jboolean rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        bool rvalue = (bool)ptr->GetBoolAttribute((unsigned int)arg0);
-        rarg = (jboolean)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
+    jobject rarg = obj;
+    ptr->i_AttributePosition = arg0;
     return rarg;
 }
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetIntAttribute(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024VariableValue_i_1AttributePosition__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::VariableValue* ptr = (::SiddhiGpu::VariableValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
         env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
         return 0;
@@ -3692,450 +3315,13 @@ JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_Get
     jint position = env->GetIntField(obj, JavaCPP_positionFID);
     ptr += position;
     jint rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        int rvalue = ptr->GetIntAttribute((unsigned int)arg0);
-        rarg = (jint)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jlong JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetLongAttribute(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jlong rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        jlong rvalue = ptr->GetLongAttribute((unsigned int)arg0);
-        rarg = (jlong)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jfloat JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetFloatAttribute(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jfloat rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        float rvalue = ptr->GetFloatAttribute((unsigned int)arg0);
-        rarg = (jfloat)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jdouble JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetDoubleAttribute(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jdouble rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        double rvalue = ptr->GetDoubleAttribute((unsigned int)arg0);
-        rarg = (jdouble)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetStringAttribute(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    const char* rptr;
-    jthrowable exc = NULL;
-    try {
-        rptr = (const char*)ptr->GetStringAttribute((unsigned int)arg0);
-        if (rptr != NULL) {
-            rarg = JavaCPP_createPointer(env, 4);
-            env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-        }
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_ui_1Timestamp__J(JNIEnv* env, jobject obj, jlong arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = obj;
-    ptr->ui_Timestamp = (uint64_t)arg0;
-    return rarg;
-}
-JNIEXPORT jlong JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_ui_1Timestamp__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jlong rarg = 0;
-    uint64_t rvalue = (uint64_t)ptr->ui_Timestamp;
-    rarg = (jlong)rvalue;
-    return rarg;
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 18))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::CudaEvent* rptr = new ::SiddhiGpu::CudaEvent[arg0];
-        jint rcapacity = arg0;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_deallocateArray);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_ui_1NumAttributes__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jint rarg = 0;
-    unsigned int rvalue = (unsigned int)ptr->ui_NumAttributes;
-    rarg = (jint)rvalue;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_ui_1NumAttributes__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = obj;
-    ptr->ui_NumAttributes = (unsigned int)arg0;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_a_1Attributes__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::AttibuteValue* rptr;
-    rptr = &ptr->a_Attributes[arg0];
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 27);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_a_1Attributes__ILorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_2(JNIEnv* env, jobject obj, jint arg0, jobject arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::AttibuteValue* ptr1 = arg1 == NULL ? NULL : (::SiddhiGpu::AttibuteValue*)jlong_to_ptr(env->GetLongField(arg1, JavaCPP_addressFID));
-    if (ptr1 == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "Pointer address of argument 1 is NULL.");
-        return 0;
-    }
-    jint position1 = arg1 == NULL ? 0 : env->GetIntField(arg1, JavaCPP_positionFID);
-    ptr1 += position1;
-    jobject rarg = obj;
-    ptr->a_Attributes[arg0] = *ptr1;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_a_1Attributes__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::AttibuteValue* rptr;
-    rptr = ptr->a_Attributes;
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 27);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
-    return rarg;
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_Destroy(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->Destroy();
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_Reset(JNIEnv* env, jobject obj, jlong arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->Reset((uint64_t)arg0);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_SetTimestamp(JNIEnv* env, jobject obj, jlong arg0) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->SetTimestamp((uint64_t)arg0);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT jlong JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetTimestamp(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jlong rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        uint64_t rvalue = (uint64_t)ptr->GetTimestamp();
-        rarg = (jlong)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_GetNumAttributes(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jint rarg = 0;
-    jthrowable exc = NULL;
-    try {
-        unsigned int rvalue = (unsigned int)ptr->GetNumAttributes();
-        rarg = (jint)rvalue;
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-    return rarg;
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024CudaEvent_AddBoolAttribute(JNIEnv* env, jobject obj, jint arg0, jboolean arg1) {
-    ::SiddhiGpu::CudaEvent* ptr = (::SiddhiGpu::CudaEvent*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jthrowable exc = NULL;
-    try {
-        ptr->AddBoolAttribute((unsigned int)arg0, (bool)arg1);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_allocate(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 27))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::AttibuteValue* rptr = new ::SiddhiGpu::AttibuteValue();
-        jint rcapacity = 1;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_deallocate);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 27))) {
-        return;
-    }
-    jthrowable exc = NULL;
-    try {
-        ::SiddhiGpu::AttibuteValue* rptr = new ::SiddhiGpu::AttibuteValue[arg0];
-        jint rcapacity = arg0;
-        JavaCPP_initPointer(env, obj, rptr, rcapacity, &JavaCPP_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_deallocateArray);
-    } catch (...) {
-        exc = JavaCPP_handleException(env, 16);
-    }
-
-    if (exc != NULL) {
-        env->Throw(exc);
-    }
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_m_1Value__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::AttibuteValue* ptr = (::SiddhiGpu::AttibuteValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    ::SiddhiGpu::Values* rptr;
-    rptr = &ptr->m_Value;
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 26);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_m_1Value__Lorg_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_2(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::AttibuteValue* ptr = (::SiddhiGpu::AttibuteValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    ::SiddhiGpu::Values* ptr0 = arg0 == NULL ? NULL : (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    if (ptr0 == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "Pointer address of argument 0 is NULL.");
-        return 0;
-    }
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jobject rarg = obj;
-    ptr->m_Value = *ptr0;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_e_1Type__I(JNIEnv* env, jobject obj, jint arg0) {
-    ::SiddhiGpu::AttibuteValue* ptr = (::SiddhiGpu::AttibuteValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = obj;
-    ptr->e_Type = (SiddhiGpu::DataType::Value)arg0;
-    return rarg;
-}
-JNIEXPORT jint JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024AttibuteValue_e_1Type__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::AttibuteValue* ptr = (::SiddhiGpu::AttibuteValue*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jint rarg = 0;
-    SiddhiGpu::DataType::Value rvalue = (SiddhiGpu::DataType::Value)ptr->e_Type;
+    int rvalue = ptr->i_AttributePosition;
     rarg = (jint)rvalue;
     return rarg;
 }
 
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_allocate(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 26))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 23))) {
         return;
     }
     jthrowable exc = NULL;
@@ -4152,7 +3338,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_alloca
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 26))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 23))) {
         return;
     }
     jthrowable exc = NULL;
@@ -4167,38 +3353,6 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_alloca
     if (exc != NULL) {
         env->Throw(exc);
     }
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1ExtString__Lorg_bytedeco_javacpp_BytePointer_2(JNIEnv* env, jobject obj, jobject arg0) {
-    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
-    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
-    ptr0 += position0;
-    jobject rarg = obj;
-    ptr->z_ExtString = (char*)ptr0;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1ExtString__(JNIEnv* env, jobject obj) {
-    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = NULL;
-    char* rptr;
-    rptr = (char*)ptr->z_ExtString;
-    if (rptr != NULL) {
-        rarg = JavaCPP_createPointer(env, 4);
-        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
-    }
-    return rarg;
 }
 JNIEXPORT jboolean JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_b_1BoolVal__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
@@ -4275,6 +3429,18 @@ JNIEXPORT jlong JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_l_1Lo
     rarg = (jlong)rvalue;
     return rarg;
 }
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_f_1FloatVal__F(JNIEnv* env, jobject obj, jfloat arg0) {
+    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = obj;
+    ptr->f_FloatVal = arg0;
+    return rarg;
+}
 JNIEXPORT jfloat JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_f_1FloatVal__(JNIEnv* env, jobject obj) {
     ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
@@ -4286,18 +3452,6 @@ JNIEXPORT jfloat JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_f_1F
     jfloat rarg = 0;
     float rvalue = ptr->f_FloatVal;
     rarg = (jfloat)rvalue;
-    return rarg;
-}
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_f_1FloatVal__F(JNIEnv* env, jobject obj, jfloat arg0) {
-    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = obj;
-    ptr->f_FloatVal = arg0;
     return rarg;
 }
 JNIEXPORT jdouble JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_d_1DoubleVal__(JNIEnv* env, jobject obj) {
@@ -4342,18 +3496,6 @@ JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1
     }
     return rarg;
 }
-JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1StringVal__IB(JNIEnv* env, jobject obj, jint arg0, jbyte arg1) {
-    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
-    if (ptr == NULL) {
-        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
-        return 0;
-    }
-    jint position = env->GetIntField(obj, JavaCPP_positionFID);
-    ptr += position;
-    jobject rarg = obj;
-    ptr->z_StringVal[arg0] = (char)arg1;
-    return rarg;
-}
 JNIEXPORT jbyte JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1StringVal__I(JNIEnv* env, jobject obj, jint arg0) {
     ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
     if (ptr == NULL) {
@@ -4367,9 +3509,53 @@ JNIEXPORT jbyte JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1St
     rarg = (jbyte)rvalue;
     return rarg;
 }
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1StringVal__IB(JNIEnv* env, jobject obj, jint arg0, jbyte arg1) {
+    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = obj;
+    ptr->z_StringVal[arg0] = (char)arg1;
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1ExtString__Lorg_bytedeco_javacpp_BytePointer_2(JNIEnv* env, jobject obj, jobject arg0) {
+    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    signed char* ptr0 = arg0 == NULL ? NULL : (signed char*)jlong_to_ptr(env->GetLongField(arg0, JavaCPP_addressFID));
+    jint position0 = arg0 == NULL ? 0 : env->GetIntField(arg0, JavaCPP_positionFID);
+    ptr0 += position0;
+    jobject rarg = obj;
+    ptr->z_ExtString = (char*)ptr0;
+    return rarg;
+}
+JNIEXPORT jobject JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024Values_z_1ExtString__(JNIEnv* env, jobject obj) {
+    ::SiddhiGpu::Values* ptr = (::SiddhiGpu::Values*)jlong_to_ptr(env->GetLongField(obj, JavaCPP_addressFID));
+    if (ptr == NULL) {
+        env->ThrowNew(JavaCPP_getClass(env, 3), "This pointer address is NULL.");
+        return 0;
+    }
+    jint position = env->GetIntField(obj, JavaCPP_positionFID);
+    ptr += position;
+    jobject rarg = NULL;
+    char* rptr;
+    rptr = (char*)ptr->z_ExtString;
+    if (rptr != NULL) {
+        rarg = JavaCPP_createPointer(env, 4);
+        env->SetLongField(rarg, JavaCPP_addressFID, ptr_to_jlong(rptr));
+    }
+    return rarg;
+}
 
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024DataType_allocate(JNIEnv* env, jobject obj) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 28))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 24))) {
         return;
     }
     jthrowable exc = NULL;
@@ -4386,7 +3572,7 @@ JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024DataType_allo
     }
 }
 JNIEXPORT void JNICALL Java_org_wso2_siddhi_gpu_jni_SiddhiGpu_00024DataType_allocateArray(JNIEnv* env, jobject obj, jint arg0) {
-    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 28))) {
+    if (!env->IsSameObject(env->GetObjectClass(obj), JavaCPP_getClass(env, 24))) {
         return;
     }
     jthrowable exc = NULL;

@@ -412,6 +412,9 @@ public class FilterProcessor implements Processor {
                 // get bytebuffer from CUDA-C Lib
                 log.info("GpuEventConsumer : Get ByteBuffer of " + byteBufferSize + " bytes");
                 BytePointer bytePointer = gpuEventConsumer.CreateByteBuffer(byteBufferSize);
+                bytePointer.capacity(byteBufferSize);
+                bytePointer.limit(byteBufferSize);
+                bytePointer.position(0);
                 eventByteBuffer = bytePointer.asBuffer();
                 resultsBuffer = eventByteBuffer.asIntBuffer();
                 log.info("GpuEventConsumer : Got ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
