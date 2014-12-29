@@ -99,7 +99,7 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEvents
 	p_StopWatch = NULL;
 	i_NumAttributes = 0;
 	i_CudaDeviceId = -1;
-	b_DeviceSet = false
+	b_DeviceSet = false;
 }
 
 CudaSingleFilterKernel::~CudaSingleFilterKernel()

@@ -46,7 +46,7 @@ public:
 
 	int GetMaxNumberOfEvents() { return i_MaxNumOfEvents; }
 
-	void CreateByteBuffer(int _iSize);
+	char * CreateByteBuffer(int _iSize);
 	void SetByteBuffer(char * _pBuffer, int _iSize);
 	int GetByteBufferSize() { return i_ByteBufferSize; }
 	char * GetByteBuffer() { return p_ByteBuffer; }

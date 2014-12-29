@@ -425,7 +425,7 @@ public static final int
 
 	public native int GetMaxNumberOfEvents();
 
-	public native void CreateByteBuffer(int _iSize);
+	public native @Cast("char*") BytePointer CreateByteBuffer(int _iSize);
 	public native void SetByteBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
 	public native void SetByteBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
 	public native void SetByteBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
@@ -470,6 +470,8 @@ public static final int
 	public native void SetEventBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
 	public native void SetEventBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
 	public native void SetEventBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
+	public native @Cast("char*") BytePointer GetEventBuffer(int _iSize);
+
 	public native void SetResultsBufferPosition(int _iPos);
 	public native void SetEventMetaBufferPosition(int _iPos);
 	public native void SetSizeOfEvent(int _iSize);
@@ -544,6 +546,7 @@ public static final int
 	public native void SetEventBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
 	public native void SetEventBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
 	public native void SetEventBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
+	public native @Cast("char*") BytePointer GetEventBuffer(int _iSize);
 	public native void ProcessEvents(int _iNumEvents);
 
 	public native void AddFilterToDevice(Filter _pFilter);

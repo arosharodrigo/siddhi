@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.bytedeco.javacpp.BytePointer;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -408,8 +409,8 @@ public class FilterProcessor implements Processor {
             
             // get bytebuffer from CUDA-C Lib
             log.info("GpuEventConsumer : Get ByteBuffer of " + byteBufferSize + " bytes");
-            gpuEventConsumer.CreateByteBuffer(byteBufferSize);
-            eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
+            BytePointer bytePointer = gpuEventConsumer.CreateByteBuffer(byteBufferSize);
+            eventByteBuffer = bytePointer.asBuffer();
             resultsBuffer = eventByteBuffer.asIntBuffer();
             log.info("GpuEventConsumer : Got ByteBuffer of " + byteBufferSize + " bytes in [" + eventByteBuffer + "]");
 
