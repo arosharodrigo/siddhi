@@ -1,5 +1,6 @@
 package org.wso2.siddhi.performance;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -66,6 +67,8 @@ public class ComplexFilterMultipleQueryPerformance {
 
         CommandLineParser cliParser = new BasicParser();
         CommandLine cmd = null;
+        
+        final DecimalFormat decimalFormat = new DecimalFormat("###.##");
 
         boolean asyncEnabled = true;
         boolean gpuEnabled = false;
@@ -161,7 +164,8 @@ public class ComplexFilterMultipleQueryPerformance {
                     //double tp = (10000000 * 1000.0 / (end - start));
                     double tp = ((eventCount - prevEventCount) * 1000.0) / (end - start);
                     throughputList.add(tp);
-                    System.out.println("Throughput = " + tp + " Event/sec " + (eventCount - prevEventCount));
+                    System.out.println("Throughput = " + decimalFormat.format(tp) + " Event/sec " + (eventCount - prevEventCount));
+                    
                     //System.out.println("," + tp);
                     start = end;
                     prevEventCount = eventCount;
