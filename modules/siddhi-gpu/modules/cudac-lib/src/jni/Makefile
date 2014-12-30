@@ -68,6 +68,10 @@ ifeq ($(GPU_DEBUG),1)
 	CCFLAGS += -DGPU_DEBUG
 endif
 
+ifeq ($(KERNEL_TIME),1)
+	CCFLAGS += -DKERNEL_TIME
+endif
+
 ALL_CCFLAGS := 
 ALL_CCFLAGS += $(NVCCFLAGS)
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))

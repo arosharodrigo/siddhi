@@ -310,7 +310,7 @@ public class FilterProcessor implements Processor {
 
     @Override
     public void configureProcessor(MetaStateEvent metaEvent) {
-
+        
         // configure GPU related data structures
         if (metaEvent.getEventCount() == 1 && varPositionToAttribNameMap != null && gpuEventConsumer != null)
         {
@@ -387,12 +387,13 @@ public class FilterProcessor implements Processor {
 
             eventsDataBufferPosition = bufferPreambleSize;
 
-            log.info("GpuEventConsumer : Filter results buffer position is " + filterResultsBufferPosition);
-            log.info("GpuEventConsumer : EventMeta buffer position is " + eventMetaBufferPosition);
-            log.info("GpuEventConsumer : EventData buffer position is " + eventsDataBufferPosition);
-            log.info("GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
+            log.info("[" + queryName + "] GpuEventConsumer : Filter results buffer position is " + filterResultsBufferPosition);
+            log.info("[" + queryName + "] GpuEventConsumer : EventMeta buffer position is " + eventMetaBufferPosition);
+            log.info("[" + queryName + "] GpuEventConsumer : EventData buffer position is " + eventsDataBufferPosition);
+            log.info("[" + queryName + "] GpuEventConsumer : Size of an event is " + sizeOfEvent + " bytes");
             int byteBufferSize = eventsDataBufferPosition + (sizeOfEvent * gpuEventConsumer.GetMaxNumberOfEvents());
 
+            // Should set these before buffer allocation
             gpuEventConsumer.SetSizeOfEvent(sizeOfEvent);
             gpuEventConsumer.SetResultsBufferPosition(filterResultsBufferPosition);
             gpuEventConsumer.SetEventMetaBufferPosition(eventMetaBufferPosition);
@@ -407,7 +408,7 @@ public class FilterProcessor implements Processor {
             // gpuEventConsumer.CreateByteBuffer(byteBufferSize);
             // eventByteBuffer = gpuEventConsumer.GetByteBuffer().asBuffer();
 
-            log.info("EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
+            log.info("[" + queryName + "] EventByteBuffer : IsDirect=" + this.eventByteBuffer.isDirect() +
                     " HasArray=" + this.eventByteBuffer.hasArray() + 
                     " Position=" + this.eventByteBuffer.position() + 
                     " Limit=" + this.eventByteBuffer.limit());
@@ -555,7 +556,7 @@ public class FilterProcessor implements Processor {
                         break;
                     }
 
-                    log.info("Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
+                    log.info("[" + queryName + "] Attribute : GpuPos=" + attributeDefinition.attributePositionInGpu + 
                             " CpuPos=" + Arrays.toString(attributeDefinition.attributePositionInCpu) + 
                             " Type=" + attributeDefinition.attributeType + 
                             " Length=" + attributeDefinition.attributeLength);

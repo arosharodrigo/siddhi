@@ -52,10 +52,10 @@ private:
 	bool SelectDevice(int _iDeviceId);
 
 	int i_CudaDeviceId;
+	bool b_DeviceSet;
 
 	int i_EventsPerBlock;
 	int i_MaxNumberOfEvents;
-//	int i_NumEvents;
 	int i_NumAttributes;
 
 	char * p_HostEventBuffer;

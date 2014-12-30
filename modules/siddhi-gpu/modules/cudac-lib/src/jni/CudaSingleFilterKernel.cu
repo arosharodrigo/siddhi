@@ -57,6 +57,53 @@ __global__ void ProcessEventsSingleFilterKernel(SingleFilterKernelInput * _pInpu
 	}
 }
 
+__global__ void ProcessEventsSingleFilterKernel2(
+		char * 					  _pByteBuffer,         // ByteBuffer from java side
+		Filter *                  _apFilter,            // Filters buffer - pre-copied at initialization
+		int                       _iResultsPosition,    // Results array position in ByteBuffer
+		int                       _iEventMetaPosition,  // EventMeta position in ByteBuffer
+		int                       _iEventDataPosition,  // EventData position in ByteBuffer
+		int                       _iMaxEventCount,      // used for setting results array
+		int                       _iSizeOfEvent,        // Size of an event
+		int                       _iEventsPerBlock,     // number of events allocated per block
+		int                       _iEventCount          // Num events in this batch
+)
+{
+	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
+		return;
+
+	if((blockIdx.x == _iEventCount / _iEventsPerBlock) && // last thread block
+			(threadIdx.x >= _iEventCount % _iEventsPerBlock))
+	{
+		return;
+	}
+
+	EventMeta * pEventMeta = (EventMeta*) (_pByteBuffer + _iEventMetaPosition);
+
+	// get assigned event
+	int iEventIdx = (blockIdx.x * _iEventsPerBlock) +  threadIdx.x;
+	char * pEvent = (_pByteBuffer + _iEventDataPosition) + (_iSizeOfEvent * iEventIdx);
+
+	// get assigned filter
+	/*__shared__*/ Filter mFilter = *_apFilter;
+
+	// get results array
+	MatchedEvents * pMatchedEvents = (MatchedEvents*) (_pByteBuffer + _iResultsPosition);
+
+	int iCurrentNodeIdx = 0;
+	bool bResult = Evaluate(mFilter, pEventMeta, pEvent, iCurrentNodeIdx);
+
+	//TODO improve results sending
+	if(bResult)
+	{
+		pMatchedEvents->a_ResultEvents[iEventIdx] = iEventIdx;
+	}
+	else // ~ possible way to avoid cudaMemset from host
+	{
+		pMatchedEvents->a_ResultEvents[iEventIdx] = -1 * iEventIdx;
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +120,7 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, GpuEventCons
 	p_StopWatch = NULL;
 	i_NumAttributes = 0;
 	i_CudaDeviceId = -1;
+	b_DeviceSet = false;
 }
 
 CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer * _pConsumer, FILE * _fpLog) :
@@ -95,6 +143,7 @@ CudaSingleFilterKernel::CudaSingleFilterKernel(int _iMaxBufferSize, int _iEvents
 	p_StopWatch = NULL;
 	i_NumAttributes = 0;
 	i_CudaDeviceId = -1;
+	b_DeviceSet = false;
 }
 
 CudaSingleFilterKernel::~CudaSingleFilterKernel()
@@ -223,7 +272,11 @@ void CudaSingleFilterKernel::SetEventBuffer(char * _pBuffer, int _iSize)
  */
 void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 {
-	CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId)); // TODO: do this only at start
+	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
+	{
+		CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId));
+		b_DeviceSet = true;
+	}
 
 #ifdef KERNEL_TIME
 	sdkStartTimer(&p_StopWatch);
@@ -255,6 +308,19 @@ void CudaSingleFilterKernel::ProcessEvents(int _iNumEvents)
 #endif
 
 	ProcessEventsSingleFilterKernel<<<numBlocks, numThreads>>>(p_DeviceInput);
+	
+	/*ProcessEventsSingleFilterKernel2<<<numBlocks, numThreads>>>(
+		p_DeviceEventBuffer,
+		p_DeviceFilter,
+		i_ResultsBufferPosition,
+		i_EventMetaBufferPosition,
+		i_EventDataBufferPosition,
+		i_MaxNumberOfEvents,
+		i_SizeOfEvent,
+		i_EventsPerBlock,
+		_iNumEvents
+	);*/
+	
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
