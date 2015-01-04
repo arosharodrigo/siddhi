@@ -29,6 +29,8 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
     protected E previousToLastReturned;
     protected E lastReturned;
     protected E last;
+    protected int currentEventCount;
+    protected int iteratedEventCount;
 
     public void insertBeforeCurrent(E events) {
 
@@ -66,6 +68,7 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
     public void add(E complexEvents) {
         if (first == null) {
             first = complexEvents;
+            currentEventCount = 1;
         } else {
             last.setNext(complexEvents);
         }
@@ -77,6 +80,7 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
         E lastEvent = complexEvents;
         while (lastEvent.getNext() != null) {
             lastEvent = (E) lastEvent.getNext();
+            currentEventCount++;
         }
         return lastEvent;
     }
@@ -118,6 +122,7 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
             throw new NoSuchElementException();
         }
         lastReturned = returnEvent;
+        iteratedEventCount++;
         return (E) returnEvent;
     }
 
@@ -149,6 +154,7 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
         }
         lastReturned.setNext(null);
         lastReturned = null;
+        currentEventCount--;
     }
 
     public void detach() {
@@ -175,6 +181,7 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
             firstEvent = first;
             first = lastReturned;
             previousToLastReturned = null;
+            currentEventCount = currentEventCount - iteratedEventCount;
         }
         return (E) firstEvent;
     }
@@ -184,6 +191,8 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
         lastReturned = null;
         first = null;
         last = null;
+        currentEventCount = 0;
+        iteratedEventCount = 0;
     }
 
     public void reset() {
@@ -204,6 +213,7 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
             E firstEvent = first;
             first = (E) first.getNext();
             firstEvent.setNext(null);
+            currentEventCount--;
             return (E) firstEvent;
         } else {
             return null;
@@ -214,6 +224,9 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
     public String toString() {
         return "EventChunk{" +
                 "first=" + first +
+                " last=" + last + 
+                " count=" + currentEventCount + 
+                " iterated=" + iteratedEventCount +
                 '}';
     }
 }

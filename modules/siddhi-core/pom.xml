@@ -45,6 +45,12 @@
         <artifactId>siddhi-query-compiler</artifactId>
         <version>${project.version}</version>
     </dependency>
+    
+    <dependency>
+        <groupId>org.wso2.siddhi.gpu.jni</groupId>
+        <artifactId>javacpp-cudaclib</artifactId>
+        <version>${project.version}</version>
+    </dependency>
 
     <dependency>
         <groupId>log4j</groupId>
