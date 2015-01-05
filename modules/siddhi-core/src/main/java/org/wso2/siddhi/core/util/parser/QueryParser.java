@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter;
@@ -55,8 +56,10 @@ public class QueryParser {
         Element element = null;
         try {
             element = AnnotationHelper.getAnnotationElement("info", "name", query.getAnnotations());
+            QueryAnnotations queryAnnotations = new QueryAnnotations(query.getAnnotations());
+            
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    executionPlanContext, definitionMap, executors);
+                    executionPlanContext, definitionMap, executors, queryAnnotations);
 
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                     executionPlanContext, streamRuntime.getMetaComplexEvent(), executors);
@@ -71,7 +74,7 @@ public class QueryParser {
             queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter, streamRuntime.getMetaComplexEvent());
             validateOutputStream(queryRuntime.getOutputStreamDefinition(), definitionMap);
 
-
+            queryRuntime.configureRuntime(); // configure processors with updated MetaData
         } catch (Exception e) {
             if (element != null) {
                 throw new ExecutionPlanCreationException(e.getMessage() + " when creating query " + element.getValue(), e);

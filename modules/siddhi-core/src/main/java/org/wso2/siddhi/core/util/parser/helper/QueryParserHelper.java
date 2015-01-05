@@ -94,8 +94,8 @@ public class QueryParserHelper {
                     variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_TYPE_INDEX] = STATE_OUTPUT_DATA_INDEX;
                 }
                 variableExpressionExecutor.getPosition()[STREAM_EVENT_CHAIN_INDEX] = UNKNOWN_STATE;
-                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_INDEX] = metaComplexEvent.
-                        getOutputStreamDefinition().getAttributeList().indexOf(variableExpressionExecutor.getAttribute());
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_INDEX] = 
+                        metaComplexEvent.getOutputStreamDefinition().getAttributeList().indexOf(variableExpressionExecutor.getAttribute());
                 continue;
             }
 

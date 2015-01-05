@@ -1,0 +1,23 @@
+ifndef CPPBUILD
+CPPBUILD=/home/prabodha/devel/research/frameworks/javacpp/javacpp/javacpp-presets/siddhigpu/cppbuild
+endif
+
+ifndef PLATFORM
+PLATFORM=linux-x86_64
+endif
+
+APP=SiddhiGpu
+
+deploy: build
+	#$(info $(CPPBUILD)/$(PLATFORM))
+	mkdir -p $(CPPBUILD)/$(PLATFORM)/include
+	mkdir -p $(CPPBUILD)/$(PLATFORM)/lib
+	cp *.h $(CPPBUILD)/$(PLATFORM)/include
+	cp *.so $(CPPBUILD)/$(PLATFORM)/lib
+
+build: clean
+	g++ Filter.cpp GpuEventConsumer.cpp Timer.cpp CpuFilterKernel.cpp -march=x86-64 -m64 -Wall -O3 -fPIC -shared -s -o libgpueventconsumer.so
+	
+clean:
+	-rm *.o *.so 
+

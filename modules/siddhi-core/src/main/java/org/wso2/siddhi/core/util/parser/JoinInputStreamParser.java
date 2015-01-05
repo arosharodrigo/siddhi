@@ -19,6 +19,7 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.input.stream.join.Finder;
 import org.wso2.siddhi.core.query.input.stream.join.JoinProcessor;
 import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;
@@ -35,7 +36,8 @@ public class JoinInputStreamParser {
 
     public static JoinStreamRuntime parseInputStream(SingleStreamRuntime leftStreamRuntime, SingleStreamRuntime rightStreamRuntime,
                                                      JoinInputStream joinInputStream, ExecutionPlanContext executionPlanContext,
-                                                     MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors) {
+                                                     MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors,
+                                                     QueryAnnotations queryAnnotations) {
 
         JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true);
         JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false);

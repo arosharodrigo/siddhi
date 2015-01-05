@@ -21,6 +21,7 @@ import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.input.MultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
@@ -47,7 +48,8 @@ public class StateInputStreamParser {
                                                       ExecutionPlanContext executionPlanContext,
                                                       MetaStateEvent metaStateEvent,
                                                       List<VariableExpressionExecutor> executors,
-                                                      Map<String, AbstractDefinition> definitionMap) {
+                                                      Map<String, AbstractDefinition> definitionMap,
+                                                      QueryAnnotations queryAnnotations) {
 
         Map<String, ProcessStreamReceiver> processStreamReceiverMap = new HashMap<String, ProcessStreamReceiver>();
 
@@ -65,7 +67,7 @@ public class StateInputStreamParser {
         StateElement stateElement = stateInputStream.getStateElement();
 
         InnerStateRuntime innerStateRuntime = parse(stateElement, definitionMap, metaStateEvent,
-                executionPlanContext, executors, processStreamReceiverMap);
+                executionPlanContext, executors, processStreamReceiverMap, queryAnnotations);
 
         stateStreamRuntime.setInnerStateRuntime(innerStateRuntime);
 
@@ -75,7 +77,8 @@ public class StateInputStreamParser {
     private static InnerStateRuntime parse(StateElement stateElement, Map<String, AbstractDefinition> definitionMap,
                                            MetaStateEvent metaStateEvent, ExecutionPlanContext executionPlanContext,
                                            List<VariableExpressionExecutor> executors,
-                                           Map<String, ProcessStreamReceiver> processStreamReceiverMap) {
+                                           Map<String, ProcessStreamReceiver> processStreamReceiverMap,
+                                           QueryAnnotations queryAnnotations) {
 
 
         if (stateElement instanceof StreamStateElement) {
@@ -83,7 +86,8 @@ public class StateInputStreamParser {
             BasicSingleInputStream basicSingleInputStream = ((StreamStateElement) stateElement).getBasicSingleInputStream();
             SingleStreamRuntime singleStreamRuntime = SingleInputStreamParser.parseInputStream(basicSingleInputStream,
                     executionPlanContext, executors, definitionMap, metaStateEvent,
-                    processStreamReceiverMap.get(basicSingleInputStream.getStreamId()));
+                    processStreamReceiverMap.get(basicSingleInputStream.getStreamId()),
+                    queryAnnotations);
 
             int stateIndex = metaStateEvent.getStreamEventCount() - 1;
             StreamPreStateProcessor streamPreStateProcessor = new StreamPreStateProcessor();
@@ -107,11 +111,11 @@ public class StateInputStreamParser {
 
             StateElement currentElement = ((NextStateElement) stateElement).getStateElement();
             InnerStateRuntime currentInnerStateRuntime = parse(currentElement, definitionMap, metaStateEvent,
-                    executionPlanContext, executors, processStreamReceiverMap);
+                    executionPlanContext, executors, processStreamReceiverMap, queryAnnotations);
 
             StateElement nextElement = ((NextStateElement) stateElement).getNextStateElement();
             InnerStateRuntime nextInnerStateRuntime = parse(nextElement, definitionMap, metaStateEvent,
-                    executionPlanContext, executors, processStreamReceiverMap);
+                    executionPlanContext, executors, processStreamReceiverMap, queryAnnotations);
 
             currentInnerStateRuntime.getLastProcessor().setNextStateProcessor(nextInnerStateRuntime.getFirstProcessor());
 
@@ -132,7 +136,7 @@ public class StateInputStreamParser {
 
             StateElement currentElement = ((EveryStateElement) stateElement).getStateElement();
             InnerStateRuntime innerStateRuntime = parse(currentElement, definitionMap, metaStateEvent,
-                    executionPlanContext, executors, processStreamReceiverMap);
+                    executionPlanContext, executors, processStreamReceiverMap, queryAnnotations);
 
             EveryInnerStateRuntime everyInnerStateRuntime = new EveryInnerStateRuntime(innerStateRuntime);
 

@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.input.stream.join;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.query.processor.Processor;
 
 import java.util.ArrayList;
@@ -79,5 +80,9 @@ public class JoinStreamProcessor implements Processor {
     @Override
     public Processor cloneProcessor() {
         return null;
+    }
+
+    @Override
+    public void configureProcessor(MetaComplexEvent metaEvent) {
     }
 }

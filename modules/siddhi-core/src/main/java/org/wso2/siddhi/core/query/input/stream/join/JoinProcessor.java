@@ -18,6 +18,7 @@ package org.wso2.siddhi.core.query.input.stream.join;
 
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventPool;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -162,6 +163,10 @@ public class JoinProcessor implements Processor {
 
     public void setStateEventPool(StateEventPool stateEventPool) {
         this.stateEventPool = stateEventPool;
+    }
+
+    @Override
+    public void configureProcessor(MetaComplexEvent metaEvent) {
     }
 
 }

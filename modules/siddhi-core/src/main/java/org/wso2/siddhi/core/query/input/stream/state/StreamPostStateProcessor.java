@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.input.stream.state;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.query.processor.Processor;
 
@@ -128,5 +129,9 @@ public class StreamPostStateProcessor implements PostStateProcessor {
 
     public PreStateProcessor getThisStatePreProcessor() {
         return thisStatePreProcessor;
+    }
+
+    @Override
+    public void configureProcessor(MetaComplexEvent metaEvent) {
     }
 }

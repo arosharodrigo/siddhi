@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.input.stream.state;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventCloner;
 import org.wso2.siddhi.core.event.state.StateEventPool;
@@ -185,5 +186,9 @@ public class StreamPreStateProcessor implements PreStateProcessor {
 
     public void setStateId(int stateId) {
         this.stateId = stateId;
+    }
+
+    @Override
+    public void configureProcessor(MetaComplexEvent metaEvent) {
     }
 }

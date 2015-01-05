@@ -103,7 +103,7 @@ public class SingleStreamEntryValve implements InputProcessor {
          */
         @Override
         public void onEvent(IndexedEventFactory.IndexedEvent indexedEvent, long sequence, boolean endOfBatch) throws Exception {
-            System.out.println("SSEV:" + indexedEvent);
+            //System.out.println("SSEV:" + indexedEvent);
             int streamIndex = indexedEvent.getStreamIndex();
             if (currentIndex != streamIndex) {
                 sendEvents();

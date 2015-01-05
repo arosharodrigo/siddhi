@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.processor.window;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulater;
@@ -59,4 +60,8 @@ public abstract class WindowProcessor extends StreamProcessor {
     }
 
     protected abstract WindowProcessor cloneWindowProcessor() ;
+    
+    public void configureProcessor(MetaComplexEvent metaEvent) {
+        
+    }
 }

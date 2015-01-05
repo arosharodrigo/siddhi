@@ -12,6 +12,7 @@
     <description>Siddhi, high performing Complex Event Processing Engine</description>
 
     <modules>
+        <module>modules/siddhi-gpu</module>
         <module>modules/siddhi-query-api</module>
         <module>modules/siddhi-query-compiler</module>
         <module>modules/siddhi-core</module>
@@ -116,7 +117,7 @@
                     <argLine>-ea -Xmx512m</argLine>
                 </configuration>
             </plugin>
-            <plugin>
+            <!--plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>2.1.2</version>
@@ -139,6 +140,30 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>debug.log.enable</name>
+                                    <value>false</value>
+                                </property>
+                                <property>
+                                    <name>performance.log.enable</name>
+                                    <value>false</value>
+                                </property>
+                            </properties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

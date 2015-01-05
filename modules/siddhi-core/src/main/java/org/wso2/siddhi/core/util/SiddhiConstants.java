@@ -36,6 +36,16 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_PLAYBACK = "Playback";
     public static final String ANNOTATION_ENFORCE_ORDER = "EnforceOrder";
     public static final String ANNOTATION_PARALLEL = "parallel";
+    
+    public static final String ANNOTATION_INFO = "info";
+    public static final String ANNOTATION_ELEMENT_INFO_NAME = "name";
+    
+    public static final String ANNOTATION_GPU = "gpu";
+    public static final String ANNOTATION_ELEMENT_GPU_FILTER = "filter";
+    public static final String ANNOTATION_ELEMENT_GPU_BLOCK_SIZE = "block.size";
+    public static final String ANNOTATION_ELEMENT_GPU_MIN_EVENT_COUNT = "threshold";
+    public static final String ANNOTATION_ELEMENT_GPU_STRING_SIZES = "string.sizes";
+    public static final String ANNOTATION_ELEMENT_GPU_CUDA_DEVICE = "cuda.device";
 
 //    public static final String ANNOTATION_CONFIG = "config";
 //    public static final String ANNOTATION_INFO = "info";

@@ -17,6 +17,7 @@ package org.wso2.siddhi.core.query.input.stream.single;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.query.processor.Processor;
 
 import java.util.concurrent.locks.Lock;
@@ -98,6 +99,12 @@ public class SingleThreadEntryValveProcessor implements Processor {
     @Override
     public Processor cloneProcessor() {
         return new SingleThreadEntryValveProcessor(executionPlanContext);
+    }
+
+
+    @Override
+    public void configureProcessor(MetaComplexEvent metaEvent) {
+        
     }
 
 }

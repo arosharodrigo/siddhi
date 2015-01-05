@@ -37,4 +37,6 @@ public interface StreamRuntime {
     void setCommonProcessor(Processor commonProcessor);
 
     public MetaComplexEvent getMetaComplexEvent() ;
+    
+    public void configureRuntime(MetaComplexEvent metaComplexEvent);
 }

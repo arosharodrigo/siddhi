@@ -22,11 +22,15 @@ package org.wso2.siddhi.core.config;
 import org.wso2.siddhi.core.util.SiddhiExtensionLoader;
 
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class SiddhiContext {
 
-    private int eventBufferSize ;
+    private int eventBufferSize;
     private Map<String, Class> siddhiExtensions;
+    private ThreadPoolExecutor executorService = null;
+    private ScheduledExecutorService scheduledExecutorService = null;
 
     public SiddhiContext() {
         setSiddhiExtensions(SiddhiExtensionLoader.loadSiddhiExtensions());
@@ -46,5 +50,21 @@ public class SiddhiContext {
 
     public void setEventBufferSize(int eventBufferSize) {
         this.eventBufferSize = eventBufferSize;
+    }
+    
+    public ScheduledExecutorService getScheduledExecutorService() {
+        return scheduledExecutorService;
+    }
+
+    public void setScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
+        this.scheduledExecutorService = scheduledExecutorService;
+    }
+    
+    public void setExecutorService(ThreadPoolExecutor executorService) {
+        this.executorService = executorService;
+    }
+
+    public ThreadPoolExecutor getExecutorService() {
+        return executorService;
     }
 }

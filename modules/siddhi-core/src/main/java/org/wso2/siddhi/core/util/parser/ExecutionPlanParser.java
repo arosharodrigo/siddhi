@@ -88,11 +88,19 @@ public class ExecutionPlanParser {
                 executionPlanContext.setSharedLock(new ReentrantLock());
             }
 
-            executionPlanContext.setExecutorService(new ThreadPoolExecutor(5, Integer.MAX_VALUE,
-                    60L, TimeUnit.SECONDS,
-                    new LinkedBlockingDeque<Runnable>()));
-
-            executionPlanContext.setScheduledExecutorService(Executors.newScheduledThreadPool(5));
+            if(siddhiContext.getExecutorService() != null) {
+                executionPlanContext.setExecutorService(siddhiContext.getExecutorService());
+            } else {
+                executionPlanContext.setExecutorService(new ThreadPoolExecutor(5, Integer.MAX_VALUE,
+                        60L, TimeUnit.SECONDS,
+                        new LinkedBlockingDeque<Runnable>()));
+            }
+            
+            if(siddhiContext.getScheduledExecutorService() != null) {
+                executionPlanContext.setScheduledExecutorService(siddhiContext.getScheduledExecutorService());
+            } else {
+                executionPlanContext.setScheduledExecutorService(Executors.newScheduledThreadPool(5));
+            }
 
         } catch (DuplicateAnnotationException e) {
             throw new ExecutionPlanValidationException(e.getMessage() + " for the same Execution Plan " +
