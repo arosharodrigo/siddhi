@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org)
+ * All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -40,9 +41,6 @@ public class StateEventCloner {
      */
     public StateEvent copyStateEvent(StateEvent stateEvent) {
         StateEvent borrowedEvent = stateEventPool.borrowEvent();
-//        if (preOutputDataSize > 0) {
-//            System.arraycopy(stateEvent.getPreOutputData(), 0, borrowedEvent.getPreOutputData(), 0, preOutputDataSize);
-//        }
         if (outputDataSize > 0) {
             System.arraycopy(stateEvent.getOutputData(), 0, borrowedEvent.getOutputData(), 0, outputDataSize);
         }
@@ -51,6 +49,7 @@ public class StateEventCloner {
         }
         borrowedEvent.setType(stateEvent.getType());
         borrowedEvent.setTimestamp(stateEvent.getTimestamp());
+        borrowedEvent.setId(stateEvent.getId());
         return borrowedEvent;
     }
 }
