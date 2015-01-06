@@ -64,4 +64,21 @@ public class DefineStreamTestCase {
                         attribute("volume", Attribute.Type.FLOAT).annotation(Annotation.annotation("Foo").element("name","bar").element("Custom")),
                 streamDefinition);
     }
+    
+    @Test
+    public void testEqualObjects2() throws SiddhiParserException {
+        
+        StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("@Foo(name='bar','Custom')define stream cseStream ( symbol string, price int, volume float )");
+        
+        //System.out.println("StreamDef : " + streamDefinition.toString());
+        
+        Assert.assertEquals(StreamDefinition.
+                        id("cseStream").
+                        attribute("symbol", Attribute.Type.STRING).
+                        attribute("price", Attribute.Type.INT).
+                        attribute("volume", Attribute.Type.FLOAT).
+                        annotation(Annotation.annotation("name").element(null, "planname")).
+                        annotation(Annotation.annotation("Foo").element("name","bar").element("Custom")),
+                streamDefinition);
+    }
 }

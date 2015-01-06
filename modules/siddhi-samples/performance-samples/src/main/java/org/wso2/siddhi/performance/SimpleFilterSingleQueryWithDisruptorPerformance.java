@@ -32,7 +32,8 @@ public class SimpleFilterSingleQueryWithDisruptorPerformance {
     public static void main(String[] args) throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
+        //@plan:name('SimpleFilterSingleQueryWithDisruptorPerformance') 
+        String cseEventStream = "@plan:name('planname') @plan:parallel define stream cseEventStream (symbol string, price float, volume int);";
         String query1 = "@info(name = 'query1') from cseEventStream[70 > price] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query1);

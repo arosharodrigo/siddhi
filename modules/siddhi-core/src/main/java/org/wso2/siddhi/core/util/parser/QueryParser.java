@@ -72,7 +72,8 @@ public class QueryParser {
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
 
             queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter, streamRuntime.getMetaComplexEvent());
-            validateOutputStream(queryRuntime.getOutputStreamDefinition(), definitionMap);
+//            validateOutputStream(queryRuntime.getOutputStreamDefinition(), definitionMap);
+
 
             queryRuntime.configureRuntime(); // configure processors with updated MetaData
         } catch (Exception e) {
