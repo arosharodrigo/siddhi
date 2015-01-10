@@ -52,7 +52,7 @@ public class Scheduler {
         try {
             toNotifyQueue.put(time);
 
-            if (!running) {
+            if (!running && toNotifyQueue.size()==1) {
                 synchronized (toNotifyQueue) {
                     if (!running) {
                         running = true;
@@ -79,7 +79,7 @@ public class Scheduler {
     }
 
     public Scheduler cloneScheduler(SingleThreadEntryValveProcessor singleThreadEntryValve) {
-        return new Scheduler(scheduledExecutorService,singleThreadEntryValve);
+        return new Scheduler(scheduledExecutorService, singleThreadEntryValve);
     }
 
     private class EventCaller implements Runnable {
@@ -105,8 +105,9 @@ public class Scheduler {
         public void run() {
             Long toNotifyTime = toNotifyQueue.peek();
             long currentTime = System.currentTimeMillis();
-            long timeDiff = toNotifyTime - currentTime ;
+            long timeDiff = toNotifyTime - currentTime;
             while (toNotifyTime != null && timeDiff <= 0) {
+
                 toNotifyQueue.poll();
 
                 StreamEvent timerEvent = streamEventPool.borrowEvent();
