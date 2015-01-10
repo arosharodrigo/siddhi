@@ -235,7 +235,7 @@ public class StreamJunction {
         }
 
         public void onEvent(Event event, long sequence, boolean endOfBatch) {
-            System.out.println("SJ:" + streamJunctionContext.getStreamDefinition().getId() + " " + event);
+            //System.out.println("SJ:" + streamJunctionContext.getStreamDefinition().getId() + " " + event);
             receiver.receive(event, endOfBatch);
         }
 

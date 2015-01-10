@@ -58,10 +58,13 @@ public class ComplexEventChunkTestCase {
         ConversionStreamEventChunk streamEventChunk = new ConversionStreamEventChunk(streamEventConverter, streamEventPool);
         streamEventChunk.convertAndAssign(streamEvent1);
 
+        Assert.assertEquals(3, streamEventChunk.getCurrentEventCount());
+        
         while (streamEventChunk.hasNext()) {
             count++;
             StreamEvent event = streamEventChunk.next();
             Assert.assertEquals(count * 1l, event.getOutputData()[2]);
+            Assert.assertEquals(count, streamEventChunk.getIteratedEventCount());
         }
         Assert.assertEquals(3, count);
     }
@@ -84,14 +87,18 @@ public class ComplexEventChunkTestCase {
         ConversionStreamEventChunk streamEventChunk = new ConversionStreamEventChunk(streamEventConverter, streamEventPool);
         streamEventChunk.convertAndAssign(streamEvent1);
 
+        Assert.assertEquals(3, streamEventChunk.getCurrentEventCount());
+        
         while (streamEventChunk.hasNext()) {
             count++;
             streamEventChunk.next();
+            Assert.assertEquals(count, streamEventChunk.getIteratedEventCount());
             if (count == 1) {
                 streamEventChunk.remove();
             }
         }
         Assert.assertEquals(streamEvent2, streamEventChunk.getFirst());
+        Assert.assertEquals(2, streamEventChunk.getCurrentEventCount());
     }
 
     @Test
@@ -126,6 +133,7 @@ public class ComplexEventChunkTestCase {
         StreamEvent streamEvent = streamEventChunk.getFirst();
         Assert.assertEquals(streamEvent3, streamEvent);
         Assert.assertEquals(streamEvent4, streamEvent.getNext());
+        Assert.assertEquals(2, streamEventChunk.getCurrentEventCount());
     }
 
     @Test
@@ -156,6 +164,7 @@ public class ComplexEventChunkTestCase {
         }
 
         Assert.assertNull(streamEventChunk.getFirst());
+        Assert.assertEquals(0, streamEventChunk.getCurrentEventCount());
     }
 
     @Test

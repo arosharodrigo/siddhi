@@ -207,6 +207,14 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E> {
     public E getLast() {
         return (E) last;
     }
+    
+    public int getCurrentEventCount() {
+        return currentEventCount;
+    }
+    
+    public int getIteratedEventCount() {
+        return iteratedEventCount;
+    }
 
     public E poll() {
         if (first != null) {

@@ -38,7 +38,7 @@ public class JoinStreamProcessor implements Processor {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         for(Processor processor:joinProcessorList){
-          processor.process(complexEventChunk);
+            processor.process(complexEventChunk);
         }
     }
 

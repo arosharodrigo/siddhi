@@ -46,7 +46,11 @@ public class InputManager {
             singleThreadEntryValve = new SingleThreadEntryValve(executionPlanContext, inputDistributor);
             singleStreamEntryValve = new SingleStreamEntryValve(executionPlanContext, singleThreadEntryValve);
         }
-
+//        else if(executionPlanContext.isParallel())
+//        {
+//            inputDistributor = new InputDistributor();
+//            singleStreamEntryValve = new SingleStreamEntryValve(executionPlanContext, inputDistributor);
+//        }
     }
 
     public InputHandler getInputHandler(String streamId) {
@@ -83,6 +87,7 @@ public class InputManager {
             inputDistributor.addInputProcessor(streamJunctionMap.get(streamId).constructPublisher());
         } else {
             //todo handle
+            inputHandler = new InputHandler(streamId, 0, streamJunctionMap.get(streamId).constructPublisher());
         }
         inputHandlerMap.put(streamId, inputHandler);
         return inputHandler;
