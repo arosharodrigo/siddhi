@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.query.input.stream.state;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
+import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement;
 
 /**
@@ -29,6 +30,7 @@ public class LogicalPostStateProcessor extends StreamPostStateProcessor {
 
     private LogicalStateElement.Type type;
     private LogicalPreStateProcessor partnerPreStateProcessor;
+    private LogicalPostStateProcessor partnerPostStateProcessor;
 
     public LogicalPostStateProcessor(LogicalStateElement.Type type) {
 
@@ -39,41 +41,88 @@ public class LogicalPostStateProcessor extends StreamPostStateProcessor {
         return type;
     }
 
-    /**
-     * Process the handed StreamEvent
-     *
-     * @param complexEventChunk event chunk to be processed
-     */
-    @Override
-    public void process(ComplexEventChunk complexEventChunk) {
-        complexEventChunk.reset();
-        if (complexEventChunk.hasNext()) {     //one one event will be coming
-            StateEvent stateEvent = (StateEvent) complexEventChunk.next();
-            switch (type) {
-                case AND:
-                    partnerPreStateProcessor.partnerStateChanged(stateEvent);
-                    if (stateEvent.getStreamEvent(partnerPreStateProcessor.getStateId()) != null) {
-                        super.process(complexEventChunk);
-                    } else {
-                        thisStatePreProcessor.stateChanged();
-                    }
-                    break;
-                case OR:
-                    partnerPreStateProcessor.partnerStateChanged(stateEvent);
-                    super.process(complexEventChunk);
-                    break;
-                case NOT:
-                    break;
-            }
+//    /**
+//     * Process the handed StreamEvent
+//     *
+//     * @param complexEventChunk event chunk to be processed
+//     */
+//    @Override
+//    public void process(ComplexEventChunk complexEventChunk) {
+//        complexEventChunk.reset();
+//        if (complexEventChunk.hasNext()) {     //one one event will be coming
+//            StateEvent stateEvent = (StateEvent) complexEventChunk.next();
+//
+//        }
+//        complexEventChunk.clear();
+//    }
+
+    protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {
+        switch (type) {
+            case AND:
+                if (stateEvent.getStreamEvent(partnerPreStateProcessor.getStateId()) != null) {
+                    super.process(stateEvent, complexEventChunk);
+                } else {
+                    thisStatePreProcessor.stateChanged();
+                }
+                break;
+            case OR:
+                super.process(stateEvent, complexEventChunk);
+                break;
+            case NOT:
+                break;
         }
-        complexEventChunk.clear();
     }
 
     public void setPartnerPreStateProcessor(LogicalPreStateProcessor partnerPreStateProcessor) {
         this.partnerPreStateProcessor = partnerPreStateProcessor;
     }
 
-    public LogicalPreStateProcessor getPartnerPreStateProcessor() {
-        return partnerPreStateProcessor;
+    public void setPartnerPostStateProcessor(LogicalPostStateProcessor partnerPostStateProcessor) {
+        this.partnerPostStateProcessor = partnerPostStateProcessor;
+    }
+
+    /**
+     * Set next processor element in processor chain
+     *
+     * @param nextProcessor Processor to be set as next element of processor chain
+     */
+    @Override
+    public void setNextProcessor(Processor nextProcessor) {
+        this.nextProcessor = nextProcessor;
+    }
+
+    /**
+     * Set as the last element of the processor chain
+     *
+     * @param processor Last processor in the chain
+     */
+    @Override
+    public void setToLast(Processor processor) {
+        if (nextProcessor == null) {
+            this.nextProcessor = processor;
+        } else {
+            this.nextProcessor.setToLast(processor);
+        }
+    }
+
+    /**
+     * Clone a copy of processor
+     *
+     * @return
+     */
+    @Override
+    public Processor cloneProcessor() {
+        return null;
+    }
+
+    public void setNextStatePreProcessor(PreStateProcessor preStateProcessor) {
+        this.nextStatePerProcessor = preStateProcessor;
+        partnerPostStateProcessor.nextStatePerProcessor = preStateProcessor;
+
+    }
+
+    public void setNextEveryStatePerProcessor(PreStateProcessor nextEveryStatePerProcessor) {
+        this.nextEveryStatePerProcessor = nextEveryStatePerProcessor;
+        partnerPostStateProcessor.nextEveryStatePerProcessor = nextEveryStatePerProcessor;
     }
 }

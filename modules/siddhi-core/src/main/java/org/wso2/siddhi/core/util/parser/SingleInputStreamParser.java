@@ -126,7 +126,8 @@ public class SingleInputStreamParser {
             metaStreamEvent = (MetaStreamEvent) metaEvent;
         }
         for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
-            inputExpressions[i] = ExpressionParser.parseExpression(parameters[i], metaEvent, stateIndex, executors, context, false);
+            inputExpressions[i] = ExpressionParser.parseExpression(parameters[i], metaEvent, stateIndex, executors,
+                    context, false, SiddhiConstants.LAST);
         }
         if (handler instanceof Filter) {
             
@@ -237,7 +238,7 @@ public class SingleInputStreamParser {
             metaStreamEvent.setInputDefinition(inputDefinition);
             metaStreamEvent.setInitialAttributeSize(inputDefinition.getAttributeList().size());
         } else {
-            throw new DefinitionNotExistException("Stream definition with stream ID " + inputStream.getStreamId() + " has not been defined");
+            throw new DefinitionNotExistException("Stream definition with stream ID '" + inputStream.getStreamId() + "' has not been defined");
         }
         if ((inputStream.getStreamReferenceId() != null) &&
                 !(inputStream.getStreamId()).equals(inputStream.getStreamReferenceId())) { //if ref id is provided

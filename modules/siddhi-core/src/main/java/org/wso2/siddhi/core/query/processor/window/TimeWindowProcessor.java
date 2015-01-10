@@ -68,7 +68,6 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
-
         while (streamEventChunk.hasNext()) {
 
             StreamEvent streamEvent = streamEventChunk.next();
@@ -109,7 +108,7 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
         return windowProcessor;
     }
 
-    public void cloneScheduler(TimeWindowProcessor timeWindowProcessor,SingleThreadEntryValveProcessor singleThreadEntryValveProcessor){
+    public void cloneScheduler(TimeWindowProcessor timeWindowProcessor, SingleThreadEntryValveProcessor singleThreadEntryValveProcessor) {
         this.scheduler = timeWindowProcessor.scheduler.cloneScheduler(singleThreadEntryValveProcessor);
     }
 }
