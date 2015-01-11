@@ -97,6 +97,9 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         if (stateProcessorsSize != 0) {
             stateProcessors.get(0).updateState();
         }
+        // If GPU process? call GpuEventProcessor
+        
+        // Else call next.process(streamEventChunk);
         next.process(streamEventChunk);
         streamEventChunk.clear();
     }
