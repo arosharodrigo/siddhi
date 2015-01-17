@@ -1,4 +1,4 @@
-package org.wso2.siddhi.core.util.parser;
+package org.wso2.siddhi.core.gpu.util.parser;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.HAVING_STATE;
 import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_EVENT_CHAIN_INDEX;

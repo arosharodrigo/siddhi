@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.gpu.util.parser.GpuInputStreamParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;

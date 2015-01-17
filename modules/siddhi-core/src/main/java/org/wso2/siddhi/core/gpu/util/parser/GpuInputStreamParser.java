@@ -1,4 +1,4 @@
-package org.wso2.siddhi.core.util.parser;
+package org.wso2.siddhi.core.gpu.util.parser;
 
 import java.util.List;
 import java.util.Map;
@@ -9,12 +9,15 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.query.QueryAnnotations;
-import org.wso2.siddhi.core.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.MultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.util.parser.JoinInputStreamParser;
+import org.wso2.siddhi.core.util.parser.SingleInputStreamParser;
+import org.wso2.siddhi.core.util.parser.StateInputStreamParser;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.execution.query.input.stream.BasicSingleInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;

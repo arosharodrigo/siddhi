@@ -1,4 +1,4 @@
-package org.wso2.siddhi.core.event.stream;
+package org.wso2.siddhi.core.gpu.event.stream;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_INDEX;
 

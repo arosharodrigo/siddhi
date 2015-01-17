@@ -1,11 +1,12 @@
-package org.wso2.siddhi.core.query.input;
+package org.wso2.siddhi.core.gpu.query.input;
 
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.stream.GpuEvent;
-import org.wso2.siddhi.core.event.stream.GpuEventPool;
-import org.wso2.siddhi.core.event.stream.converter.ConversionGpuEventChunk;
+import org.wso2.siddhi.core.gpu.event.stream.GpuEvent;
+import org.wso2.siddhi.core.gpu.event.stream.GpuEventPool;
+import org.wso2.siddhi.core.gpu.event.stream.converter.ConversionGpuEventChunk;
+import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 
 public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 

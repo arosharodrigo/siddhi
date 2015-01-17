@@ -1,9 +1,9 @@
-package org.wso2.siddhi.core.event.stream.converter;
+package org.wso2.siddhi.core.gpu.event.stream.converter;
 
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.stream.GpuEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.gpu.event.stream.GpuEvent;
 
 public class GpuEventConverter {
 

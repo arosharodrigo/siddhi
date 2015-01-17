@@ -1,4 +1,6 @@
-package org.wso2.siddhi.core.event.stream;
+package org.wso2.siddhi.core.gpu.event.stream;
+
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 
 public class GpuEventPool {
     private GpuEventFactory eventFactory;

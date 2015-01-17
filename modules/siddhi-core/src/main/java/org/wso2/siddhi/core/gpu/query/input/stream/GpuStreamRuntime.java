@@ -1,4 +1,4 @@
-package org.wso2.siddhi.core.query.input.stream.gpu;
+package org.wso2.siddhi.core.gpu.query.input.stream;
 
 import java.util.ArrayList;
 import java.util.List;
