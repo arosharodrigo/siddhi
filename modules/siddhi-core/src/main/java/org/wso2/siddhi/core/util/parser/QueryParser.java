@@ -28,7 +28,9 @@ import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
+import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
+import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -52,30 +54,51 @@ public class QueryParser {
     public static QueryRuntime parse(Query query, ExecutionPlanContext executionPlanContext, Map<String,
             AbstractDefinition> definitionMap) {
         List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
-        QueryRuntime queryRuntime;
+        QueryRuntime queryRuntime = null;
         Element element = null;
         try {
             element = AnnotationHelper.getAnnotationElement("info", "name", query.getAnnotations());
             QueryAnnotations queryAnnotations = new QueryAnnotations(query.getAnnotations());
             
-            StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    executionPlanContext, definitionMap, executors, queryAnnotations);
+            Annotation gpuAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_GPU, query.getAnnotations());
+            if(gpuAnnotation == null) {
 
-            QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    executionPlanContext, streamRuntime.getMetaComplexEvent(), executors);
-            OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(), query.getOutputRate());
+                StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
+                        executionPlanContext, definitionMap, executors, queryAnnotations);
 
-            QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
-            QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
-            QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent());
+                QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
+                        executionPlanContext, streamRuntime.getMetaComplexEvent(), executors);
+                OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(), query.getOutputRate());
 
-            selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
+                QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
+                QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
+                QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent());
 
-            queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter, streamRuntime.getMetaComplexEvent());
-//            validateOutputStream(queryRuntime.getOutputStreamDefinition(), definitionMap);
+                selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
+
+                queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter, streamRuntime.getMetaComplexEvent());
+                //            validateOutputStream(queryRuntime.getOutputStreamDefinition(), definitionMap);
 
 
-            queryRuntime.configureRuntime(); // configure processors with updated MetaData
+                queryRuntime.configureRuntime(); // configure processors with updated MetaData
+            } else {
+                StreamRuntime streamRuntime = GpuInputStreamParser.parse(query.getInputStream(),
+                        executionPlanContext, definitionMap, executors, queryAnnotations);
+                
+                QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
+                        executionPlanContext, streamRuntime.getMetaComplexEvent(), executors);
+                OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(), query.getOutputRate());
+
+                QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
+                QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
+                QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent());
+
+                selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
+
+                queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter, streamRuntime.getMetaComplexEvent());
+                
+                queryRuntime.configureRuntime(); // configure processors with updated MetaData
+            }
         } catch (Exception e) {
             if (element != null) {
                 throw new ExecutionPlanCreationException(e.getMessage() + " when creating query " + element.getValue(), e);

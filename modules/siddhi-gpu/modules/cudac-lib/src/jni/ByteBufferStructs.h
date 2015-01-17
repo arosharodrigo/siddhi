@@ -35,6 +35,28 @@ typedef struct EventDataBuffer
 	char     data[1]; // event data
 } EventDataBuffer;
 
+typedef struct CepOperator
+{
+	enum Type
+	{
+		FILTER = 0,
+		WINDOW,
+		JOIN,
+		PATTERN,
+		SEQUENCE,
+		SELECT
+	};
+
+	uint16_t i_OperatorType;   // 2 bytes
+	uint16_t i_OperatorDataLength; // 2 bytes
+	char     p_Data[1]; // n bytes
+} CepOperator;
+
+typedef struct CepFilterOperator
+{
+
+} CepFilterOperator;
+
 #pragma pack()
 
 

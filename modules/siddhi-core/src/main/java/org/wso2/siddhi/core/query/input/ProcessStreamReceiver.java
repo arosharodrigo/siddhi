@@ -37,8 +37,8 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
     protected String streamId;
     protected Processor next;
+    protected MetaStreamEvent metaStreamEvent;
     private ConversionStreamEventChunk streamEventChunk;
-    private MetaStreamEvent metaStreamEvent;
     private StreamEventPool streamEventPool;
     protected List<PreStateProcessor> stateProcessors = new ArrayList<PreStateProcessor>();
     protected int stateProcessorsSize;
@@ -94,12 +94,10 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     }
     
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {
+        //System.out.println("ProcessStreamReceiver [" + this + " / " + Thread.currentThread().getName() + "] " + streamEventChunk.getCurrentEventCount());
         if (stateProcessorsSize != 0) {
             stateProcessors.get(0).updateState();
         }
-        // If GPU process? call GpuEventProcessor
-        
-        // Else call next.process(streamEventChunk);
         next.process(streamEventChunk);
         streamEventChunk.clear();
     }

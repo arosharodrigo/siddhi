@@ -74,5 +74,16 @@
               classpathref="classpath" fork="true">
         </java>
     </target>
-
+	
+    <target name="aggregate" depends="compile">
+        <java classname="org.wso2.siddhi.sample.AggregateSample"
+              classpathref="classpath" fork="true">
+        </java>
+    </target>
+	
+    <target name="join" depends="compile">
+        <java classname="org.wso2.siddhi.sample.JoinSample"
+              classpathref="classpath" fork="true">
+        </java>
+    </target>
 </project>

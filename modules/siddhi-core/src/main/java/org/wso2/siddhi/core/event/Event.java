@@ -70,7 +70,7 @@ public class Event {
 
     @Override
     public String toString() {
-        return "StreamEvent{" +
+        return "Event{" +
                 "timestamp=" + timestamp +
                 ", data=" + Arrays.toString(data) +
                 ", isExpired=" + isExpired +

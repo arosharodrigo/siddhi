@@ -158,6 +158,9 @@ public class ExecutionPlanRuntime {
 
     public void start() {
         inputManager.startProcessing();
+        for (StreamJunction streamJunction : streamJunctionMap.values()) {
+            streamJunction.startProcessing();
+        }
     }
 
 }

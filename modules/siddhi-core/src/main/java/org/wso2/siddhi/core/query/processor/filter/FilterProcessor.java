@@ -47,7 +47,7 @@ import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.core.util.parser.GpuExpressionParser;
+import org.wso2.siddhi.core.util.parser.GpuFilterExpressionParser;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -64,7 +64,7 @@ public class FilterProcessor implements Processor {
     private SiddhiGpu.GpuEventConsumer gpuEventConsumer = null;
     private int gpuProcessMinimumEventCount = 256;
     private ComplexEvent [] inputStreamEvents = null;
-    private Map<Integer, GpuExpressionParser.VariablePosition> varPositionToAttribNameMap = null;
+    private Map<Integer, GpuFilterExpressionParser.VariablePosition> varPositionToAttribNameMap = null;
     private int inputStreamEventIndex = 0;
     private int [] stringAttributeSizes = null;
     private String queryName = null;
@@ -127,7 +127,7 @@ public class FilterProcessor implements Processor {
         return new FilterProcessor(conditionExecutor.cloneExecutor());
     }
 
-    public void setVariablePositionToAttributeNameMapper(Map<Integer, GpuExpressionParser.VariablePosition> mapper)
+    public void setVariablePositionToAttributeNameMapper(Map<Integer, GpuFilterExpressionParser.VariablePosition> mapper)
     {
         varPositionToAttribNameMap = mapper;
     }
@@ -338,7 +338,7 @@ public class FilterProcessor implements Processor {
 
             // calculate max byte buffer size
             for(int index = 0; index < count; ++index) {
-                GpuExpressionParser.VariablePosition varPos = varPositionToAttribNameMap.get(index);
+                GpuFilterExpressionParser.VariablePosition varPos = varPositionToAttribNameMap.get(index);
                 if(varPos != null)
                 {
                     switch(varPos.type)
@@ -435,7 +435,7 @@ public class FilterProcessor implements Processor {
             // fill attribute type - length (2 + 2 bytes)
             for(int index = 0; index < count; ++index) {
 
-                GpuExpressionParser.VariablePosition varPos = varPositionToAttribNameMap.get(index);
+                GpuFilterExpressionParser.VariablePosition varPos = varPositionToAttribNameMap.get(index);
 
                 if(varPos != null)
                 {

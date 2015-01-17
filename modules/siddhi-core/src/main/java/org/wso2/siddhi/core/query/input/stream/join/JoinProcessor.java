@@ -54,11 +54,13 @@ public class JoinProcessor implements Processor {
      */
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
+        //System.out.println("JoinProcessor [left=" + leftJoinProcessor + "|pre=" + preJoinProcessor + "|trig=" + trigger + "]");
         if (trigger) {
             returnEventChunk.clear();
             complexEventChunk.reset();
             while (complexEventChunk.hasNext()) {
                 StreamEvent streamEvent = (StreamEvent) complexEventChunk.next();
+                ///System.out.println("JoinProcessor [EventType=" + streamEvent.getType() +"]");
                 if (streamEvent.getType() == ComplexEvent.Type.TIMER ||
                         (!preJoinProcessor && streamEvent.getType() == ComplexEvent.Type.CURRENT)) {
                     continue;

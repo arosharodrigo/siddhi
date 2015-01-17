@@ -26,7 +26,9 @@ import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.QueryAnnotations;
+import org.wso2.siddhi.core.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
+import org.wso2.siddhi.core.query.input.stream.gpu.GpuStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleThreadEntryValveProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
@@ -71,6 +73,7 @@ public class SingleInputStreamParser {
         Processor processor = null;
         Processor singleThreadValve = null;
         boolean first = true;
+        
         MetaStreamEvent metaStreamEvent;
         if (metaComplexEvent instanceof MetaStateEvent) {
             metaStreamEvent = new MetaStreamEvent();
@@ -80,41 +83,54 @@ public class SingleInputStreamParser {
             metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
             initMetaStreamEvent(inputStream, definitionMap, metaStreamEvent);
         }
-        if (!inputStream.getStreamHandlers().isEmpty()) {
-            /* create processor chain from StreamHandlers */
-            for (StreamHandler handler : inputStream.getStreamHandlers()) {
-                Processor currentProcessor = generateProcessor(handler, metaComplexEvent, executors, executionPlanContext, queryAnnotations);
-                if (currentProcessor instanceof SchedulingProcessor) {
-                    if (singleThreadValve == null) {
+        
+        if(!(processStreamReceiver instanceof GpuProcessStreamReceiver)) {
 
-                        singleThreadValve = new SingleThreadEntryValveProcessor(executionPlanContext);
-                        if (first) {
-                            processor = singleThreadValve;
-                            first = false;
-                        } else {
-                            processor.setToLast(singleThreadValve);
+            if (!inputStream.getStreamHandlers().isEmpty()) {
+                /* create processor chain from StreamHandlers */
+                for (StreamHandler handler : inputStream.getStreamHandlers()) {
+                    
+                    Processor currentProcessor = generateProcessor(handler, metaComplexEvent, executors, executionPlanContext, queryAnnotations);
+                    
+                    if (currentProcessor instanceof SchedulingProcessor) {
+                        if (singleThreadValve == null) {
+
+                            singleThreadValve = new SingleThreadEntryValveProcessor(executionPlanContext);
+                            if (first) {
+                                processor = singleThreadValve;
+                                first = false;
+                            } else {
+                                processor.setToLast(singleThreadValve);
+                            }
                         }
+                        Scheduler scheduler = new Scheduler(executionPlanContext.getScheduledExecutorService(), singleThreadValve);
+                        ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
                     }
-                    Scheduler scheduler = new Scheduler(executionPlanContext.getScheduledExecutorService(), singleThreadValve);
-                    ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
-                }
-                if (first) {
-                    processor = currentProcessor;
-                    first = false;
-                } else {
-                    processor.setToLast(currentProcessor);
+                    
+                    if (first) {
+                        processor = currentProcessor;
+                        first = false;
+                    } else {
+                        processor.setToLast(currentProcessor);
+                    }
                 }
             }
+
+            metaStreamEvent.initializeAfterWindowData();
+            return new SingleStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
+            
+        } else {
+            
+            metaStreamEvent.initializeAfterWindowData();
+            return new GpuStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
         }
-
-        metaStreamEvent.initializeAfterWindowData();
-        return new SingleStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
-
+        
     }
 
 
     private static Processor generateProcessor(StreamHandler handler, MetaComplexEvent metaEvent, List<VariableExpressionExecutor> executors, 
             ExecutionPlanContext context, QueryAnnotations queryAnnotations) {
+        
         ExpressionExecutor[] inputExpressions = new ExpressionExecutor[handler.getParameters().length];
         Expression[] parameters = handler.getParameters();
         MetaStreamEvent metaStreamEvent;
@@ -129,6 +145,7 @@ public class SingleInputStreamParser {
             inputExpressions[i] = ExpressionParser.parseExpression(parameters[i], metaEvent, stateIndex, executors,
                     context, false, SiddhiConstants.LAST);
         }
+        
         if (handler instanceof Filter) {
             
             if(queryAnnotations.getAnnotationBooleanValue(SiddhiConstants.ANNOTATION_GPU, SiddhiConstants.ANNOTATION_ELEMENT_GPU_FILTER)) {
@@ -171,7 +188,7 @@ public class SingleInputStreamParser {
                     log.info("Created SiddhiGpu.GpuEventConsumer Initialized with CUDA deivce " + cudaDeviceId);
 
                     try {
-                        GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
+                        GpuFilterExpressionParser gpuExpressionParser = new GpuFilterExpressionParser();
 
                         SiddhiGpu.Filter gpuFilter = gpuExpressionParser.parseExpression(parameters[0],  metaEvent, stateIndex, context);
                         gpuEventConsumer.AddFilter(gpuFilter);
@@ -227,8 +244,8 @@ public class SingleInputStreamParser {
      * @param metaStreamEvent
      * @return
      */
-    private static void initMetaStreamEvent(SingleInputStream inputStream, Map<String,
-            AbstractDefinition> definitionMap, MetaStreamEvent metaStreamEvent) {
+    private static void initMetaStreamEvent(SingleInputStream inputStream, Map<String,AbstractDefinition> definitionMap, 
+            MetaStreamEvent metaStreamEvent) {
         String streamId = inputStream.getStreamId();
         if(inputStream.isInnerStream()){
             streamId = "#".concat(streamId);

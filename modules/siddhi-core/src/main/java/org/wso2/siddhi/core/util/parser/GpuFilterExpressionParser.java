@@ -44,9 +44,9 @@ import org.wso2.siddhi.query.api.expression.math.Mod;
 import org.wso2.siddhi.query.api.expression.math.Multiply;
 import org.wso2.siddhi.query.api.expression.math.Subtract;
 
-public class GpuExpressionParser
+public class GpuFilterExpressionParser
 {
-    private static final Logger log = Logger.getLogger(GpuExpressionParser.class);
+    private static final Logger log = Logger.getLogger(GpuFilterExpressionParser.class);
     private int variableExpressionCount = 0; 
     
     public static class VariablePosition {
