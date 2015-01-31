@@ -23,10 +23,13 @@ import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
+import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.gpu.query.input.stream.GpuStreamRuntime;
+import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
 import org.wso2.siddhi.core.gpu.util.parser.GpuFilterExpressionParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
@@ -37,6 +40,7 @@ import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.query.processor.stream_function.StreamFunctionProcessor;
+import org.wso2.siddhi.core.query.processor.window.LengthWindowProcessor;
 import org.wso2.siddhi.core.query.processor.window.WindowProcessor;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
@@ -56,6 +60,59 @@ import java.util.Map;
 public class SingleInputStreamParser {
     
     private static final Logger log = Logger.getLogger(SingleInputStreamParser.class);
+    
+    public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream, ExecutionPlanContext executionPlanContext,
+            List<VariableExpressionExecutor> executors, Map<String, AbstractDefinition> definitionMap,
+            MetaComplexEvent metaComplexEvent, ProcessStreamReceiver processStreamReceiver, GpuQueryContext gpuQueryContext) {
+
+        Processor processor = null;
+        Processor singleThreadValve = null;
+        boolean first = true;
+
+        MetaStreamEvent metaStreamEvent;
+        if (metaComplexEvent instanceof MetaStateEvent) {
+            metaStreamEvent = new MetaStreamEvent();
+            ((MetaStateEvent) metaComplexEvent).addEvent(metaStreamEvent);
+            initMetaStreamEvent(inputStream, definitionMap, metaStreamEvent);
+        } else {
+            metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
+            initMetaStreamEvent(inputStream, definitionMap, metaStreamEvent);
+        }
+
+        if (!inputStream.getStreamHandlers().isEmpty()) {
+            /* create processor chain from StreamHandlers */
+            for (StreamHandler handler : inputStream.getStreamHandlers()) {
+
+                Processor currentProcessor = generateProcessor(handler, metaComplexEvent, executors, executionPlanContext,
+                        ((GpuProcessStreamReceiver)processStreamReceiver), gpuQueryContext);
+
+                if (currentProcessor instanceof SchedulingProcessor) {
+                    if (singleThreadValve == null) {
+
+                        singleThreadValve = new SingleThreadEntryValveProcessor(executionPlanContext);
+                        if (first) {
+                            processor = singleThreadValve;
+                            first = false;
+                        } else {
+                            processor.setToLast(singleThreadValve);
+                        }
+                    }
+                    Scheduler scheduler = new Scheduler(executionPlanContext.getScheduledExecutorService(), singleThreadValve);
+                    ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
+                }
+
+                if (first) {
+                    processor = currentProcessor;
+                    first = false;
+                } else {
+                    processor.setToLast(currentProcessor);
+                }
+            }
+        }
+
+        metaStreamEvent.initializeAfterWindowData();
+        return new GpuStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
+    }
 
     /**
      * Parse single InputStream and return SingleStreamRuntime
@@ -69,8 +126,7 @@ public class SingleInputStreamParser {
      */
     public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream, ExecutionPlanContext executionPlanContext,
                                                        List<VariableExpressionExecutor> executors, Map<String, AbstractDefinition> definitionMap,
-                                                       MetaComplexEvent metaComplexEvent, ProcessStreamReceiver processStreamReceiver,
-                                                       QueryAnnotations queryAnnotations) {
+                                                       MetaComplexEvent metaComplexEvent, ProcessStreamReceiver processStreamReceiver) {
         Processor processor = null;
         Processor singleThreadValve = null;
         boolean first = true;
@@ -85,52 +141,151 @@ public class SingleInputStreamParser {
             initMetaStreamEvent(inputStream, definitionMap, metaStreamEvent);
         }
         
-        if(!(processStreamReceiver instanceof GpuProcessStreamReceiver)) {
+        if (!inputStream.getStreamHandlers().isEmpty()) {
+            /* create processor chain from StreamHandlers */
+            for (StreamHandler handler : inputStream.getStreamHandlers()) {
 
-            if (!inputStream.getStreamHandlers().isEmpty()) {
-                /* create processor chain from StreamHandlers */
-                for (StreamHandler handler : inputStream.getStreamHandlers()) {
-                    
-                    Processor currentProcessor = generateProcessor(handler, metaComplexEvent, executors, executionPlanContext, queryAnnotations);
-                    
-                    if (currentProcessor instanceof SchedulingProcessor) {
-                        if (singleThreadValve == null) {
+                Processor currentProcessor = generateProcessor(handler, metaComplexEvent, executors, executionPlanContext);
 
-                            singleThreadValve = new SingleThreadEntryValveProcessor(executionPlanContext);
-                            if (first) {
-                                processor = singleThreadValve;
-                                first = false;
-                            } else {
-                                processor.setToLast(singleThreadValve);
-                            }
+                if (currentProcessor instanceof SchedulingProcessor) {
+                    if (singleThreadValve == null) {
+
+                        singleThreadValve = new SingleThreadEntryValveProcessor(executionPlanContext);
+                        if (first) {
+                            processor = singleThreadValve;
+                            first = false;
+                        } else {
+                            processor.setToLast(singleThreadValve);
                         }
-                        Scheduler scheduler = new Scheduler(executionPlanContext.getScheduledExecutorService(), singleThreadValve);
-                        ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
                     }
-                    
-                    if (first) {
-                        processor = currentProcessor;
-                        first = false;
-                    } else {
-                        processor.setToLast(currentProcessor);
-                    }
+                    Scheduler scheduler = new Scheduler(executionPlanContext.getScheduledExecutorService(), singleThreadValve);
+                    ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
+                }
+
+                if (first) {
+                    processor = currentProcessor;
+                    first = false;
+                } else {
+                    processor.setToLast(currentProcessor);
                 }
             }
-
-            metaStreamEvent.initializeAfterWindowData();
-            return new SingleStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
-            
-        } else {
-            
-            metaStreamEvent.initializeAfterWindowData();
-            return new GpuStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
         }
+
+        metaStreamEvent.initializeAfterWindowData();
+        return new SingleStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
         
     }
 
+    
+    private static Processor generateProcessor(StreamHandler handler, MetaComplexEvent metaEvent, List<VariableExpressionExecutor> executors, 
+            ExecutionPlanContext context, GpuProcessStreamReceiver gpuProcessStreamReceiver, GpuQueryContext gpuQueryContext) {
+        
+        ExpressionExecutor[] inputExpressions = new ExpressionExecutor[handler.getParameters().length];
+        Expression[] parameters = handler.getParameters();
+        MetaStreamEvent metaStreamEvent;
+        int stateIndex = SiddhiConstants.UNKNOWN_STATE;
+        if (metaEvent instanceof MetaStateEvent) {
+            stateIndex = ((MetaStateEvent) metaEvent).getStreamEventCount() - 1;
+            metaStreamEvent = ((MetaStateEvent) metaEvent).getMetaStreamEvent(stateIndex);
+        } else {
+            metaStreamEvent = (MetaStreamEvent) metaEvent;
+        }
+        for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
+            inputExpressions[i] = ExpressionParser.parseExpression(parameters[i], metaEvent, stateIndex, executors,
+                    context, false, SiddhiConstants.LAST);
+        }
+        
+        String streamId = gpuProcessStreamReceiver.getStreamId();
+        GpuQueryProcessor gpuQueryProcessor = gpuProcessStreamReceiver.getGpuQueryProcessor();
+        SiddhiGpu.GpuQueryRuntime gpuQueryRuntime = gpuQueryProcessor.getGpuQueryRuntime();
+        
+        if (handler instanceof Filter) {
+            
+            // add filter processor 
+            GpuFilterExpressionParser gpuExpressionParser = new GpuFilterExpressionParser();
+            SiddhiGpu.GpuFilterProcessor gpuFilterProcessor = gpuExpressionParser.parseExpression(parameters[0], metaEvent, stateIndex, context);
+            gpuFilterProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
+            gpuQueryRuntime.AddProcessor(streamId, gpuFilterProcessor);
+            gpuQueryProcessor.AddGpuProcessor(gpuFilterProcessor);
+            
+            return new FilterProcessor(inputExpressions[0]);
+            
+//            ///////////////////
+//            
+//            SiddhiGpu.GpuEventConsumer gpuEventConsumer = new SiddhiGpu.GpuEventConsumer(
+//                    SiddhiGpu.SingleFilterKernel, gpuQueryContext.getQueryName(), context.getSiddhiContext().getEventBufferSize(), 
+//                    gpuQueryContext.getEventsPerBlock());
+//
+//            log.info("Created SiddhiGpu.GpuEventConsumer [Type=SingleFilterKernel|CUDADevice=" + gpuQueryContext.getCudaDeviceId() + 
+//                    "|Query=" + gpuQueryContext.getQueryName() + "|BufferSize=" + context.getSiddhiContext().getEventBufferSize() + 
+//                    "|EventsPerBlock=" + gpuQueryContext.getEventsPerBlock() + "] ");
+//
+//            if(gpuEventConsumer.Initialize(gpuQueryContext.getCudaDeviceId())) {
+//
+//                log.info("Created SiddhiGpu.GpuEventConsumer Initialized with CUDA deivce " + gpuQueryContext.getCudaDeviceId());
+//
+//                try {
+//                    GpuFilterExpressionParser gpuExpressionParser = new GpuFilterExpressionParser();
+//
+//                    SiddhiGpu.Filter gpuFilter = gpuExpressionParser.parseExpression(parameters[0],  metaEvent, stateIndex, context);
+//                    gpuEventConsumer.AddFilter(gpuFilter);
+//                    gpuEventConsumer.ConfigureFilters();
+//
+//                    FilterProcessor filterProcessor = new FilterProcessor(
+//                            inputExpressions[0],
+//                            gpuEventConsumer, gpuQueryContext); 
+//                    filterProcessor.setVariablePositionToAttributeNameMapper(gpuExpressionParser.getVariablePositionToAttributeNameMapper());
+//
+//                    return filterProcessor;
+//
+//                } catch(RuntimeException ex) {
+//                    log.info("GPU Filter creation failed : " + ex.getMessage());
+//                    ex.printStackTrace();
+//                    return new FilterProcessor(inputExpressions[0]);
+//                }
+//            } else {
+//                log.warn("Created SiddhiGpu.GpuEventConsumer Initialization failed. Fallback to CPU.");
+//                return new FilterProcessor(inputExpressions[0]);
+//            }
+
+
+        } else if (handler instanceof Window) {
+            WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadSiddhiImplementation(((Window) handler).getFunction(),
+                    WindowProcessor.class);
+            windowProcessor.initProcessor(metaStreamEvent.getInputDefinition(), inputExpressions);
+            
+            // TODO: only support length window
+            if(windowProcessor instanceof LengthWindowProcessor)
+            {
+                LengthWindowProcessor lengthWindowProcessor = (LengthWindowProcessor) windowProcessor;
+                
+                SiddhiGpu.GpuLengthSlidingWindowProcessor gpuLengthWindowProcessor = 
+                        new SiddhiGpu.GpuLengthSlidingWindowProcessor(lengthWindowProcessor.getLength());
+                
+                gpuQueryRuntime.AddProcessor(streamId, gpuLengthWindowProcessor);
+                gpuQueryProcessor.AddGpuProcessor(gpuLengthWindowProcessor);
+            }
+            else
+            {
+                throw new OperationNotSupportedException(windowProcessor.getClass().getSimpleName() + " not supported in GPU processing");
+            }
+            
+            return windowProcessor;
+
+        } else if (handler instanceof StreamFunction) {
+            StreamProcessor streamProcessor = (StreamFunctionProcessor) SiddhiClassLoader.loadSiddhiImplementation(
+                    ((StreamFunction) handler).getFunction(), StreamFunctionProcessor.class);
+            metaStreamEvent.setInputDefinition(streamProcessor.initProcessor(metaStreamEvent.getInputDefinition(),
+                    inputExpressions));
+            return streamProcessor;
+
+        } else {
+            throw new IllegalStateException(handler.getClass().getName() + " is not supported");
+        }
+    }
 
     private static Processor generateProcessor(StreamHandler handler, MetaComplexEvent metaEvent, List<VariableExpressionExecutor> executors, 
-            ExecutionPlanContext context, QueryAnnotations queryAnnotations) {
+            ExecutionPlanContext context) {
         
         ExpressionExecutor[] inputExpressions = new ExpressionExecutor[handler.getParameters().length];
         Expression[] parameters = handler.getParameters();
@@ -148,75 +303,7 @@ public class SingleInputStreamParser {
         }
         
         if (handler instanceof Filter) {
-            
-            if(queryAnnotations.getAnnotationBooleanValue(SiddhiConstants.ANNOTATION_GPU, SiddhiConstants.ANNOTATION_ELEMENT_GPU_FILTER)) {
-                Integer eventsPerBlock = queryAnnotations.getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
-                        SiddhiConstants.ANNOTATION_ELEMENT_GPU_BLOCK_SIZE);
-
-                Integer minEventCount = queryAnnotations.getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
-                        SiddhiConstants.ANNOTATION_ELEMENT_GPU_MIN_EVENT_COUNT);
-
-                String stringAttributeSizes = queryAnnotations.getAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
-                        SiddhiConstants.ANNOTATION_ELEMENT_GPU_STRING_SIZES);
-                
-                Integer cudaDeviceId = queryAnnotations.getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
-                        SiddhiConstants.ANNOTATION_ELEMENT_GPU_CUDA_DEVICE);
-
-                String queryName = queryAnnotations.getAnnotationStringValue(SiddhiConstants.ANNOTATION_INFO, 
-                        SiddhiConstants.ANNOTATION_ELEMENT_INFO_NAME);
-
-                if(eventsPerBlock == null) {
-                    eventsPerBlock = new Integer(128);
-                }
-
-                if(minEventCount == null) {
-                    minEventCount = eventsPerBlock;
-                }
-                
-                if(cudaDeviceId == null) {
-                    cudaDeviceId = new Integer(0); //default CUDA device 
-                }
-
-                SiddhiGpu.GpuEventConsumer gpuEventConsumer = new SiddhiGpu.GpuEventConsumer(
-                        SiddhiGpu.SingleFilterKernel, queryName, context.getSiddhiContext().getEventBufferSize(), eventsPerBlock);
-                
-                log.info("Created SiddhiGpu.GpuEventConsumer [Type=SingleFilterKernel|CUDADevice=" + cudaDeviceId + 
-                        "|Query=" + queryName + "|BufferSize=" + context.getSiddhiContext().getEventBufferSize() + 
-                        "|EventsPerBlock=" + eventsPerBlock + "] ");
-
-                if(gpuEventConsumer.Initialize(cudaDeviceId)) {
-
-                    log.info("Created SiddhiGpu.GpuEventConsumer Initialized with CUDA deivce " + cudaDeviceId);
-
-                    try {
-                        GpuFilterExpressionParser gpuExpressionParser = new GpuFilterExpressionParser();
-
-                        SiddhiGpu.Filter gpuFilter = gpuExpressionParser.parseExpression(parameters[0],  metaEvent, stateIndex, context);
-                        gpuEventConsumer.AddFilter(gpuFilter);
-                        gpuEventConsumer.ConfigureFilters();
-
-                        FilterProcessor filterProcessor = new FilterProcessor(
-                                inputExpressions[0],
-                                gpuEventConsumer, queryName, minEventCount, stringAttributeSizes); 
-                        filterProcessor.setVariablePositionToAttributeNameMapper(gpuExpressionParser.getVariablePositionToAttributeNameMapper());
-
-                        return filterProcessor;
-
-                    } catch(RuntimeException ex) {
-                        log.info("GPU Filter creation failed : " + ex.getMessage());
-                        ex.printStackTrace();
-                        return new FilterProcessor(inputExpressions[0]);
-                    }
-                } else {
-                    log.warn("Created SiddhiGpu.GpuEventConsumer Initialization failed. Fallback to CPU.");
-                    return new FilterProcessor(inputExpressions[0]);
-                }
-                
-            }
-            else
-            {
-                return new FilterProcessor(inputExpressions[0]);
-            }
+            return new FilterProcessor(inputExpressions[0]);
 
         } else if (handler instanceof Window) {
             WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadSiddhiImplementation(((Window) handler).getFunction(),

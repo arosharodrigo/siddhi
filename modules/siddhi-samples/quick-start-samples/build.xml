@@ -86,4 +86,11 @@
               classpathref="classpath" fork="true">
         </java>
     </target>
+	
+    <target name="gpu_filter" depends="compile">
+        <java classname="org.wso2.siddhi.sample.GpuFilterSample"
+              classpathref="classpath" fork="true">
+        </java>
+    </target>
+	
 </project>

@@ -101,9 +101,26 @@ GENCODE_FLAGS   := $(GENCODE_SM20)
 .SUFFIXES: .cu
 
 OUT=libgpueventconsumer.so
-SRC = Filter.cpp  GpuEventConsumer.cpp  Timer.cpp CudaKernelBase.cpp CpuFilterKernel.cpp
-CULIBS = CudaFilterKernelCore CudaSingleFilterKernel
-#SRCCU = CudaFilterKernelCore.cu CudaFilterKernel.cu CudaSingleFilterKernel.cu 
+
+SRC = GpuQueryRuntime.cpp  
+SRC += GpuStreamProcessor.cpp
+SRC += GpuKernel.cpp  
+SRC += GpuProcessorContext.cpp
+SRC += GpuUtils.cpp
+SRC += GpuFilterProcessor.cpp  
+SRC += GpuLengthSlidingWindowProcessor.cpp  
+SRC += GpuJoinProcessor.cpp 
+
+CULIBS = GpuCudaHelper 
+CULIBS += GpuEventBuffer 
+CULIBS += GpuIntBuffer 
+CULIBS += GpuProcessorContext 
+CULIBS += GpuStreamEventBuffer 
+CULIBS += GpuFilterKernel 
+CULIBS += GpuFilterKernelCore 
+CULIBS += GpuLengthSlidingWindowKernel
+CULIBS += GpuJoinKernel 
+
 CULIBSRC = $(addsuffix .cu , $(CULIBS))
 CULIBSTATIC = $(addsuffix .a, $(addprefix lib, $(CULIBS)))
 LD_CULIBS = $(addprefix -l, $(CULIBS))

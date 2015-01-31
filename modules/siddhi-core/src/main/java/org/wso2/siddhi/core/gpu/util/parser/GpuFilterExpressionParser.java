@@ -19,6 +19,7 @@ import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu.ConstValue;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu.ExecutorNode;
+import org.wso2.siddhi.gpu.jni.SiddhiGpu.GpuFilterProcessor;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu.VariableValue;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -67,7 +68,7 @@ public class GpuFilterExpressionParser
         return varPositionToAttribNameMap;
     }
 
-    public SiddhiGpu.Filter parseExpression(Expression expression, MetaComplexEvent metaEvent, int currentState, 
+    public SiddhiGpu.GpuFilterProcessor parseExpression(Expression expression, MetaComplexEvent metaEvent, int currentState, 
             ExecutionPlanContext executionPlanContext) {
 
         log.info("parseExpression");
@@ -78,7 +79,7 @@ public class GpuFilterExpressionParser
 
         parseExpressionTree(expression, metaEvent, currentState, executionPlanContext, gpuFilterList);
 
-        SiddhiGpu.Filter filter = new SiddhiGpu.Filter(0, gpuFilterList.size());
+        SiddhiGpu.GpuFilterProcessor filter = new SiddhiGpu.GpuFilterProcessor(gpuFilterList.size());
 
         int i = 0;
         for (SiddhiGpu.ExecutorNode executorNode : gpuFilterList) {
@@ -1188,18 +1189,20 @@ public class GpuFilterExpressionParser
             MetaStreamEvent metaStreamEvent = (MetaStreamEvent) metaEvent;
             AbstractDefinition abstractDefinition;
             Attribute.Type type;
+            int position;// = variableExpressionCount++; 
             
             if (currentState == HAVING_STATE) {
                 abstractDefinition = metaStreamEvent.getOutputStreamDefinition();
                 type = abstractDefinition.getAttributeType(attributeName);
+                position = abstractDefinition.getAttributePosition(attributeName);
                 eventPosition[STREAM_EVENT_CHAIN_INDEX] = HAVING_STATE;
             } else {
                 abstractDefinition = metaStreamEvent.getInputDefinition();
                 eventPosition[STREAM_EVENT_CHAIN_INDEX] = UNKNOWN_STATE;
                 type = abstractDefinition.getAttributeType(attributeName);
+                position = abstractDefinition.getAttributePosition(attributeName);
             }
             
-            int position = variableExpressionCount++; 
             VariablePosition varPos = new VariablePosition(attributeName, type);
             varPos.position[STREAM_EVENT_CHAIN_INDEX] = eventPosition[STREAM_EVENT_CHAIN_INDEX];
             varPos.position[STREAM_EVENT_INDEX] = eventPosition[STREAM_EVENT_INDEX];

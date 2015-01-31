@@ -23,11 +23,17 @@ import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.gpu.util.parser.GpuInputStreamParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
+import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;
+import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter;
+import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
+import org.wso2.siddhi.core.query.processor.window.LengthWindowProcessor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
@@ -52,20 +58,18 @@ public class QueryParser {
      * @param definitionMap map containing user given stream definitions
      * @return queryRuntime
      */
-    public static QueryRuntime parse(Query query, ExecutionPlanContext executionPlanContext, Map<String,
-            AbstractDefinition> definitionMap) {
+    public static QueryRuntime parse(Query query, ExecutionPlanContext executionPlanContext, Map<String,AbstractDefinition> definitionMap) {
         List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
         QueryRuntime queryRuntime = null;
         Element element = null;
         try {
             element = AnnotationHelper.getAnnotationElement("info", "name", query.getAnnotations());
-            QueryAnnotations queryAnnotations = new QueryAnnotations(query.getAnnotations());
             
             Annotation gpuAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_GPU, query.getAnnotations());
             if(gpuAnnotation == null) {
 
                 StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                        executionPlanContext, definitionMap, executors, queryAnnotations);
+                        executionPlanContext, definitionMap, executors);
 
                 QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                         executionPlanContext, streamRuntime.getMetaComplexEvent(), executors);
@@ -83,8 +87,12 @@ public class QueryParser {
 
                 queryRuntime.configureRuntime(); // configure processors with updated MetaData
             } else {
+                
+                GpuQueryContext gpuQueryContext = new GpuQueryContext(query.getAnnotations());
+                gpuQueryContext.setInputEventBufferSize(executionPlanContext.getSiddhiContext().getEventBufferSize());
+                
                 StreamRuntime streamRuntime = GpuInputStreamParser.parse(query.getInputStream(),
-                        executionPlanContext, definitionMap, executors, queryAnnotations);
+                        executionPlanContext, definitionMap, executors, gpuQueryContext);
                 
                 QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                         executionPlanContext, streamRuntime.getMetaComplexEvent(), executors);

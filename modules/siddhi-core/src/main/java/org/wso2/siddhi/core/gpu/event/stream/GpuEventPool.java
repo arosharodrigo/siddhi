@@ -1,15 +1,19 @@
 package org.wso2.siddhi.core.gpu.event.stream;
 
-import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.gpu.util.ByteBufferWriter;
 
 public class GpuEventPool {
     private GpuEventFactory eventFactory;
+    private GpuMetaStreamEvent metaEvent;
+    private ByteBufferWriter bufferWriter;
     private int size;
     private int index = 0;
     private GpuEvent streamEventList;
 
-    public GpuEventPool(MetaStreamEvent metaStreamEvent, int size) {
-        eventFactory = new GpuEventFactory(metaStreamEvent);
+    public GpuEventPool(GpuMetaStreamEvent gpuMetaEvent, ByteBufferWriter bufferWriter, int size) {
+        eventFactory = new GpuEventFactory(gpuMetaEvent, bufferWriter);
+        this.metaEvent = gpuMetaEvent;
+        this.bufferWriter = bufferWriter;
         this.size = size;
     }
 
@@ -62,5 +66,13 @@ public class GpuEventPool {
 
     public int getSize() {
         return size;
+    }
+    
+    public GpuMetaStreamEvent getGpuMetaEvent() {
+        return metaEvent;
+    }
+    
+    public ByteBufferWriter getByteBufferWriter() {
+        return bufferWriter;
     }
 }

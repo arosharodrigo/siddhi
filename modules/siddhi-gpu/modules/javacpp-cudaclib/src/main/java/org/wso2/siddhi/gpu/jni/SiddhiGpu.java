@@ -9,17 +9,17 @@ import org.bytedeco.javacpp.annotation.*;
 public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
     static { Loader.load(); }
 
-// Parsed from <CudaCommon.h>
+// Parsed from <DataTypes.h>
 
 /*
- * CudaCommon.h
+ * DataTypes.h
  *
- *  Created on: Dec 26, 2014
+ *  Created on: Jan 20, 2015
  *      Author: prabodha
  */
 
-// #ifndef CUDACOMMON_H_
-// #define CUDACOMMON_H_
+// #ifndef DATATYPES_H_
+// #define DATATYPES_H_
 
 // #include <stdint.h>
 
@@ -48,6 +48,28 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 	public static native @Cast("const char*") BytePointer GetTypeName(@Cast("SiddhiGpu::DataType::Value") int _eType);
 }
 
+
+
+
+
+
+// #endif /* DATATYPES_H_ */
+
+
+// Parsed from <Value.h>
+
+/*
+ * Value.h
+ *
+ *  Created on: Jan 20, 2015
+ *      Author: prabodha
+ */
+
+// #ifndef VALUE_H_
+// #define VALUE_H_
+
+// #include <stdint.h>
+
 @Namespace("SiddhiGpu") public static class Values extends Pointer {
     static { Loader.load(); }
     public Values() { allocate(); }
@@ -72,27 +94,299 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 
 
-// #endif /* CUDACOMMON_H_ */
+// #endif /* VALUE_H_ */
 
 
-// Parsed from <Filter.h>
+// Parsed from <GpuQueryRuntime.h>
 
 /*
- * FIlter.h
+ * GpuQueryRuntime.h
  *
- *  Created on: Oct 23, 2014
+ *  Created on: Jan 18, 2015
  *      Author: prabodha
  */
 
-// #ifndef FILTER_H_
-// #define FILTER_H_
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <vector>
 
-// #include "CudaCommon.h"
+// #ifndef GPUQUERYRUNTIME_H_
+// #define GPUQUERYRUNTIME_H_
+
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <map>
+// #include <vector>
+// #include <string.h>
+// #include <string>
+
+// #include "GpuMetaEvent.h"
+
+@Namespace("SiddhiGpu") @NoOffset public static class GpuQueryRuntime extends Pointer {
+    static { Loader.load(); }
+    public GpuQueryRuntime() { }
+    public GpuQueryRuntime(Pointer p) { super(p); }
+
+
+	public GpuQueryRuntime(@StdString BytePointer _zQueryName, int _iDeviceId, int _iInputEventBufferSize) { allocate(_zQueryName, _iDeviceId, _iInputEventBufferSize); }
+	private native void allocate(@StdString BytePointer _zQueryName, int _iDeviceId, int _iInputEventBufferSize);
+	public GpuQueryRuntime(@StdString String _zQueryName, int _iDeviceId, int _iInputEventBufferSize) { allocate(_zQueryName, _iDeviceId, _iInputEventBufferSize); }
+	private native void allocate(@StdString String _zQueryName, int _iDeviceId, int _iInputEventBufferSize);
+
+	public native void AddStream(@StdString BytePointer _sStramId, GpuMetaEvent _pMetaEvent);
+	public native void AddStream(@StdString String _sStramId, GpuMetaEvent _pMetaEvent);
+	public native GpuStreamProcessor GetStream(@StdString BytePointer _sStramId);
+	public native GpuStreamProcessor GetStream(@StdString String _sStramId);
+	public native void AddProcessor(@StdString BytePointer _sStramId, GpuProcessor _pProcessor);
+	public native void AddProcessor(@StdString String _sStramId, GpuProcessor _pProcessor);
+
+	public native @Cast("char*") BytePointer GetInputEventBuffer(@StdString BytePointer _sStramId);
+	public native @Cast("char*") ByteBuffer GetInputEventBuffer(@StdString String _sStramId);
+
+	public native @Cast("bool") boolean Configure();
+}
+
+
+
+
+
+// #endif /* GPUQUERYRUNTIME_H_ */
+
+
+// Parsed from <GpuStreamProcessor.h>
+
+/*
+ * GpuStreamProcessor.h
+ *
+ *  Created on: Jan 20, 2015
+ *      Author: prabodha
+ */
+
+// #ifndef GPUSTREAMPROCESSOR_H_
+// #define GPUSTREAMPROCESSOR_H_
+
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <string.h>
+// #include <string>
+@Namespace("SiddhiGpu") @Opaque public static class GpuProcessorContext extends Pointer {
+    public GpuProcessorContext() { }
+    public GpuProcessorContext(Pointer p) { super(p); }
+}
+
+@Namespace("SiddhiGpu") @NoOffset public static class GpuStreamProcessor extends Pointer {
+    static { Loader.load(); }
+    public GpuStreamProcessor() { }
+    public GpuStreamProcessor(Pointer p) { super(p); }
+
+	public GpuStreamProcessor(@StdString BytePointer _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent) { allocate(_sStreamId, _iStreamIndex, _pMetaEvent); }
+	private native void allocate(@StdString BytePointer _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent);
+	public GpuStreamProcessor(@StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent) { allocate(_sStreamId, _iStreamIndex, _pMetaEvent); }
+	private native void allocate(@StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent);
+
+	public native @Cast("bool") boolean Initialize(int _iDeviceId, int _iInputEventBufferSize);
+	public native void AddProcessor(GpuProcessor _pProcessor);
+	public native void Process(int _iNumEvents);
+
+	public native GpuProcessorContext GetProcessorContext();
+}
+
+
+
+
+// #endif /* GPUSTREAMPROCESSOR_H_ */
+
+
+// Parsed from <GpuProcessor.h>
+
+/*
+ * GpuProcessor.h
+ *
+ *  Created on: Jan 19, 2015
+ *      Author: prabodha
+ */
+
+// #ifndef GPUPROCESSOR_H_
+// #define GPUPROCESSOR_H_
+
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <list>
+
+@Namespace("SiddhiGpu") @NoOffset public static class GpuProcessor extends Pointer {
+    static { Loader.load(); }
+    public GpuProcessor() { }
+    public GpuProcessor(Pointer p) { super(p); }
+
+	/** enum SiddhiGpu::GpuProcessor::Type */
+	public static final int
+		FILTER = 0,
+		LENGTH_SLIDING_WINDOW = 1,
+		LENGTH_BATCH_WINDOW = 2,
+		TIME_SLIDING_WINDOW = 3,
+		TIME_BATCH_WINDOW = 4,
+		JOIN = 5,
+		SEQUENCE = 6,
+		PATTERN = 7;
+
+	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native void Process(int _iNumEvents);
+	public native void Print(@Cast("FILE*") Pointer _fp);
+	public native GpuProcessor Clone();
+
+	public native int GetResultEventBufferIndex();
+	public native @Cast("char*") BytePointer GetResultEventBuffer();
+	public native int GetResultEventBufferSize();
+
+	public native @Cast("SiddhiGpu::GpuProcessor::Type") int GetType();
+	public native GpuProcessor GetNext();
+	public native void SetNext(GpuProcessor _pProc);
+	public native void AddToLast(GpuProcessor _pProc);
+	public native void SetThreadBlockSize(int _iThreadBlockSize);
+}
+
+
+
+
+
+// #endif /* GPUPROCESSOR_H_ */
+
+
+// Parsed from <GpuMetaEvent.h>
+
+/*
+ * GpuMetaEvent.h
+ *
+ *  Created on: Jan 20, 2015
+ *      Author: prabodha
+ */
+
+// #ifndef GPUMETAEVENT_H_
+// #define GPUMETAEVENT_H_
+
+@Namespace("SiddhiGpu") @NoOffset public static class GpuMetaAttribute extends Pointer {
+    static { Loader.load(); }
+    public GpuMetaAttribute(Pointer p) { super(p); }
+    public GpuMetaAttribute(int size) { allocateArray(size); }
+    private native void allocateArray(int size);
+    @Override public GpuMetaAttribute position(int position) {
+        return (GpuMetaAttribute)super.position(position);
+    }
+
+	/** enum SiddhiGpu::GpuMetaAttribute::Type */
+	public static final int
+		CURRENT = 0,
+		EXPIRED = 1,
+		TIMER = 2,
+		RESET = 3,
+		NONE = 4;
+
+	public GpuMetaAttribute() { allocate(); }
+	private native void allocate();
+
+	public GpuMetaAttribute(int _iType, int _iLen, int _iPos) { allocate(_iType, _iLen, _iPos); }
+	private native void allocate(int _iType, int _iLen, int _iPos);
+
+	public native int i_Type(); public native GpuMetaAttribute i_Type(int i_Type);
+	public native int i_Length(); public native GpuMetaAttribute i_Length(int i_Length);
+	public native int i_Position(); public native GpuMetaAttribute i_Position(int i_Position);
+}
+
+@Namespace("SiddhiGpu") @NoOffset public static class GpuMetaEvent extends Pointer {
+    static { Loader.load(); }
+    public GpuMetaEvent() { }
+    public GpuMetaEvent(Pointer p) { super(p); }
+
+	public GpuMetaEvent(int _iStreamIndex, int _iAttribCount, int _iEventSize) { allocate(_iStreamIndex, _iAttribCount, _iEventSize); }
+	private native void allocate(int _iStreamIndex, int _iAttribCount, int _iEventSize);
+
+	public native GpuMetaEvent Clone();
+
+	public native void SetAttribute(int _iIndex, int _iType, int _iLen, int _iPos);
+
+	public native int i_StreamIndex(); public native GpuMetaEvent i_StreamIndex(int i_StreamIndex);
+	public native int i_AttributeCount(); public native GpuMetaEvent i_AttributeCount(int i_AttributeCount);
+	public native int i_SizeOfEventInBytes(); public native GpuMetaEvent i_SizeOfEventInBytes(int i_SizeOfEventInBytes);
+	public native GpuMetaAttribute p_Attributes(); public native GpuMetaEvent p_Attributes(GpuMetaAttribute p_Attributes);
+}
+
+
+
+
+// #endif /* GPUMETAEVENT_H_ */
+
+
+// Parsed from <GpuKernel.h>
+
+/*
+ * GpuKernel.h
+ *
+ *  Created on: Jan 19, 2015
+ *      Author: prabodha
+ */
+
+// #ifndef GPUKERNEL_H_
+// #define GPUKERNEL_H_
+
+// #include <stdlib.h>
+// #include <stdio.h>
+
+@Namespace("SiddhiGpu") @NoOffset public static class GpuKernel extends Pointer {
+    static { Loader.load(); }
+    public GpuKernel() { }
+    public GpuKernel(Pointer p) { super(p); }
+
+
+	public native @Cast("bool") boolean Initialize(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native void Process(int _iNumEvents, @Cast("bool") boolean _bLast);
+
+	public native @Cast("char*") BytePointer GetResultEventBuffer();
+	public native int GetResultEventBufferSize();
+
+	public native int GetDeviceId();
+
+	public native int GetResultEventBufferIndex();
+	public native void SetResultEventBufferIndex(int _iIndex);
+
+	public native int GetInputEventBufferIndex();
+	public native void SetInputEventBufferIndex(int _iIndex);
+}
+
+
+
+
+// #endif /* GPUKERNEL_H_ */
+
+
+// Parsed from <GpuFilterProcessor.h>
+
+/*
+ * GpuFilterProcessor.h
+ *
+ *  Created on: Jan 20, 2015
+ *      Author: prabodha
+ */
+
+// #ifndef GPUFILTERPROCESSOR_H_
+// #define GPUFILTERPROCESSOR_H_
+
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <string>
+
+// #include "GpuProcessor.h"
+// #include "DataTypes.h"
+// #include "Value.h"
 // #define __STDC_FORMAT_MACROS
 // #include <inttypes.h>
+
+@Namespace("SiddhiGpu") @Opaque public static class GpuFilterKernel extends Pointer {
+    public GpuFilterKernel() { }
+    public GpuFilterKernel(Pointer p) { super(p); }
+}
+
+// #pragma pack(1)
 
 /** enum SiddhiGpu::ConditionType */
 public static final int
@@ -345,216 +639,135 @@ public static final int
 	public native void Print(@Cast("FILE*") Pointer _fp);
 }
 
-@Namespace("SiddhiGpu") @NoOffset public static class Filter extends Pointer {
-    static { Loader.load(); }
-    public Filter() { }
-    public Filter(Pointer p) { super(p); }
+// #pragma pack()
 
-	public Filter(int _iFilterId, int _iNodeCount) { allocate(_iFilterId, _iNodeCount); }
-	private native void allocate(int _iFilterId, int _iNodeCount);
-//	~Filter();
+@Namespace("SiddhiGpu") @NoOffset public static class GpuFilterProcessor extends GpuProcessor {
+    static { Loader.load(); }
+    public GpuFilterProcessor() { }
+    public GpuFilterProcessor(Pointer p) { super(p); }
+
+	public GpuFilterProcessor(int _iNodeCount) { allocate(_iNodeCount); }
+	private native void allocate(int _iNodeCount);
 
 	public native void AddExecutorNode(int _iPos, @ByRef ExecutorNode _pNode);
 
-	public native Filter Clone();
 	public native void Destroy();
 
-	public native void Print();
+	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native void Process(int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
+	public native GpuProcessor Clone();
 
-	public native int i_FilterId(); public native Filter i_FilterId(int i_FilterId);
-	public native ExecutorNode ap_ExecutorNodes(); public native Filter ap_ExecutorNodes(ExecutorNode ap_ExecutorNodes); // nodes are stored in in-order
-	public native int i_NodeCount(); public native Filter i_NodeCount(int i_NodeCount);
+	public native int GetResultEventBufferIndex();
+	public native @Cast("char*") BytePointer GetResultEventBuffer();
+	public native int GetResultEventBufferSize();
 
+	public native void Print();
+
+	public native ExecutorNode ap_ExecutorNodes(); public native GpuFilterProcessor ap_ExecutorNodes(ExecutorNode ap_ExecutorNodes); // nodes are stored in in-order
+	public native int i_NodeCount(); public native GpuFilterProcessor i_NodeCount(int i_NodeCount);
 }
 
 
 
-// #endif /* FILTER_H_ */
+
+// #endif /* GPUFILTERPROCESSOR_H_ */
 
 
-// Parsed from <GpuEventConsumer.h>
+// Parsed from <GpuLengthSlidingWindowProcessor.h>
 
 /*
- * GpuEventConsumer.h
+ * GpuLengthSlidingWindowProcessor.h
  *
- *  Created on: Oct 23, 2014
+ *  Created on: Jan 20, 2015
  *      Author: prabodha
  */
 
-// #ifndef GPUEVENTCONSUMER_H_
-// #define GPUEVENTCONSUMER_H_
+// #ifndef GPULENGTHSLIDINGWINDOWPROCESSOR_H_
+// #define GPULENGTHSLIDINGWINDOWPROCESSOR_H_
 
-// #include <stdlib.h>
 // #include <stdio.h>
-// #include <string>
-// #include <map>
-// #include <vector>
-// #include "Timer.h"
-// #include "CudaKernelBase.h"
-// #include "CudaSingleFilterKernel.h"
-
-@Namespace("SiddhiGpu") @Opaque public static class CudaEvent extends Pointer {
-    public CudaEvent() { }
-    public CudaEvent(Pointer p) { super(p); }
+// #include "GpuProcessor.h"
+@Namespace("SiddhiGpu") @Opaque public static class GpuLengthSlidingWindowFilterKernel extends Pointer {
+    public GpuLengthSlidingWindowFilterKernel() { }
+    public GpuLengthSlidingWindowFilterKernel(Pointer p) { super(p); }
 }
 
-/** enum SiddhiGpu::KernelType */
-public static final int
-	SingleFilterKernel = 0,
-	MultiFilterKernel = 1;
-
-@Namespace("SiddhiGpu") @NoOffset public static class GpuEventConsumer extends Pointer {
+@Namespace("SiddhiGpu") @NoOffset public static class GpuLengthSlidingWindowProcessor extends GpuProcessor {
     static { Loader.load(); }
-    public GpuEventConsumer() { }
-    public GpuEventConsumer(Pointer p) { super(p); }
+    public GpuLengthSlidingWindowProcessor() { }
+    public GpuLengthSlidingWindowProcessor(Pointer p) { super(p); }
 
-	public GpuEventConsumer(@Cast("SiddhiGpu::KernelType") int _eKernelType, @Cast("const char*") BytePointer _zName, int _iMaxBufferSize, int _iEventsPerBlock) { allocate(_eKernelType, _zName, _iMaxBufferSize, _iEventsPerBlock); }
-	private native void allocate(@Cast("SiddhiGpu::KernelType") int _eKernelType, @Cast("const char*") BytePointer _zName, int _iMaxBufferSize, int _iEventsPerBlock);
-	public GpuEventConsumer(@Cast("SiddhiGpu::KernelType") int _eKernelType, String _zName, int _iMaxBufferSize, int _iEventsPerBlock) { allocate(_eKernelType, _zName, _iMaxBufferSize, _iEventsPerBlock); }
-	private native void allocate(@Cast("SiddhiGpu::KernelType") int _eKernelType, String _zName, int _iMaxBufferSize, int _iEventsPerBlock);
+	public GpuLengthSlidingWindowProcessor(int _iWindowSize) { allocate(_iWindowSize); }
+	private native void allocate(int _iWindowSize);
 
-	public native @Cast("bool") boolean Initialize(int _iCudaDeviceId);
+	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native void Process(int _iNumEvents);
+	public native void Print(@Cast("FILE*") Pointer _fp);
+	public native GpuProcessor Clone();
+	public native int GetResultEventBufferIndex();
+	public native @Cast("char*") BytePointer GetResultEventBuffer();
+	public native int GetResultEventBufferSize();
 
-	public native void AddFilter(Filter _pFilter);
-	public native void ConfigureFilters();
+	public native void Print();
 
-	public native void ProcessEvents(int _iNumEvents);
-
-	public native void PrintAverageStats();
-
-	public native int GetMaxNumberOfEvents();
-
-	public native void CreateByteBuffer(int _iSize);
-	public native void SetByteBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
-	public native void SetByteBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
-	public native void SetByteBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
-	public native int GetByteBufferSize();
-	public native @Cast("char*") BytePointer GetByteBuffer();
-	public native void SetResultsBufferPosition(int _iPos);
-	public native void SetEventMetaBufferPosition(int _iPos);
-	public native void SetSizeOfEvent(int _iSize);
-	public native void SetEventDataBufferPosition(int _iPos);
+	public native int GetWindowSize();
 }
 
 
 
-// #endif /* GPUEVENTCONSUMER_H_ */
+
+// #endif /* GPULENGTHSLIDINGWINDOWPROCESSOR_H_ */
 
 
-// Parsed from <CudaKernelBase.h>
+// Parsed from <GpuJoinProcessor.h>
 
 /*
- * CudaKernelBase.h
+ * GpuJoinProcessor.h
  *
- *  Created on: Nov 10, 2014
+ *  Created on: Jan 31, 2015
  *      Author: prabodha
  */
 
-// #ifndef CUDAKERNELBASE_H_
-// #define CUDAKERNELBASE_H_
+// #ifndef GPUJOINPROCESSOR_H_
+// #define GPUJOINPROCESSOR_H_
 
-// #include <stdlib.h>
 // #include <stdio.h>
-// #include <string.h>
-// #include "CudaCommon.h"
-// #include "Filter.h"
+// #include "GpuProcessor.h"
+@Namespace("SiddhiGpu") @Opaque public static class GpuJoinKernel extends Pointer {
+    public GpuJoinKernel() { }
+    public GpuJoinKernel(Pointer p) { super(p); }
+}
 
-@Namespace("SiddhiGpu") @NoOffset public static class CudaKernelBase extends Pointer {
+@Namespace("SiddhiGpu") @NoOffset public static class GpuJoinProcessor extends GpuProcessor {
     static { Loader.load(); }
-    public CudaKernelBase() { }
-    public CudaKernelBase(Pointer p) { super(p); }
+    public GpuJoinProcessor() { }
+    public GpuJoinProcessor(Pointer p) { super(p); }
 
+	public GpuJoinProcessor(int _iLeftWindowSize, int _iRightWindowSize) { allocate(_iLeftWindowSize, _iRightWindowSize); }
+	private native void allocate(int _iLeftWindowSize, int _iRightWindowSize);
 
-	public native @Cast("bool") boolean Initialize(int _iCudaDeviceId);
-	public native void SetEventBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
-	public native void SetEventBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
-	public native void SetEventBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
-	public native void SetResultsBufferPosition(int _iPos);
-	public native void SetEventMetaBufferPosition(int _iPos);
-	public native void SetSizeOfEvent(int _iSize);
-	public native void SetEventDataBufferPosition(int _iPos);
+	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native void Process(int _iNumEvents);
+	public native void Print(@Cast("FILE*") Pointer _fp);
+	public native GpuProcessor Clone();
+	public native int GetResultEventBufferIndex();
+	public native @Cast("char*") BytePointer GetResultEventBuffer();
+	public native int GetResultEventBufferSize();
 
-	public native void ProcessEvents(int _iNumEvents);
+	public native void Print();
 
-	public native void AddFilterToDevice(Filter _pFilter);
-	public native void CopyFiltersToDevice();
-
-	public native float GetElapsedTimeAverage();
+	public native int GetLeftStreamWindowSize();
+	public native int GetRightStreamWindowSize();
 }
 
 
 
-// #endif /* CUDAKERNELBASE_H_ */
 
-
-// Parsed from <CudaSingleFilterKernel.h>
-
-/*
- * CudaSingleFilterKernel.h
- *
- *  Created on: Nov 9, 2014
- *      Author: prabodha
- */
-
-// #ifndef CUDASINGLEFILTERKERNEL_H_
-// #define CUDASINGLEFILTERKERNEL_H_
-
-// #include "CudaKernelBase.h"
-// #include <list>
-// #include "helper_timer.h"
-
-// -------------------------------------------------------------------------------------------------------------------
-
-@Namespace("SiddhiGpu") public static class SingleFilterKernelInput extends Pointer {
-    static { Loader.load(); }
-    public SingleFilterKernelInput() { allocate(); }
-    public SingleFilterKernelInput(int size) { allocateArray(size); }
-    public SingleFilterKernelInput(Pointer p) { super(p); }
-    private native void allocate();
-    private native void allocateArray(int size);
-    @Override public SingleFilterKernelInput position(int position) {
-        return (SingleFilterKernelInput)super.position(position);
-    }
-
-	public native @Cast("char*") BytePointer p_ByteBuffer(); public native SingleFilterKernelInput p_ByteBuffer(BytePointer p_ByteBuffer);         // ByteBuffer from java side
-	public native int i_ResultsPosition(); public native SingleFilterKernelInput i_ResultsPosition(int i_ResultsPosition);    // Results array position in ByteBuffer
-	public native int i_EventMetaPosition(); public native SingleFilterKernelInput i_EventMetaPosition(int i_EventMetaPosition);  // EventMeta position in ByteBuffer
-	public native int i_EventDataPosition(); public native SingleFilterKernelInput i_EventDataPosition(int i_EventDataPosition);  // EventData position in ByteBuffer
-	public native int i_SizeOfEvent(); public native SingleFilterKernelInput i_SizeOfEvent(int i_SizeOfEvent);        // Size of an event
-	public native int i_EventsPerBlock(); public native SingleFilterKernelInput i_EventsPerBlock(int i_EventsPerBlock);     // number of events allocated per block
-	public native Filter ap_Filter(); public native SingleFilterKernelInput ap_Filter(Filter ap_Filter);            // Filters buffer - pre-copied at initialization
-	public native int i_MaxEventCount(); public native SingleFilterKernelInput i_MaxEventCount(int i_MaxEventCount);      // used for setting results array
-	public native int i_EventCount(); public native SingleFilterKernelInput i_EventCount(int i_EventCount);         // Num events in this batch
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-@Namespace("SiddhiGpu") @NoOffset public static class CudaSingleFilterKernel extends CudaKernelBase {
-    static { Loader.load(); }
-    public CudaSingleFilterKernel() { }
-    public CudaSingleFilterKernel(Pointer p) { super(p); }
-
-	public CudaSingleFilterKernel(int _iMaxBufferSize, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog) { allocate(_iMaxBufferSize, _pConsumer, _fpLog); }
-	private native void allocate(int _iMaxBufferSize, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog);
-	public CudaSingleFilterKernel(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog) { allocate(_iMaxBufferSize, _iEventsPerBlock, _pConsumer, _fpLog); }
-	private native void allocate(int _iMaxBufferSize, int _iEventsPerBlock, GpuEventConsumer _pConsumer, @Cast("FILE*") Pointer _fpLog);
-
-	public native @Cast("bool") boolean Initialize(int _iCudaDeviceId);
-	public native void SetEventBuffer(@Cast("char*") BytePointer _pBuffer, int _iSize);
-	public native void SetEventBuffer(@Cast("char*") ByteBuffer _pBuffer, int _iSize);
-	public native void SetEventBuffer(@Cast("char*") byte[] _pBuffer, int _iSize);
-	public native void ProcessEvents(int _iNumEvents);
-
-	public native void AddFilterToDevice(Filter _pFilter);
-	public native void CopyFiltersToDevice();
-
-	public native float GetElapsedTimeAverage();
-}
-
-
-
-// #endif /* CUDASINGLEFILTERKERNEL_H_ */
+// #endif /* GPUJOINPROCESSOR_H_ */
 
 
 }

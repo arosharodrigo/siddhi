@@ -51,6 +51,8 @@ public interface StreamEventConverter {
      * @param borrowedEvent Event that will be populated
      */
     public void convertData(long timeStamp, Object[] data, StreamEvent borrowedEvent);
+    
+    public void convertData(long timeStamp, ComplexEvent.Type type, Object[] data, StreamEvent borrowedEvent);
 
     /**
      * Element to hold information about event conversion

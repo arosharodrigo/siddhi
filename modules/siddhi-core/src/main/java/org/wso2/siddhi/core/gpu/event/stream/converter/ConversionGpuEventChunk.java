@@ -1,63 +1,199 @@
 package org.wso2.siddhi.core.gpu.event.stream.converter;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
+import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
+import org.wso2.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import org.wso2.siddhi.core.gpu.event.stream.GpuEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuEventPool;
+import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
+import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribute;
 
-public class ConversionGpuEventChunk extends ComplexEventChunk<GpuEvent> {
-    private GpuEventConverter gpuEventConverter;
-    private GpuEventPool gpuEventPool; 
+public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
-    public ConversionGpuEventChunk(MetaStreamEvent metaStreamEvent, GpuEventPool gpuEventPool) {
-        this.gpuEventPool = gpuEventPool;
-        gpuEventConverter = new GpuEventConverter();
+    private GpuMetaStreamEvent gpuMetaStreamEvent;
+    private Object attributeData[];
+    private ComplexEvent.Type eventTypes[]; 
+    
+    public ConversionGpuEventChunk(MetaStreamEvent metaStreamEvent, StreamEventPool streamEventPool, GpuMetaStreamEvent gpuMetaStreamEvent) {
+        super(metaStreamEvent, streamEventPool);
+        this.gpuMetaStreamEvent = gpuMetaStreamEvent;
+        eventTypes = ComplexEvent.Type.values();
+        
+        attributeData = new Object[gpuMetaStreamEvent.getAttributes().size()];
+        int index = 0;
+        for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+            switch(attrib.type) {
+            case BOOL:
+                attributeData[index++] = new Boolean(false);
+                break;
+            case INT:
+                attributeData[index++] = new Integer(0);
+                break;
+            case LONG:
+                attributeData[index++] = new Long(0);
+                break;
+            case FLOAT:
+                attributeData[index++] = new Float(0);
+                break;
+            case DOUBLE:
+                attributeData[index++] = new Double(0);
+                break;
+            case STRING:
+                attributeData[index++] = new String();
+                break;
+            }
+        }
     }
 
-    public ConversionGpuEventChunk(GpuEventConverter gpuEventConverter, GpuEventPool gpuEventPool) {
-        this.gpuEventConverter = gpuEventConverter;
-        this.gpuEventPool = gpuEventPool;
+    public ConversionGpuEventChunk(StreamEventConverter streamEventConverter, StreamEventPool streamEventPool, GpuMetaStreamEvent gpuMetaStreamEvent) {
+        super(streamEventConverter, streamEventPool);
+        this.gpuMetaStreamEvent = gpuMetaStreamEvent;
+    }
+    
+    public void convertAndAdd(ByteBuffer eventBuffer, int eventCount) {
+        for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
+
+            StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+
+            long timestamp = eventBuffer.getLong();
+            long sequence = eventBuffer.getLong();
+            ComplexEvent.Type type = eventTypes[eventBuffer.getShort()];
+
+            int index = 0;
+            for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+                switch(attrib.type) {
+                case BOOL:
+                    attributeData[index++] = eventBuffer.getShort();
+                    break;
+                case INT:
+                    attributeData[index++] = eventBuffer.getInt();
+                    break;
+                case LONG:
+                    attributeData[index++] = eventBuffer.getLong();
+                    break;
+                case FLOAT:
+                    attributeData[index++] = eventBuffer.getFloat();
+                    break;
+                case DOUBLE:
+                    attributeData[index++] = eventBuffer.getDouble();
+                    break;
+                case STRING:
+                    short length = eventBuffer.getShort();
+                    byte string[] = new byte[length];
+                    eventBuffer.get(string, 0, length);
+                    attributeData[index++] = new String(string); // TODO: avoid allocation
+                    break;
+                }
+            }
+
+            streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
+
+            if (first == null) {
+                first = borrowedEvent;
+                last = first;
+                currentEventCount = 1;
+            } else {
+                last.setNext(borrowedEvent);
+                last = borrowedEvent;
+                currentEventCount++;
+            }
+        }
+    }
+    
+    public void convertAndAdd(IntBuffer indexBuffer, ByteBuffer eventBuffer, int eventCount) {
+        
+        for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
+            int matched = indexBuffer.get();
+            if (matched >= 0) {
+
+                StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+                
+                long timestamp = eventBuffer.getLong();
+                long sequence = eventBuffer.getLong();
+                ComplexEvent.Type type = eventTypes[eventBuffer.getShort()];
+                
+                int index = 0;
+                for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+                    switch(attrib.type) {
+                    case BOOL:
+                        attributeData[index++] = eventBuffer.getShort();
+                        break;
+                    case INT:
+                        attributeData[index++] = eventBuffer.getInt();
+                        break;
+                    case LONG:
+                        attributeData[index++] = eventBuffer.getLong();
+                        break;
+                    case FLOAT:
+                        attributeData[index++] = eventBuffer.getFloat();
+                        break;
+                    case DOUBLE:
+                        attributeData[index++] = eventBuffer.getDouble();
+                        break;
+                    case STRING:
+                        short length = eventBuffer.getShort();
+                        byte string[] = new byte[length];
+                        eventBuffer.get(string, 0, length);
+                        attributeData[index++] = new String(string); // TODO: avoid allocation
+                        break;
+                    }
+                }
+                
+                streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
+                
+                if (first == null) {
+                    first = borrowedEvent;
+                    last = first;
+                    currentEventCount = 1;
+                } else {
+                    last.setNext(borrowedEvent);
+                    last = borrowedEvent;
+                    currentEventCount++;
+                }
+            } else {
+                eventBuffer.position(eventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes());
+            }
+        }
     }
     
     public void convertAndAssign(Event event) {
-        GpuEvent borrowedEvent = gpuEventPool.borrowEvent();
-        gpuEventConverter.convertEvent(event, borrowedEvent);
+        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+        streamEventConverter.convertEvent(event, borrowedEvent);
         first = borrowedEvent;
         last = first;
         currentEventCount = 1;
     }
 
     public void convertAndAssign(long timeStamp, Object[] data) {
-        GpuEvent borrowedEvent = gpuEventPool.borrowEvent();
-        gpuEventConverter.convertData(timeStamp, data, borrowedEvent);
+        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+        streamEventConverter.convertData(timeStamp, data, borrowedEvent);
         first = borrowedEvent;
         last = first;
         currentEventCount = 1;
     }
 
     public void convertAndAssign(ComplexEvent complexEvent) {
-        first = gpuEventPool.borrowEvent();
+        first = streamEventPool.borrowEvent();
         currentEventCount = 1;
         last = convertAllStreamEvents(complexEvent, first);
     }
 
-//    @Override
-//    public void convertAndAssignFirst(StreamEvent streamEvent) {
-//        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-//        eventConverter.convertStreamEvent(streamEvent, borrowedEvent);
-//        first = borrowedEvent;
-//        last = first;
-//    }
-
     public void convertAndAssign(Event[] events) {
-        GpuEvent firstEvent = gpuEventPool.borrowEvent();
-        gpuEventConverter.convertEvent(events[0], firstEvent);
-        GpuEvent currentEvent = firstEvent;
+        StreamEvent firstEvent = streamEventPool.borrowEvent();
+        streamEventConverter.convertEvent(events[0], firstEvent);
+        StreamEvent currentEvent = firstEvent;
         for (int i = 1, eventsLength = events.length; i < eventsLength; i++) {
-            GpuEvent nextEvent = gpuEventPool.borrowEvent();
-            gpuEventConverter.convertEvent(events[i], nextEvent);
+            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            streamEventConverter.convertEvent(events[i], nextEvent);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
         }
@@ -67,8 +203,8 @@ public class ConversionGpuEventChunk extends ComplexEventChunk<GpuEvent> {
     }
 
     public void convertAndAdd(Event event) {
-        GpuEvent borrowedEvent = gpuEventPool.borrowEvent();
-        gpuEventConverter.convertEvent(event, borrowedEvent);
+        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+        streamEventConverter.convertEvent(event, borrowedEvent);
 
         if (first == null) {
             first = borrowedEvent;
@@ -82,13 +218,13 @@ public class ConversionGpuEventChunk extends ComplexEventChunk<GpuEvent> {
 
     }
 
-    private GpuEvent convertAllStreamEvents(ComplexEvent complexEvents, GpuEvent firstEvent) {
-        gpuEventConverter.convertStreamEvent(complexEvents, firstEvent);
-        GpuEvent currentEvent = firstEvent;
+    private StreamEvent convertAllStreamEvents(ComplexEvent complexEvents, StreamEvent firstEvent) {
+        streamEventConverter.convertStreamEvent(complexEvents, firstEvent);
+        StreamEvent currentEvent = firstEvent;
         complexEvents = complexEvents.getNext();
         while (complexEvents != null) {
-            GpuEvent nextEvent = gpuEventPool.borrowEvent();
-            gpuEventConverter.convertStreamEvent(complexEvents, nextEvent);
+            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            streamEventConverter.convertStreamEvent(complexEvents, nextEvent);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
             currentEventCount++;
@@ -119,13 +255,13 @@ public class ConversionGpuEventChunk extends ComplexEventChunk<GpuEvent> {
         if (previousToLastReturned != null) {
             previousToLastReturned.setNext(lastReturned.getNext());
         } else {
-            first = (GpuEvent) lastReturned.getNext();
+            first = lastReturned.getNext();
             if (first == null) {
                 last = null;
             }
         }
         lastReturned.setNext(null);
-        gpuEventPool.returnEvents(lastReturned);
+        streamEventPool.returnEvents(lastReturned);
         lastReturned = null;
         currentEventCount--;
     }

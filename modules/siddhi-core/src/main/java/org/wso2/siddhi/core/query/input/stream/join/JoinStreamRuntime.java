@@ -32,9 +32,9 @@ import java.util.List;
 
 public class JoinStreamRuntime implements StreamRuntime {
 
-    List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
-    private ExecutionPlanContext executionPlanContext;
-    private MetaStateEvent metaStateEvent;
+    protected List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
+    protected ExecutionPlanContext executionPlanContext;
+    protected MetaStateEvent metaStateEvent;
 
     public JoinStreamRuntime(ExecutionPlanContext executionPlanContext, MetaStateEvent metaStateEvent) {
 

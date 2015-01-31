@@ -19,6 +19,7 @@
 
 package org.wso2.siddhi.core.query.input;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
@@ -35,11 +36,13 @@ import java.util.List;
 
 public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
+    private static final Logger log = Logger.getLogger(ProcessStreamReceiver.class);
+    
     protected String streamId;
     protected Processor next;
     protected MetaStreamEvent metaStreamEvent;
-    private ConversionStreamEventChunk streamEventChunk;
-    private StreamEventPool streamEventPool;
+    protected ConversionStreamEventChunk streamEventChunk;
+    protected StreamEventPool streamEventPool;
     protected List<PreStateProcessor> stateProcessors = new ArrayList<PreStateProcessor>();
     protected int stateProcessorsSize;
 

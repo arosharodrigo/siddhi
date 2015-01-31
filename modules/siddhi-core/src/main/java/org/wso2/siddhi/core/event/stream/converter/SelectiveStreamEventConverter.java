@@ -72,4 +72,9 @@ public class SelectiveStreamEventConverter implements StreamEventConverter {
         convertToInnerStreamEvent(data, StreamEvent.Type.CURRENT, timeStamp, borrowedEvent);
     }
 
+    @Override
+    public void convertData(long timeStamp, ComplexEvent.Type type, Object[] data, StreamEvent borrowedEvent)
+    {
+        convertToInnerStreamEvent(data, type, timeStamp, borrowedEvent);
+    }
 }

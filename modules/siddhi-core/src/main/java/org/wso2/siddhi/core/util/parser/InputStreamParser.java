@@ -47,13 +47,12 @@ public class InputStreamParser {
      * @return
      */
     public static StreamRuntime parse(InputStream inputStream, ExecutionPlanContext executionPlanContext, Map<String, AbstractDefinition> definitionMap,
-                                      List<VariableExpressionExecutor> executors,
-                                      QueryAnnotations queryAnnotations) {
+                                      List<VariableExpressionExecutor> executors) {
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
             
             ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(((SingleInputStream) inputStream).getStreamId());
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
-                    executionPlanContext, executors, definitionMap, new MetaStreamEvent(), processStreamReceiver, queryAnnotations);
+                    executionPlanContext, executors, definitionMap, new MetaStreamEvent(), processStreamReceiver);
             
         } else if (inputStream instanceof JoinInputStream) {
             
@@ -75,19 +74,19 @@ public class InputStreamParser {
             SingleStreamRuntime leftStreamRuntime = SingleInputStreamParser.parseInputStream(
                     (SingleInputStream) ((JoinInputStream) inputStream).getLeftInputStream(),
                     executionPlanContext, executors, definitionMap,
-                    metaStateEvent.getMetaStreamEvent(0), leftProcessStreamReceiver, queryAnnotations);
+                    metaStateEvent.getMetaStreamEvent(0), leftProcessStreamReceiver);
 
             SingleStreamRuntime rightStreamRuntime = SingleInputStreamParser.parseInputStream(
                     (SingleInputStream) ((JoinInputStream) inputStream).getRightInputStream(),
                     executionPlanContext, executors, definitionMap,
-                    metaStateEvent.getMetaStreamEvent(1), rightProcessStreamReceiver, queryAnnotations);
+                    metaStateEvent.getMetaStreamEvent(1), rightProcessStreamReceiver);
 
             return JoinInputStreamParser.parseInputStream(leftStreamRuntime, rightStreamRuntime,
-                    (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors, queryAnnotations);
+                    (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors);
         } else if (inputStream instanceof StateInputStream) {
             MetaStateEvent metaStateEvent = new MetaStateEvent(inputStream.getAllStreamIds().size());
             return StateInputStreamParser.parseInputStream(((StateInputStream) inputStream), executionPlanContext,
-                    metaStateEvent, executors, definitionMap, queryAnnotations);
+                    metaStateEvent, executors, definitionMap);
         } else {
             //TODO: pattern, etc
             throw new OperationNotSupportedException();

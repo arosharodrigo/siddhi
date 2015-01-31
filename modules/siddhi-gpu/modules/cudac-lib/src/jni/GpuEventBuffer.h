@@ -1,0 +1,39 @@
+/*
+ * GpuEventBuffer.h
+ *
+ *  Created on: Jan 28, 2015
+ *      Author: prabodha
+ */
+
+#ifndef GPUEVENTBUFFER_H_
+#define GPUEVENTBUFFER_H_
+
+namespace SiddhiGpu
+{
+
+class GpuEventBuffer
+{
+public:
+	GpuEventBuffer(int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog);
+	virtual ~GpuEventBuffer();
+
+	virtual void CopyToDevice(bool _bAsync) = 0;
+	virtual void CopyToHost(bool _bAsync) = 0;
+
+	GpuKernelMetaEvent * GetDeviceMetaEvent() { return p_DeviceMetaEvent; }
+	GpuMetaEvent * GetHostMetaEvent() { return p_HostMetaEvent; }
+
+	int GetDeviceId() { return i_DeviceId; }
+
+protected:
+	GpuMetaEvent * p_HostMetaEvent;
+	GpuKernelMetaEvent * p_DeviceMetaEvent;
+
+	int i_DeviceId;
+	FILE * fp_Log;
+};
+
+}
+
+
+#endif /* GPUEVENTBUFFER_H_ */

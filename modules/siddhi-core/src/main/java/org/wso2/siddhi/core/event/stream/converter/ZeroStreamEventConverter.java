@@ -47,5 +47,11 @@ public class ZeroStreamEventConverter implements StreamEventConverter {
     public void convertData(long timeStamp, Object[] data, StreamEvent borrowedEvent) {
         convertToInnerStreamEvent(data, StreamEvent.Type.CURRENT, timeStamp, borrowedEvent);
     }
+    
+    @Override
+    public void convertData(long timeStamp, ComplexEvent.Type type, Object[] data, StreamEvent borrowedEvent)
+    {
+        convertToInnerStreamEvent(data, type, timeStamp, borrowedEvent);
+    }
 
 }

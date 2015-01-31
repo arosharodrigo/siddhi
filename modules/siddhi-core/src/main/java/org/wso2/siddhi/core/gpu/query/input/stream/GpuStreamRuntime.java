@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.wso2.siddhi.core.event.MetaComplexEvent;
+import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
+import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
@@ -14,9 +16,12 @@ import org.wso2.siddhi.core.query.processor.window.TimeWindowProcessor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 
 public class GpuStreamRuntime extends SingleStreamRuntime {
+    
+    private GpuQueryProcessor gpuQueryProcessor;
 
     public GpuStreamRuntime(ProcessStreamReceiver processStreamReceiver, Processor processorChain, MetaComplexEvent metaComplexEvent) {
         super(processStreamReceiver, processorChain, metaComplexEvent);
+        gpuQueryProcessor = ((GpuProcessStreamReceiver)processStreamReceiver).getGpuQueryProcessor();
     }
     
     @Override
@@ -65,5 +70,7 @@ public class GpuStreamRuntime extends SingleStreamRuntime {
             processStreamReceiver.setNext(processorChain);
             processorChain.setToLast(commonProcessor);
         }
+        
+        gpuQueryProcessor.setSelectProcessor(commonProcessor);
     }
 }

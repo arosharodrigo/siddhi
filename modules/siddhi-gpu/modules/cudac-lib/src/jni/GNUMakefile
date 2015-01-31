@@ -8,6 +8,15 @@ endif
 
 APP=SiddhiGpu
 
+SOURCES = GpuQueryRuntime.cpp  
+SOURCES += GpuStreamProcessor.cpp
+SOURCES += GpuKernel.cpp  
+SOURCES += GpuProcessorContext.cpp
+SOURCES += GpuUtils.cpp
+SOURCES += GpuFilterProcessor.cpp  
+SOURCES += GpuLengthSlidingWindowProcessor.cpp  
+SOURCES += GpuJoinProcessor.cpp
+
 deploy: build
 	#$(info $(CPPBUILD)/$(PLATFORM))
 	mkdir -p $(CPPBUILD)/$(PLATFORM)/include
@@ -16,7 +25,7 @@ deploy: build
 	cp *.so $(CPPBUILD)/$(PLATFORM)/lib
 
 build: clean
-	g++ Filter.cpp GpuEventConsumer.cpp Timer.cpp CpuFilterKernel.cpp -march=x86-64 -m64 -Wall -O3 -fPIC -shared -s -o libgpueventconsumer.so
+	g++ $(SOURCES) -march=x86-64 -m64 -Wall -O3 -fPIC -shared -s -o libgpuqueryruntime.so
 	
 clean:
 	-rm *.o *.so 

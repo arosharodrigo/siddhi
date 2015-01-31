@@ -25,7 +25,7 @@ package org.wso2.siddhi.core.event;
 public interface ComplexEvent {
 
     public enum Type {
-        CURRENT, EXPIRED, TIMER, RESET
+        CURRENT, EXPIRED, TIMER, RESET, NONE
     }
 
     ComplexEvent getNext();

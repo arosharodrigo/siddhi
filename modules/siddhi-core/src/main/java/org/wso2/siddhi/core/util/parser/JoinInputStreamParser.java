@@ -19,6 +19,7 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.input.stream.join.Finder;
 import org.wso2.siddhi.core.query.input.stream.join.JoinProcessor;
@@ -36,8 +37,7 @@ public class JoinInputStreamParser {
 
     public static JoinStreamRuntime parseInputStream(SingleStreamRuntime leftStreamRuntime, SingleStreamRuntime rightStreamRuntime,
                                                      JoinInputStream joinInputStream, ExecutionPlanContext executionPlanContext,
-                                                     MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors,
-                                                     QueryAnnotations queryAnnotations) {
+                                                     MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors) {
 
         JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true);
         JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false);
@@ -107,5 +107,52 @@ public class JoinInputStreamParser {
             throw new OperationNotSupportedException("Only streams with window can be joined");
         }
 
+    }
+    
+    public static JoinStreamRuntime parseInputStream(SingleStreamRuntime leftStreamRuntime, SingleStreamRuntime rightStreamRuntime,
+            JoinInputStream joinInputStream, ExecutionPlanContext executionPlanContext,
+            MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors, GpuQueryContext gpuQueryContext) {
+
+        JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true);
+        JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false);
+
+        WindowProcessor leftWindowProcessor = insertJoinProcessorsAndGetWindow(leftPreJoinProcessor,
+                leftPostJoinProcessor, leftStreamRuntime);
+
+        JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true);
+        JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false);
+
+        WindowProcessor rightWindowProcessor = insertJoinProcessorsAndGetWindow(rightPreJoinProcessor,
+                rightPostJoinProcessor, rightStreamRuntime);
+
+        leftPreJoinProcessor.setFindableProcessor((FindableProcessor) rightWindowProcessor);
+        leftPostJoinProcessor.setFindableProcessor((FindableProcessor) rightWindowProcessor);
+
+        rightPreJoinProcessor.setFindableProcessor((FindableProcessor) leftWindowProcessor);
+        rightPostJoinProcessor.setFindableProcessor((FindableProcessor) leftWindowProcessor);
+
+        //todo fix
+        ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(joinInputStream.getOnCompare(),
+                metaStateEvent, -1, executors, executionPlanContext, false, 0);
+        Finder leftFinder = new Finder(expressionExecutor, 1, 0);
+        Finder rightFinder = new Finder(expressionExecutor, 0, 1);
+
+        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
+            rightPreJoinProcessor.setTrigger(true);
+            rightPreJoinProcessor.setFinder(rightFinder);
+            rightPostJoinProcessor.setTrigger(true);
+            rightPostJoinProcessor.setFinder(rightFinder);
+        }
+        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT) {
+            leftPreJoinProcessor.setTrigger(true);
+            leftPreJoinProcessor.setFinder(leftFinder);
+            leftPostJoinProcessor.setTrigger(true);
+            leftPostJoinProcessor.setFinder(leftFinder);
+        }
+
+        JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(executionPlanContext,metaStateEvent);
+        joinStreamRuntime.addRuntime(leftStreamRuntime);
+        joinStreamRuntime.addRuntime(rightStreamRuntime);
+        return joinStreamRuntime;
     }
 }
