@@ -34,10 +34,10 @@ bool GpuCudaHelper::SelectDevice(int _iDeviceId, FILE * _fpLog)
 
 	if(_iDeviceId < iDevCount)
 	{
-		CUDA_CHECK_WARN(cudaSetDeviceFlags(cudaDeviceMapHost));
+//		CUDA_CHECK_WARN(cudaSetDeviceFlags(cudaDeviceMapHost));
 		cudaGetLastError();
-		CUDA_CHECK_RETURN(cudaSetDevice(i_CudaDeviceId));
-		fprintf(_fpLog, "CUDA device set to %d\n", i_CudaDeviceId);
+		CUDA_CHECK_RETURN(cudaSetDevice(_iDeviceId));
+		fprintf(_fpLog, "CUDA device set to %d\n", _iDeviceId);
 		fflush(_fpLog);
 		return true;
 	}
@@ -68,9 +68,9 @@ void GpuCudaHelper::AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc
     {
         // allocate a generic page-aligned chunk of system memory
         fprintf(_fpLog, "> mmap() allocating %4.2f Mbytes (generic page-aligned system memory)\n", (float)_iAllocSize/1048576.0f);
-        *_ppAlloc = (int *) mmap(NULL, (_iAllocSize + MEMORY_ALIGNMENT), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
+        *_ppAlloc = (char *) mmap(NULL, (_iAllocSize + MEMORY_ALIGNMENT), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
 
-        *_ppAlignedAlloc = (int *)ALIGN_UP(*_ppAlloc, MEMORY_ALIGNMENT);
+        *_ppAlignedAlloc = (char *)ALIGN_UP(*_ppAlloc, MEMORY_ALIGNMENT);
 
         fprintf(_fpLog, "> cudaHostRegister() registering %4.2f Mbytes of generic allocated system memory\n", (float)_iAllocSize/1048576.0f);
         // pin allocate memory
