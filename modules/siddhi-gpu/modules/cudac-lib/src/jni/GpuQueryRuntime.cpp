@@ -25,12 +25,19 @@ GpuQueryRuntime::GpuQueryRuntime(std::string _zQueryName, int _iDeviceId, int _i
 	char zLogFile[256];
 	sprintf(zLogFile, "logs/GpuQueryRuntime_%s.log", _zQueryName.c_str());
 	fp_Log = fopen(zLogFile, "w");
+	if(fp_Log)
+	{
+		fprintf(fp_Log, "[GpuQueryRuntime] Created : Name=%s deviceId=%d InputBufferSize=%d \n",
+				s_QueryName.c_str(), i_DeviceId, i_InputEventBufferSize);
+		fflush(fp_Log);
 
-	fprintf(fp_Log, "[GpuQueryRuntime] Created : Name=%s deviceId=%d InputBufferSize=%d",
-			s_QueryName.c_str(), i_DeviceId, i_InputEventBufferSize);
-	fflush(fp_Log);
-
-	GpuUtils::PrintThreadInfo(s_QueryName.c_str(), fp_Log);
+		GpuUtils::PrintThreadInfo(s_QueryName.c_str(), fp_Log);
+	}
+	else
+	{
+		fp_Log = NULL;
+		printf("[GpuQueryRuntime] Error while creating log file at %s\n", zLogFile);
+	}
 }
 
 GpuQueryRuntime::~GpuQueryRuntime()
@@ -43,7 +50,7 @@ GpuQueryRuntime::~GpuQueryRuntime()
 
 void GpuQueryRuntime::AddStream(std::string _sStramId, GpuMetaEvent * _pMetaEvent)
 {
-	fprintf(fp_Log, "[GpuQueryRuntime] AddStream : Id=%s Index=%d", _sStramId.c_str(), _pMetaEvent->i_StreamIndex);
+	fprintf(fp_Log, "[GpuQueryRuntime] AddStream : Id=%s Index=%d \n", _sStramId.c_str(), _pMetaEvent->i_StreamIndex);
 	fflush(fp_Log);
 
 	GpuStreamProcessor * pStreamProcessor = new GpuStreamProcessor(_sStramId, _pMetaEvent->i_StreamIndex, _pMetaEvent);
@@ -53,7 +60,7 @@ void GpuQueryRuntime::AddStream(std::string _sStramId, GpuMetaEvent * _pMetaEven
 
 void GpuQueryRuntime::AddProcessor(std::string _sStramId, GpuProcessor * _pProcessor)
 {
-	fprintf(fp_Log, "[GpuQueryRuntime] AddProcessor : Id=%s Type=%d", _sStramId.c_str(), _pProcessor->GetType());
+	fprintf(fp_Log, "[GpuQueryRuntime] AddProcessor : Id=%s Type=%d \n", _sStramId.c_str(), _pProcessor->GetType());
 	fflush(fp_Log);
 
 	StreamProcessorsByStreamId::iterator ite = map_StreamProcessorsByStreamId.find(_sStramId);
@@ -65,7 +72,7 @@ void GpuQueryRuntime::AddProcessor(std::string _sStramId, GpuProcessor * _pProce
 
 GpuStreamProcessor * GpuQueryRuntime::GetStream(std::string _sStramId)
 {
-	fprintf(fp_Log, "[GpuQueryRuntime] GetStream : Id=%s ", _sStramId.c_str());
+	fprintf(fp_Log, "[GpuQueryRuntime] GetStream : Id=%s \n", _sStramId.c_str());
 	fflush(fp_Log);
 
 	StreamProcessorsByStreamId::iterator ite = map_StreamProcessorsByStreamId.find(_sStramId);
@@ -79,7 +86,7 @@ GpuStreamProcessor * GpuQueryRuntime::GetStream(std::string _sStramId)
 
 char * GpuQueryRuntime::GetInputEventBuffer(std::string _sStramId)
 {
-	fprintf(fp_Log, "[GpuQueryRuntime] GetInputEventBuffer : Id=%s ", _sStramId.c_str());
+	fprintf(fp_Log, "[GpuQueryRuntime] GetInputEventBuffer : Id=%s \n", _sStramId.c_str());
 	fflush(fp_Log);
 
 	StreamProcessorsByStreamId::iterator ite = map_StreamProcessorsByStreamId.find(_sStramId);
@@ -97,7 +104,7 @@ char * GpuQueryRuntime::GetInputEventBuffer(std::string _sStramId)
 
 bool GpuQueryRuntime::Configure()
 {
-	fprintf(fp_Log, "[GpuQueryRuntime] Configure");
+	fprintf(fp_Log, "[GpuQueryRuntime] Configure \n");
 	fflush(fp_Log);
 	GpuUtils::PrintThreadInfo(s_QueryName.c_str(), fp_Log);
 

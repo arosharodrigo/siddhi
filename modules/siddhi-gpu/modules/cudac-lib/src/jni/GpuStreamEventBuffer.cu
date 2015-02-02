@@ -27,7 +27,7 @@ GpuStreamEventBuffer::GpuStreamEventBuffer(int _iDeviceId, GpuMetaEvent * _pMeta
 	i_EventBufferSizeInBytes(0),
 	i_EventCount(0)
 {
-	fprintf(fp_Log, "[GpuStreamEventBuffer] Created with device id : %d", i_DeviceId);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] Created with device id : %d \n", i_DeviceId);
 	fflush(fp_Log);
 }
 

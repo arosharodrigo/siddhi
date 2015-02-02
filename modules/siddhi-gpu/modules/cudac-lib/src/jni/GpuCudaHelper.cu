@@ -67,19 +67,19 @@ void GpuCudaHelper::AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc
     if (_bPinGenericMemory)
     {
         // allocate a generic page-aligned chunk of system memory
-        fprintf(_fpLog, "> mmap() allocating %4.2f Mbytes (generic page-aligned system memory)\n", (float)_iAllocSize/1048576.0f);
+        fprintf(_fpLog, "[GpuCudaHelper] AllocateHostMemory (generic page-aligned system memory) using mmap : %4.2f Mbytes \n", (float)_iAllocSize/1048576.0f);
         *_ppAlloc = (char *) mmap(NULL, (_iAllocSize + MEMORY_ALIGNMENT), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
 
         *_ppAlignedAlloc = (char *)ALIGN_UP(*_ppAlloc, MEMORY_ALIGNMENT);
 
-        fprintf(_fpLog, "> cudaHostRegister() registering %4.2f Mbytes of generic allocated system memory\n", (float)_iAllocSize/1048576.0f);
+        fprintf(_fpLog, "[GpuCudaHelper] cudaHostRegister registering generic allocated system memory\n");
         // pin allocate memory
         CUDA_CHECK_RETURN(cudaHostRegister(*_ppAlignedAlloc, _iAllocSize, cudaHostRegisterMapped));
     }
     else
 #endif
     {
-        fprintf(_fpLog, "> cudaMallocHost() allocating %4.2f Mbytes of system memory\n", (float)_iAllocSize/1048576.0f);
+        fprintf(_fpLog, "[GpuCudaHelper] AllocateHostMemory (system memory) using cudaMallocHost : %4.2f Mbytes\n", (float)_iAllocSize/1048576.0f);
         // allocate host memory (pinned is required for achieve asynchronicity)
         CUDA_CHECK_RETURN(cudaMallocHost((void **)_ppAlloc, _iAllocSize));
         *_ppAlignedAlloc = *_ppAlloc;

@@ -20,7 +20,7 @@ GpuIntBuffer::GpuIntBuffer(int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _f
 	i_EventBufferSizeInBytes(0),
 	i_EventCount(0)
 {
-	fprintf(fp_Log, "[GpuIntBuffer] Created with device id : %d", i_DeviceId);
+	fprintf(fp_Log, "[GpuIntBuffer] Created with device id : %d \n", i_DeviceId);
 	fflush(fp_Log);
 }
 

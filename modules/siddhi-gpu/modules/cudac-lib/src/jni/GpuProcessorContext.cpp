@@ -19,7 +19,7 @@ GpuProcessorContext::GpuProcessorContext(int _iDeviceId, FILE * _fpLog) :
 	i_DeviceId(_iDeviceId),
 	fp_Log(_fpLog)
 {
-	fprintf(fp_Log, "[GpuProcessorContext] Created with device id : %d", i_DeviceId);
+	fprintf(fp_Log, "[GpuProcessorContext] Created with device id : %d \n", i_DeviceId);
 	fflush(fp_Log);
 
 	vec_EventBuffers.reserve(5);
