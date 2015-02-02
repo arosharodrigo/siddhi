@@ -21,7 +21,7 @@
 namespace SiddhiGpu
 {
 
-class GpuFilterKernel;
+class GpuFilterKernelStandalone;
 
 #pragma pack(1)
 
@@ -571,7 +571,7 @@ public:
 
 private:
 	GpuProcessorContext * p_Context;
-	GpuFilterKernel * p_FilterKernel;
+	GpuKernel * p_FilterKernel;
 };
 
 };

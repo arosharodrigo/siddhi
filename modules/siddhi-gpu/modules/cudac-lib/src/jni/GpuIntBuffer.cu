@@ -29,7 +29,7 @@ GpuIntBuffer::~GpuIntBuffer()
 	fprintf(fp_Log, "[GpuIntBuffer] destroy\n");
 	fflush(fp_Log);
 
-	GpuCudaHelper::FreeHostMemory(true, &p_UnalignedBuffer, &p_HostEventBuffer, i_EventBufferSizeInBytes, fp_Log);
+	GpuCudaHelper::FreeHostMemory(true, (char**)&p_UnalignedBuffer, (char**)&p_HostEventBuffer, i_EventBufferSizeInBytes, fp_Log);
 
 	if(p_DeviceMetaEvent)
 	{
@@ -54,7 +54,7 @@ int * GpuIntBuffer::CreateEventBuffer(int _iEventCount)
 	fprintf(fp_Log, "[GpuIntBuffer] Allocating ByteBuffer for %d events : %d bytes \n", _iEventCount, (int)(sizeof(char) * i_EventBufferSizeInBytes));
 	fflush(fp_Log);
 
-	GpuCudaHelper::AllocateHostMemory(true, &p_UnalignedBuffer, &p_HostEventBuffer, i_EventBufferSizeInBytes, fp_Log);
+	GpuCudaHelper::AllocateHostMemory(true, (char**)&p_UnalignedBuffer, (char**)&p_HostEventBuffer, i_EventBufferSizeInBytes, fp_Log);
 
 	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceEventBuffer, i_EventBufferSizeInBytes));
 
@@ -122,5 +122,20 @@ void GpuIntBuffer::CopyToHost(bool _bAsync)
 	}
 }
 
+void GpuIntBuffer::ResetHostEventBuffer(int _iResetVal)
+{
+	fprintf(fp_Log, "[GpuIntBuffer] HostReset : Val=%d\n", _iResetVal);
+
+	memset(p_HostEventBuffer, _iResetVal, i_EventBufferSizeInBytes);
+}
+
+void GpuIntBuffer::ResetDeviceEventBuffer(int _iResetVal)
+{
+	fprintf(fp_Log, "[GpuIntBuffer] DeviceReset : Val=%d\n", _iResetVal);
+
+	CUDA_CHECK_RETURN(cudaMemset(p_DeviceEventBuffer, _iResetVal, i_EventBufferSizeInBytes));
+}
+
+}
 
 #endif

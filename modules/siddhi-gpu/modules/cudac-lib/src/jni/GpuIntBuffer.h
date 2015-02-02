@@ -8,9 +8,13 @@
 #ifndef GPUINTBUFFER_H_
 #define GPUINTBUFFER_H_
 
+#include <stdio.h>
+#include "GpuEventBuffer.h"
 
 namespace SiddhiGpu
 {
+
+class GpuMetaEvent;
 
 class GpuIntBuffer : public GpuEventBuffer
 {
@@ -28,6 +32,9 @@ public:
 
 	void CopyToDevice(bool _bAsync);
 	void CopyToHost(bool _bAsync);
+	void ResetHostEventBuffer(int _iResetVal);
+	void ResetDeviceEventBuffer(int _iResetVal);
+
 private:
 	int * p_HostEventBuffer;
 	int * p_UnalignedBuffer;

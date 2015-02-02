@@ -275,8 +275,17 @@ void GpuFilterProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBuffer
 	fprintf(fp_Log, "[GpuFilterProcessor] Init : DeviceId=%d InputEventBufferSize=%d\n", p_Context->GetDeviceId(), _iInputEventBufferSize);
 	fflush(fp_Log);
 
-	p_FilterKernel = new GpuFilterKernel(this, p_Context, i_ThreadBlockSize, fp_Log);
-	p_FilterKernel->SetInputEventBufferIndex(0);
+	if(p_Next)
+	{
+		p_FilterKernel = new GpuFilterKernelStandalone(this, p_Context, i_ThreadBlockSize, fp_Log);
+		p_FilterKernel->SetInputEventBufferIndex(0);
+	}
+	else
+	{
+		p_FilterKernel = new GpuFilterKernelFirst(this, p_Context, i_ThreadBlockSize, fp_Log);
+		p_FilterKernel->SetInputEventBufferIndex(0);
+	}
+
 	p_FilterKernel->Initialize(_pMetaEvent, _iInputEventBufferSize);
 }
 

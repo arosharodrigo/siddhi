@@ -3,9 +3,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "GpuProcessorContext.h"
 #include "GpuMetaEvent.h"
+#include "GpuProcessor.h"
+#include "GpuProcessorContext.h"
+#include "GpuStreamEventBuffer.h"
+#include "GpuIntBuffer.h"
+#include "GpuKernelDataTypes.h"
 #include "GpuJoinKernel.h"
+#include "GpuCudaHelper.h"
 
 namespace SiddhiGpu
 {
@@ -16,7 +21,6 @@ GpuJoinKernel::GpuJoinKernel(GpuProcessor * _pProc, GpuProcessorContext * _pCont
 	p_Context(_pContext),
 	p_InputEventBuffer(NULL),
 	p_ResultEventBuffer(NULL),
-	p_WindowEventBuffer(NULL),
 	b_DeviceSet(false),
 	i_LeftStraemWindowSize(_iLeftWindowSize),
 	i_RightStraemWindowSize(_iRightWindowSize),
@@ -52,50 +56,18 @@ bool GpuJoinKernel::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBuffe
 			p_ResultEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
 
-	p_WindowEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
-	p_WindowEventBuffer->CreateEventBuffer(i_WindowSize);
-
-	fprintf(fp_Log, "[GpuJoinKernel] Created device window buffer : Length=%d Size=%d bytes\n", i_WindowSize,
-			p_WindowEventBuffer->GetEventBufferSizeInBytes());
-	fflush(fp_Log);
-
-	// initialize window buffer data
-	char * pHostWindowBuffer = (char*) malloc(p_WindowEventBuffer->GetEventBufferSizeInBytes());
-
-	fprintf(fp_Log, "[GpuJoinKernel] initialize window buffer data \n");
-	fflush(fp_Log);
-
-	memset(pHostWindowBuffer, 0, p_WindowEventBuffer->GetEventBufferSizeInBytes());
-
-	char * pCurrentEvent;
-	for(int i=0; i<i_WindowSize; ++i)
-	{
-		pCurrentEvent = pHostWindowBuffer + (_pMetaEvent->i_SizeOfEventInBytes * i);
-		GpuEvent * pGpuEvent = (GpuEvent*) pCurrentEvent;
-		pGpuEvent->i_Type = GpuMetaAttribute::NONE;
-	}
-
-	CUDA_CHECK_RETURN(cudaMemcpy(
-			p_WindowEventBuffer->GetDeviceEventBuffer(),
-			pHostWindowBuffer,
-			p_WindowEventBuffer->GetEventBufferSizeInBytes(),
-			cudaMemcpyHostToDevice
-			));
-
-	free(pHostWindowBuffer);
-
 	fprintf(fp_Log, "[GpuJoinKernel] Initialization complete\n");
 	fflush(fp_Log);
 
 	return true;
 }
 
-void GpuJoinKernel::Process(int _iNumEvents, bool _bLast)
+void GpuJoinKernel::Process(int & _iNumEvents, bool _bLast)
 {
 	fprintf(fp_Log, "[GpuJoinKernel] Process : EventCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
 
-	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
+/*	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
 	{
 		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
 		b_DeviceSet = true;
@@ -183,6 +155,7 @@ void GpuJoinKernel::Process(int _iNumEvents, bool _bLast)
 	{
 		i_RemainingCount -= _iNumEvents;
 	}
+	*/
 }
 
 char * GpuJoinKernel::GetResultEventBuffer()

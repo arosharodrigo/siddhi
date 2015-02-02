@@ -31,6 +31,9 @@ public:
 
 	void CopyToDevice(bool _bAsync);
 	void CopyToHost(bool _bAsync);
+	void ResetHostEventBuffer(int _iResetVal);
+	void ResetDeviceEventBuffer(int _iResetVal);
+
 private:
 	char * p_HostEventBuffer;
 	char * p_UnalignedBuffer;

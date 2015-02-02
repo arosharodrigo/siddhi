@@ -4,6 +4,7 @@
 #include "GpuKernelDataTypes.h"
 #include "GpuMetaEvent.h"
 #include "GpuCudaHelper.h"
+#include "GpuEventBuffer.h"
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -8,6 +8,8 @@ ifndef CPPBUILD
 $(error CPPBUILD not defined!!)
 endif
 
+CUB_LIB_PATH := /home/prabodha/cuda/libs/cub/cub-1.3.2
+
 ifndef PLATFORM
 #PLATFORM=linux-x86_64
 $(error PLATFORM not defined!!)
@@ -87,7 +89,7 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 
 # Common includes and paths for CUDA
-INCLUDES  := -I.
+INCLUDES  := -I. -I$(CUB_LIB_PATH)
 LIBRARIES := -L.
 
 ################################################################################
@@ -100,7 +102,7 @@ GENCODE_FLAGS   := $(GENCODE_SM20)
 ################################################################################
 .SUFFIXES: .cu
 
-OUT=libgpueventconsumer.so
+OUT=libgpuqueryruntime.so
 
 SRC = GpuQueryRuntime.cpp  
 SRC += GpuStreamProcessor.cpp
@@ -117,9 +119,9 @@ CULIBS += GpuIntBuffer
 CULIBS += GpuProcessorContext 
 CULIBS += GpuStreamEventBuffer 
 CULIBS += GpuFilterKernel 
-CULIBS += GpuFilterKernelCore 
 CULIBS += GpuLengthSlidingWindowKernel
 CULIBS += GpuJoinKernel 
+CULIBS += GpuFilterKernelCore 
 
 CULIBSRC = $(addsuffix .cu , $(CULIBS))
 CULIBSTATIC = $(addsuffix .a, $(addprefix lib, $(CULIBS)))

@@ -2,6 +2,7 @@
 #define _GPU_FILTER_KERNEL_CORE_CU__
 
 #include "GpuFilterKernelCore.h"
+#include "GpuFilterProcessor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>

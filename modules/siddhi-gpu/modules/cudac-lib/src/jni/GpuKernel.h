@@ -24,7 +24,7 @@ public:
 	virtual ~GpuKernel();
 
 	virtual bool Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize) = 0;
-	virtual void Process(int _iNumEvents, bool _bLast) = 0;
+	virtual void Process(int & _iNumEvents, bool _bLast) = 0;
 
 	virtual char * GetResultEventBuffer() = 0;
 	virtual int GetResultEventBufferSize() = 0;

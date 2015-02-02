@@ -8,8 +8,13 @@
 #ifndef GPUEVENTBUFFER_H_
 #define GPUEVENTBUFFER_H_
 
+#include <stdio.h>
+#include "GpuKernelDataTypes.h"
+
 namespace SiddhiGpu
 {
+
+class GpuMetaEvent;
 
 class GpuEventBuffer
 {
@@ -19,6 +24,8 @@ public:
 
 	virtual void CopyToDevice(bool _bAsync) = 0;
 	virtual void CopyToHost(bool _bAsync) = 0;
+	virtual void ResetHostEventBuffer(int _iResetVal) = 0;
+	virtual void ResetDeviceEventBuffer(int _iResetVal) = 0;
 
 	GpuKernelMetaEvent * GetDeviceMetaEvent() { return p_DeviceMetaEvent; }
 	GpuMetaEvent * GetHostMetaEvent() { return p_HostMetaEvent; }

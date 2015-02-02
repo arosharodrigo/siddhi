@@ -339,7 +339,9 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 
 	public native @Cast("bool") boolean Initialize(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native void Process(int _iNumEvents, @Cast("bool") boolean _bLast);
+	public native void Process(@ByRef IntPointer _iNumEvents, @Cast("bool") boolean _bLast);
+	public native void Process(@ByRef IntBuffer _iNumEvents, @Cast("bool") boolean _bLast);
+	public native void Process(@ByRef int[] _iNumEvents, @Cast("bool") boolean _bLast);
 
 	public native @Cast("char*") BytePointer GetResultEventBuffer();
 	public native int GetResultEventBufferSize();
@@ -381,9 +383,9 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 // #define __STDC_FORMAT_MACROS
 // #include <inttypes.h>
 
-@Namespace("SiddhiGpu") @Opaque public static class GpuFilterKernel extends Pointer {
-    public GpuFilterKernel() { }
-    public GpuFilterKernel(Pointer p) { super(p); }
+@Namespace("SiddhiGpu") @Opaque public static class GpuFilterKernelStandalone extends Pointer {
+    public GpuFilterKernelStandalone() { }
+    public GpuFilterKernelStandalone(Pointer p) { super(p); }
 }
 
 // #pragma pack(1)

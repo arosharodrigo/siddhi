@@ -66,7 +66,7 @@ void GpuLengthSlidingWindowProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInp
 		{
 		case GpuProcessor::FILTER:
 		{
-			p_WindowKernel = new GpuLengthSlidingWindowFilterKernel(this, p_Context, i_ThreadBlockSize, i_WindowSize, fp_Log);
+			p_WindowKernel = new GpuLengthSlidingWindowFirstKernel(this, p_Context, i_ThreadBlockSize, i_WindowSize, fp_Log);
 			p_WindowKernel->SetInputEventBufferIndex(p_PrevProcessor->GetResultEventBufferIndex());
 		}
 		break;
@@ -77,7 +77,7 @@ void GpuLengthSlidingWindowProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInp
 	else
 	{
 		p_WindowKernel = new GpuLengthSlidingWindowFirstKernel(this, p_Context, i_ThreadBlockSize, i_WindowSize, fp_Log);
-		p_WindowKernel->SetInputEventBufferIndex(p_PrevProcessor->GetResultEventBufferIndex());
+		p_WindowKernel->SetInputEventBufferIndex(0);
 	}
 
 	p_WindowKernel->Initialize(_pMetaEvent, _iInputEventBufferSize);

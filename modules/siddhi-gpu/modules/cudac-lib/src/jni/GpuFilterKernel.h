@@ -21,14 +21,14 @@ class GpuProcessorContext;
 class GpuIntBuffer;
 class GpuStreamEventBuffer;
 
-class GpuFilterKernel : public GpuKernel
+class GpuFilterKernelStandalone : public GpuKernel
 {
 public:
-	GpuFilterKernel(GpuProcessor * _pProc, GpuProcessorContext * _pContext, int _iThreadBlockSize, FILE * _fPLog);
-	~GpuFilterKernel();
+	GpuFilterKernelStandalone(GpuProcessor * _pProc, GpuProcessorContext * _pContext, int _iThreadBlockSize, FILE * _fPLog);
+	~GpuFilterKernelStandalone();
 
 	bool Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	void Process(int _iNumEvents, bool _bLast);
+	void Process(int & _iNumEvents, bool _bLast);
 	char * GetResultEventBuffer();
 	int GetResultEventBufferSize();
 
@@ -37,6 +37,33 @@ private:
 	GpuKernelFilter * p_DeviceFilter;
 	GpuStreamEventBuffer * p_InputEventBuffer;
 	GpuIntBuffer * p_ResultEventBuffer;
+	bool b_DeviceSet;
+};
+
+class GpuFilterKernelFirst : public GpuKernel
+{
+public:
+	GpuFilterKernelFirst(GpuProcessor * _pProc, GpuProcessorContext * _pContext, int _iThreadBlockSize, FILE * _fPLog);
+	~GpuFilterKernelFirst();
+
+	bool Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
+	void Process(int & _iNumEvents, bool _bLast);
+	char * GetResultEventBuffer();
+	int GetResultEventBufferSize();
+
+private:
+	GpuProcessorContext * p_Context;
+	GpuKernelFilter * p_DeviceFilter;
+	GpuStreamEventBuffer * p_InputEventBuffer;
+	GpuIntBuffer * p_MatchedIndexEventBuffer;
+	GpuIntBuffer * p_PrefixSumBuffer;
+	GpuStreamEventBuffer * p_ResultEventBuffer;
+	int i_MatchedEvenBufferIndex;
+	int * pi_DeviceMatchedEventCount;
+	int * pi_HostMatchedEventCount;
+	void * p_TempStorageForPrefixSum;
+	size_t i_SizeOfTempStorageForPrefixSum;
+
 	bool b_DeviceSet;
 };
 

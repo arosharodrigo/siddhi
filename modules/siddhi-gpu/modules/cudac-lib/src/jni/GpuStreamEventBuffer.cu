@@ -136,6 +136,20 @@ void GpuStreamEventBuffer::CopyToHost(bool _bAsync)
 	}
 }
 
+void GpuStreamEventBuffer::ResetHostEventBuffer(int _iResetVal)
+{
+	fprintf(fp_Log, "[GpuStreamEventBuffer] HostReset : Val=%d\n", _iResetVal);
+
+	memset(p_HostEventBuffer, _iResetVal, i_EventBufferSizeInBytes);
+}
+
+void GpuStreamEventBuffer::ResetDeviceEventBuffer(int _iResetVal)
+{
+	fprintf(fp_Log, "[GpuStreamEventBuffer] DeviceReset : Val=%d\n", _iResetVal);
+
+	CUDA_CHECK_RETURN(cudaMemset(p_DeviceEventBuffer, _iResetVal, i_EventBufferSizeInBytes));
+}
+
 }
 
 #endif
