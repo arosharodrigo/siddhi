@@ -322,6 +322,9 @@ int GpuFilterProcessor::GetResultEventBufferIndex()
 
 char * GpuFilterProcessor::GetResultEventBuffer()
 {
+	fprintf(fp_Log, "[GpuFilterProcessor] GetResultEventBuffer : Kernel=%p Buffer=%p Size=%d \n",
+			p_FilterKernel, p_FilterKernel->GetResultEventBuffer(), p_FilterKernel->GetResultEventBufferSize());
+	fflush(fp_Log);
 	return p_FilterKernel->GetResultEventBuffer();
 }
 
