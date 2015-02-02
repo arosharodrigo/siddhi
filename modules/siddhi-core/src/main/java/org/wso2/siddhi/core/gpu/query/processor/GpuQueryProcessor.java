@@ -152,6 +152,7 @@ public class GpuQueryProcessor {
     }
 
     public void AddGpuProcessor(SiddhiGpu.GpuProcessor gpuProcessor) {
+        log.debug("AddGpuProcessor : " + gpuProcessor.GetType());
         gpuProcessors.add(gpuProcessor);
     }
     
@@ -174,7 +175,7 @@ public class GpuQueryProcessor {
             return;
         }
         
-        SiddhiGpu.GpuProcessor lastGpuProcessor = gpuProcessors.get(gpuProcessors.size());
+        SiddhiGpu.GpuProcessor lastGpuProcessor = gpuProcessors.get(gpuProcessors.size() - 1);
         if(lastGpuProcessor != null) {
             if(lastGpuProcessor instanceof SiddhiGpu.GpuFilterProcessor) {
                 

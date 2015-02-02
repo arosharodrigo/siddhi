@@ -479,7 +479,7 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 
 	i_ResultEventBufferIndex = p_Context->AddEventBuffer(p_ResultEventBuffer);
 
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
+	fprintf(fp_Log, "[GpuFilterKernelFirst] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
 			p_ResultEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
 

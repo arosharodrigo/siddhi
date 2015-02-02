@@ -95,19 +95,17 @@ bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
 
 void GpuStreamProcessor::AddProcessor(GpuProcessor * _pProcessor)
 {
-	GpuProcessor * pCloned = _pProcessor->Clone();
-
 	fprintf(fp_Log, "[GpuStreamProcessor] AddProcessor : Processor=%d \n", _pProcessor->GetType());
-	pCloned->Print(fp_Log);
+	_pProcessor->Print(fp_Log);
 	fflush(fp_Log);
 
 	if(p_ProcessorChain)
 	{
-		p_ProcessorChain->AddToLast(pCloned);
+		p_ProcessorChain->AddToLast(_pProcessor);
 	}
 	else
 	{
-		p_ProcessorChain = pCloned;
+		p_ProcessorChain = _pProcessor;
 	}
 }
 
