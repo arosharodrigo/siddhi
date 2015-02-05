@@ -20,7 +20,7 @@ class GpuUtils
 public:
 
 	static void PrintThreadInfo(const char * _zTag, FILE * _fpLog);
-	static void PrintByteBuffer(const char * _pEventBuffer, int _iNumEvents, GpuMetaEvent * _pEventMeta, const char * _zTag, FILE * _fpLog);
+	static void PrintByteBuffer(char * _pEventBuffer, int _iNumEvents, GpuMetaEvent * _pEventMeta, const char * _zTag, FILE * _fpLog);
 };
 
 }

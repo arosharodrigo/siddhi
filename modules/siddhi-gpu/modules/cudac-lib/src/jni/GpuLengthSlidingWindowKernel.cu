@@ -45,10 +45,10 @@ void ProcessEventsLengthSlidingWindow(
 	int iEventIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
 
 	// get in event starting position
-	char * pInEvent = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
+	char * pInEventBuffer = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
 
 	// output to results buffer [expired event, in event]
-	char * pResultsExpiredEventBuffer = _pResultsBuffer + (_iSizeOfEvent * iEventIdx);
+	char * pResultsExpiredEventBuffer = _pResultsBuffer + (_iSizeOfEvent * iEventIdx * 2);
 	char * pResultsInEventBuffer = pResultsExpiredEventBuffer + _iSizeOfEvent;
 
 	GpuEvent * pExpiredEvent = (GpuEvent *)pResultsExpiredEventBuffer;
@@ -63,15 +63,15 @@ void ProcessEventsLengthSlidingWindow(
 			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (_iWindowLength + iExpiredEventPos));
 
 			GpuEvent * pWindowEvent = (GpuEvent*) pExpiredOutEventInWindowBuffer;
-			if(pWindowEvent->i_Type != GpuMetaAttribute::NONE) // if window event is filled
+			if(pWindowEvent->i_Type != GpuEvent::NONE) // if window event is filled
 			{
 				memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInWindowBuffer, _iSizeOfEvent);
-				pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+				pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 			}
 			else
 			{
 				memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-				pExpiredEvent->i_Type = GpuMetaAttribute::NONE;
+				pExpiredEvent->i_Type = GpuEvent::NONE;
 			}
 		}
 		else
@@ -80,18 +80,18 @@ void ProcessEventsLengthSlidingWindow(
 			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * iExpiredEventPos);
 
 			memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInInputBuffer, _iSizeOfEvent);
-			pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
 	}
 	else
 	{
 		// [NULL,inEvent]
 		memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-		pExpiredEvent->i_Type = GpuMetaAttribute::NONE;
+		pExpiredEvent->i_Type = GpuEvent::NONE;
 
 	}
 
-	memcpy(pResultsInEventBuffer, pInEvent, _iSizeOfEvent);
+	memcpy(pResultsInEventBuffer, pInEventBuffer, _iSizeOfEvent);
 
 }
 
@@ -136,11 +136,11 @@ void ProcessEventsLengthSlidingWindowFilter(
 	if(_pFilterdEventsIndexes[iEventIdx] < 0)
 	{
 		memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-		pExpiredEvent->i_Type = GpuMetaAttribute::NONE;
+		pExpiredEvent->i_Type = GpuEvent::NONE;
 
 		memset(pResultsInEventBuffer, 0, _iSizeOfEvent);
 		GpuEvent * pResultsInEvent = (GpuEvent *)pResultsInEventBuffer;
-		pResultsInEvent->i_Type = GpuMetaAttribute::NONE;
+		pResultsInEvent->i_Type = GpuEvent::NONE;
 
 		return; // not matched
 	}
@@ -156,15 +156,15 @@ void ProcessEventsLengthSlidingWindowFilter(
 			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (_iWindowLength + iExpiredEventPos));
 
 			GpuEvent * pWindowEvent = (GpuEvent*) pExpiredOutEventInWindowBuffer;
-			if(pWindowEvent->i_Type != GpuMetaAttribute::NONE) // if window event is filled
+			if(pWindowEvent->i_Type != GpuEvent::NONE) // if window event is filled
 			{
 				memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInWindowBuffer, _iSizeOfEvent);
-				pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+				pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 			}
 			else
 			{
 				memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-				pExpiredEvent->i_Type = GpuMetaAttribute::NONE;
+				pExpiredEvent->i_Type = GpuEvent::NONE;
 			}
 		}
 		else
@@ -173,14 +173,14 @@ void ProcessEventsLengthSlidingWindowFilter(
 			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * iExpiredEventPos);
 
 			memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInInputBuffer, _iSizeOfEvent);
-			pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
 	}
 	else
 	{
 		// [NULL,inEvent]
 		memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-		pExpiredEvent->i_Type = GpuMetaAttribute::NONE;
+		pExpiredEvent->i_Type = GpuEvent::NONE;
 
 	}
 
@@ -201,7 +201,7 @@ void MoveEvent(
 	char * pDestinationEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * _iDestination);
 	GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
 
-	if(pDestinationEvent->i_Type != GpuMetaAttribute::NONE) // there is an event in destination position
+	if(pDestinationEvent->i_Type != GpuEvent::NONE) // there is an event in destination position
 	{
 		// move it to next position first
 		int iNextPosition = _iDestination - _iShift;
@@ -212,7 +212,7 @@ void MoveEvent(
 	}
 
 	memcpy(pDestinationEventBuffer, _pSourceEvent, _iSizeOfEvent);
-	pDestinationEvent->i_Type = GpuMetaAttribute::EXPIRED;
+	pDestinationEvent->i_Type = GpuEvent::EXPIRED;
 }
 
 __global__
@@ -264,7 +264,7 @@ void SetWindowState(
 
 			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
-			pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
 	}
 	else
@@ -277,7 +277,7 @@ void SetWindowState(
 
 			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
-			pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
 	}
 }
@@ -338,7 +338,7 @@ void SetWindowState(
 
 			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
-			pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
 	}
 	else
@@ -351,7 +351,7 @@ void SetWindowState(
 
 			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
-			pExpiredEvent->i_Type = GpuMetaAttribute::EXPIRED;
+			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
 	}
 }
@@ -419,7 +419,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 	{
 		pCurrentEvent = pHostWindowBuffer + (_pMetaEvent->i_SizeOfEventInBytes * i);
 		GpuEvent * pGpuEvent = (GpuEvent*) pCurrentEvent;
-		pGpuEvent->i_Type = GpuMetaAttribute::NONE;
+		pGpuEvent->i_Type = GpuEvent::NONE;
 	}
 
 	p_WindowEventBuffer->CopyToDevice(false);
@@ -501,7 +501,7 @@ void GpuLengthSlidingWindowFirstKernel::Process(int & _iNumEvents, bool _bLast)
 #endif
 
 #ifdef GPU_DEBUG
-	GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), p_ResultEventBuffer->GetMaxEventCount(), p_ResultEventBuffer->GetHostMetaEvent(),
+	GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents * 2, p_ResultEventBuffer->GetHostMetaEvent(),
 			"GpuLengthSlidingWindowFirstKernel::Out", fp_Log);
 #endif
 
@@ -543,7 +543,6 @@ GpuLengthSlidingWindowFilterKernel::GpuLengthSlidingWindowFilterKernel(GpuProces
 	p_Context(_pContext),
 	p_InputEventBuffer(NULL),
 	p_ResultEventBuffer(NULL),
-	p_OriginalEventBuffer(NULL),
 	p_WindowEventBuffer(NULL),
 	b_DeviceSet(false),
 	i_WindowSize(_iWindowSize),
@@ -563,14 +562,10 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Initialize\n");
 	fflush(fp_Log);
 
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] OriginalInpuEventBufferIndex=%d\n", 0);
-	fflush(fp_Log);
-	p_OriginalEventBuffer = (GpuStreamEventBuffer*) p_Context->GetEventBuffer(0);
-
 	// set input event buffer
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] InpuEventBufferIndex=%d\n", i_InputBufferIndex);
 	fflush(fp_Log);
-	p_InputEventBuffer = (GpuIntBuffer*) p_Context->GetEventBuffer(i_InputBufferIndex);
+	p_InputEventBuffer = (GpuStreamEventBuffer*) p_Context->GetEventBuffer(i_InputBufferIndex);
 
 	// set resulting event buffer and its meta data
 	p_ResultEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
@@ -602,7 +597,7 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 
 #ifdef GPU_DEBUG
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
-			"GpuLengthSlidingWindowFilterKernel", fp_Log);
+			"GpuLengthSlidingWindowFilterKernel::In", fp_Log);
 #endif
 
 	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
@@ -626,11 +621,10 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 	fflush(fp_Log);
 #endif
 
-	ProcessEventsLengthSlidingWindowFilter<<<numBlocks, numThreads>>>(
-			p_OriginalEventBuffer->GetDeviceEventBuffer(),
-			p_OriginalEventBuffer->GetDeviceMetaEvent(),
-			_iNumEvents,
+	ProcessEventsLengthSlidingWindow<<<numBlocks, numThreads>>>(
 			p_InputEventBuffer->GetDeviceEventBuffer(),
+			p_InputEventBuffer->GetDeviceMetaEvent(),
+			_iNumEvents,
 			p_WindowEventBuffer->GetDeviceEventBuffer(),
 			i_WindowSize,
 			i_RemainingCount,
@@ -641,7 +635,6 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 	);
 
 	SetWindowState<<<numBlocks, numThreads>>>(
-			p_OriginalEventBuffer->GetDeviceEventBuffer(),
 			p_InputEventBuffer->GetDeviceEventBuffer(),
 			_iNumEvents,
 			p_WindowEventBuffer->GetDeviceEventBuffer(),
@@ -660,6 +653,11 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 	if(_bLast)
 	{
 		p_ResultEventBuffer->CopyToHost(true);
+
+#ifdef GPU_DEBUG
+	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
+	fflush(fp_Log);
+#endif
 	}
 	//	CUDA_CHECK_RETURN(cudaMemcpy(
 	//			p_HostEventBuffer,
@@ -672,9 +670,10 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
-	fflush(fp_Log);
+	GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents * 2, p_ResultEventBuffer->GetHostMetaEvent(),
+			"GpuLengthSlidingWindowFilterKernel::Out", fp_Log);
 #endif
+
 
 #ifdef KERNEL_TIME
 	sdkStopTimer(&p_StopWatch);

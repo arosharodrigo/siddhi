@@ -59,9 +59,8 @@ public:
 private:
 	GpuProcessorContext * p_Context;
 
-	GpuIntBuffer * p_InputEventBuffer;
+	GpuStreamEventBuffer * p_InputEventBuffer;
 	GpuStreamEventBuffer * p_ResultEventBuffer;
-	GpuStreamEventBuffer * p_OriginalEventBuffer;
 	GpuStreamEventBuffer * p_WindowEventBuffer;
 
 	bool b_DeviceSet;

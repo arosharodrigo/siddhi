@@ -8,6 +8,9 @@
 
 #include "GpuMetaEvent.h"
 #include "GpuUtils.h"
+#include "DataTypes.h"
+#include "GpuKernelDataTypes.h"
+#include <string.h>
 #include <unistd.h>
 #include <syscall.h>
 #include <stdint.h>
@@ -26,7 +29,7 @@ void GpuUtils::PrintThreadInfo(const char * _zTag, FILE * _fpLog)
 #endif
 }
 
-void GpuUtils::PrintByteBuffer(const char * _pEventBuffer, int _iNumEvents, GpuMetaEvent * _pEventMeta, const char * _zTag, FILE * _fpLog)
+void GpuUtils::PrintByteBuffer(char * _pEventBuffer, int _iNumEvents, GpuMetaEvent * _pEventMeta, const char * _zTag, FILE * _fpLog)
 {
 #ifdef GPU_DEBUG
 	fprintf(_fpLog, "[%s] [PrintByteBuffer] EventMeta [Attribs=%d] [", _zTag, _pEventMeta->i_AttributeCount);
