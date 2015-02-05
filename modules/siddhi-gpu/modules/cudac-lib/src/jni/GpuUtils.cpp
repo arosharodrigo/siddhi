@@ -7,6 +7,8 @@
 
 
 #include "GpuUtils.h"
+#include <unistd.h>
+#include <syscall.h>
 
 namespace SiddhiGpu
 {

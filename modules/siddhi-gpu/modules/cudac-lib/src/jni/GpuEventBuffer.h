@@ -27,6 +27,8 @@ public:
 	virtual void ResetHostEventBuffer(int _iResetVal) = 0;
 	virtual void ResetDeviceEventBuffer(int _iResetVal) = 0;
 
+	virtual void Print() = 0;
+
 	GpuKernelMetaEvent * GetDeviceMetaEvent() { return p_DeviceMetaEvent; }
 	GpuMetaEvent * GetHostMetaEvent() { return p_HostMetaEvent; }
 

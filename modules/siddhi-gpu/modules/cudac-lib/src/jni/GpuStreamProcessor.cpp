@@ -59,7 +59,10 @@ bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
 		p_ProcessorContext = new GpuProcessorContext(_iDeviceId, fp_Log);
 		GpuStreamEventBuffer * pInputEventBuffer = new GpuStreamEventBuffer(_iDeviceId, p_MetaEvent, fp_Log);
 		pInputEventBuffer->CreateEventBuffer(_iInputEventBufferSize);
-		p_ProcessorContext->AddEventBuffer(pInputEventBuffer);
+		int iBufferIndex = p_ProcessorContext->AddEventBuffer(pInputEventBuffer);
+
+		fprintf(fp_Log, "[GpuStreamProcessor] [Initialize] Input Event Buffer added to index=%d \n", iBufferIndex);
+		fflush(fp_Log);
 
 		// init & configure processor chain
 		if(p_ProcessorChain)

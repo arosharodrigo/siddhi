@@ -33,6 +33,7 @@ public:
 	void CopyToHost(bool _bAsync);
 	void ResetHostEventBuffer(int _iResetVal);
 	void ResetDeviceEventBuffer(int _iResetVal);
+	void Print();
 
 private:
 	char * p_HostEventBuffer;

@@ -240,7 +240,7 @@ GpuFilterKernelStandalone::GpuFilterKernelStandalone(GpuProcessor * _pProc, GpuP
 
 GpuFilterKernelStandalone::~GpuFilterKernelStandalone()
 {
-	fprintf(fp_Log, "[GpuFilterKernelFirst] destroy\n");
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] destroy\n");
 	fflush(fp_Log);
 
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceFilter));
@@ -252,13 +252,14 @@ GpuFilterKernelStandalone::~GpuFilterKernelStandalone()
 
 bool GpuFilterKernelStandalone::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuFilterKernelFirst] Initialize\n");
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Initialize\n");
 	fflush(fp_Log);
 
 	// set input event buffer
-	fprintf(fp_Log, "[GpuFilterKernelFirst] InputEventBufferIndex=%d\n", i_InputBufferIndex);
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] InputEventBufferIndex=%d\n", i_InputBufferIndex);
 	fflush(fp_Log);
 	p_InputEventBuffer = (GpuStreamEventBuffer*)p_Context->GetEventBuffer(i_InputBufferIndex);
+	p_InputEventBuffer->Print();
 
 	// set resulting event buffer and its meta data
 	GpuMetaEvent * pFilterResultMetaEvent = new GpuMetaEvent(_pMetaEvent->i_StreamIndex, 1, sizeof(int));
@@ -267,14 +268,15 @@ bool GpuFilterKernelStandalone::Initialize(GpuMetaEvent * _pMetaEvent, int _iInp
 	p_ResultEventBuffer = new GpuIntBuffer(p_Context->GetDeviceId(), pFilterResultMetaEvent, fp_Log);
 	p_ResultEventBuffer->CreateEventBuffer(_iInputEventBufferSize);
 	i_ResultEventBufferIndex = p_Context->AddEventBuffer(p_ResultEventBuffer);
-	fprintf(fp_Log, "[GpuFilterKernelFirst] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
 			p_ResultEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
+	p_ResultEventBuffer->Print();
 
 	delete pFilterResultMetaEvent;
 
 
-	fprintf(fp_Log, "[GpuFilterKernelFirst] Copying filter to device \n");
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Copying filter to device \n");
 	fflush(fp_Log);
 
 	CUDA_CHECK_RETURN(cudaMalloc(
@@ -310,7 +312,7 @@ bool GpuFilterKernelStandalone::Initialize(GpuMetaEvent * _pMetaEvent, int _iInp
 	free(apHostFilters);
 	apHostFilters = NULL;
 
-	fprintf(fp_Log, "[GpuFilterKernelFirst] Initialization complete \n");
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Initialization complete \n");
 	fflush(fp_Log);
 
 	return true;
@@ -319,6 +321,10 @@ bool GpuFilterKernelStandalone::Initialize(GpuMetaEvent * _pMetaEvent, int _iInp
 
 void GpuFilterKernelStandalone::Process(int & _iNumEvents, bool _bLast)
 {
+#ifdef GPU_DEBUG
+	PrintByteBuffer(_iNumEvents);
+#endif
+
 	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
 	{
 		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
@@ -339,7 +345,7 @@ void GpuFilterKernelStandalone::Process(int & _iNumEvents, bool _bLast)
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuFilterKernelFirst] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fflush(fp_Log);
 #endif
 
@@ -363,7 +369,19 @@ void GpuFilterKernelStandalone::Process(int & _iNumEvents, bool _bLast)
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuFilterKernelFirst] Kernel complete \n");
+
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] ProcessEventsFilterKernelStandalone results\n");
+	int * pResults = p_ResultEventBuffer->GetHostEventBuffer();
+	for(int i=0; i<_iNumEvents; ++i)
+	{
+		fprintf(fp_Log, "[GpuFilterKernelStandalone] Result [%d => %d] \n", i, *pResults);
+		pResults++;
+	}
+	fflush(fp_Log);
+#endif
+
+#ifdef GPU_DEBUG
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Kernel complete \n");
 	fflush(fp_Log);
 #endif
 
@@ -374,14 +392,14 @@ void GpuFilterKernelStandalone::Process(int & _iNumEvents, bool _bLast)
 //			cudaMemcpyDeviceToHost));
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "Results copied \n");
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Results copied \n");
 	fflush(fp_Log);
 #endif
 
 #ifdef KERNEL_TIME
 	sdkStopTimer(&p_StopWatch);
 	float fElapsed = sdkGetTimerValue(&p_StopWatch);
-	fprintf(fp_Log, "[ProcessEvents] Stats : Elapsed=%f ms\n", fElapsed);
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Stats : Elapsed=%f ms\n", fElapsed);
 	fflush(fp_Log);
 	lst_ElapsedTimes.push_back(fElapsed);
 	sdkResetTimer(&p_StopWatch);
@@ -454,6 +472,7 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 	fprintf(fp_Log, "[GpuFilterKernelFirst] InputEventBufferIndex=%d\n", i_InputBufferIndex);
 	fflush(fp_Log);
 	p_InputEventBuffer = (GpuStreamEventBuffer*)p_Context->GetEventBuffer(i_InputBufferIndex);
+	p_InputEventBuffer->Print();
 
 	// set resulting event buffer and its meta data
 	GpuMetaEvent * pMatchedResultIndexMetaEvent = new GpuMetaEvent(_pMetaEvent->i_StreamIndex, 1, sizeof(int));
@@ -464,9 +483,11 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 	fprintf(fp_Log, "[GpuFilterKernelFirst] MatchedIndexEventBuffer created : Size=%d bytes\n",
 			p_MatchedIndexEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
+	p_MatchedIndexEventBuffer->Print();
 
 	p_PrefixSumBuffer = new GpuIntBuffer(p_Context->GetDeviceId(), pMatchedResultIndexMetaEvent, fp_Log);
 	p_PrefixSumBuffer->CreateEventBuffer(_iInputEventBufferSize);
+	p_PrefixSumBuffer->Print();
 
 	delete pMatchedResultIndexMetaEvent;
 
@@ -482,6 +503,7 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 	fprintf(fp_Log, "[GpuFilterKernelFirst] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
 			p_ResultEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
+	p_ResultEventBuffer->Print();
 
 	pi_HostMatchedEventCount = (int*) malloc(sizeof(int));
 	CUDA_CHECK_RETURN(cudaMalloc(
@@ -533,7 +555,11 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 
 void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 {
-	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
+#ifdef GPU_DEBUG
+	PrintByteBuffer(_iNumEvents);
+#endif
+
+	if(!b_DeviceSet)
 	{
 		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
 		b_DeviceSet = true;
@@ -577,6 +603,23 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 			p_MatchedIndexEventBuffer->GetDeviceEventBuffer()
 	);
 
+#ifdef GPU_DEBUG
+
+	p_MatchedIndexEventBuffer->CopyToHost(true);
+
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	fprintf(fp_Log, "[GpuFilterKernelFirst] ProcessEventsFilterKernelFirstV2 results\n");
+	int * pResults = p_MatchedIndexEventBuffer->GetHostEventBuffer();
+	for(int i=0; i<_iNumEvents; ++i)
+	{
+		fprintf(fp_Log, "[GpuFilterKernelFirst] Result [%d => %d] \n", i, *pResults);
+		pResults++;
+	}
+	fflush(fp_Log);
+#endif
+
 	CUDA_CHECK_RETURN(cub::DeviceScan::ExclusiveSum(
 			p_TempStorageForPrefixSum, i_SizeOfTempStorageForPrefixSum,
 			p_MatchedIndexEventBuffer->GetDeviceEventBuffer(),
@@ -610,10 +653,10 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 
 	CUDA_CHECK_RETURN(cudaMemcpy(pi_HostMatchedEventCount, pi_DeviceMatchedEventCount, sizeof(int), cudaMemcpyDeviceToHost));
 
-	_iNumEvents = *pi_HostMatchedEventCount;
-
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	_iNumEvents = *pi_HostMatchedEventCount;
 
 #ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuFilterKernelFirst] Kernel complete : ResultCount=%d\n", _iNumEvents);
@@ -638,6 +681,88 @@ char * GpuFilterKernelFirst::GetResultEventBuffer()
 int GpuFilterKernelFirst::GetResultEventBufferSize()
 {
 	return p_ResultEventBuffer->GetEventBufferSizeInBytes();
+}
+
+void GpuFilterKernelFirst::PrintByteBuffer(int _iNumEvents)
+{
+	GpuMetaEvent * pEventMeta = p_InputEventBuffer->GetHostMetaEvent();
+
+	char * pEventDataStart = p_InputEventBuffer->GetHostEventBuffer();
+
+	fprintf(fp_Log, "[GpuFilterKernelFirst] [PrintByteBuffer] EventMeta %d [", pEventMeta->i_AttributeCount);
+	for(int i=0; i<pEventMeta->i_AttributeCount; ++i)
+	{
+		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
+				pEventMeta->p_Attributes[i].i_Position,
+				pEventMeta->p_Attributes[i].i_Type,
+				pEventMeta->p_Attributes[i].i_Length);
+	}
+	fprintf(fp_Log, "]\n");
+
+
+	fprintf(fp_Log, "[GpuFilterKernelFirst] [PrintByteBuffer] Events Count : %d\n", _iNumEvents);
+	for(int e=0; e<_iNumEvents; ++e)
+	{
+		char * pEvent = pEventDataStart + (pEventMeta->i_SizeOfEventInBytes * e);
+
+		fprintf(fp_Log, "[GpuFilterKernelFirst] [PrintByteBuffer] Event_%d <%p> ", e, pEvent);
+
+		for(int a=0; a<pEventMeta->i_AttributeCount; ++a)
+		{
+			switch(pEventMeta->p_Attributes[a].i_Type)
+			{
+				case DataType::Boolean:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 2);
+					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Int:
+				{
+					int32_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Long:
+				{
+					int64_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%" PRIi64 "] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Float:
+				{
+					float f;
+					memcpy(&f, pEvent + pEventMeta->p_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f] ", pEventMeta->p_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::Double:
+				{
+					double f;
+					memcpy(&f, pEvent + pEventMeta->p_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f] ", pEventMeta->p_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::StringIn:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 2);
+					char * z = pEvent + pEventMeta->p_Attributes[a].i_Position + 2;
+					z[i] = 0;
+					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s] ", pEventMeta->p_Attributes[a].i_Position, i, z);
+				}
+				break;
+				default:
+					break;
+			}
+		}
+
+		fprintf(fp_Log, "\n");
+		fflush(fp_Log);
+	}
 }
 
 }

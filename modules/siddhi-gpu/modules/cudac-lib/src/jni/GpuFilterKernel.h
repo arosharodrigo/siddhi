@@ -52,6 +52,8 @@ public:
 	int GetResultEventBufferSize();
 
 private:
+	void PrintByteBuffer(int _iNumEvents);
+
 	GpuProcessorContext * p_Context;
 	GpuKernelFilter * p_DeviceFilter;
 	GpuStreamEventBuffer * p_InputEventBuffer;

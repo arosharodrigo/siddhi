@@ -108,6 +108,20 @@ char * GpuStreamEventBuffer::CreateEventBuffer(int _iEventCount)
 	return p_HostEventBuffer;
 }
 
+void GpuStreamEventBuffer::Print()
+{
+	fprintf(fp_Log, "[GpuStreamEventBuffer] DeviceId=%d MaxEventCount=%d BufferSizeInBytes=%d \n", i_DeviceId, i_EventCount, i_EventBufferSizeInBytes);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] EventMeta %d [", p_HostMetaEvent->i_AttributeCount);
+	for(int i=0; i<p_HostMetaEvent->i_AttributeCount; ++i)
+	{
+		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
+				p_HostMetaEvent->p_Attributes[i].i_Position,
+				p_HostMetaEvent->p_Attributes[i].i_Type,
+				p_HostMetaEvent->p_Attributes[i].i_Length);
+	}
+	fprintf(fp_Log, "]\n");
+}
+
 void GpuStreamEventBuffer::CopyToDevice(bool _bAsync)
 {
 	fprintf(fp_Log, "[GpuStreamEventBuffer] CopyToDevice : Async=%d\n", _bAsync);
