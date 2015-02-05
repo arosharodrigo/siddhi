@@ -133,7 +133,7 @@ public class QueryParserHelper {
             initGpuStreamRuntime((GpuStreamRuntime) runtime, 0, metaComplexEvent, null);
         } else if (runtime instanceof GpuJoinStreamRuntime) {
             
-        } if (runtime instanceof SingleStreamRuntime) {
+        } else if (runtime instanceof SingleStreamRuntime) {
             initSingleStreamRuntime((SingleStreamRuntime) runtime, 0, metaComplexEvent, null);
         } else {
             MetaStateEvent metaStateEvent = (MetaStateEvent) metaComplexEvent;
