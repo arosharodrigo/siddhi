@@ -117,9 +117,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
                 StreamEvent borrowedEvent = streamEventPool.borrowEvent();
                 
-                long timestamp = eventBuffer.getLong();
-                long sequence = eventBuffer.getLong();
                 ComplexEvent.Type type = eventTypes[eventBuffer.getShort()];
+                long sequence = eventBuffer.getLong();
+                long timestamp = eventBuffer.getLong();
                 
                 int index = 0;
                 for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {

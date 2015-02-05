@@ -26,6 +26,10 @@ public class ByteBufferWriter {
     public void setBufferIndex(int index) {
         bufferIndex = index;
     }
+    
+    public int getBufferPosition() {
+        return byteBuffer.position();
+    }
 
     public void writeByte(byte value) {
         byteBuffer.put(bufferIndex, value);
@@ -69,9 +73,10 @@ public class ByteBufferWriter {
     
     public void writeString(String value, int length) {
         byte[] str = value.getBytes();
-        byteBuffer.putShort((short) str.length);
+        byteBuffer.putShort(bufferIndex, (short) str.length);
         bufferIndex += 2;
-        byteBuffer.put(str, bufferIndex, str.length);
+        byteBuffer.position(bufferIndex);
+        byteBuffer.put(str, 0, str.length); // watch out: This can go wrong if length < str.length
         bufferIndex += length;
     }
     

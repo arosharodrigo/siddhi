@@ -67,12 +67,12 @@ public class GpuQueryProcessor {
         streamInputEventBuffers[streamIndex].Reset();
         
         // start gpu processor
-        gpuStreamProcessor[streamIndex].Process(eventCount);
+        int resultEventCount = gpuStreamProcessor[streamIndex].Process(eventCount);
         
         // copy events back
-        log.info("[process] convert result events");
+        log.info("[process] convert result events : " + resultEventCount);
         
-        gpuQueryPostProcessor.process(streamIndex, streamInputEventBuffers[streamIndex].getByteBuffer(), eventCount);
+        gpuQueryPostProcessor.process(streamIndex, streamInputEventBuffers[streamIndex].getByteBuffer(), resultEventCount);
         // convert to StreamEvent
         //// streamEventChunk.convertAndAdd(event);
         //// processAndClearGpu(streamEventChunk);

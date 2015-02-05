@@ -556,7 +556,7 @@ public:
 
 	void Configure(GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog);
 	void Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	void Process(int _iNumEvents);
+	int Process(int _iNumEvents);
 	void Print(FILE * _fp);
 	GpuProcessor * Clone();
 

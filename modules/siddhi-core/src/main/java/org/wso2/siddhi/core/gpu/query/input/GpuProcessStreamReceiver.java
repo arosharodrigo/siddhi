@@ -50,15 +50,17 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         log.debug("[receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
-        eventBufferWriter.writeLong(event.getTimestamp());
-        eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
         ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
         eventBufferWriter.writeShort((short)type.ordinal());
+        eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
+        eventBufferWriter.writeLong(event.getTimestamp());
         
         Object [] data = event.getData();
         
         int index = 0;
         for (GpuEventAttribute attrib : gpuMetaEvent.getAttributes()) {
+            log.debug("[receive] writing attribute index=" + index + " attrib=" + attrib.toString() + " val=" + data[index] + 
+                    " BufferIndex=" + eventBufferWriter.getBufferIndex() + " BufferPosition=" + eventBufferWriter.getBufferPosition());
             switch(attrib.type) {
             case BOOL:
                 eventBufferWriter.writeBool(((Boolean) data[index++]).booleanValue());
@@ -91,8 +93,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             endTime = System.nanoTime();
             
             duration = endTime - startTime;
-            double average = ((double)duration / currentEventCount);
-            log.debug("Batch Throughput : [" + currentEventCount + "] " + average + " eps");
+            double average = (currentEventCount / (double)duration);
+            log.debug("Batch Throughput : [" + currentEventCount + "] " + average + " epns");
             
             currentEventCount = 0;
         }
@@ -109,8 +111,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         streamEventChunk.clear();
         
         duration = endTime - startTime;
-        double average = ((double)duration / currentEventCount);
-        log.debug("Batch Throughput : [" + currentEventCount + "] " + average + " eps");
+        double average = (currentEventCount / (double)duration);
+        log.debug("Batch Throughput : [" + currentEventCount + "] " + average + " epns");
     }
     
     public void init() {

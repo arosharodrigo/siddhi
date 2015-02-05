@@ -41,9 +41,9 @@ typedef struct GpuKernelFilter
 
 typedef struct GpuEvent
 {
-	uint64_t i_Timestamp; // 8 bytes
-	uint64_t i_Sequence; // 8 bytes
 	uint16_t i_Type; // 2 bytes
+	uint64_t i_Sequence; // 8 bytes
+	uint64_t i_Timestamp; // 8 bytes
 	char a_Attributes[1]; // n bytes
 } GpuEvent;
 

@@ -39,7 +39,7 @@ public:
 
 	virtual void Configure(GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog) = 0;
 	virtual void Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize) = 0;
-	virtual void Process(int _iNumEvents) = 0;
+	virtual int Process(int _iNumEvents) = 0;
 	virtual void Print(FILE * _fp) = 0;
 	virtual GpuProcessor * Clone() = 0;
 

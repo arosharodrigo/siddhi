@@ -113,12 +113,14 @@ void GpuStreamProcessor::AddProcessor(GpuProcessor * _pProcessor)
 	}
 }
 
-void GpuStreamProcessor::Process(int _iNumEvents)
+int GpuStreamProcessor::Process(int _iNumEvents)
 {
 	if(p_ProcessorChain)
 	{
-		p_ProcessorChain->Process(_iNumEvents);
+		return p_ProcessorChain->Process(_iNumEvents);
 	}
+
+	return 0;
 }
 
 };

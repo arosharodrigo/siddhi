@@ -385,17 +385,6 @@ void GpuFilterKernelStandalone::Process(int & _iNumEvents, bool _bLast)
 	fflush(fp_Log);
 #endif
 
-//	CUDA_CHECK_RETURN(cudaMemcpy(
-//			p_HostEventBuffer,
-//			p_HostInput->p_ByteBuffer,
-//			sizeof(char) * 4 * i_MaxNumberOfEvents,
-//			cudaMemcpyDeviceToHost));
-
-#ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuFilterKernelStandalone] Results copied \n");
-	fflush(fp_Log);
-#endif
-
 #ifdef KERNEL_TIME
 	sdkStopTimer(&p_StopWatch);
 	float fElapsed = sdkGetTimerValue(&p_StopWatch);

@@ -295,7 +295,7 @@ void GpuFilterProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBuffer
 	p_FilterKernel->Initialize(_pMetaEvent, _iInputEventBufferSize);
 }
 
-void GpuFilterProcessor::Process(int _iNumEvents)
+int GpuFilterProcessor::Process(int _iNumEvents)
 {
 	fprintf(fp_Log, "[GpuFilterProcessor] Process : NumEvents=%d \n", _iNumEvents);
 	fflush(fp_Log);
@@ -305,8 +305,10 @@ void GpuFilterProcessor::Process(int _iNumEvents)
 
 	if(p_Next)
 	{
-		p_Next->Process(_iNumEvents);
+		_iNumEvents = p_Next->Process(_iNumEvents);
 	}
+
+	return _iNumEvents;
 }
 
 void GpuFilterProcessor::Print(FILE * _fp)

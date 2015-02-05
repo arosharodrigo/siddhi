@@ -84,7 +84,7 @@ void GpuJoinProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSi
 
 }
 
-void GpuJoinProcessor::Process(int _iNumEvents)
+int GpuJoinProcessor::Process(int _iNumEvents)
 {
 	fprintf(fp_Log, "[GpuJoinProcessor] Process : NumEvents=%d \n", _iNumEvents);
 	fflush(fp_Log);
@@ -93,8 +93,10 @@ void GpuJoinProcessor::Process(int _iNumEvents)
 
 	if(p_Next)
 	{
-		p_Next->Process(_iNumEvents);
+		_iNumEvents = p_Next->Process(_iNumEvents);
 	}
+
+	return _iNumEvents;
 }
 
 void GpuJoinProcessor::Print(FILE * _fp)

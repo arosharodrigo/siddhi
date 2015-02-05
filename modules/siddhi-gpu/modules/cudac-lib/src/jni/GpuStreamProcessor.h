@@ -28,7 +28,7 @@ public:
 
 	bool Initialize(int _iDeviceId, int _iInputEventBufferSize);
 	void AddProcessor(GpuProcessor * _pProcessor);
-	void Process(int _iNumEvents);
+	int Process(int _iNumEvents);
 
 	GpuProcessorContext * GetProcessorContext() { return p_ProcessorContext; }
 

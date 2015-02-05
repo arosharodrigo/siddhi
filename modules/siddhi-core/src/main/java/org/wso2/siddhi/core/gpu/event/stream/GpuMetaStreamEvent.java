@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
+import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.gpu.event.GpuMetaEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribute.Type;
@@ -38,6 +39,13 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
         public Type type;
         public int length;
         public int position;
+        
+        @Override
+        public String toString() {
+            return "GpuEventAttribute [name=" + name + ", type=" + type + ", length=" + length + ", position=" + position + "]";
+        }
+        
+        
     }
     
     public GpuMetaStreamEvent(InputStream inputStream, Map<String, AbstractDefinition> definitionMap, GpuQueryContext gpuQueryContext) {
@@ -104,24 +112,27 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
                     break;
                 case STRING: {
                     gpuAttrib.type = Type.STRING;
-                    gpuAttrib.length = 2; // length 
                     
                     int strBodyLength = 8; 
                     if(stringAttributeSizes != null && stringAttributeSizes.containsKey(attrib.getName())) {
                         strBodyLength = stringAttributeSizes.get(attrib.getName());
                     }
-                    gpuAttrib.length += strBodyLength;
+                    gpuAttrib.length = strBodyLength;
                     gpuAttrib.position = position;
-                    position += gpuAttrib.length;
+                    position += (gpuAttrib.length + 2); // + length
                 }
                 break;
                 default:
                     break;
                 }
+                
+                attributes.add(gpuAttrib);
             }
             
             eventSizeInBytes = position;
             
+        } else {
+            throw new OperationNotSupportedException("GpuMetaStreamEvent can only be created using SingleInputStream");
         }
     }
 
