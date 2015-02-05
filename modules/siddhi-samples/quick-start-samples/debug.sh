@@ -13,4 +13,5 @@ block_size=128
 
 #${JVM} -classpath ${CLASSPATH} ${APP} ${ringbuffer_size} ${threadpool_size} ${block_size}
 #${JDB} -classpath ${CLASSPATH} ${APP} ${ringbuffer_size} ${threadpool_size} ${block_size}
-cuda-memcheck ${JVM} -classpath ${CLASSPATH} ${APP}
+${JVM} -classpath ${CLASSPATH} ${APP}
+#cuda-memcheck ${JVM} -classpath ${CLASSPATH} ${APP}
