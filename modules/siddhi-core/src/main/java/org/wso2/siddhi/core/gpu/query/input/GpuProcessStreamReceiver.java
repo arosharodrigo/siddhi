@@ -48,7 +48,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     @Override
     public void receive(Event event, boolean endOfBatch) {
         
-        log.debug("Event=" + event.toString() + " endOfBatch="+ endOfBatch);
+        log.debug("[receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
         eventBufferWriter.writeLong(event.getTimestamp());
         eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
@@ -115,11 +115,14 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     public void init() {
         
+        log.info("[GpuProcessStreamReceiver] Initializing " + streamId );
+        
 //        streamEventChunk = new ConversionStreamEventChunk(metaStreamEvent, streamEventPool);
         gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
         
         gpuQueryProcessor.configure();
         streamIndex = gpuQueryProcessor.getStreamIndex(getStreamId());
+        log.debug("[GpuProcessStreamReceiver] Set eventBufferWriter : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
         eventBufferWriter = gpuQueryProcessor.getStreamInputEventBuffer(streamIndex);
         
         gpuQueryProcessor.setComplexEventChunk(streamIndex, gpuEventChunk);

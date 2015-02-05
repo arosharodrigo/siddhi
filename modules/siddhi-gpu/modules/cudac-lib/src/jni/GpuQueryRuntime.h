@@ -41,6 +41,7 @@ public:
 	void AddProcessor(std::string _sStramId, GpuProcessor * _pProcessor);
 
 	char * GetInputEventBuffer(std::string _sStramId);
+	int GetInputEventBufferSizeInBytes(std::string _sStramId);
 
 	bool Configure();
 

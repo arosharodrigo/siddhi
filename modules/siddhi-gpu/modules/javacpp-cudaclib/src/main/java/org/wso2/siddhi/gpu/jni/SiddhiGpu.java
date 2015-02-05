@@ -142,6 +142,8 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 	public native @Cast("char*") BytePointer GetInputEventBuffer(@StdString BytePointer _sStramId);
 	public native @Cast("char*") ByteBuffer GetInputEventBuffer(@StdString String _sStramId);
+	public native int GetInputEventBufferSizeInBytes(@StdString BytePointer _sStramId);
+	public native int GetInputEventBufferSizeInBytes(@StdString String _sStramId);
 
 	public native @Cast("bool") boolean Configure();
 }

@@ -616,18 +616,7 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuFilterKernelFirst] Kernel complete \n");
-	fflush(fp_Log);
-#endif
-
-//	CUDA_CHECK_RETURN(cudaMemcpy(
-//			p_HostEventBuffer,
-//			p_HostInput->p_ByteBuffer,
-//			sizeof(char) * 4 * i_MaxNumberOfEvents,
-//			cudaMemcpyDeviceToHost));
-
-#ifdef GPU_DEBUG
-	fprintf(fp_Log, "Results copied \n");
+	fprintf(fp_Log, "[GpuFilterKernelFirst] Kernel complete : ResultCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
 #endif
 

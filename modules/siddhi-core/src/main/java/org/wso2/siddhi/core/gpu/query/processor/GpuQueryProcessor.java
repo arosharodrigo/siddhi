@@ -61,7 +61,7 @@ public class GpuQueryProcessor {
     }
     
     public void process(int streamIndex, int eventCount) {
-        log.info("streamIndex=" + streamIndex + " eventCount=" + eventCount);
+        log.info("[process] streamIndex=" + streamIndex + " eventCount=" + eventCount);
 
         // reset bytebuffer writers
         streamInputEventBuffers[streamIndex].Reset();
@@ -70,16 +70,19 @@ public class GpuQueryProcessor {
         gpuStreamProcessor[streamIndex].Process(eventCount);
         
         // copy events back
-        log.info("convert result events and call selector");
+        log.info("[process] convert result events");
         
         gpuQueryPostProcessor.process(streamIndex, streamInputEventBuffers[streamIndex].getByteBuffer(), eventCount);
         // convert to StreamEvent
         //// streamEventChunk.convertAndAdd(event);
         //// processAndClearGpu(streamEventChunk);
         
+        log.info("[process] call selector");
         // call Selector processor
         selectProcessor.process(complexEventChunks[streamIndex]);
         complexEventChunks[streamIndex].clear();
+        
+        log.info("[process] complete");
     }
     
     public void setSelectProcessor(Processor selectProcessor) {
@@ -171,8 +174,19 @@ public class GpuQueryProcessor {
                 String streamId = entry.getValue().getStreamId();
 
                 gpuStreamProcessor[streamIndex] = gpuQueryRuntime.GetStream(streamId);
-                streamInputEventBuffers[streamIndex] = new ByteBufferWriter(gpuQueryRuntime.GetInputEventBuffer(streamId));
+                
+                BytePointer bytePointer = gpuQueryRuntime.GetInputEventBuffer(new BytePointer(streamId));
+                int bufferSize = gpuQueryRuntime.GetInputEventBufferSizeInBytes(streamId);
+                bytePointer.capacity(bufferSize);
+                bytePointer.limit(bufferSize);
+                bytePointer.position(0);
+                ByteBuffer eventByteBuffer = bytePointer.asBuffer();
+                
+                log.debug("ByteBuffer for StreamId=" + streamId + " StreamIndex=" + streamIndex + " [" + eventByteBuffer + "]");
+                
+                streamInputEventBuffers[streamIndex] = new ByteBufferWriter(eventByteBuffer);
             }
+            
         } else {
             log.warn("SiddhiGpu.QueryRuntime initialization failed");
             return;

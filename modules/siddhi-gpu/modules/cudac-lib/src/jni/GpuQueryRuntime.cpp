@@ -54,7 +54,7 @@ void GpuQueryRuntime::AddStream(std::string _sStramId, GpuMetaEvent * _pMetaEven
 	fflush(fp_Log);
 
 	GpuStreamProcessor * pStreamProcessor = new GpuStreamProcessor(_sStramId, _pMetaEvent->i_StreamIndex, _pMetaEvent);
-	vec_StreamProcessors. push_back(pStreamProcessor);
+	vec_StreamProcessors.push_back(pStreamProcessor);
 	map_StreamProcessorsByStreamId.insert(std::make_pair(_sStramId, pStreamProcessor));
 }
 
@@ -100,6 +100,24 @@ char * GpuQueryRuntime::GetInputEventBuffer(std::string _sStramId)
 	}
 
 	return NULL;
+}
+
+int GpuQueryRuntime::GetInputEventBufferSizeInBytes(std::string _sStramId)
+{
+	fprintf(fp_Log, "[GpuQueryRuntime] GetInputEventBufferSizeInBytes : Id=%s \n", _sStramId.c_str());
+	fflush(fp_Log);
+
+	StreamProcessorsByStreamId::iterator ite = map_StreamProcessorsByStreamId.find(_sStramId);
+	if(ite != map_StreamProcessorsByStreamId.end())
+	{
+		GpuEventBuffer * pEventBuffer = ite->second->GetProcessorContext()->GetEventBuffer(0);
+		if(pEventBuffer)
+		{
+			return ((GpuStreamEventBuffer*)pEventBuffer)->GetEventBufferSizeInBytes();
+		}
+	}
+
+	return 0;
 }
 
 bool GpuQueryRuntime::Configure()
