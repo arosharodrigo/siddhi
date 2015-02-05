@@ -63,6 +63,7 @@ bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
 
 		fprintf(fp_Log, "[GpuStreamProcessor] [Initialize] Input Event Buffer added to index=%d \n", iBufferIndex);
 		fflush(fp_Log);
+		pInputEventBuffer->Print();
 
 		// init & configure processor chain
 		if(p_ProcessorChain)

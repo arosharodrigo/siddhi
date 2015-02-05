@@ -416,6 +416,88 @@ int GpuFilterKernelStandalone::GetResultEventBufferSize()
 	return p_ResultEventBuffer->GetEventBufferSizeInBytes();
 }
 
+void GpuFilterKernelStandalone::PrintByteBuffer(int _iNumEvents)
+{
+	GpuMetaEvent * pEventMeta = p_InputEventBuffer->GetHostMetaEvent();
+
+	char * pEventDataStart = p_InputEventBuffer->GetHostEventBuffer();
+
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] [PrintByteBuffer] EventMeta %d [", pEventMeta->i_AttributeCount);
+	for(int i=0; i<pEventMeta->i_AttributeCount; ++i)
+	{
+		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
+				pEventMeta->p_Attributes[i].i_Position,
+				pEventMeta->p_Attributes[i].i_Type,
+				pEventMeta->p_Attributes[i].i_Length);
+	}
+	fprintf(fp_Log, "]\n");
+
+
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] [PrintByteBuffer] Events Count : %d\n", _iNumEvents);
+	for(int e=0; e<_iNumEvents; ++e)
+	{
+		char * pEvent = pEventDataStart + (pEventMeta->i_SizeOfEventInBytes * e);
+
+		fprintf(fp_Log, "[GpuFilterKernelStandalone] [PrintByteBuffer] Event_%d <%p> ", e, pEvent);
+
+		for(int a=0; a<pEventMeta->i_AttributeCount; ++a)
+		{
+			switch(pEventMeta->p_Attributes[a].i_Type)
+			{
+				case DataType::Boolean:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 2);
+					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Int:
+				{
+					int32_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Long:
+				{
+					int64_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%" PRIi64 "] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Float:
+				{
+					float f;
+					memcpy(&f, pEvent + pEventMeta->p_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f] ", pEventMeta->p_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::Double:
+				{
+					double f;
+					memcpy(&f, pEvent + pEventMeta->p_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f] ", pEventMeta->p_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::StringIn:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 2);
+					char * z = pEvent + pEventMeta->p_Attributes[a].i_Position + 2;
+					z[i] = 0;
+					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s] ", pEventMeta->p_Attributes[a].i_Position, i, z);
+				}
+				break;
+				default:
+					break;
+			}
+		}
+
+		fprintf(fp_Log, "\n");
+		fflush(fp_Log);
+	}
+}
+
 // ============================================================================================================
 
 GpuFilterKernelFirst::GpuFilterKernelFirst(GpuProcessor * _pProc, GpuProcessorContext * _pContext, int _iThreadBlockSize, FILE * _fPLog) :

@@ -94,6 +94,11 @@ public class GpuQueryProcessor {
     }
     
     public void addStream(String streamId, GpuMetaStreamEvent metaStreamEvent) {
+        
+        log.info("[addStream] StreamId=" + streamId + " StreamIndex=" + metaStreamEvent.getStreamIndex() + 
+                " AttributeCount=" + metaStreamEvent.getAttributes().size() + 
+                " SizeOfEvent=" + metaStreamEvent.getEventSizeInBytes());
+        
         metaStreams.put(streamId, metaStreamEvent);
 
         SiddhiGpu.GpuMetaEvent siddhiGpuMetaEvent = new SiddhiGpu.GpuMetaEvent(metaStreamEvent.getStreamIndex(), 
