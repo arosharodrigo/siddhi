@@ -3,6 +3,7 @@ package org.wso2.siddhi.core.gpu.event.stream.converter;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
@@ -19,6 +20,7 @@ import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribut
 
 public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
+    private static final Logger log = Logger.getLogger(ConversionGpuEventChunk.class);
     private GpuMetaStreamEvent gpuMetaStreamEvent;
     private Object attributeData[];
     private ComplexEvent.Type eventTypes[]; 
@@ -64,9 +66,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
             StreamEvent borrowedEvent = streamEventPool.borrowEvent();
 
-            long timestamp = eventBuffer.getLong();
-            long sequence = eventBuffer.getLong();
             ComplexEvent.Type type = eventTypes[eventBuffer.getShort()];
+            long sequence = eventBuffer.getLong();
+            long timestamp = eventBuffer.getLong();
 
             int index = 0;
             for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
@@ -88,15 +90,16 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                     break;
                 case STRING:
                     short length = eventBuffer.getShort();
-                    byte string[] = new byte[length];
-                    eventBuffer.get(string, 0, length);
-                    attributeData[index++] = new String(string); // TODO: avoid allocation
+                    byte string[] = new byte[attrib.length];
+                    eventBuffer.get(string, 0, attrib.length);
+                    attributeData[index++] = new String(string, 0, length); // TODO: avoid allocation
                     break;
                 }
             }
 
             streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
-
+            log.debug("Converted event " + borrowedEvent.toString());
+            
             if (first == null) {
                 first = borrowedEvent;
                 last = first;
@@ -121,6 +124,8 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                 long sequence = eventBuffer.getLong();
                 long timestamp = eventBuffer.getLong();
                 
+//                log.debug("matched event : index=" + resultsIndex + " type=" + type + " seq=" + sequence + " time=" + timestamp);
+                
                 int index = 0;
                 for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
                     switch(attrib.type) {
@@ -141,14 +146,19 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                         break;
                     case STRING:
                         short length = eventBuffer.getShort();
-                        byte string[] = new byte[length];
-                        eventBuffer.get(string, 0, length);
-                        attributeData[index++] = new String(string); // TODO: avoid allocation
+                        byte string[] = new byte[attrib.length];
+                        eventBuffer.get(string, 0, attrib.length);
+                        attributeData[index++] = new String(string, 0, length); // TODO: avoid allocation
                         break;
                     }
                 }
                 
+//                for(int i=0; i<index; ++i) {
+//                    log.debug("attributeData: " + attributeData[i]);
+//                }
+                
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
+                log.debug("Converted event " + borrowedEvent.toString());
                 
                 if (first == null) {
                     first = borrowedEvent;
@@ -160,6 +170,7 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                     currentEventCount++;
                 }
             } else {
+//                log.debug("not matched event : index=" + resultsIndex + " bufferPosition=" + eventBuffer.position());
                 eventBuffer.position(eventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes());
             }
         }

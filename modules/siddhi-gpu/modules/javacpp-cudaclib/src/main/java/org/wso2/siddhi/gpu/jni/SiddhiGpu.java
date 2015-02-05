@@ -188,7 +188,7 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 	public native @Cast("bool") boolean Initialize(int _iDeviceId, int _iInputEventBufferSize);
 	public native void AddProcessor(GpuProcessor _pProcessor);
-	public native void Process(int _iNumEvents);
+	public native int Process(int _iNumEvents);
 
 	public native GpuProcessorContext GetProcessorContext();
 }
@@ -233,7 +233,7 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
 	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native void Process(int _iNumEvents);
+	public native int Process(int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 
@@ -659,7 +659,7 @@ public static final int
 
 	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
 	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native void Process(int _iNumEvents);
+	public native int Process(int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 
@@ -708,7 +708,7 @@ public static final int
 
 	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
 	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native void Process(int _iNumEvents);
+	public native int Process(int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 	public native int GetResultEventBufferIndex();
@@ -755,7 +755,7 @@ public static final int
 
 	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
 	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native void Process(int _iNumEvents);
+	public native int Process(int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 	public native int GetResultEventBufferIndex();
