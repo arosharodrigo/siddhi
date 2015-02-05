@@ -15,15 +15,6 @@ namespace SiddhiGpu
 class GpuMetaAttribute
 {
 public:
-	enum Type
-	{
-		CURRENT = 0,
-		EXPIRED,
-		TIMER,
-		RESET,
-		NONE
-	};
-
 	GpuMetaAttribute() :
 		i_Type(-1),
 		i_Length(-1),

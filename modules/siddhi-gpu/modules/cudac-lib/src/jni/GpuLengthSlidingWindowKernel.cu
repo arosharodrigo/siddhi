@@ -12,6 +12,7 @@
 #include "GpuKernelDataTypes.h"
 #include "GpuLengthSlidingWindowKernel.h"
 #include "GpuCudaHelper.h"
+#include "GpuUtils.h"
 
 namespace SiddhiGpu
 {
@@ -386,6 +387,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] InpuEventBufferIndex=%d\n", i_InputBufferIndex);
 	fflush(fp_Log);
 	p_InputEventBuffer = (GpuStreamEventBuffer*) p_Context->GetEventBuffer(i_InputBufferIndex);
+	p_InputEventBuffer->Print();
 
 	// set resulting event buffer and its meta data
 	p_ResultEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
@@ -396,6 +398,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
 			p_ResultEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
+	p_ResultEventBuffer->Print();
 
 	p_WindowEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_WindowEventBuffer->CreateEventBuffer(i_WindowSize);
@@ -406,6 +409,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] initialize window buffer data \n");
 	fflush(fp_Log);
+	p_WindowEventBuffer->Print();
 
 	p_WindowEventBuffer->ResetHostEventBuffer(0);
 
@@ -428,10 +432,15 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 
 void GpuLengthSlidingWindowFirstKernel::Process(int & _iNumEvents, bool _bLast)
 {
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Process : EventCount=%d\n", _iNumEvents);
+	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Process : EventCount=%d WindowRemainingCount=%d\n", _iNumEvents, i_RemainingCount);
 	fflush(fp_Log);
 
-	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
+#ifdef GPU_DEBUG
+	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
+			"GpuLengthSlidingWindowFirstKernel::In", fp_Log);
+#endif
+
+	if(!b_DeviceSet)
 	{
 		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
 		b_DeviceSet = true;
@@ -491,16 +500,11 @@ void GpuLengthSlidingWindowFirstKernel::Process(int & _iNumEvents, bool _bLast)
 	fflush(fp_Log);
 #endif
 
-	//	CUDA_CHECK_RETURN(cudaMemcpy(
-	//			p_HostEventBuffer,
-	//			p_HostInput->p_ByteBuffer,
-	//			sizeof(char) * 4 * i_MaxNumberOfEvents,
-	//			cudaMemcpyDeviceToHost));
-
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Results copied \n");
-	fflush(fp_Log);
+	GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), p_ResultEventBuffer->GetMaxEventCount(), p_ResultEventBuffer->GetHostMetaEvent(),
+			"GpuLengthSlidingWindowFirstKernel::Out", fp_Log);
 #endif
+
 
 #ifdef KERNEL_TIME
 	sdkStopTimer(&p_StopWatch);
@@ -595,6 +599,11 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 {
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Process : EventCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
+
+#ifdef GPU_DEBUG
+	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
+			"GpuLengthSlidingWindowFilterKernel", fp_Log);
+#endif
 
 	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
 	{

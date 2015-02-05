@@ -41,6 +41,15 @@ typedef struct GpuKernelFilter
 
 typedef struct GpuEvent
 {
+	enum Type
+	{
+		CURRENT = 0,
+		EXPIRED,
+		TIMER,
+		RESET,
+		NONE
+	};
+
 	uint16_t i_Type; // 2 bytes
 	uint64_t i_Sequence; // 8 bytes
 	uint64_t i_Timestamp; // 8 bytes

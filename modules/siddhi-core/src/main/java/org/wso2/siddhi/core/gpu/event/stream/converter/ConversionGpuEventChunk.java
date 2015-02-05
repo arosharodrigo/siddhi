@@ -158,7 +158,7 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 //                }
                 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
-                log.debug("Converted event " + borrowedEvent.toString());
+                //log.debug("Converted event " + borrowedEvent.toString());
                 
                 if (first == null) {
                     first = borrowedEvent;

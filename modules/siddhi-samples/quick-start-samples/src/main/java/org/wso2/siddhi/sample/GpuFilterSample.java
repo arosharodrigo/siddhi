@@ -15,10 +15,11 @@ public class GpuFilterSample {
 
         // Create Siddhi Manager
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().setEventBufferSize(1024);
+        siddhiManager.getSiddhiContext().setEventBufferSize(4096);
 
         String executionPlan = "@plan:name('GpuFilterSample') @plan:parallel define stream cseEventStream (symbol string, price float, volume long);"
-                + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0') from cseEventStream[volume < 150] select symbol,price insert into outputStream ;";
+        //        + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0') from cseEventStream[volume < 150] select symbol,price insert into outputStream ;";
+                + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0') from cseEventStream#window.length(100) select symbol,price insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
@@ -26,7 +27,9 @@ public class GpuFilterSample {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 //EventPrinter.print(timeStamp, inEvents, removeEvents);
-                log.debug("timestamp=" + timeStamp + " inEvents=" + inEvents.length + " removeEvents=" + removeEvents.length);
+                log.debug("timestamp=" + timeStamp + 
+                        " inEvents=" + (inEvents != null ? inEvents.length : 0) + 
+                        " removeEvents=" + (removeEvents != null ? removeEvents.length : 0));
            }
         });
         
@@ -42,7 +45,7 @@ public class GpuFilterSample {
             inputHandler.send(new Object[]{"WSO2", 45.6f, 50l});
             
             count += 5;
-            if(count == 10000000) {
+            if(count == 1000000000) {
                 break;
             }
         }

@@ -48,7 +48,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     @Override
     public void receive(Event event, boolean endOfBatch) {
         
-        log.debug("[receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
+        //log.debug("[receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
         ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
         eventBufferWriter.writeShort((short)type.ordinal());
