@@ -157,6 +157,9 @@ public class GpuQueryProcessor {
     }
     
     public void configure() {
+        
+        log.debug("configure : ");
+        
         gpuStreamProcessor = new SiddhiGpu.GpuStreamProcessor[metaStreams.size()];
         streamInputEventBuffers = new ByteBufferWriter[metaStreams.size()];
         complexEventChunks = new ConversionGpuEventChunk[metaStreams.size()];

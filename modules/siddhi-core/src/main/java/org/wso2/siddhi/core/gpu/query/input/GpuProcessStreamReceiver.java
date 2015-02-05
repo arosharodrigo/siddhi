@@ -31,10 +31,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     public GpuProcessStreamReceiver(String streamId) {
         super(streamId);
-        gpuQueryProcessor = null;
+        this.gpuQueryProcessor = null;
         this.gpuMetaEvent = null;
         this.gpuEventChunk = null;
-        currentEventCount = 0;
+        this.eventBufferWriter = null;
+        this.currentEventCount = 0;
     }
 
     public GpuProcessStreamReceiver clone(String key) {
@@ -46,6 +47,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     @Override
     public void receive(Event event, boolean endOfBatch) {
+        
+        log.debug("Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
         eventBufferWriter.writeLong(event.getTimestamp());
         eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
