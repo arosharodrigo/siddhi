@@ -197,8 +197,7 @@ void ResultSorter(
 		int                  _iEventCount,        // Num events in original batch
 		int                  _iSizeOfEvent,       // Size of an event
 		int                  _iEventsPerBlock,    // number of events allocated per block
-		char               * _pOutputEventBuffer, // Matched events final buffer
-		int                * _pMatchedEventCount  // Matched event count
+		char               * _pOutputEventBuffer  // Matched events final buffer
 )
 {
 	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
@@ -223,7 +222,6 @@ void ResultSorter(
 
 	memcpy(pOutEventBuffer, pInEventBuffer, _iSizeOfEvent);
 
-	atomicMax(_pMatchedEventCount, _pPrefixSumBuffer[iEventIdx]);
 }
 
 // ============================================================================================================
@@ -417,8 +415,6 @@ GpuFilterKernelFirst::GpuFilterKernelFirst(GpuProcessor * _pProc, GpuProcessorCo
 	p_PrefixSumBuffer(NULL),
 	p_ResultEventBuffer(NULL),
 	i_MatchedEvenBufferIndex(-1),
-	pi_DeviceMatchedEventCount(NULL),
-	pi_HostMatchedEventCount(NULL),
 	p_TempStorageForPrefixSum(NULL),
 	i_SizeOfTempStorageForPrefixSum(0),
 	b_DeviceSet(false)
@@ -433,9 +429,6 @@ GpuFilterKernelFirst::~GpuFilterKernelFirst()
 
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceFilter));
 	p_DeviceFilter = NULL;
-
-	CUDA_CHECK_RETURN(cudaFree(pi_DeviceMatchedEventCount));
-	pi_DeviceMatchedEventCount = NULL;
 
 	delete p_ResultEventBuffer;
 	p_ResultEventBuffer = NULL;
@@ -494,11 +487,6 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 			p_ResultEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
 	p_ResultEventBuffer->Print();
-
-	pi_HostMatchedEventCount = (int*) malloc(sizeof(int));
-	CUDA_CHECK_RETURN(cudaMalloc(
-			(void**) &pi_DeviceMatchedEventCount,
-			sizeof(int)));
 
 	fprintf(fp_Log, "[GpuFilterKernelFirst] Copying filter to device \n");
 	fflush(fp_Log);
@@ -616,6 +604,34 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 			p_PrefixSumBuffer->GetDeviceEventBuffer(),
 			_iNumEvents)); //p_InputEventBuffer->GetMaxEventCount());
 
+
+#ifdef GPU_DEBUG
+
+	p_MatchedIndexEventBuffer->CopyToHost(true);
+
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	fprintf(fp_Log, "[GpuFilterKernelFirst] MatchedIndexEventBuffer after prefix sum\n");
+	int * pMatchedResults = p_MatchedIndexEventBuffer->GetHostEventBuffer();
+	for(int i=0; i<_iNumEvents; ++i)
+	{
+		fprintf(fp_Log, "[GpuFilterKernelFirst] Result [%d => %d] \n", i, *pMatchedResults);
+		pMatchedResults++;
+	}
+	fflush(fp_Log);
+
+	p_InputEventBuffer->CopyToHost(true);
+
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	fprintf(fp_Log, "[GpuFilterKernelFirst] InputEventBuffer after prefix sum\n");
+	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
+			"GpuFilterKernelFirst::InputEventBuffer", fp_Log);
+
+#endif
+
 //	char               * _pInByteBuffer,      // Input ByteBuffer from java side
 //	int                * _pMatchedIndexBuffer,// Matched event index buffer
 //	int                * _pPrefixSumBuffer,   // prefix sum buffer
@@ -623,7 +639,6 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 //	int                  _iSizeOfEvent,       // Size of an event
 //	int                  _iEventsPerBlock,    // number of events allocated per block
 //	char               * _pOutputEventBuffer  // Matched events final buffer
-//	int                * _pMatchedEventCount  // Matched event count
 
 	ResultSorter<<<numBlocks, numThreads>>>(
 			p_InputEventBuffer->GetDeviceEventBuffer(),
@@ -632,8 +647,7 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 			_iNumEvents,
 			p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
 			i_ThreadBlockSize,
-			p_ResultEventBuffer->GetDeviceEventBuffer(),
-			pi_DeviceMatchedEventCount
+			p_ResultEventBuffer->GetDeviceEventBuffer()
 	);
 
 	if(_bLast)
@@ -641,12 +655,23 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 		p_ResultEventBuffer->CopyToHost(true);
 	}
 
-	CUDA_CHECK_RETURN(cudaMemcpy(pi_HostMatchedEventCount, pi_DeviceMatchedEventCount, sizeof(int), cudaMemcpyDeviceToHost));
+	p_PrefixSumBuffer->CopyToHost(true);
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-	_iNumEvents = *pi_HostMatchedEventCount;
+	int * pPrefixSumResults = p_PrefixSumBuffer->GetHostEventBuffer();
+	_iNumEvents = pPrefixSumResults[_iNumEvents];
+
+#ifdef GPU_DEBUG
+	p_ResultEventBuffer->CopyToHost(true);
+
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents, p_ResultEventBuffer->GetHostMetaEvent(),
+			"GpuFilterKernelFirst::Out", fp_Log);
+#endif
 
 #ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuFilterKernelFirst] Kernel complete : ResultCount=%d\n", _iNumEvents);

@@ -59,8 +59,6 @@ private:
 	GpuIntBuffer * p_PrefixSumBuffer;
 	GpuStreamEventBuffer * p_ResultEventBuffer;
 	int i_MatchedEvenBufferIndex;
-	int * pi_DeviceMatchedEventCount;
-	int * pi_HostMatchedEventCount;
 	void * p_TempStorageForPrefixSum;
 	size_t i_SizeOfTempStorageForPrefixSum;
 
