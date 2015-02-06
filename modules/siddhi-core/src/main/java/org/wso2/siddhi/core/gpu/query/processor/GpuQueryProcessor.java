@@ -61,7 +61,7 @@ public class GpuQueryProcessor {
     }
     
     public void process(int streamIndex, int eventCount) {
-        log.debug("[process] streamIndex=" + streamIndex + " eventCount=" + eventCount);
+        //log.debug("[process] streamIndex=" + streamIndex + " eventCount=" + eventCount);
 
         // reset bytebuffer writers
         streamInputEventBuffers[streamIndex].Reset();
@@ -70,19 +70,19 @@ public class GpuQueryProcessor {
         int resultEventCount = gpuStreamProcessor[streamIndex].Process(eventCount);
         
         // copy events back
-        log.debug("[process] convert result events : " + resultEventCount);
+        //log.debug("[process] convert result events : " + resultEventCount);
         
         gpuQueryPostProcessor.process(streamIndex, streamInputEventBuffers[streamIndex].getByteBuffer(), resultEventCount);
         // convert to StreamEvent
         //// streamEventChunk.convertAndAdd(event);
         //// processAndClearGpu(streamEventChunk);
         
-        log.debug("[process] call selector");
+        //log.debug("[process] call selector");
         // call Selector processor
         selectProcessor.process(complexEventChunks[streamIndex]);
         complexEventChunks[streamIndex].clear();
         
-        log.debug("[process] complete");
+        //log.debug("[process] complete");
     }
     
     public void setSelectProcessor(Processor selectProcessor) {

@@ -110,7 +110,9 @@ void GpuIntBuffer::Print()
 
 void GpuIntBuffer::CopyToDevice(bool _bAsync)
 {
+#ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuIntBuffer] CopyToDevice : Async=%d\n", _bAsync);
+#endif
 
 	if(_bAsync)
 	{
@@ -124,7 +126,9 @@ void GpuIntBuffer::CopyToDevice(bool _bAsync)
 
 void GpuIntBuffer::CopyToHost(bool _bAsync)
 {
+#ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuIntBuffer] CopyToHost : Async=%d\n", _bAsync);
+#endif
 
 	if(_bAsync)
 	{

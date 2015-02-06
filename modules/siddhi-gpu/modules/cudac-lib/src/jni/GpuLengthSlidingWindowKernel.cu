@@ -430,10 +430,10 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 
 void GpuLengthSlidingWindowFirstKernel::Process(int & _iNumEvents, bool _bLast)
 {
+#ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Process : EventCount=%d WindowRemainingCount=%d\n", _iNumEvents, i_RemainingCount);
 	fflush(fp_Log);
 
-#ifdef GPU_DEBUG
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
 			"GpuLengthSlidingWindowFirstKernel::In", fp_Log);
 #endif
@@ -610,10 +610,10 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 
 void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 {
+#ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Process : EventCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
 
-#ifdef GPU_DEBUG
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
 			"GpuLengthSlidingWindowFilterKernel::In", fp_Log);
 #endif

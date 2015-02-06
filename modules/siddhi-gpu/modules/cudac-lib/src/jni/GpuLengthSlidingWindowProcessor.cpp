@@ -86,8 +86,10 @@ void GpuLengthSlidingWindowProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInp
 
 int GpuLengthSlidingWindowProcessor::Process(int _iNumEvents)
 {
+#ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Process : NumEvents=%d \n", _iNumEvents);
 	fflush(fp_Log);
+#endif
 
 	p_WindowKernel->Process(_iNumEvents, (p_Next == NULL));
 

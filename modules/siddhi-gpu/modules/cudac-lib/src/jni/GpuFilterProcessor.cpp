@@ -297,8 +297,10 @@ void GpuFilterProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBuffer
 
 int GpuFilterProcessor::Process(int _iNumEvents)
 {
+#ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuFilterProcessor] Process : NumEvents=%d \n", _iNumEvents);
 	fflush(fp_Log);
+#endif
 	// invoke kernels
 	// get result meta data (resulting events count)
 	p_FilterKernel->Process(_iNumEvents, (p_Next == NULL));
