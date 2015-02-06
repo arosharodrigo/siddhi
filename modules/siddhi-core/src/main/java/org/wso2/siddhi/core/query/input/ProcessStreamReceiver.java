@@ -40,6 +40,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     private static final Logger log = Logger.getLogger(ProcessStreamReceiver.class);
     
     protected String streamId;
+    protected String queryName;
     protected Processor next;
     protected MetaStreamEvent metaStreamEvent;
     protected ConversionStreamEventChunk streamEventChunk;
@@ -58,6 +59,12 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
     public ProcessStreamReceiver(String streamId) {
         this.streamId = streamId;
+        this.queryName = streamId;
+    }
+    
+    public ProcessStreamReceiver(String streamId, String queryName) {
+        this.streamId = streamId;
+        this.queryName = queryName;
     }
 
     @Override
@@ -66,7 +73,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     }
 
     public ProcessStreamReceiver clone(String key) {
-        ProcessStreamReceiver clonedProcessStreamReceiver = new ProcessStreamReceiver(streamId + key);
+        ProcessStreamReceiver clonedProcessStreamReceiver = new ProcessStreamReceiver(streamId + key, queryName);
         clonedProcessStreamReceiver.setMetaStreamEvent(metaStreamEvent);
         clonedProcessStreamReceiver.setStreamEventPool(new StreamEventPool(metaStreamEvent, streamEventPool.getSize()));
         return clonedProcessStreamReceiver;
@@ -119,7 +126,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
                 }
                 
                 double avgThroughput = totalThroughput / throughputList.size();
-                log.info("<" + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+                log.info("<" + queryName + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
                 throughputList.clear();
             }
         }
