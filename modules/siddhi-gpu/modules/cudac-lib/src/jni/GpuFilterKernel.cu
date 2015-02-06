@@ -581,56 +581,12 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 			p_MatchedIndexEventBuffer->GetDeviceEventBuffer()
 	);
 
-#ifdef GPU_DEBUG
-
-	p_MatchedIndexEventBuffer->CopyToHost(true);
-
-	CUDA_CHECK_RETURN(cudaPeekAtLastError());
-	CUDA_CHECK_RETURN(cudaThreadSynchronize());
-
-	fprintf(fp_Log, "[GpuFilterKernelFirst] ProcessEventsFilterKernelFirstV2 results\n");
-	int * pResults = p_MatchedIndexEventBuffer->GetHostEventBuffer();
-	for(int i=0; i<_iNumEvents; ++i)
-	{
-		fprintf(fp_Log, "[GpuFilterKernelFirst] Result [%d => %d] \n", i, *pResults);
-		pResults++;
-	}
-	fflush(fp_Log);
-#endif
-
 	CUDA_CHECK_RETURN(cub::DeviceScan::ExclusiveSum(
 			p_TempStorageForPrefixSum, i_SizeOfTempStorageForPrefixSum,
 			p_MatchedIndexEventBuffer->GetDeviceEventBuffer(),
 			p_PrefixSumBuffer->GetDeviceEventBuffer(),
 			_iNumEvents)); //p_InputEventBuffer->GetMaxEventCount());
 
-
-#ifdef GPU_DEBUG
-
-	p_MatchedIndexEventBuffer->CopyToHost(true);
-
-	CUDA_CHECK_RETURN(cudaPeekAtLastError());
-	CUDA_CHECK_RETURN(cudaThreadSynchronize());
-
-	fprintf(fp_Log, "[GpuFilterKernelFirst] MatchedIndexEventBuffer after prefix sum\n");
-	int * pMatchedResults = p_MatchedIndexEventBuffer->GetHostEventBuffer();
-	for(int i=0; i<_iNumEvents; ++i)
-	{
-		fprintf(fp_Log, "[GpuFilterKernelFirst] Result [%d => %d] \n", i, *pMatchedResults);
-		pMatchedResults++;
-	}
-	fflush(fp_Log);
-
-	p_InputEventBuffer->CopyToHost(true);
-
-	CUDA_CHECK_RETURN(cudaPeekAtLastError());
-	CUDA_CHECK_RETURN(cudaThreadSynchronize());
-
-	fprintf(fp_Log, "[GpuFilterKernelFirst] InputEventBuffer after prefix sum\n");
-	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
-			"GpuFilterKernelFirst::InputEventBuffer", fp_Log);
-
-#endif
 
 //	char               * _pInByteBuffer,      // Input ByteBuffer from java side
 //	int                * _pMatchedIndexBuffer,// Matched event index buffer
@@ -664,16 +620,12 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 	_iNumEvents = pPrefixSumResults[_iNumEvents];
 
 #ifdef GPU_DEBUG
-	p_ResultEventBuffer->CopyToHost(true);
+	if(_bLast)
+	{
+		GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents, p_ResultEventBuffer->GetHostMetaEvent(),
+				"GpuFilterKernelFirst::Out", fp_Log);
+	}
 
-	CUDA_CHECK_RETURN(cudaPeekAtLastError());
-	CUDA_CHECK_RETURN(cudaThreadSynchronize());
-
-	GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents, p_ResultEventBuffer->GetHostMetaEvent(),
-			"GpuFilterKernelFirst::Out", fp_Log);
-#endif
-
-#ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuFilterKernelFirst] Kernel complete : ResultCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
 #endif
