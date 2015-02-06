@@ -56,11 +56,10 @@ void ProcessEventsLengthSlidingWindow(
 
 	if(iEventIdx >= _iRemainingCount)
 	{
-		int iExpiredEventPos = (iEventIdx - _iRemainingCount) - _iWindowLength;
-		if(iExpiredEventPos < 0)
+		if(iEventIdx < _iWindowLength)
 		{
 			// in window buffer
-			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (_iWindowLength + iExpiredEventPos));
+			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx - _iRemainingCount));
 
 			GpuEvent * pWindowEvent = (GpuEvent*) pExpiredOutEventInWindowBuffer;
 			if(pWindowEvent->i_Type != GpuEvent::NONE) // if window event is filled
@@ -77,7 +76,7 @@ void ProcessEventsLengthSlidingWindow(
 		else
 		{
 			// in input event buffer
-			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * iExpiredEventPos);
+			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * (iEventIdx - _iWindowLength));
 
 			memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInInputBuffer, _iSizeOfEvent);
 			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
@@ -127,7 +126,7 @@ void ProcessEventsLengthSlidingWindowFilter(
 	char * pInEventBuffer = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
 
 	// output to results buffer [expired event, in event]
-	char * pResultsExpiredEventBuffer = _pResultsBuffer + (_iSizeOfEvent * iEventIdx);
+	char * pResultsExpiredEventBuffer = _pResultsBuffer + (_iSizeOfEvent * iEventIdx * 2);
 	char * pResultsInEventBuffer = pResultsExpiredEventBuffer + _iSizeOfEvent;
 
 	GpuEvent * pExpiredEvent = (GpuEvent *)pResultsExpiredEventBuffer;
@@ -149,11 +148,10 @@ void ProcessEventsLengthSlidingWindowFilter(
 
 	if(iEventIdx >= _iRemainingCount)
 	{
-		int iExpiredEventPos = (iEventIdx - _iRemainingCount) - _iWindowLength;
-		if(iExpiredEventPos < 0)
+		if(iEventIdx < _iWindowLength)
 		{
 			// in window buffer
-			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (_iWindowLength + iExpiredEventPos));
+			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx - _iRemainingCount));
 
 			GpuEvent * pWindowEvent = (GpuEvent*) pExpiredOutEventInWindowBuffer;
 			if(pWindowEvent->i_Type != GpuEvent::NONE) // if window event is filled
@@ -170,7 +168,7 @@ void ProcessEventsLengthSlidingWindowFilter(
 		else
 		{
 			// in input event buffer
-			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * iExpiredEventPos);
+			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * (iEventIdx - _iWindowLength));
 
 			memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInInputBuffer, _iSizeOfEvent);
 			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
@@ -490,6 +488,10 @@ void GpuLengthSlidingWindowFirstKernel::Process(int & _iNumEvents, bool _bLast)
 	if(_bLast)
 	{
 		p_ResultEventBuffer->CopyToHost(true);
+#ifdef GPU_DEBUG
+	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
+	fflush(fp_Log);
+#endif
 	}
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
@@ -566,6 +568,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] InpuEventBufferIndex=%d\n", i_InputBufferIndex);
 	fflush(fp_Log);
 	p_InputEventBuffer = (GpuStreamEventBuffer*) p_Context->GetEventBuffer(i_InputBufferIndex);
+	p_InputEventBuffer->Print();
 
 	// set resulting event buffer and its meta data
 	p_ResultEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
@@ -576,6 +579,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
 			p_ResultEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
+	p_ResultEventBuffer->Print();
 
 	p_WindowEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_WindowEventBuffer->CreateEventBuffer(i_WindowSize);
@@ -583,6 +587,20 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Created device window buffer : Length=%d Size=%d bytes\n", i_WindowSize,
 			p_WindowEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
+	p_WindowEventBuffer->Print();
+
+	p_WindowEventBuffer->ResetHostEventBuffer(0);
+
+	char * pHostWindowBuffer = p_WindowEventBuffer->GetHostEventBuffer();
+	char * pCurrentEvent;
+	for(int i=0; i<i_WindowSize; ++i)
+	{
+		pCurrentEvent = pHostWindowBuffer + (_pMetaEvent->i_SizeOfEventInBytes * i);
+		GpuEvent * pGpuEvent = (GpuEvent*) pCurrentEvent;
+		pGpuEvent->i_Type = GpuEvent::NONE;
+	}
+
+	p_WindowEventBuffer->CopyToDevice(false);
 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Initialization complete\n");
 	fflush(fp_Log);
@@ -659,12 +677,6 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 	fflush(fp_Log);
 #endif
 	}
-	//	CUDA_CHECK_RETURN(cudaMemcpy(
-	//			p_HostEventBuffer,
-	//			p_HostInput->p_ByteBuffer,
-	//			sizeof(char) * 4 * i_MaxNumberOfEvents,
-	//			cudaMemcpyDeviceToHost));
-
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
