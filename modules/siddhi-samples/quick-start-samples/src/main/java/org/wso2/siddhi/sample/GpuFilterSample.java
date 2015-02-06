@@ -19,7 +19,8 @@ public class GpuFilterSample {
 
         String executionPlan = "@plan:name('GpuFilterSample') @plan:parallel define stream cseEventStream (symbol string, price float, volume long);"
         //        + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0') from cseEventStream[volume < 150] select symbol,price insert into outputStream ;";
-                + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0') from cseEventStream#window.length(100) select symbol,price insert into outputStream ;";
+        //        + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0') from cseEventStream#window.length(100) select symbol,price insert into outputStream ;";
+                + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0') from cseEventStream#window.length(10000) select symbol,price insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 

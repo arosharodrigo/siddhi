@@ -94,7 +94,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             duration = endTime - startTime;
             double average = (currentEventCount * 1000000000 / (double)duration);
-            log.debug("Batch Throughput : [" + currentEventCount + "] " + average + " eps");
+            log.info("Batch Throughput : [" + currentEventCount + "] " + average + " eps");
             
             currentEventCount = 0;
         }
@@ -112,7 +112,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         duration = endTime - startTime;
         double average = (currentEventCount / (double)duration);
-        log.debug("Batch Throughput : [" + currentEventCount + "] " + average + " epns");
+        log.info("Batch Throughput : [" + currentEventCount + "] " + average + " epns");
     }
     
     public void init() {

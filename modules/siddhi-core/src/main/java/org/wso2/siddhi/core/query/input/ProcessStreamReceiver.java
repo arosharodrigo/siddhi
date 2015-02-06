@@ -45,6 +45,11 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     protected StreamEventPool streamEventPool;
     protected List<PreStateProcessor> stateProcessors = new ArrayList<PreStateProcessor>();
     protected int stateProcessorsSize;
+    
+    private float currentEventCount = 0;
+    private long startTime = 0;
+    private long endTime = 0;
+    private long duration = 0;
 
 
     public ProcessStreamReceiver(String streamId) {
@@ -85,8 +90,19 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     @Override
     public void receive(Event event, boolean endOfBatch) {
         streamEventChunk.convertAndAdd(event);
+        currentEventCount++;
         if (endOfBatch) {
+            startTime = System.nanoTime();
+            
             processAndClear(streamEventChunk);
+            
+            endTime = System.nanoTime();
+            
+            duration = endTime - startTime;
+            double average = (currentEventCount * 1000000000 / (double)duration);
+            log.info("Batch Throughput : [" + currentEventCount + "] " + average + " eps");
+            
+            currentEventCount = 0;
         }
     }
 
