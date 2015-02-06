@@ -19,7 +19,7 @@ class GpuMetaEvent;
 class GpuEventBuffer
 {
 public:
-	GpuEventBuffer(int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog);
+	GpuEventBuffer(std::string _sName, int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog);
 	virtual ~GpuEventBuffer();
 
 	virtual void CopyToDevice(bool _bAsync) = 0;
@@ -38,6 +38,7 @@ protected:
 	GpuMetaEvent * p_HostMetaEvent;
 	GpuKernelMetaEvent * p_DeviceMetaEvent;
 
+	std::string s_Name;
 	int i_DeviceId;
 	FILE * fp_Log;
 };

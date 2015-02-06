@@ -19,7 +19,7 @@ class GpuMetaEvent;
 class GpuIntBuffer : public GpuEventBuffer
 {
 public:
-	GpuIntBuffer(int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog);
+	GpuIntBuffer(std::string _sName, int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog);
 	virtual ~GpuIntBuffer();
 
 	void SetEventBuffer(int * _pBuffer, int _iBufferSizeInBytes, int _iEventCount);

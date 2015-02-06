@@ -264,7 +264,7 @@ bool GpuFilterKernelStandalone::Initialize(GpuMetaEvent * _pMetaEvent, int _iInp
 	GpuMetaEvent * pFilterResultMetaEvent = new GpuMetaEvent(_pMetaEvent->i_StreamIndex, 1, sizeof(int));
 	pFilterResultMetaEvent->SetAttribute(0, DataType::Int, sizeof(int), 0);
 
-	p_ResultEventBuffer = new GpuIntBuffer(p_Context->GetDeviceId(), pFilterResultMetaEvent, fp_Log);
+	p_ResultEventBuffer = new GpuIntBuffer("FilterResultEventBuffer", p_Context->GetDeviceId(), pFilterResultMetaEvent, fp_Log);
 	p_ResultEventBuffer->CreateEventBuffer(_iInputEventBufferSize);
 	i_ResultEventBufferIndex = p_Context->AddEventBuffer(p_ResultEventBuffer);
 	fprintf(fp_Log, "[GpuFilterKernelStandalone] ResultEventBuffer created : Index=%d Size=%d bytes\n", i_ResultEventBufferIndex,
@@ -461,14 +461,14 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 	GpuMetaEvent * pMatchedResultIndexMetaEvent = new GpuMetaEvent(_pMetaEvent->i_StreamIndex, 1, sizeof(int));
 	pMatchedResultIndexMetaEvent->SetAttribute(0, DataType::Int, sizeof(int), 0);
 
-	p_MatchedIndexEventBuffer = new GpuIntBuffer(p_Context->GetDeviceId(), pMatchedResultIndexMetaEvent, fp_Log);
+	p_MatchedIndexEventBuffer = new GpuIntBuffer("FilterMatchedIndexEventBuffer", p_Context->GetDeviceId(), pMatchedResultIndexMetaEvent, fp_Log);
 	p_MatchedIndexEventBuffer->CreateEventBuffer(_iInputEventBufferSize);
 	fprintf(fp_Log, "[GpuFilterKernelFirst] MatchedIndexEventBuffer created : Size=%d bytes\n",
 			p_MatchedIndexEventBuffer->GetEventBufferSizeInBytes());
 	fflush(fp_Log);
 	p_MatchedIndexEventBuffer->Print();
 
-	p_PrefixSumBuffer = new GpuIntBuffer(p_Context->GetDeviceId(), pMatchedResultIndexMetaEvent, fp_Log);
+	p_PrefixSumBuffer = new GpuIntBuffer("FilterPrefixSumBuffer", p_Context->GetDeviceId(), pMatchedResultIndexMetaEvent, fp_Log);
 	p_PrefixSumBuffer->CreateEventBuffer(_iInputEventBufferSize);
 	p_PrefixSumBuffer->Print();
 
@@ -478,7 +478,7 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 	CUDA_CHECK_RETURN(cudaMalloc((void**)&p_TempStorageForPrefixSum, i_SizeOfTempStorageForPrefixSum));
 
 
-	p_ResultEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
+	p_ResultEventBuffer = new GpuStreamEventBuffer("FilterResultEventBuffer", p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_ResultEventBuffer->CreateEventBuffer(_iInputEventBufferSize);
 
 	i_ResultEventBufferIndex = p_Context->AddEventBuffer(p_ResultEventBuffer);

@@ -32,12 +32,12 @@ namespace SiddhiGpu
 class GpuCudaHelper
 {
 public:
-	static bool SelectDevice(int _iDeviceId, FILE * _fpLog);
-	static void GetDeviceId(FILE * _fpLog);
+	static bool SelectDevice(int _iDeviceId, const char * _zTag, FILE * _fpLog);
+	static void GetDeviceId(const char * _zTag, FILE * _fpLog);
 	static void DeviceReset();
 
-	static void AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, FILE * _fpLog);
-	static void FreeHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, FILE * _fpLog);
+	static void AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, const char * _zTag, FILE * _fpLog);
+	static void FreeHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, const char * _zTag, FILE * _fpLog);
 };
 
 }

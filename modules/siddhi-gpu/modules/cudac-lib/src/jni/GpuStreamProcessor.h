@@ -23,7 +23,7 @@ class GpuProcessorContext;
 class GpuStreamProcessor
 {
 public:
-	GpuStreamProcessor(std::string _sStreamId, int _iStreamIndex, GpuMetaEvent * _pMetaEvent);
+	GpuStreamProcessor(std::string _sQueryName, std::string _sStreamId, int _iStreamIndex, GpuMetaEvent * _pMetaEvent);
 	~GpuStreamProcessor();
 
 	bool Initialize(int _iDeviceId, int _iInputEventBufferSize);
@@ -33,6 +33,7 @@ public:
 	GpuProcessorContext * GetProcessorContext() { return p_ProcessorContext; }
 
 private:
+	std::string s_QueryName;
 	std::string s_StreamId;
 	int i_StreamIndex;
 	GpuMetaEvent * p_MetaEvent;

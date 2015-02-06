@@ -19,24 +19,24 @@
 namespace SiddhiGpu
 {
 
-GpuStreamEventBuffer::GpuStreamEventBuffer(int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog) :
-	GpuEventBuffer(_iDeviceId, _pMetaEvent, _fpLog),
+GpuStreamEventBuffer::GpuStreamEventBuffer(std::string _sName, int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog) :
+	GpuEventBuffer(_sName, _iDeviceId, _pMetaEvent, _fpLog),
 	p_HostEventBuffer(NULL),
 	p_UnalignedBuffer(NULL),
 	p_DeviceEventBuffer(NULL),
 	i_EventBufferSizeInBytes(0),
 	i_EventCount(0)
 {
-	fprintf(fp_Log, "[GpuStreamEventBuffer] Created with device id : %d \n", i_DeviceId);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> Created with device id : %d \n", _sName.c_str(), i_DeviceId);
 	fflush(fp_Log);
 }
 
 GpuStreamEventBuffer::~GpuStreamEventBuffer()
 {
-	fprintf(fp_Log, "[GpuStreamEventBuffer] destroy\n");
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> destroy\n", s_Name.c_str());
 	fflush(fp_Log);
 
-	GpuCudaHelper::FreeHostMemory(true, &p_UnalignedBuffer, &p_HostEventBuffer, i_EventBufferSizeInBytes, fp_Log);
+	GpuCudaHelper::FreeHostMemory(true, &p_UnalignedBuffer, &p_HostEventBuffer, i_EventBufferSizeInBytes, s_Name.c_str(), fp_Log);
 
 //	if(p_UnalignedBuffer)
 //	{
@@ -57,7 +57,8 @@ void GpuStreamEventBuffer::SetEventBuffer(char * _pBuffer, int _iBufferSizeInByt
 	i_EventBufferSizeInBytes = _iBufferSizeInBytes;
 	i_EventCount = _iEventCount;
 
-	fprintf(fp_Log, "[GpuStreamEventBuffer] Set ByteBuffer [Ptr=%p Count=%d Size=%d bytes]\n", p_HostEventBuffer, i_EventCount, i_EventBufferSizeInBytes);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> Set ByteBuffer [Ptr=%p Count=%d Size=%d bytes]\n",
+			s_Name.c_str(), p_HostEventBuffer, i_EventCount, i_EventBufferSizeInBytes);
 	fflush(fp_Log);
 }
 
@@ -65,15 +66,16 @@ char * GpuStreamEventBuffer::CreateEventBuffer(int _iEventCount)
 {
 	i_EventCount = _iEventCount;
 	i_EventBufferSizeInBytes = _iEventCount * p_HostMetaEvent->i_SizeOfEventInBytes;
-	fprintf(fp_Log, "[GpuStreamEventBuffer] Allocating ByteBuffer for %d events : %d bytes \n", _iEventCount, (int)(sizeof(char) * i_EventBufferSizeInBytes));
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> Allocating ByteBuffer for %d events : %d bytes \n",
+			s_Name.c_str(), _iEventCount, (int)(sizeof(char) * i_EventBufferSizeInBytes));
 	fflush(fp_Log);
 
-	GpuCudaHelper::AllocateHostMemory(true, &p_UnalignedBuffer, &p_HostEventBuffer, i_EventBufferSizeInBytes, fp_Log);
+	GpuCudaHelper::AllocateHostMemory(true, &p_UnalignedBuffer, &p_HostEventBuffer, i_EventBufferSizeInBytes, s_Name.c_str(), fp_Log);
 
 	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceEventBuffer, i_EventBufferSizeInBytes));
 
-	fprintf(fp_Log, "[GpuStreamEventBuffer] Host ByteBuffer [Ptr=%p Size=%d]\n", p_HostEventBuffer, i_EventBufferSizeInBytes);
-	fprintf(fp_Log, "[GpuStreamEventBuffer] Device ByteBuffer [Ptr=%p] \n", p_DeviceEventBuffer);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> Host ByteBuffer [Ptr=%p Size=%d]\n", s_Name.c_str(), p_HostEventBuffer, i_EventBufferSizeInBytes);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> Device ByteBuffer [Ptr=%p] \n", s_Name.c_str(), p_DeviceEventBuffer);
 	fflush(fp_Log);
 
 	int GpuMetaEventSize = sizeof(GpuKernelMetaEvent) + sizeof(GpuKernelMetaAttribute) * p_HostMetaEvent->i_AttributeCount;
@@ -110,8 +112,9 @@ char * GpuStreamEventBuffer::CreateEventBuffer(int _iEventCount)
 
 void GpuStreamEventBuffer::Print()
 {
-	fprintf(fp_Log, "[GpuStreamEventBuffer] DeviceId=%d MaxEventCount=%d BufferSizeInBytes=%d \n", i_DeviceId, i_EventCount, i_EventBufferSizeInBytes);
-	fprintf(fp_Log, "[GpuStreamEventBuffer] EventMeta %d [", p_HostMetaEvent->i_AttributeCount);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> DeviceId=%d MaxEventCount=%d BufferSizeInBytes=%d \n",
+			s_Name.c_str(), i_DeviceId, i_EventCount, i_EventBufferSizeInBytes);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> EventMeta %d [", s_Name.c_str(), p_HostMetaEvent->i_AttributeCount);
 	for(int i=0; i<p_HostMetaEvent->i_AttributeCount; ++i)
 	{
 		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
@@ -125,7 +128,7 @@ void GpuStreamEventBuffer::Print()
 void GpuStreamEventBuffer::CopyToDevice(bool _bAsync)
 {
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuStreamEventBuffer] CopyToDevice : Async=%d\n", _bAsync);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> CopyToDevice : Async=%d\n", s_Name.c_str(), _bAsync);
 #endif
 
 	if(_bAsync)
@@ -141,7 +144,7 @@ void GpuStreamEventBuffer::CopyToDevice(bool _bAsync)
 void GpuStreamEventBuffer::CopyToHost(bool _bAsync)
 {
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuStreamEventBuffer] CopyToHost : Async=%d\n", _bAsync);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> CopyToHost : Async=%d\n", s_Name.c_str(), _bAsync);
 #endif
 
 	if(_bAsync)
@@ -156,14 +159,14 @@ void GpuStreamEventBuffer::CopyToHost(bool _bAsync)
 
 void GpuStreamEventBuffer::ResetHostEventBuffer(int _iResetVal)
 {
-	fprintf(fp_Log, "[GpuStreamEventBuffer] HostReset : Val=%d\n", _iResetVal);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> HostReset : Val=%d\n", s_Name.c_str(), _iResetVal);
 
 	memset(p_HostEventBuffer, _iResetVal, i_EventBufferSizeInBytes);
 }
 
 void GpuStreamEventBuffer::ResetDeviceEventBuffer(int _iResetVal)
 {
-	fprintf(fp_Log, "[GpuStreamEventBuffer] DeviceReset : Val=%d\n", _iResetVal);
+	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> DeviceReset : Val=%d\n", s_Name.c_str(), _iResetVal);
 
 	CUDA_CHECK_RETURN(cudaMemset(p_DeviceEventBuffer, _iResetVal, i_EventBufferSizeInBytes));
 }

@@ -426,7 +426,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 	p_InputEventBuffer->Print();
 
 	// set resulting event buffer and its meta data
-	p_ResultEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
+	p_ResultEventBuffer = new GpuStreamEventBuffer("WindowResultEventBuffer", p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_ResultEventBuffer->CreateEventBuffer(_iInputEventBufferSize * 2);
 
 	i_ResultEventBufferIndex = p_Context->AddEventBuffer(p_ResultEventBuffer);
@@ -436,7 +436,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 	fflush(fp_Log);
 	p_ResultEventBuffer->Print();
 
-	p_WindowEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
+	p_WindowEventBuffer = new GpuStreamEventBuffer("WindowEventBuffer", p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_WindowEventBuffer->CreateEventBuffer(i_WindowSize);
 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Created device window buffer : Length=%d Size=%d bytes\n", i_WindowSize,
@@ -610,7 +610,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 	p_InputEventBuffer->Print();
 
 	// set resulting event buffer and its meta data
-	p_ResultEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
+	p_ResultEventBuffer = new GpuStreamEventBuffer("WindowResultEventBuffer", p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_ResultEventBuffer->CreateEventBuffer(_iInputEventBufferSize * 2);
 
 	i_ResultEventBufferIndex = p_Context->AddEventBuffer(p_ResultEventBuffer);
@@ -620,7 +620,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 	fflush(fp_Log);
 	p_ResultEventBuffer->Print();
 
-	p_WindowEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
+	p_WindowEventBuffer = new GpuStreamEventBuffer("WindowEventBuffer", p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_WindowEventBuffer->CreateEventBuffer(i_WindowSize);
 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Created device window buffer : Length=%d Size=%d bytes\n", i_WindowSize,

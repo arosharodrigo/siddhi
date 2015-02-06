@@ -18,7 +18,8 @@
 namespace SiddhiGpu
 {
 
-GpuStreamProcessor::GpuStreamProcessor(std::string _sStreamId, int _iStreamIndex, GpuMetaEvent * _pMetaEvent) :
+GpuStreamProcessor::GpuStreamProcessor(std::string _sQueryName, std::string _sStreamId, int _iStreamIndex, GpuMetaEvent * _pMetaEvent) :
+	s_QueryName(_sQueryName),
 	s_StreamId(_sStreamId),
 	i_StreamIndex(_iStreamIndex),
 	p_MetaEvent(_pMetaEvent),
@@ -26,7 +27,7 @@ GpuStreamProcessor::GpuStreamProcessor(std::string _sStreamId, int _iStreamIndex
 	p_ProcessorContext(NULL)
 {
 	char zLogFile[256];
-	sprintf(zLogFile, "logs/GpuStreamProcessor_%s.log", _sStreamId.c_str());
+	sprintf(zLogFile, "logs/GpuStreamProcessor_%s_%s.log", _sQueryName.c_str(), _sStreamId.c_str());
 	fp_Log = fopen(zLogFile, "w");
 
 	fprintf(fp_Log, "[GpuStreamProcessor] Created : Id=%s Index=%d \n", s_StreamId.c_str(), i_StreamIndex);
@@ -57,7 +58,7 @@ bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
 		// init ByteBuffer
 		// init stream meta data
 		p_ProcessorContext = new GpuProcessorContext(_iDeviceId, fp_Log);
-		GpuStreamEventBuffer * pInputEventBuffer = new GpuStreamEventBuffer(_iDeviceId, p_MetaEvent, fp_Log);
+		GpuStreamEventBuffer * pInputEventBuffer = new GpuStreamEventBuffer("MainInputEventBuffer", _iDeviceId, p_MetaEvent, fp_Log);
 		pInputEventBuffer->CreateEventBuffer(_iInputEventBufferSize);
 		int iBufferIndex = p_ProcessorContext->AddEventBuffer(pInputEventBuffer);
 
