@@ -31,6 +31,7 @@ import org.wso2.siddhi.core.query.input.stream.state.PreStateProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.stream.StreamJunction;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     private long endTime = 0;
     private long duration = 0;
 
+    private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
 
     public ProcessStreamReceiver(String streamId) {
         this.streamId = streamId;
@@ -100,7 +102,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             
             duration = endTime - startTime;
             double average = (currentEventCount * 1000000000 / (double)duration);
-            log.info("Batch Throughput : [" + currentEventCount + "] " + average + " eps");
+            log.info("Batch Throughput : [" + currentEventCount + "/" + duration + "] " + decimalFormat.format(average) + " eps");
             
             currentEventCount = 0;
         }

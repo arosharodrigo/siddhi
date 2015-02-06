@@ -1,5 +1,7 @@
 package org.wso2.siddhi.core.gpu.query.input;
 
+import java.text.DecimalFormat;
+
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -28,6 +30,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private long startTime = 0;
     private long endTime = 0;
     private long duration = 0;
+    
+    private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
     
     public GpuProcessStreamReceiver(String streamId) {
         super(streamId);
@@ -94,7 +98,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             duration = endTime - startTime;
             double average = (currentEventCount * 1000000000 / (double)duration);
-            log.info("Batch Throughput : [" + currentEventCount + "] " + average + " eps");
+            log.info("Batch Throughput : [" + currentEventCount + "/" + duration + "] " + decimalFormat.format(average) + " eps");
             
             currentEventCount = 0;
         }
