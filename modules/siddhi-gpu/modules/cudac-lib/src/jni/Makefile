@@ -57,7 +57,7 @@ endif
 
 # Debug build flags
 ifeq ($(dbg),1)
-      NVCCFLAGS += -g -G --ptxas-options=-v -maxrregcount=32
+      NVCCFLAGS += -g -G --ptxas-options=-v -maxrregcount=32 -lineinfo
       TARGET := debug
 else
       NVCCFLAGS += -po -maxrregcount=32 -O3

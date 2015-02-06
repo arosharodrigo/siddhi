@@ -239,7 +239,7 @@ void SetWindowState(
 	int iEventIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
 
 	// get in event starting position
-	char * pInEvent = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
+	char * pInEventBuffer = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
 
 	if(_iNumberOfEvents < _iWindowLength)
 	{
@@ -249,9 +249,47 @@ void SetWindowState(
 		{
 			int iExitEventCount = _iNumberOfEvents - _iRemainingCount;
 
-			//TODO: make this non recursive
-			MoveEvent((iEventIdx + iWindowPositionShift), pInEvent, _pEventWindowBuffer, _iSizeOfEvent, iExitEventCount);
+			// calculate start and end window buffer positions
+			int iStart = iEventIdx + iWindowPositionShift;
+			int iEnd = iStart;
+			while(iEnd >= 0)
+			{
+				char * pDestinationEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * iEnd);
+				GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
 
+				if(pDestinationEvent->i_Type != GpuEvent::NONE) // there is an event in destination position
+				{
+					iEnd -= iExitEventCount;
+				}
+				else
+				{
+					break;
+				}
+
+			}
+
+			// work back from end while copying events
+			while(iEnd < iStart)
+			{
+				char * pDestinationEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * iEnd);
+				GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
+
+				char * pSourceEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEnd + iExitEventCount));
+
+				memcpy(pDestinationEventBuffer, pSourceEventBuffer, _iSizeOfEvent);
+				pDestinationEvent->i_Type = GpuEvent::EXPIRED;
+
+				iEnd += iExitEventCount;
+			}
+
+			// iEnd == iStart
+			if(iStart >= 0)
+			{
+				char * pDestinationEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * iStart);
+				GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
+				memcpy(pDestinationEventBuffer, pInEventBuffer, _iSizeOfEvent);
+				pDestinationEvent->i_Type = GpuEvent::EXPIRED;
+			}
 		}
 		else
 		{
@@ -260,7 +298,7 @@ void SetWindowState(
 
 			char * pWindowEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx + iWindowPositionShift));
 
-			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
+			memcpy(pWindowEventBuffer, pInEventBuffer, _iSizeOfEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
 			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
@@ -273,7 +311,7 @@ void SetWindowState(
 		{
 			char * pWindowEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx - iWindowPositionShift));
 
-			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
+			memcpy(pWindowEventBuffer, pInEventBuffer, _iSizeOfEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
 			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}

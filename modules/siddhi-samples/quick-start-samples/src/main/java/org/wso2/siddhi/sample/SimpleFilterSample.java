@@ -37,7 +37,8 @@ public class SimpleFilterSample {
         siddhiManager.getSiddhiContext().setEventBufferSize(4096);
 
         String executionPlan = "@plan:name('FilterSample') @plan:parallel define stream cseEventStream (symbol string, price float, volume long);"
-                + "@info(name = 'query1') from cseEventStream[volume < 150] select symbol,price insert into outputStream ;";
+//                + "@info(name = 'query1') from cseEventStream[volume < 150] select symbol,price insert into outputStream ;";
+                + "@info(name = 'query1') from cseEventStream[volume < 150]#window.length(10000) select symbol,price insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
