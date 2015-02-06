@@ -653,6 +653,10 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Process : EventCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
 
+	p_InputEventBuffer->CopyToHost(true);
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(),
 			"GpuLengthSlidingWindowFilterKernel::In", fp_Log);
 #endif

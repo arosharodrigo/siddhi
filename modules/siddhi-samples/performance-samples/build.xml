@@ -27,8 +27,14 @@
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="api.dir" value="../../siddhi-query-api/target"/>
     <property name="query.dir" value="../../siddhi-query-compiler/target"/>
+	<property name="gpu.dir" value="../../siddhi-gpu/target" />
     <property name="core.dir" value="../../siddhi-core/target"/>
     <property name="lib.dir" value="../target/lib"/>
+	<property name="ringbuffer.size" value="1024" />
+	<property name="threadpool.size" value="4" />
+	<property name="block.size" value="256" />
+	<property name="gpu.enabled" value="false" />
+	<property name="async.enabled" value="true" />
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -40,6 +46,7 @@
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
         <fileset dir="${api.dir}" includes="**/*.jar"/>
         <fileset dir="${query.dir}" includes="**/*.jar"/>
+    	<fileset dir="${gpu.dir}" includes="**/*.jar"/>
         <fileset dir="${core.dir}" includes="**/*.jar"/>
         <fileset dir="${resources.dir}" excludes="**/*.java"/>
     </path>
@@ -76,5 +83,13 @@
               classpathref="classpath" fork="true">
         </java>
     </target>
+	
+	<target name="ComplexFilterMultipleQuery" depends="compile">
+		<java classname="org.wso2.siddhi.performance.ComplexFilterMultipleQueryPerformance"
+			classpathref="classpath" fork="true">
+			<arg line="--enable-async ${async.enabled} --enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} 
+				--threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
+		</java>
+	</target>
 
 </project>

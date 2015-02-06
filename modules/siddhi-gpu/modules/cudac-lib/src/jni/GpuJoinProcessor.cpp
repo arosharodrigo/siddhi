@@ -14,7 +14,7 @@ namespace SiddhiGpu
 {
 
 GpuJoinProcessor::GpuJoinProcessor(int _iLeftWindowSize, int _iRightWindowSize) :
-	GpuProcessor(GpuProcessor::LENGTH_SLIDING_WINDOW),
+	GpuProcessor(GpuProcessor::JOIN),
 	i_LeftStraemWindowSize(_iLeftWindowSize),
 	i_RightStraemWindowSize(_iRightWindowSize),
 	p_Context(NULL),

@@ -1,0 +1,1074 @@
+JAVA PROFILE 1.0.1, created Sat Jan 10 01:40:41 2015
+
+Copyright (c) 2003, 2005, Oracle and/or its affiliates. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+  - Neither the name of Oracle nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Header for -agentlib:hprof (or -Xrunhprof) ASCII Output (JDK 5.0 JVMTI based)
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME        is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+                the time spent by a thread waiting to enter a monitor.
+                Entries in this record are TRACEs ranked by the percentage
+                of total monitor contention time and a brief description
+                of the monitor.  The "count" field indicates the number of 
+                times the monitor was contended at that TRACE.
+
+MONITOR DUMP    is a complete snapshot of all the monitors and threads in 
+                the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=5000017d, id = 200001, name="main", group="main")
+THREAD START (obj=5000017d, id = 200004, name="pool-1-thread-1", group="main")
+THREAD START (obj=5000017d, id = 200005, name="pool-1-thread-2", group="main")
+THREAD START (obj=5000017d, id = 200008, name="SIGINT handler", group="system")
+THREAD START (obj=500004e8, id = 200009, name="Thread-0", group="main")
+THREAD END (id = 200009)
+THREAD END (id = 200008)
+THREAD END (id = 200002)
+TRACE 300254:
+	java.lang.Thread.yield(Thread.java:Unknown line)
+	com.lmax.disruptor.SleepingWaitStrategy.applyWaitMethod(SleepingWaitStrategy.java:74)
+	com.lmax.disruptor.SleepingWaitStrategy.waitFor(SleepingWaitStrategy.java:51)
+	com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:55)
+TRACE 300272:
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
+	java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+TRACE 300265:
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:142)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+TRACE 300273:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300279:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300275:
+	org.wso2.siddhi.core.stream.StreamJunction.sendEvent(StreamJunction.java:91)
+	org.wso2.siddhi.core.stream.StreamJunction$Publisher.send(StreamJunction.java:253)
+	org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback.send(InsertIntoStreamCallback.java:36)
+	org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter.sendToCallBacks(OutputRateLimiter.java:43)
+TRACE 300276:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300284:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300277:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300271:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300289:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300281:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300280:
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:102)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:147)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+TRACE 300278:
+	sun.misc.Unsafe.park(Unsafe.java:Unknown line)
+	java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:349)
+	com.lmax.disruptor.SingleProducerSequencer.next(SingleProducerSequencer.java:106)
+	com.lmax.disruptor.SingleProducerSequencer.next(SingleProducerSequencer.java:81)
+TRACE 300286:
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:145)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+TRACE 300288:
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:90)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
+TRACE 300255:
+	org.wso2.siddhi.core.event.stream.StreamEvent.<init>(StreamEvent.java:48)
+	org.wso2.siddhi.core.event.stream.StreamEventFactory.newInstance(StreamEventFactory.java:50)
+	org.wso2.siddhi.core.event.stream.StreamEventPool.borrowEvent(StreamEventPool.java:56)
+	org.wso2.siddhi.core.event.stream.converter.ConversionStreamEventChunk.convertAndAdd(ConversionStreamEventChunk.java:93)
+TRACE 300066:
+	java.lang.ClassLoader.findBootstrapClass(ClassLoader.java:Unknown line)
+	java.lang.ClassLoader.findBootstrapClassOrNull(ClassLoader.java:1070)
+	java.lang.ClassLoader.loadClass(ClassLoader.java:414)
+	java.lang.ClassLoader.loadClass(ClassLoader.java:412)
+TRACE 300290:
+	org.wso2.siddhi.core.event.stream.StreamEventFactory.newInstance(StreamEventFactory.java:50)
+	org.wso2.siddhi.core.event.stream.StreamEventPool.borrowEvent(StreamEventPool.java:56)
+	org.wso2.siddhi.core.event.stream.converter.ConversionStreamEventChunk.convertAndAdd(ConversionStreamEventChunk.java:93)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:84)
+TRACE 300282:
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:139)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+TRACE 300041:
+	java.util.zip.ZipFile.open(ZipFile.java:Unknown line)
+	java.util.zip.ZipFile.<init>(ZipFile.java:215)
+	java.util.zip.ZipFile.<init>(ZipFile.java:145)
+	java.util.jar.JarFile.<init>(JarFile.java:154)
+TRACE 300294:
+	java.util.ArrayList.iterator(ArrayList.java:814)
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:87)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:147)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+TRACE 300295:
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:92)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
+TRACE 300287:
+	sun.misc.Unsafe.park(Unsafe.java:Unknown line)
+	java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:349)
+	com.lmax.disruptor.SleepingWaitStrategy.applyWaitMethod(SleepingWaitStrategy.java:78)
+	com.lmax.disruptor.SleepingWaitStrategy.waitFor(SleepingWaitStrategy.java:51)
+TRACE 300068:
+	java.util.zip.ZipFile.read(ZipFile.java:Unknown line)
+	java.util.zip.ZipFile.access$1400(ZipFile.java:56)
+	java.util.zip.ZipFile$ZipFileInputStream.read(ZipFile.java:679)
+	java.util.zip.ZipFile$ZipFileInflaterInputStream.fill(ZipFile.java:415)
+TRACE 300293:
+	com.lmax.disruptor.SleepingWaitStrategy.waitFor(SleepingWaitStrategy.java:51)
+	com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:55)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:123)
+	java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+TRACE 300260:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300274:
+	com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:55)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:123)
+	java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+TRACE 300298:
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:92)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
+TRACE 300060:
+	java.util.jar.JarVerifier.<init>(JarVerifier.java:550)
+	java.util.jar.JarFile.getManifestFromReference(JarFile.java:183)
+	java.util.jar.JarFile.getManifest(JarFile.java:167)
+	sun.misc.URLClassPath$JarLoader$2.getManifest(URLClassPath.java:779)
+TRACE 300065:
+	java.util.jar.JarFile.initializeVerifier(JarFile.java:334)
+	java.util.jar.JarFile.getInputStream(JarFile.java:415)
+	sun.misc.URLClassPath$JarLoader$2.getInputStream(URLClassPath.java:775)
+	sun.misc.Resource.cachedInputStream(Resource.java:77)
+TRACE 300291:
+	com.lmax.disruptor.util.Util.getMinimumSequence(Util.java:69)
+	com.lmax.disruptor.SingleProducerSequencer.next(SingleProducerSequencer.java:104)
+	com.lmax.disruptor.SingleProducerSequencer.next(SingleProducerSequencer.java:81)
+	com.lmax.disruptor.RingBuffer.next(RingBuffer.java:207)
+TRACE 300013:
+	java.io.FileInputStream.readBytes(FileInputStream.java:Unknown line)
+	java.io.FileInputStream.read(FileInputStream.java:272)
+	sun.misc.Resource.getBytes(Resource.java:124)
+	java.net.URLClassLoader.defineClass(URLClassLoader.java:444)
+TRACE 300130:
+	java.util.TreeMap.values(TreeMap.java:833)
+	java.beans.Introspector.getTargetPropertyInfo(Introspector.java:547)
+	java.beans.Introspector.getBeanInfo(Introspector.java:418)
+	java.beans.Introspector.getBeanInfo(Introspector.java:163)
+TRACE 300241:
+	java.util.logging.LogManager$LoggerContext.processParentHandlers(LogManager.java:700)
+	java.util.logging.LogManager$LoggerContext.addLocalLogger(LogManager.java:656)
+	java.util.logging.LogManager$LoggerContext.addLocalLogger(LogManager.java:608)
+	java.util.logging.LogManager.addLogger(LogManager.java:1005)
+TRACE 300253:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300267:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300030:
+	java.lang.ClassLoader.defineClass1(ClassLoader.java:Unknown line)
+	java.lang.ClassLoader.defineClass(ClassLoader.java:800)
+	java.security.SecureClassLoader.defineClass(SecureClassLoader.java:142)
+	java.net.URLClassLoader.defineClass(URLClassLoader.java:449)
+TRACE 300047:
+	java.util.zip.ZipFile.getInflater(ZipFile.java:450)
+	java.util.zip.ZipFile.getInputStream(ZipFile.java:369)
+	java.util.jar.JarFile.getBytes(JarFile.java:389)
+	java.util.jar.JarFile.hasClassPathAttribute(JarFile.java:491)
+TRACE 300270:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300079:
+	java.net.URLClassLoader.findResource(URLClassLoader.java:548)
+	java.lang.ClassLoader.getResource(ClassLoader.java:1147)
+	java.lang.ClassLoader.getResource(ClassLoader.java:1142)
+	org.apache.log4j.helpers.Loader.getResource(Loader.java:96)
+TRACE 300266:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300283:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300147:
+	java.io.UnixFileSystem.list(UnixFileSystem.java:Unknown line)
+	java.io.File.list(File.java:1116)
+	java.io.File.listFiles(File.java:1201)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.getContentFromDirectory(SiddhiExtensionLoader.java:96)
+TRACE 300250:
+	java.lang.System.arraycopy(System.java:Unknown line)
+	org.wso2.siddhi.core.event.Event.copyFrom(Event.java:93)
+	org.wso2.siddhi.core.stream.StreamJunction.sendEvent(StreamJunction.java:86)
+	org.wso2.siddhi.core.stream.StreamJunction$Publisher.send(StreamJunction.java:253)
+TRACE 300269:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300285:
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:150)
+	java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	java.lang.Thread.run(Thread.java:745)
+TRACE 300296:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300309:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300311:
+	org.apache.log4j.Category.getEffectiveLevel(Category.java:439)
+	org.apache.log4j.Logger.isTraceEnabled(Logger.java:209)
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:73)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:147)
+TRACE 300001:
+	java.io.UnixFileSystem.getBooleanAttributes0(UnixFileSystem.java:Unknown line)
+	java.io.UnixFileSystem.getBooleanAttributes(UnixFileSystem.java:242)
+	java.io.File.exists(File.java:813)
+	sun.misc.PostVMInitHook.trackJavaUsage(PostVMInitHook.java:42)
+TRACE 300061:
+	java.util.jar.JarVerifier.<init>(JarVerifier.java:781)
+	java.util.jar.JarFile.getManifestFromReference(JarFile.java:183)
+	java.util.jar.JarFile.getManifest(JarFile.java:167)
+	sun.misc.URLClassPath$JarLoader$2.getManifest(URLClassPath.java:779)
+TRACE 300064:
+	sun.security.util.ManifestEntryVerifier.<init>(ManifestEntryVerifier.java:84)
+	java.util.jar.JarFile.initializeVerifier(JarFile.java:341)
+	java.util.jar.JarFile.getInputStream(JarFile.java:415)
+	sun.misc.URLClassPath$JarLoader$2.getInputStream(URLClassPath.java:775)
+TRACE 300085:
+	java.io.FileInputStream.readBytes(FileInputStream.java:Unknown line)
+	java.io.FileInputStream.read(FileInputStream.java:272)
+	java.io.BufferedInputStream.read1(BufferedInputStream.java:273)
+	java.io.BufferedInputStream.read(BufferedInputStream.java:334)
+TRACE 300160:
+	java.lang.System.arraycopy(System.java:Unknown line)
+	java.util.ArrayList.add(ArrayList.java:458)
+	org.antlr.v4.runtime.atn.ATNState.addTransition(ATNState.java:194)
+	org.antlr.v4.runtime.atn.ATNState.addTransition(ATNState.java:182)
+TRACE 300175:
+	org.antlr.v4.runtime.atn.ParserATNSimulator.closure_(ParserATNSimulator.java:1444)
+	org.antlr.v4.runtime.atn.ParserATNSimulator.closureCheckingStopState(ParserATNSimulator.java:1431)
+	org.antlr.v4.runtime.atn.ParserATNSimulator.closure_(ParserATNSimulator.java:1492)
+	org.antlr.v4.runtime.atn.ParserATNSimulator.closureCheckingStopState(ParserATNSimulator.java:1431)
+TRACE 300209:
+	sun.reflect.ReflectionFactory.newFieldAccessor(ReflectionFactory.java:140)
+	java.lang.reflect.Field.acquireFieldAccessor(Field.java:1057)
+	java.lang.reflect.Field.getFieldAccessor(Field.java:1038)
+	java.lang.reflect.Field.get(Field.java:379)
+TRACE 300299:
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
+TRACE 300300:
+	java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:674)
+	java.lang.StringBuilder.append(StringBuilder.java:234)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance$1.receive(<Unknown Source>:Unknown line)
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:92)
+TRACE 300304:
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:73)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:147)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+TRACE 300307:
+	com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:62)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:123)
+	java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+TRACE 300310:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300313:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300003:
+	sun.misc.URLClassPath.getLoader(URLClassPath.java:325)
+	sun.misc.URLClassPath.getResource(URLClassPath.java:198)
+	java.net.URLClassLoader$1.run(URLClassLoader.java:358)
+	java.net.URLClassLoader$1.run(URLClassLoader.java:355)
+TRACE 300063:
+	java.util.jar.JarFile.initializeVerifier(JarFile.java:341)
+	java.util.jar.JarFile.getInputStream(JarFile.java:415)
+	sun.misc.URLClassPath$JarLoader$2.getInputStream(URLClassPath.java:775)
+	sun.misc.Resource.cachedInputStream(Resource.java:77)
+TRACE 300087:
+	java.util.zip.ZipFile.freeEntry(ZipFile.java:Unknown line)
+	java.util.zip.ZipFile.access$1000(ZipFile.java:56)
+	java.util.zip.ZipFile$ZipFileInputStream.close(ZipFile.java:728)
+	java.util.zip.ZipFile$ZipFileInputStream.read(ZipFile.java:687)
+TRACE 300119:
+	sun.reflect.generics.factory.CoreReflectionFactory.makeParameterizedType(CoreReflectionFactory.java:105)
+	sun.reflect.generics.visitor.Reifier.visitClassTypeSignature(Reifier.java:140)
+	sun.reflect.generics.tree.ClassTypeSignature.accept(ClassTypeSignature.java:49)
+	sun.reflect.generics.repository.MethodRepository.getReturnType(MethodRepository.java:68)
+TRACE 300136:
+	java.util.ArrayList$SubList.listIterator(ArrayList.java:1053)
+	java.util.AbstractList.listIterator(AbstractList.java:299)
+	java.util.ArrayList$SubList.iterator(ArrayList.java:1045)
+	java.util.AbstractCollection.toArray(AbstractCollection.java:179)
+TRACE 300164:
+	java.lang.String.toCharArray(String.java:2746)
+	java.util.zip.ZipCoder.getBytes(ZipCoder.java:78)
+	java.util.zip.ZipFile.getInputStream(ZipFile.java:351)
+	java.util.jar.JarFile.getInputStream(JarFile.java:412)
+TRACE 300165:
+	java.lang.Object.getClass(Object.java:Unknown line)
+	java.util.Arrays.copyOf(Arrays.java:2219)
+	org.antlr.v4.runtime.misc.Array2DHashSet.getOrAddImpl(Array2DHashSet.java:112)
+	org.antlr.v4.runtime.misc.Array2DHashSet.getOrAdd(Array2DHashSet.java:83)
+TRACE 300181:
+	java.util.zip.Inflater.inflateBytes(Inflater.java:Unknown line)
+	java.util.zip.Inflater.inflate(Inflater.java:259)
+	java.util.zip.InflaterInputStream.read(InflaterInputStream.java:152)
+	sun.misc.Resource.getBytes(Resource.java:124)
+TRACE 300252:
+	org.wso2.siddhi.core.event.stream.StreamEvent.getAttribute(StreamEvent.java:120)
+	org.wso2.siddhi.core.executor.VariableExpressionExecutor.execute(VariableExpressionExecutor.java:38)
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:34)
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:20)
+TRACE 300292:
+	org.wso2.siddhi.core.stream.StreamJunction$Publisher.send(StreamJunction.java:253)
+	org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback.send(InsertIntoStreamCallback.java:36)
+	org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter.sendToCallBacks(OutputRateLimiter.java:43)
+	org.wso2.siddhi.core.query.output.rateLimit.PassThroughOutputRateLimiter.process(PassThroughOutputRateLimiter.java:49)
+TRACE 300297:
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:92)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
+TRACE 300305:
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:93)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+	com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
+TRACE 300312:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300314:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300315:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300320:
+	java.util.IdentityHashMap.keySet(IdentityHashMap.java:963)
+	java.lang.ApplicationShutdownHooks.runHooks(ApplicationShutdownHooks.java:97)
+	java.lang.ApplicationShutdownHooks$1.run(ApplicationShutdownHooks.java:46)
+	java.lang.Shutdown.runHooks(Shutdown.java:123)
+TRACE 300006:
+	sun.misc.SharedSecrets.getJavaUtilZipFileAccess(SharedSecrets.java:185)
+	sun.misc.URLClassPath$JarLoader.<clinit>(URLClassPath.java:599)
+	sun.misc.URLClassPath$3.run(URLClassPath.java:366)
+	sun.misc.URLClassPath$3.run(URLClassPath.java:356)
+TRACE 300007:
+	java.util.zip.ZipFile.<clinit>(ZipFile.java:743)
+	sun.misc.Unsafe.ensureClassInitialized(Unsafe.java:Unknown line)
+	sun.misc.SharedSecrets.getJavaUtilZipFileAccess(SharedSecrets.java:185)
+	sun.misc.URLClassPath$JarLoader.<clinit>(URLClassPath.java:599)
+TRACE 300008:
+	java.security.AccessController.doPrivileged(AccessController.java:Unknown line)
+	java.net.URLClassLoader.findClass(URLClassLoader.java:354)
+	java.lang.ClassLoader.loadClass(ClassLoader.java:425)
+	java.lang.ClassLoader.loadClass(ClassLoader.java:412)
+TRACE 300011:
+	java.lang.ClassLoader.getPackage(ClassLoader.java:1658)
+	java.lang.ClassLoader.getPackage(ClassLoader.java:1656)
+	java.net.URLClassLoader.getAndVerifyPackage(URLClassLoader.java:382)
+	java.net.URLClassLoader.defineClass(URLClassLoader.java:417)
+TRACE 300016:
+	sun.misc.Perf$GetPerfAction.run(Perf.java:89)
+	java.security.AccessController.doPrivileged(AccessController.java:Unknown line)
+	sun.misc.PerfCounter.<clinit>(PerfCounter.java:51)
+	java.net.URLClassLoader.defineClass(URLClassLoader.java:448)
+TRACE 300019:
+	sun.misc.Perf.createLong(Perf.java:Unknown line)
+	sun.misc.PerfCounter.<init>(PerfCounter.java:65)
+	sun.misc.PerfCounter.newPerfCounter(PerfCounter.java:71)
+	sun.misc.PerfCounter$CoreCounters.<clinit>(PerfCounter.java:128)
+TRACE 300020:
+	java.nio.DirectByteBuffer.asLongBuffer(DirectByteBuffer.java:825)
+	sun.misc.PerfCounter.<init>(PerfCounter.java:67)
+	sun.misc.PerfCounter.newPerfCounter(PerfCounter.java:71)
+	sun.misc.PerfCounter$CoreCounters.<clinit>(PerfCounter.java:128)
+TRACE 300021:
+	java.security.SecureClassLoader.getPermissions(SecureClassLoader.java:192)
+	java.net.URLClassLoader.getPermissions(URLClassLoader.java:635)
+	sun.misc.Launcher$AppClassLoader.getPermissions(Launcher.java:316)
+	java.security.SecureClassLoader.getProtectionDomain(SecureClassLoader.java:206)
+TRACE 300031:
+	sun.misc.URLClassPath$JarLoader.ensureOpen(URLClassPath.java:665)
+	sun.misc.URLClassPath$JarLoader.<init>(URLClassPath.java:638)
+	sun.misc.URLClassPath$3.run(URLClassPath.java:366)
+	sun.misc.URLClassPath$3.run(URLClassPath.java:356)
+TRACE 300037:
+	java.lang.Class.forName0(Class.java:Unknown line)
+	java.lang.Class.forName(Class.java:274)
+	sun.nio.cs.FastCharsetProvider.lookup(FastCharsetProvider.java:119)
+	sun.nio.cs.FastCharsetProvider.charsetForName(FastCharsetProvider.java:136)
+TRACE 300038:
+	sun.reflect.NativeConstructorAccessorImpl.newInstance0(NativeConstructorAccessorImpl.java:Unknown line)
+	sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+TRACE 300039:
+	java.util.zip.ZipFile.<init>(ZipFile.java:466)
+	java.util.zip.ZipFile.<init>(ZipFile.java:145)
+	java.util.jar.JarFile.<init>(JarFile.java:154)
+	java.util.jar.JarFile.<init>(JarFile.java:91)
+TRACE 300040:
+	java.util.zip.ZipFile.<init>(ZipFile.java:213)
+	java.util.zip.ZipFile.<init>(ZipFile.java:145)
+	java.util.jar.JarFile.<init>(JarFile.java:154)
+	java.util.jar.JarFile.<init>(JarFile.java:91)
+TRACE 300046:
+	java.util.zip.ZipFile.getInputStream(ZipFile.java:356)
+	java.util.jar.JarFile.getBytes(JarFile.java:389)
+	java.util.jar.JarFile.hasClassPathAttribute(JarFile.java:491)
+	java.util.jar.JavaUtilJarAccessImpl.jarFileHasClassPathAttribute(JavaUtilJarAccessImpl.java:37)
+TRACE 300052:
+	java.lang.Object.<init>(Object.java:37)
+	java.io.InputStream.<init>(InputStream.java:45)
+	java.util.zip.ZipFile$ZipFileInputStream.<init>(ZipFile.java:659)
+	java.util.zip.ZipFile.getInputStream(ZipFile.java:356)
+TRACE 300067:
+	sun.launcher.LauncherHelper.getMainMethod(LauncherHelper.java:507)
+	sun.launcher.LauncherHelper.checkAndLoadMain(LauncherHelper.java:486)
+TRACE 300069:
+	java.net.URLStreamHandler.parseURL(URLStreamHandler.java:144)
+	sun.net.www.protocol.file.Handler.parseURL(Handler.java:67)
+	java.net.URL.<init>(URL.java:614)
+	java.net.URL.<init>(URL.java:482)
+TRACE 300070:
+	org.apache.log4j.LogManager.<clinit>(LogManager.java:78)
+	org.apache.log4j.Logger.getLogger(Logger.java:117)
+	org.wso2.siddhi.core.SiddhiManager.<clinit>(SiddhiManager.java:34)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300071:
+	java.lang.AbstractStringBuilder.<init>(AbstractStringBuilder.java:64)
+	java.lang.StringBuilder.<init>(StringBuilder.java:85)
+	java.net.URLStreamHandler.parseURL(URLStreamHandler.java:249)
+	sun.net.www.protocol.file.Handler.parseURL(Handler.java:67)
+TRACE 300073:
+	sun.reflect.ReflectionFactory.newMethodAccessor(ReflectionFactory.java:155)
+	java.lang.reflect.Method.acquireMethodAccessor(Method.java:669)
+	java.lang.reflect.Method.invoke(Method.java:604)
+	org.apache.log4j.helpers.Loader.getTCL(Loader.java:154)
+TRACE 300077:
+	java.lang.System.arraycopy(System.java:Unknown line)
+	java.util.Arrays.copyOf(Arrays.java:2272)
+	java.lang.StringCoding.safeTrim(StringCoding.java:79)
+	java.lang.StringCoding.access$300(StringCoding.java:50)
+TRACE 300080:
+	sun.misc.URLClassPath$FileLoader.getResource(URLClassPath.java:1066)
+	sun.misc.URLClassPath$FileLoader.findResource(URLClassPath.java:1047)
+	sun.misc.URLClassPath.findResource(URLClassPath.java:176)
+	java.net.URLClassLoader$2.run(URLClassLoader.java:551)
+TRACE 300081:
+	sun.net.www.MessageHeader.grow(MessageHeader.java:344)
+	sun.net.www.MessageHeader.<init>(MessageHeader.java:56)
+	sun.net.www.URLConnection.<init>(URLConnection.java:58)
+	sun.net.www.protocol.file.FileURLConnection.<init>(FileURLConnection.java:68)
+TRACE 300082:
+	sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:93)
+	sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:188)
+	java.net.URL.openStream(URL.java:1037)
+	org.apache.log4j.PropertyConfigurator.doConfigure(PropertyConfigurator.java:433)
+TRACE 300084:
+	java.util.Properties.load(Properties.java:341)
+	org.apache.log4j.PropertyConfigurator.doConfigure(PropertyConfigurator.java:433)
+	org.apache.log4j.helpers.OptionConverter.selectAndConfigure(OptionConverter.java:470)
+	org.apache.log4j.LogManager.<clinit>(LogManager.java:122)
+TRACE 300086:
+	java.lang.Class.getDeclaredConstructors0(Class.java:Unknown line)
+	java.lang.Class.privateGetDeclaredConstructors(Class.java:2585)
+	java.lang.Class.getConstructor0(Class.java:2885)
+	java.lang.Class.newInstance(Class.java:350)
+TRACE 300088:
+	java.beans.Introspector.<clinit>(Introspector.java:100)
+	org.apache.log4j.config.PropertySetter.setProperty(PropertySetter.java:154)
+	org.apache.log4j.config.PropertySetter.setProperties(PropertySetter.java:129)
+	org.apache.log4j.config.PropertySetter.setProperties(PropertySetter.java:96)
+TRACE 300089:
+	java.beans.Introspector.<clinit>(Introspector.java:108)
+	org.apache.log4j.config.PropertySetter.setProperty(PropertySetter.java:154)
+	org.apache.log4j.config.PropertySetter.setProperties(PropertySetter.java:129)
+	org.apache.log4j.config.PropertySetter.setProperties(PropertySetter.java:96)
+TRACE 300094:
+	java.beans.ThreadGroupContext.getBeanInfoFinder(ThreadGroupContext.java:119)
+	java.beans.Introspector.findExplicitBeanInfo(Introspector.java:438)
+	java.beans.Introspector.<init>(Introspector.java:388)
+	java.beans.Introspector.getBeanInfo(Introspector.java:163)
+TRACE 300104:
+	sun.reflect.generics.repository.ConstructorRepository.parse(ConstructorRepository.java:55)
+	sun.reflect.generics.repository.ConstructorRepository.parse(ConstructorRepository.java:43)
+	sun.reflect.generics.repository.AbstractRepository.<init>(AbstractRepository.java:74)
+	sun.reflect.generics.repository.GenericDeclRepository.<init>(GenericDeclRepository.java:48)
+TRACE 300114:
+	java.util.HashMap.values(HashMap.java:1033)
+	java.beans.Introspector.getTargetMethodInfo(Introspector.java:1156)
+	java.beans.Introspector.getBeanInfo(Introspector.java:416)
+	java.beans.Introspector.getBeanInfo(Introspector.java:163)
+TRACE 300125:
+	java.beans.PropertyDescriptor.setReadMethod(PropertyDescriptor.java:260)
+	java.beans.PropertyDescriptor.<init>(PropertyDescriptor.java:159)
+	java.beans.Introspector.getTargetPropertyInfo(Introspector.java:502)
+	java.beans.Introspector.getBeanInfo(Introspector.java:418)
+TRACE 300134:
+	org.apache.log4j.config.PropertySetter.setProperty(PropertySetter.java:203)
+	org.apache.log4j.config.PropertySetter.setProperty(PropertySetter.java:164)
+	org.apache.log4j.config.PropertySetter.setProperties(PropertySetter.java:129)
+	org.apache.log4j.config.PropertySetter.setProperties(PropertySetter.java:96)
+TRACE 300137:
+	java.util.regex.Pattern.<clinit>(Pattern.java:5005)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.loadSiddhiExtensions(SiddhiExtensionLoader.java:43)
+	org.wso2.siddhi.core.config.SiddhiContext.<init>(SiddhiContext.java:36)
+	org.wso2.siddhi.core.SiddhiManager.<init>(SiddhiManager.java:39)
+TRACE 300142:
+	java.util.regex.Pattern.newSlice(Pattern.java:3329)
+	java.util.regex.Pattern.atom(Pattern.java:2199)
+	java.util.regex.Pattern.sequence(Pattern.java:2046)
+	java.util.regex.Pattern.expr(Pattern.java:1964)
+TRACE 300148:
+	java.util.regex.Pattern.matcher(Pattern.java:1088)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.getContent(SiddhiExtensionLoader.java:76)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.getContentFromDirectory(SiddhiExtensionLoader.java:99)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.getContent(SiddhiExtensionLoader.java:71)
+TRACE 300149:
+	java.util.regex.Matcher.<init>(Matcher.java:224)
+	java.util.regex.Pattern.matcher(Pattern.java:1088)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.getContent(SiddhiExtensionLoader.java:76)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.getContentFromDirectory(SiddhiExtensionLoader.java:99)
+TRACE 300151:
+	java.util.regex.Pattern$CharProperty.match(Pattern.java:3694)
+	java.util.regex.Pattern$Curly.match0(Pattern.java:4158)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4132)
+	java.util.regex.Matcher.match(Matcher.java:1221)
+TRACE 300152:
+	java.lang.Character.isHighSurrogate(Character.java:4531)
+	java.lang.Character.codePointAt(Character.java:4669)
+	java.util.regex.Pattern$CharProperty.match(Pattern.java:3693)
+	java.util.regex.Pattern$Curly.match0(Pattern.java:4158)
+TRACE 300153:
+	java.util.zip.ZipFile.getNextEntry(ZipFile.java:Unknown line)
+	java.util.zip.ZipFile.access$500(ZipFile.java:56)
+	java.util.zip.ZipFile$1.nextElement(ZipFile.java:497)
+	java.util.zip.ZipFile$1.nextElement(ZipFile.java:483)
+TRACE 300154:
+	java.io.UnixFileSystem.getBooleanAttributes0(UnixFileSystem.java:Unknown line)
+	java.io.UnixFileSystem.getBooleanAttributes(UnixFileSystem.java:242)
+	java.io.File.isDirectory(File.java:843)
+	org.wso2.siddhi.core.util.SiddhiExtensionLoader.getContent(SiddhiExtensionLoader.java:70)
+TRACE 300155:
+	java.util.Arrays.copyOf(Arrays.java:2367)
+	java.lang.String.concat(String.java:1975)
+	java.net.URLClassLoader.isSealed(URLClassLoader.java:523)
+	java.net.URLClassLoader.getAndVerifyPackage(URLClassLoader.java:394)
+TRACE 300156:
+	java.util.Arrays.asList(Arrays.java:2828)
+	org.antlr.v4.runtime.atn.ATNState.<clinit>(ATNState.java:119)
+	org.antlr.v4.runtime.atn.ATNDeserializer.stateFactory(ATNDeserializer.java:689)
+	org.antlr.v4.runtime.atn.ATNDeserializer.deserialize(ATNDeserializer.java:184)
+TRACE 300157:
+	java.lang.Integer.valueOf(Integer.java:640)
+	org.antlr.v4.runtime.atn.ATNDeserializer.deserialize(ATNDeserializer.java:191)
+	org.wso2.siddhi.query.compiler.SiddhiQLLexer.<clinit>(SiddhiQLLexer.java:475)
+	org.wso2.siddhi.query.compiler.SiddhiCompiler.parse(SiddhiCompiler.java:36)
+TRACE 300161:
+	org.wso2.siddhi.query.compiler.SiddhiCompiler.parse(SiddhiCompiler.java:41)
+	org.wso2.siddhi.core.SiddhiManager.createExecutionPlanRuntime(SiddhiManager.java:58)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300162:
+	java.lang.StringCoding$StringEncoder.encode(StringCoding.java:300)
+	java.lang.StringCoding.encode(StringCoding.java:344)
+	java.lang.String.getBytes(String.java:916)
+	java.io.UnixFileSystem.getBooleanAttributes0(UnixFileSystem.java:Unknown line)
+TRACE 300163:
+	java.lang.Throwable.fillInStackTrace(Throwable.java:Unknown line)
+	java.lang.Throwable.fillInStackTrace(Throwable.java:783)
+	java.lang.Throwable.<init>(Throwable.java:287)
+	java.lang.Exception.<init>(Exception.java:84)
+TRACE 300166:
+	java.util.zip.InflaterInputStream.<init>(InflaterInputStream.java:88)
+	java.util.zip.ZipFile$ZipFileInflaterInputStream.<init>(ZipFile.java:389)
+	java.util.zip.ZipFile.getInputStream(ZipFile.java:370)
+	java.util.jar.JarFile.getInputStream(JarFile.java:412)
+TRACE 300168:
+	java.util.LinkedList.linkLast(LinkedList.java:140)
+	java.util.LinkedList.add(LinkedList.java:336)
+	org.antlr.v4.runtime.misc.FlexibleHashMap.put(FlexibleHashMap.java:137)
+	org.antlr.v4.runtime.atn.PredictionMode.getConflictingAltSubsets(PredictionMode.java:565)
+TRACE 300169:
+	java.lang.System.identityHashCode(System.java:Unknown line)
+	java.util.IdentityHashMap.hash(IdentityHashMap.java:301)
+	java.util.IdentityHashMap.put(IdentityHashMap.java:429)
+	org.antlr.v4.runtime.atn.PredictionContext.getCachedContext(PredictionContext.java:624)
+TRACE 300170:
+	org.antlr.v4.runtime.atn.PredictionContext.getCachedContext(PredictionContext.java:593)
+	org.antlr.v4.runtime.atn.PredictionContext.getCachedContext(PredictionContext.java:590)
+	org.antlr.v4.runtime.atn.PredictionContext.getCachedContext(PredictionContext.java:590)
+	org.antlr.v4.runtime.atn.PredictionContext.getCachedContext(PredictionContext.java:590)
+TRACE 300171:
+	java.util.ArrayList.<init>(ArrayList.java:144)
+	org.antlr.v4.runtime.misc.FlexibleHashMap.values(FlexibleHashMap.java:159)
+	org.antlr.v4.runtime.atn.PredictionMode.getConflictingAltSubsets(PredictionMode.java:569)
+	org.antlr.v4.runtime.atn.PredictionMode.hasSLLConflictTerminatingPrediction(PredictionMode.java:266)
+TRACE 300172:
+	org.antlr.v4.runtime.misc.MurmurHash.update(MurmurHash.java:95)
+	org.antlr.v4.runtime.atn.PredictionContext.calculateHashCode(PredictionContext.java:147)
+	org.antlr.v4.runtime.atn.SingletonPredictionContext.<init>(SingletonPredictionContext.java:38)
+	org.antlr.v4.runtime.atn.SingletonPredictionContext.create(SingletonPredictionContext.java:49)
+TRACE 300174:
+	java.util.ArrayList.ensureExplicitCapacity(ArrayList.java:212)
+	java.util.ArrayList.ensureCapacityInternal(ArrayList.java:208)
+	java.util.ArrayList.add(ArrayList.java:440)
+	org.antlr.v4.runtime.misc.FlexibleHashMap.values(FlexibleHashMap.java:163)
+TRACE 300176:
+	java.util.LinkedList$ListItr.next(LinkedList.java:892)
+	org.antlr.v4.runtime.misc.FlexibleHashMap.expand(FlexibleHashMap.java:216)
+	org.antlr.v4.runtime.misc.FlexibleHashMap.put(FlexibleHashMap.java:122)
+	org.antlr.v4.runtime.atn.PredictionMode.getConflictingAltSubsets(PredictionMode.java:565)
+TRACE 300177:
+	org.antlr.v4.runtime.atn.PredictionMode$AltAndContextConfigEqualityComparator.hashCode(PredictionMode.java:129)
+	org.antlr.v4.runtime.atn.PredictionMode$AltAndContextConfigEqualityComparator.hashCode(PredictionMode.java:117)
+	org.antlr.v4.runtime.misc.FlexibleHashMap.getBucket(FlexibleHashMap.java:98)
+	org.antlr.v4.runtime.misc.FlexibleHashMap.put(FlexibleHashMap.java:123)
+TRACE 300178:
+	org.antlr.v4.runtime.atn.ATNConfigSet$AbstractConfigHashSet.createBucket(ATNConfigSet.java:398)
+	org.antlr.v4.runtime.atn.ATNConfigSet$AbstractConfigHashSet.createBucket(ATNConfigSet.java:372)
+	org.antlr.v4.runtime.misc.Array2DHashSet.expand(Array2DHashSet.java:188)
+	org.antlr.v4.runtime.misc.Array2DHashSet.getOrAdd(Array2DHashSet.java:82)
+TRACE 300179:
+	org.antlr.v4.runtime.misc.Array2DHashSet.expand(Array2DHashSet.java:178)
+	org.antlr.v4.runtime.misc.Array2DHashSet.getOrAdd(Array2DHashSet.java:82)
+	org.antlr.v4.runtime.atn.ATNConfigSet.add(ATNConfigSet.java:167)
+	org.antlr.v4.runtime.atn.ParserATNSimulator.closure_(ParserATNSimulator.java:1447)
+TRACE 300180:
+	org.antlr.v4.runtime.atn.ArrayPredictionContext.<init>(ArrayPredictionContext.java:48)
+	org.antlr.v4.runtime.atn.PredictionContext.merge(PredictionContext.java:197)
+	org.antlr.v4.runtime.atn.ATNConfigSet.add(ATNConfigSet.java:175)
+	org.antlr.v4.runtime.atn.ParserATNSimulator.closure_(ParserATNSimulator.java:1447)
+TRACE 300182:
+	java.util.Arrays.copyOf(Arrays.java:2367)
+	java.lang.AbstractStringBuilder.expandCapacity(AbstractStringBuilder.java:130)
+	java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:114)
+	java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:415)
+TRACE 300184:
+	org.wso2.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl.visitDefinition_stream(SiddhiQLBaseVisitorImpl.java:139)
+	org.wso2.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl.visitDefinition_stream(SiddhiQLBaseVisitorImpl.java:59)
+	org.wso2.siddhi.query.compiler.SiddhiQLParser$Definition_streamContext.accept(SiddhiQLParser.java:473)
+	org.antlr.v4.runtime.tree.AbstractParseTreeVisitor.visit(AbstractParseTreeVisitor.java:44)
+TRACE 300199:
+	org.wso2.siddhi.core.ExecutionPlanRuntime.<init>(ExecutionPlanRuntime.java:59)
+	org.wso2.siddhi.core.util.parser.ExecutionPlanParser.parse(ExecutionPlanParser.java:111)
+	org.wso2.siddhi.core.SiddhiManager.createExecutionPlanRuntime(SiddhiManager.java:52)
+	org.wso2.siddhi.core.SiddhiManager.createExecutionPlanRuntime(SiddhiManager.java:58)
+TRACE 300200:
+	java.util.zip.InflaterInputStream.read(InflaterInputStream.java:152)
+	sun.misc.Resource.getBytes(Resource.java:124)
+	java.net.URLClassLoader.defineClass(URLClassLoader.java:444)
+	java.net.URLClassLoader.access$100(URLClassLoader.java:71)
+TRACE 300201:
+	java.util.concurrent.ConcurrentHashMap.ensureSegment(ConcurrentHashMap.java:746)
+	java.util.concurrent.ConcurrentHashMap.putIfAbsent(ConcurrentHashMap.java:1149)
+	java.lang.ClassLoader.checkCerts(ClassLoader.java:948)
+	java.lang.ClassLoader.preDefineClass(ClassLoader.java:666)
+TRACE 300202:
+	java.util.zip.ZipCoder.getBytes(ZipCoder.java:77)
+	java.util.zip.ZipFile.getEntry(ZipFile.java:306)
+	java.util.jar.JarFile.getEntry(JarFile.java:227)
+	java.util.jar.JarFile.getJarEntry(JarFile.java:210)
+TRACE 300203:
+	sun.misc.Unsafe.getObjectVolatile(Unsafe.java:Unknown line)
+	java.util.concurrent.ConcurrentHashMap.entryAt(ConcurrentHashMap.java:305)
+	java.util.concurrent.ConcurrentHashMap$Segment.put(ConcurrentHashMap.java:438)
+	java.util.concurrent.ConcurrentHashMap.putIfAbsent(ConcurrentHashMap.java:1150)
+TRACE 300204:
+	org.wso2.siddhi.core.util.parser.SingleInputStreamParser.generateProcessor(SingleInputStreamParser.java:129)
+	org.wso2.siddhi.core.util.parser.SingleInputStreamParser.parseInputStream(SingleInputStreamParser.java:86)
+	org.wso2.siddhi.core.util.parser.InputStreamParser.parse(InputStreamParser.java:55)
+	org.wso2.siddhi.core.util.parser.QueryParser.parse(QueryParser.java:61)
+TRACE 300205:
+	java.util.Arrays.copyOf(Arrays.java:2271)
+	java.util.zip.ZipCoder.getBytes(ZipCoder.java:89)
+	java.util.zip.ZipFile.getInputStream(ZipFile.java:351)
+	java.util.jar.JarFile.getInputStream(JarFile.java:412)
+TRACE 300208:
+	com.lmax.disruptor.dsl.Disruptor.<init>(Disruptor.java:87)
+	org.wso2.siddhi.core.stream.StreamJunction.startProcessing(StreamJunction.java:177)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300211:
+	com.lmax.disruptor.dsl.Disruptor.createEventProcessors(Disruptor.java:407)
+	com.lmax.disruptor.dsl.Disruptor.handleEventsWith(Disruptor.java:114)
+	org.wso2.siddhi.core.stream.StreamJunction.startProcessing(StreamJunction.java:181)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300218:
+	java.beans.PropertyChangeSupport.<init>(PropertyChangeSupport.java:82)
+	java.util.logging.LogManager.<init>(LogManager.java:161)
+	java.util.logging.LogManager.<init>(LogManager.java:268)
+	java.util.logging.LogManager$1.run(LogManager.java:200)
+TRACE 300219:
+	java.beans.PropertyChangeSupport$PropertyChangeListenerMap.<clinit>(PropertyChangeSupport.java:506)
+	java.beans.PropertyChangeSupport.<init>(PropertyChangeSupport.java:82)
+	java.util.logging.LogManager.<init>(LogManager.java:161)
+	java.util.logging.LogManager.<init>(LogManager.java:268)
+TRACE 300238:
+	sun.util.logging.LoggingSupport.<clinit>(LoggingSupport.java:48)
+	sun.util.logging.PlatformLogger.redirectPlatformLoggers(PlatformLogger.java:213)
+	java.util.logging.LogManager$2.run(LogManager.java:323)
+	java.util.logging.LogManager$2.run(LogManager.java:318)
+TRACE 300239:
+	java.lang.Class.forName0(Class.java:Unknown line)
+	java.lang.Class.forName(Class.java:274)
+	sun.util.logging.LoggingSupport$1.run(LoggingSupport.java:54)
+	sun.util.logging.LoggingSupport$1.run(LoggingSupport.java:49)
+TRACE 300240:
+	java.util.logging.LogManager$LoggerContext.addLocalLogger(LogManager.java:647)
+	java.util.logging.LogManager$LoggerContext.addLocalLogger(LogManager.java:608)
+	java.util.logging.LogManager.addLogger(LogManager.java:1005)
+	java.util.logging.LogManager$1.run(LogManager.java:209)
+TRACE 300244:
+	org.wso2.siddhi.core.event.Event.<init>(Event.java:44)
+	org.wso2.siddhi.core.event.EventFactory.newInstance(EventFactory.java:32)
+	org.wso2.siddhi.core.event.EventFactory.newInstance(EventFactory.java:23)
+	com.lmax.disruptor.RingBuffer.fill(RingBuffer.java:1180)
+TRACE 300246:
+	org.wso2.siddhi.core.event.ComplexEventChunk.hasNext(ComplexEventChunk.java:97)
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:77)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:147)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+TRACE 300247:
+	com.lmax.disruptor.RingBuffer.next(RingBuffer.java:207)
+	org.wso2.siddhi.core.stream.StreamJunction.sendData(StreamJunction.java:144)
+	org.wso2.siddhi.core.stream.StreamJunction.access$100(StreamJunction.java:44)
+	org.wso2.siddhi.core.stream.StreamJunction$Publisher.send(StreamJunction.java:268)
+TRACE 300248:
+	java.lang.Boolean.booleanValue(Boolean.java:131)
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:35)
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:20)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:142)
+TRACE 300249:
+	sun.misc.Unsafe.getLongVolatile(Unsafe.java:Unknown line)
+	com.lmax.disruptor.Sequence.get(Sequence.java:71)
+	com.lmax.disruptor.SleepingWaitStrategy.waitFor(SleepingWaitStrategy.java:49)
+	com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:55)
+TRACE 300251:
+	java.util.ArrayList.add(ArrayList.java:440)
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:90)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+TRACE 300256:
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:35)
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:20)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:142)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+TRACE 300257:
+	java.lang.System.currentTimeMillis(System.java:Unknown line)
+	org.wso2.siddhi.core.stream.input.InputHandler.send(InputHandler.java:47)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300258:
+	java.util.ArrayList$Itr.<init>(ArrayList.java:822)
+	java.util.ArrayList$Itr.<init>(ArrayList.java:820)
+	java.util.ArrayList.iterator(ArrayList.java:814)
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:87)
+TRACE 300261:
+	org.wso2.siddhi.core.stream.StreamJunction.sendEvent(StreamJunction.java:90)
+	org.wso2.siddhi.core.stream.StreamJunction$Publisher.send(StreamJunction.java:253)
+	org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback.send(InsertIntoStreamCallback.java:36)
+	org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter.sendToCallBacks(OutputRateLimiter.java:43)
+TRACE 300262:
+	org.wso2.siddhi.core.executor.condition.compare.greater_than.GreaterThanCompareConditionExpressionExecutorIntFloat.execute(GreaterThanCompareConditionExpressionExecutorIntFloat.java:28)
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:35)
+	org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute(CompareConditionExpressionExecutor.java:20)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:142)
+TRACE 300264:
+	java.util.ArrayList.clear(ArrayList.java:536)
+	org.wso2.siddhi.core.stream.output.StreamCallback.receive(StreamCallback.java:93)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+TRACE 300268:
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300303:
+	java.lang.Math.getExponent(Math.java:1310)
+	java.lang.StrictMath.floorOrCeil(StrictMath.java:355)
+	java.lang.StrictMath.floor(StrictMath.java:340)
+	java.lang.Math.floor(Math.java:424)
+TRACE 300306:
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:71)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:147)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+TRACE 300308:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300316:
+	org.wso2.siddhi.core.query.selector.QuerySelector.process(QuerySelector.java:105)
+	org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process(FilterProcessor.java:147)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+TRACE 300317:
+	java.lang.Float.valueOf(Float.java:434)
+	org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main(<Unknown Source>:Unknown line)
+TRACE 300318:
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear(ProcessStreamReceiver.java:101)
+	org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive(ProcessStreamReceiver.java:86)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:239)
+	org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent(StreamJunction.java:229)
+TRACE 300321:
+	java.util.IdentityHashMap$KeySet.iterator(IdentityHashMap.java:968)
+	java.lang.ApplicationShutdownHooks.runHooks(ApplicationShutdownHooks.java:101)
+	java.lang.ApplicationShutdownHooks$1.run(ApplicationShutdownHooks.java:46)
+	java.lang.Shutdown.runHooks(Shutdown.java:123)
+CPU SAMPLES BEGIN (total = 9982) Sat Jan 10 01:41:32 2015
+rank   self  accum   count trace method
+   1 34.25% 34.25%    3419 300254 java.lang.Thread.yield
+   2 15.15% 49.40%    1512 300272 org.wso2.siddhi.core.stream.StreamJunction$StreamHandler.onEvent
+   3  6.75% 56.15%     674 300265 org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process
+   4  3.83% 59.98%     382 300273 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+   5  3.82% 63.79%     381 300279 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+   6  3.81% 67.60%     380 300275 org.wso2.siddhi.core.stream.StreamJunction.sendEvent
+   7  3.47% 71.07%     346 300276 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+   8  3.43% 74.49%     342 300284 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+   9  3.42% 77.91%     341 300277 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  10  3.39% 81.30%     338 300271 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  11  3.35% 84.64%     334 300289 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  12  3.22% 87.86%     321 300281 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  13  2.56% 90.42%     256 300280 org.wso2.siddhi.core.query.selector.QuerySelector.process
+  14  2.38% 92.81%     238 300278 sun.misc.Unsafe.park
+  15  1.47% 94.28%     147 300286 org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process
+  16  0.34% 94.62%      34 300288 org.wso2.siddhi.core.stream.output.StreamCallback.receive
+  17  0.33% 94.95%      33 300255 org.wso2.siddhi.core.event.stream.StreamEvent.<init>
+  18  0.28% 95.23%      28 300066 java.lang.ClassLoader.findBootstrapClass
+  19  0.26% 95.49%      26 300290 org.wso2.siddhi.core.event.stream.StreamEventFactory.newInstance
+  20  0.25% 95.74%      25 300282 org.wso2.siddhi.core.query.processor.filter.FilterProcessor.process
+  21  0.21% 95.95%      21 300041 java.util.zip.ZipFile.open
+  22  0.17% 96.12%      17 300294 java.util.ArrayList.iterator
+  23  0.17% 96.29%      17 300295 org.wso2.siddhi.core.stream.output.StreamCallback.receive
+  24  0.16% 96.45%      16 300287 sun.misc.Unsafe.park
+  25  0.15% 96.60%      15 300068 java.util.zip.ZipFile.read
+  26  0.15% 96.75%      15 300293 com.lmax.disruptor.SleepingWaitStrategy.waitFor
+  27  0.14% 96.89%      14 300260 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  28  0.12% 97.01%      12 300274 com.lmax.disruptor.ProcessingSequenceBarrier.waitFor
+  29  0.10% 97.11%      10 300298 org.wso2.siddhi.core.stream.output.StreamCallback.receive
+  30  0.09% 97.20%       9 300060 java.util.jar.JarVerifier.<init>
+  31  0.09% 97.30%       9 300065 java.util.jar.JarFile.initializeVerifier
+  32  0.08% 97.38%       8 300291 com.lmax.disruptor.util.Util.getMinimumSequence
+  33  0.07% 97.45%       7 300013 java.io.FileInputStream.readBytes
+  34  0.07% 97.52%       7 300130 java.util.TreeMap.values
+  35  0.07% 97.59%       7 300241 java.util.logging.LogManager$LoggerContext.processParentHandlers
+  36  0.07% 97.66%       7 300253 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  37  0.07% 97.73%       7 300267 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  38  0.06% 97.79%       6 300030 java.lang.ClassLoader.defineClass1
+  39  0.06% 97.85%       6 300047 java.util.zip.ZipFile.getInflater
+  40  0.06% 97.91%       6 300270 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  41  0.05% 97.96%       5 300079 java.net.URLClassLoader.findResource
+  42  0.05% 98.01%       5 300266 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  43  0.05% 98.06%       5 300283 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  44  0.04% 98.10%       4 300147 java.io.UnixFileSystem.list
+  45  0.04% 98.14%       4 300250 java.lang.System.arraycopy
+  46  0.04% 98.18%       4 300269 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  47  0.04% 98.22%       4 300285 com.lmax.disruptor.BatchEventProcessor.run
+  48  0.04% 98.26%       4 300296 java.lang.Float.valueOf
+  49  0.04% 98.30%       4 300309 java.lang.Float.valueOf
+  50  0.04% 98.34%       4 300311 org.apache.log4j.Category.getEffectiveLevel
+  51  0.03% 98.37%       3 300001 java.io.UnixFileSystem.getBooleanAttributes0
+  52  0.03% 98.40%       3 300061 java.util.jar.JarVerifier.<init>
+  53  0.03% 98.43%       3 300064 sun.security.util.ManifestEntryVerifier.<init>
+  54  0.03% 98.46%       3 300085 java.io.FileInputStream.readBytes
+  55  0.03% 98.49%       3 300160 java.lang.System.arraycopy
+  56  0.03% 98.52%       3 300175 org.antlr.v4.runtime.atn.ParserATNSimulator.closure_
+  57  0.03% 98.55%       3 300209 sun.reflect.ReflectionFactory.newFieldAccessor
+  58  0.03% 98.58%       3 300299 org.wso2.siddhi.core.query.input.ProcessStreamReceiver.receive
+  59  0.03% 98.61%       3 300300 java.lang.AbstractStringBuilder.append
+  60  0.03% 98.64%       3 300304 org.wso2.siddhi.core.query.selector.QuerySelector.process
+  61  0.03% 98.67%       3 300307 com.lmax.disruptor.ProcessingSequenceBarrier.waitFor
+  62  0.03% 98.70%       3 300310 java.lang.Float.valueOf
+  63  0.03% 98.73%       3 300313 java.lang.Float.valueOf
+  64  0.02% 98.75%       2 300003 sun.misc.URLClassPath.getLoader
+  65  0.02% 98.77%       2 300063 java.util.jar.JarFile.initializeVerifier
+  66  0.02% 98.79%       2 300087 java.util.zip.ZipFile.freeEntry
+  67  0.02% 98.81%       2 300119 sun.reflect.generics.factory.CoreReflectionFactory.makeParameterizedType
+  68  0.02% 98.83%       2 300136 java.util.ArrayList$SubList.listIterator
+  69  0.02% 98.85%       2 300164 java.lang.String.toCharArray
+  70  0.02% 98.87%       2 300165 java.lang.Object.getClass
+  71  0.02% 98.89%       2 300181 java.util.zip.Inflater.inflateBytes
+  72  0.02% 98.91%       2 300252 org.wso2.siddhi.core.event.stream.StreamEvent.getAttribute
+  73  0.02% 98.93%       2 300292 org.wso2.siddhi.core.stream.StreamJunction$Publisher.send
+  74  0.02% 98.95%       2 300297 org.wso2.siddhi.core.stream.output.StreamCallback.receive
+  75  0.02% 98.97%       2 300305 org.wso2.siddhi.core.stream.output.StreamCallback.receive
+  76  0.02% 98.99%       2 300312 java.lang.Float.valueOf
+  77  0.02% 99.01%       2 300314 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+  78  0.02% 99.03%       2 300315 java.lang.Float.valueOf
+  79  0.02% 99.05%       2 300320 java.util.IdentityHashMap.keySet
+  80  0.01% 99.06%       1 300006 sun.misc.SharedSecrets.getJavaUtilZipFileAccess
+  81  0.01% 99.07%       1 300007 java.util.zip.ZipFile.<clinit>
+  82  0.01% 99.08%       1 300008 java.security.AccessController.doPrivileged
+  83  0.01% 99.09%       1 300011 java.lang.ClassLoader.getPackage
+  84  0.01% 99.10%       1 300016 sun.misc.Perf$GetPerfAction.run
+  85  0.01% 99.11%       1 300019 sun.misc.Perf.createLong
+  86  0.01% 99.12%       1 300020 java.nio.DirectByteBuffer.asLongBuffer
+  87  0.01% 99.13%       1 300021 java.security.SecureClassLoader.getPermissions
+  88  0.01% 99.14%       1 300031 sun.misc.URLClassPath$JarLoader.ensureOpen
+  89  0.01% 99.15%       1 300037 java.lang.Class.forName0
+  90  0.01% 99.16%       1 300038 sun.reflect.NativeConstructorAccessorImpl.newInstance0
+  91  0.01% 99.17%       1 300039 java.util.zip.ZipFile.<init>
+  92  0.01% 99.18%       1 300040 java.util.zip.ZipFile.<init>
+  93  0.01% 99.19%       1 300046 java.util.zip.ZipFile.getInputStream
+  94  0.01% 99.20%       1 300052 java.lang.Object.<init>
+  95  0.01% 99.21%       1 300067 sun.launcher.LauncherHelper.getMainMethod
+  96  0.01% 99.22%       1 300069 java.net.URLStreamHandler.parseURL
+  97  0.01% 99.23%       1 300070 org.apache.log4j.LogManager.<clinit>
+  98  0.01% 99.24%       1 300071 java.lang.AbstractStringBuilder.<init>
+  99  0.01% 99.25%       1 300073 sun.reflect.ReflectionFactory.newMethodAccessor
+ 100  0.01% 99.26%       1 300077 java.lang.System.arraycopy
+ 101  0.01% 99.27%       1 300080 sun.misc.URLClassPath$FileLoader.getResource
+ 102  0.01% 99.28%       1 300081 sun.net.www.MessageHeader.grow
+ 103  0.01% 99.29%       1 300082 sun.net.www.protocol.file.FileURLConnection.connect
+ 104  0.01% 99.30%       1 300084 java.util.Properties.load
+ 105  0.01% 99.31%       1 300086 java.lang.Class.getDeclaredConstructors0
+ 106  0.01% 99.32%       1 300088 java.beans.Introspector.<clinit>
+ 107  0.01% 99.33%       1 300089 java.beans.Introspector.<clinit>
+ 108  0.01% 99.34%       1 300094 java.beans.ThreadGroupContext.getBeanInfoFinder
+ 109  0.01% 99.35%       1 300104 sun.reflect.generics.repository.ConstructorRepository.parse
+ 110  0.01% 99.36%       1 300114 java.util.HashMap.values
+ 111  0.01% 99.37%       1 300125 java.beans.PropertyDescriptor.setReadMethod
+ 112  0.01% 99.38%       1 300134 org.apache.log4j.config.PropertySetter.setProperty
+ 113  0.01% 99.39%       1 300137 java.util.regex.Pattern.<clinit>
+ 114  0.01% 99.40%       1 300142 java.util.regex.Pattern.newSlice
+ 115  0.01% 99.41%       1 300148 java.util.regex.Pattern.matcher
+ 116  0.01% 99.42%       1 300149 java.util.regex.Matcher.<init>
+ 117  0.01% 99.43%       1 300151 java.util.regex.Pattern$CharProperty.match
+ 118  0.01% 99.44%       1 300152 java.lang.Character.isHighSurrogate
+ 119  0.01% 99.45%       1 300153 java.util.zip.ZipFile.getNextEntry
+ 120  0.01% 99.46%       1 300154 java.io.UnixFileSystem.getBooleanAttributes0
+ 121  0.01% 99.47%       1 300155 java.util.Arrays.copyOf
+ 122  0.01% 99.48%       1 300156 java.util.Arrays.asList
+ 123  0.01% 99.49%       1 300157 java.lang.Integer.valueOf
+ 124  0.01% 99.50%       1 300161 org.wso2.siddhi.query.compiler.SiddhiCompiler.parse
+ 125  0.01% 99.51%       1 300162 java.lang.StringCoding$StringEncoder.encode
+ 126  0.01% 99.52%       1 300163 java.lang.Throwable.fillInStackTrace
+ 127  0.01% 99.53%       1 300166 java.util.zip.InflaterInputStream.<init>
+ 128  0.01% 99.54%       1 300168 java.util.LinkedList.linkLast
+ 129  0.01% 99.55%       1 300169 java.lang.System.identityHashCode
+ 130  0.01% 99.56%       1 300170 org.antlr.v4.runtime.atn.PredictionContext.getCachedContext
+ 131  0.01% 99.57%       1 300171 java.util.ArrayList.<init>
+ 132  0.01% 99.58%       1 300172 org.antlr.v4.runtime.misc.MurmurHash.update
+ 133  0.01% 99.59%       1 300174 java.util.ArrayList.ensureExplicitCapacity
+ 134  0.01% 99.60%       1 300176 java.util.LinkedList$ListItr.next
+ 135  0.01% 99.61%       1 300177 org.antlr.v4.runtime.atn.PredictionMode$AltAndContextConfigEqualityComparator.hashCode
+ 136  0.01% 99.62%       1 300178 org.antlr.v4.runtime.atn.ATNConfigSet$AbstractConfigHashSet.createBucket
+ 137  0.01% 99.63%       1 300179 org.antlr.v4.runtime.misc.Array2DHashSet.expand
+ 138  0.01% 99.64%       1 300180 org.antlr.v4.runtime.atn.ArrayPredictionContext.<init>
+ 139  0.01% 99.65%       1 300182 java.util.Arrays.copyOf
+ 140  0.01% 99.66%       1 300184 org.wso2.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl.visitDefinition_stream
+ 141  0.01% 99.67%       1 300199 org.wso2.siddhi.core.ExecutionPlanRuntime.<init>
+ 142  0.01% 99.68%       1 300200 java.util.zip.InflaterInputStream.read
+ 143  0.01% 99.69%       1 300201 java.util.concurrent.ConcurrentHashMap.ensureSegment
+ 144  0.01% 99.70%       1 300202 java.util.zip.ZipCoder.getBytes
+ 145  0.01% 99.71%       1 300203 sun.misc.Unsafe.getObjectVolatile
+ 146  0.01% 99.72%       1 300204 org.wso2.siddhi.core.util.parser.SingleInputStreamParser.generateProcessor
+ 147  0.01% 99.73%       1 300205 java.util.Arrays.copyOf
+ 148  0.01% 99.74%       1 300208 com.lmax.disruptor.dsl.Disruptor.<init>
+ 149  0.01% 99.75%       1 300211 com.lmax.disruptor.dsl.Disruptor.createEventProcessors
+ 150  0.01% 99.76%       1 300218 java.beans.PropertyChangeSupport.<init>
+ 151  0.01% 99.77%       1 300219 java.beans.PropertyChangeSupport$PropertyChangeListenerMap.<clinit>
+ 152  0.01% 99.78%       1 300238 sun.util.logging.LoggingSupport.<clinit>
+ 153  0.01% 99.79%       1 300239 java.lang.Class.forName0
+ 154  0.01% 99.80%       1 300240 java.util.logging.LogManager$LoggerContext.addLocalLogger
+ 155  0.01% 99.81%       1 300244 org.wso2.siddhi.core.event.Event.<init>
+ 156  0.01% 99.82%       1 300246 org.wso2.siddhi.core.event.ComplexEventChunk.hasNext
+ 157  0.01% 99.83%       1 300247 com.lmax.disruptor.RingBuffer.next
+ 158  0.01% 99.84%       1 300248 java.lang.Boolean.booleanValue
+ 159  0.01% 99.85%       1 300249 sun.misc.Unsafe.getLongVolatile
+ 160  0.01% 99.86%       1 300251 java.util.ArrayList.add
+ 161  0.01% 99.87%       1 300256 org.wso2.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor.execute
+ 162  0.01% 99.88%       1 300257 java.lang.System.currentTimeMillis
+ 163  0.01% 99.89%       1 300258 java.util.ArrayList$Itr.<init>
+ 164  0.01% 99.90%       1 300261 org.wso2.siddhi.core.stream.StreamJunction.sendEvent
+ 165  0.01% 99.91%       1 300262 org.wso2.siddhi.core.executor.condition.compare.greater_than.GreaterThanCompareConditionExpressionExecutorIntFloat.execute
+ 166  0.01% 99.92%       1 300264 java.util.ArrayList.clear
+ 167  0.01% 99.93%       1 300268 org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance.main
+ 168  0.01% 99.94%       1 300303 java.lang.Math.getExponent
+ 169  0.01% 99.95%       1 300306 org.wso2.siddhi.core.query.selector.QuerySelector.process
+ 170  0.01% 99.96%       1 300308 java.lang.Float.valueOf
+ 171  0.01% 99.97%       1 300316 org.wso2.siddhi.core.query.selector.QuerySelector.process
+ 172  0.01% 99.98%       1 300317 java.lang.Float.valueOf
+ 173  0.01% 99.99%       1 300318 org.wso2.siddhi.core.query.input.ProcessStreamReceiver.processAndClear
+ 174  0.01% 100.00%       1 300321 java.util.IdentityHashMap$KeySet.iterator
+CPU SAMPLES END

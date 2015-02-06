@@ -42,9 +42,9 @@ public class GpuInputStreamParser {
         
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
 
-            GpuProcessStreamReceiver processStreamReceiver = new GpuProcessStreamReceiver(((SingleInputStream) inputStream).getStreamId());
             GpuMetaStreamEvent gpuMetaEvent = new GpuMetaStreamEvent(inputStream, definitionMap, gpuQueryContext);
             GpuQueryProcessor gpuQueryProcessor = new GpuQueryProcessor(gpuMetaEvent, gpuQueryContext);
+            GpuProcessStreamReceiver processStreamReceiver = new GpuProcessStreamReceiver(((SingleInputStream) inputStream).getStreamId());
             gpuQueryProcessor.addStream(((SingleInputStream) inputStream).getStreamId(), gpuMetaEvent);
             processStreamReceiver.setGpuMetaEvent(gpuMetaEvent);
             processStreamReceiver.setGpuQueryProcessor(gpuQueryProcessor);

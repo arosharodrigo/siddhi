@@ -534,7 +534,7 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 {
 #ifdef GPU_DEBUG
-	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelFirst", fp_Log);
+	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelFirst::In", fp_Log);
 #endif
 
 	if(!b_DeviceSet)
@@ -585,7 +585,7 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 			p_TempStorageForPrefixSum, i_SizeOfTempStorageForPrefixSum,
 			p_MatchedIndexEventBuffer->GetDeviceEventBuffer(),
 			p_PrefixSumBuffer->GetDeviceEventBuffer(),
-			_iNumEvents)); //p_InputEventBuffer->GetMaxEventCount());
+			_iNumEvents));
 
 
 //	char               * _pInByteBuffer,      // Input ByteBuffer from java side
@@ -617,7 +617,7 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	int * pPrefixSumResults = p_PrefixSumBuffer->GetHostEventBuffer();
-	_iNumEvents = pPrefixSumResults[_iNumEvents];
+	_iNumEvents = pPrefixSumResults[_iNumEvents - 1];
 
 #ifdef GPU_DEBUG
 	if(_bLast)

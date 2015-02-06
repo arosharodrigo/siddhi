@@ -68,7 +68,7 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
                     this.stringAttributeSizes = new HashMap<String, Integer>(); 
 
                     for (String token : tokens) {
-                        String [] keyVal = token.split(".");
+                        String [] keyVal = token.split("=");
                         this.stringAttributeSizes.put(keyVal[0], Integer.parseInt(keyVal[1]));
                     }
                 }
