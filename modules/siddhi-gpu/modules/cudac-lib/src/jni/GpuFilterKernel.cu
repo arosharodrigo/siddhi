@@ -326,7 +326,7 @@ void GpuFilterKernelStandalone::Process(int & _iNumEvents, bool _bLast)
 
 	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
 	{
-		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
+		GpuCudaHelper::SelectDevice(i_DeviceId, "GpuFilterKernelStandalone", fp_Log);
 		b_DeviceSet = true;
 	}
 
@@ -539,7 +539,7 @@ void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
 
 	if(!b_DeviceSet)
 	{
-		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
+		GpuCudaHelper::SelectDevice(i_DeviceId, "GpuFilterKernelFirst", fp_Log);
 		b_DeviceSet = true;
 	}
 

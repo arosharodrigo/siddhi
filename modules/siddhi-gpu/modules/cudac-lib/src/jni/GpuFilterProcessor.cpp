@@ -315,7 +315,7 @@ int GpuFilterProcessor::Process(int _iNumEvents)
 
 void GpuFilterProcessor::Print(FILE * _fp)
 {
-	fprintf(_fp, "AddFilter : [%p] NodeCount=%d {", this, i_NodeCount);
+	fprintf(_fp, "[GpuFilterProcessor] AddFilter : [%p] NodeCount=%d {", this, i_NodeCount);
 	for(int i=0; i<i_NodeCount; ++i)
 	{
 		ap_ExecutorNodes[i].Print(_fp);

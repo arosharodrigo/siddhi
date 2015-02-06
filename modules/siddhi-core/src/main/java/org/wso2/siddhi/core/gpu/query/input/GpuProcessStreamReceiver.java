@@ -1,6 +1,8 @@
 package org.wso2.siddhi.core.gpu.query.input;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
@@ -25,11 +27,13 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private ConversionGpuEventChunk gpuEventChunk;
     private int streamIndex;
     private ByteBufferWriter eventBufferWriter;
-    private float currentEventCount;
     
+    private float currentEventCount = 0;
+    private long iteration = 0;
     private long startTime = 0;
     private long endTime = 0;
     private long duration = 0;
+    private final List<Double> throughputList = new ArrayList<Double>();
     
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
     
@@ -98,9 +102,25 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             duration = endTime - startTime;
             double average = (currentEventCount * 1000000000 / (double)duration);
-            log.info("Batch Throughput : [" + currentEventCount + "/" + duration + "] " + decimalFormat.format(average) + " eps");
+            //log.info("Batch Throughput : [" + currentEventCount + "/" + duration + "] " + decimalFormat.format(average) + " eps");
+            
+            throughputList.add(average);
             
             currentEventCount = 0;
+            iteration++;
+            
+            if(iteration % 100000 == 0)
+            {
+                double totalThroughput = 0;
+                
+                for (Double tp : throughputList) {
+                    totalThroughput += tp;
+                }
+                
+                double avgThroughput = totalThroughput / throughputList.size();
+                log.info("<" + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+                throughputList.clear();
+            }
         }
     }
 

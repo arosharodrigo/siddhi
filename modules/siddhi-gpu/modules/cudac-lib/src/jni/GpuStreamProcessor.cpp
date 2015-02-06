@@ -52,7 +52,7 @@ bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
 	fprintf(fp_Log, "[GpuStreamProcessor] Initialize : DeviceId=%d InputEventBufferSize=%d \n", _iDeviceId, _iInputEventBufferSize);
 	fflush(fp_Log);
 
-	if(GpuCudaHelper::SelectDevice(_iDeviceId, fp_Log))
+	if(GpuCudaHelper::SelectDevice(_iDeviceId, "GpuStreamProcessor::Initialize", fp_Log))
 	{
 
 		// init ByteBuffer
