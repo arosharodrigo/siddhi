@@ -42,9 +42,9 @@ public class GpuInputStreamParser {
         
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
 
-            
             GpuMetaStreamEvent gpuMetaEvent = new GpuMetaStreamEvent(inputStream, definitionMap, gpuQueryContext);
-            GpuQueryProcessor gpuQueryProcessor = new GpuQueryProcessor(gpuMetaEvent, gpuQueryContext, gpuQueryContext.getQueryName());
+            gpuMetaEvent.setStreamIndex(0);
+            GpuQueryProcessor gpuQueryProcessor = new GpuQueryProcessor(gpuQueryContext, gpuQueryContext.getQueryName());
             GpuProcessStreamReceiver processStreamReceiver = new GpuProcessStreamReceiver(((SingleInputStream) inputStream).getStreamId(), 
                     gpuQueryContext.getQueryName());
             gpuQueryProcessor.addStream(((SingleInputStream) inputStream).getStreamId(), gpuMetaEvent);
@@ -64,7 +64,7 @@ public class GpuInputStreamParser {
             gpuMetaStateEvent.addEvent(new GpuMetaStreamEvent(leftInputStream, definitionMap, gpuQueryContext));
             gpuMetaStateEvent.addEvent(new GpuMetaStreamEvent(rightInputStream, definitionMap, gpuQueryContext));
 
-            GpuQueryProcessor gpuQueryProcessor = new GpuQueryProcessor(gpuMetaStateEvent, gpuQueryContext, gpuQueryContext.getQueryName());
+            GpuQueryProcessor gpuQueryProcessor = new GpuQueryProcessor(gpuQueryContext, gpuQueryContext.getQueryName());
             
             GpuProcessStreamReceiver leftGpuProcessStreamReceiver = new GpuProcessStreamReceiver(leftInputStream.getStreamId(), 
                     gpuQueryContext.getQueryName() + "_left");

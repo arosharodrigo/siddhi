@@ -95,4 +95,10 @@
         </java>
     </target>
 	
+    <target name="gpu_join" depends="compile">
+        <java classname="org.wso2.siddhi.sample.GpuJoinSample"
+              classpathref="classpath" fork="true">
+        </java>
+    </target>
+	
 </project>
