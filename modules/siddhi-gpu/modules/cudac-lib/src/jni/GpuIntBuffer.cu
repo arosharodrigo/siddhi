@@ -52,8 +52,8 @@ int * GpuIntBuffer::CreateEventBuffer(int _iEventCount)
 {
 	i_EventCount = _iEventCount;
 	i_EventBufferSizeInBytes = _iEventCount * p_HostMetaEvent->i_SizeOfEventInBytes;
-	fprintf(fp_Log, "[GpuIntBuffer] <%s> Allocating ByteBuffer for %d events : %d bytes \n",
-			s_Name.c_str(), _iEventCount, (int)(sizeof(char) * i_EventBufferSizeInBytes));
+	fprintf(fp_Log, "[GpuIntBuffer] <%s> Allocating ByteBuffer for %d events (x %d) : %d bytes \n",
+			s_Name.c_str(), _iEventCount, p_HostMetaEvent->i_SizeOfEventInBytes, (int)(sizeof(char) * i_EventBufferSizeInBytes));
 	fflush(fp_Log);
 
 	GpuCudaHelper::AllocateHostMemory(true, (char**)&p_UnalignedBuffer, (char**)&p_HostEventBuffer, i_EventBufferSizeInBytes, s_Name.c_str(), fp_Log);

@@ -89,6 +89,8 @@ public class QueryParser {
             } else {
                 
                 GpuQueryContext gpuQueryContext = new GpuQueryContext(query.getAnnotations());
+                gpuQueryContext.setQueryName(executionPlanContext.getName() + "_" + gpuQueryContext.getQueryName());
+                
                 gpuQueryContext.setInputEventBufferSize(executionPlanContext.getSiddhiContext().getEventBufferSize());
                 
                 StreamRuntime streamRuntime = GpuInputStreamParser.parse(query.getInputStream(),

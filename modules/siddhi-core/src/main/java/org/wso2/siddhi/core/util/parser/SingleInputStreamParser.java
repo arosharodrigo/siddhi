@@ -203,52 +203,13 @@ public class SingleInputStreamParser {
             
             // add filter processor 
             GpuFilterExpressionParser gpuExpressionParser = new GpuFilterExpressionParser();
-            SiddhiGpu.GpuFilterProcessor gpuFilterProcessor = gpuExpressionParser.parseExpression(parameters[0], metaEvent, stateIndex, context);
+            SiddhiGpu.GpuFilterProcessor gpuFilterProcessor = gpuExpressionParser.parseExpression(parameters[0], metaEvent, stateIndex, context, gpuQueryContext);
             gpuFilterProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
             gpuQueryRuntime.AddProcessor(streamId, gpuFilterProcessor);
             gpuQueryProcessor.AddGpuProcessor(gpuFilterProcessor);
             
             return new FilterProcessor(inputExpressions[0]);
             
-//            ///////////////////
-//            
-//            SiddhiGpu.GpuEventConsumer gpuEventConsumer = new SiddhiGpu.GpuEventConsumer(
-//                    SiddhiGpu.SingleFilterKernel, gpuQueryContext.getQueryName(), context.getSiddhiContext().getEventBufferSize(), 
-//                    gpuQueryContext.getEventsPerBlock());
-//
-//            log.info("Created SiddhiGpu.GpuEventConsumer [Type=SingleFilterKernel|CUDADevice=" + gpuQueryContext.getCudaDeviceId() + 
-//                    "|Query=" + gpuQueryContext.getQueryName() + "|BufferSize=" + context.getSiddhiContext().getEventBufferSize() + 
-//                    "|EventsPerBlock=" + gpuQueryContext.getEventsPerBlock() + "] ");
-//
-//            if(gpuEventConsumer.Initialize(gpuQueryContext.getCudaDeviceId())) {
-//
-//                log.info("Created SiddhiGpu.GpuEventConsumer Initialized with CUDA deivce " + gpuQueryContext.getCudaDeviceId());
-//
-//                try {
-//                    GpuFilterExpressionParser gpuExpressionParser = new GpuFilterExpressionParser();
-//
-//                    SiddhiGpu.Filter gpuFilter = gpuExpressionParser.parseExpression(parameters[0],  metaEvent, stateIndex, context);
-//                    gpuEventConsumer.AddFilter(gpuFilter);
-//                    gpuEventConsumer.ConfigureFilters();
-//
-//                    FilterProcessor filterProcessor = new FilterProcessor(
-//                            inputExpressions[0],
-//                            gpuEventConsumer, gpuQueryContext); 
-//                    filterProcessor.setVariablePositionToAttributeNameMapper(gpuExpressionParser.getVariablePositionToAttributeNameMapper());
-//
-//                    return filterProcessor;
-//
-//                } catch(RuntimeException ex) {
-//                    log.info("GPU Filter creation failed : " + ex.getMessage());
-//                    ex.printStackTrace();
-//                    return new FilterProcessor(inputExpressions[0]);
-//                }
-//            } else {
-//                log.warn("Created SiddhiGpu.GpuEventConsumer Initialization failed. Fallback to CPU.");
-//                return new FilterProcessor(inputExpressions[0]);
-//            }
-
-
         } else if (handler instanceof Window) {
             WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadSiddhiImplementation(((Window) handler).getFunction(),
                     WindowProcessor.class);

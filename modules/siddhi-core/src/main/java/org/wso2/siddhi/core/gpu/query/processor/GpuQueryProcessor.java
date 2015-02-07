@@ -26,6 +26,7 @@ import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 public class GpuQueryProcessor {
 
     private static final Logger log = Logger.getLogger(GpuQueryProcessor.class);
+    private String queryName;
     private Processor selectProcessor;
     private ByteBufferWriter streamInputEventBuffers[];
     private Map<String, GpuMetaStreamEvent> metaStreams = new HashMap<String, GpuMetaStreamEvent>();
@@ -38,9 +39,10 @@ public class GpuQueryProcessor {
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
     private GpuQueryPostProcessor gpuQueryPostProcessor;
     
-    public GpuQueryProcessor(GpuMetaEvent gpuMetaEvent, GpuQueryContext gpuQueryContext) {
+    public GpuQueryProcessor(GpuMetaEvent gpuMetaEvent, GpuQueryContext gpuQueryContext, String queryName) {
         this.gpuMetaEvent = gpuMetaEvent;
         this.gpuQueryContext = gpuQueryContext;
+        this.queryName = queryName;
         this.gpuStreamProcessor = null;
         this.streamInputEventBuffers = null;
         this.gpuQueryPostProcessor = null;
@@ -48,15 +50,15 @@ public class GpuQueryProcessor {
         
         sequenceNumber = new AtomicLong(0);
         
-        log.info("Creating SiddhiGpu.GpuQueryRuntime for query [" + gpuQueryContext.getQueryName() + "] using device [" + 
+        log.info("<" + this.queryName + "> Creating SiddhiGpu.GpuQueryRuntime using device [" + 
                 gpuQueryContext.getCudaDeviceId() + "] input buffer size [" + gpuQueryContext.getInputEventBufferSize() + "]");
         
-        gpuQueryRuntime = new SiddhiGpu.GpuQueryRuntime(gpuQueryContext.getQueryName(), gpuQueryContext.getCudaDeviceId(), 
+        gpuQueryRuntime = new SiddhiGpu.GpuQueryRuntime(this.queryName, gpuQueryContext.getCudaDeviceId(), 
                 gpuQueryContext.getInputEventBufferSize());
     }
     
     public GpuQueryProcessor clone() {
-        GpuQueryProcessor clonedQueryProcessor = new GpuQueryProcessor(gpuMetaEvent, gpuQueryContext);
+        GpuQueryProcessor clonedQueryProcessor = new GpuQueryProcessor(gpuMetaEvent, gpuQueryContext, this.queryName);
         return clonedQueryProcessor;
     }
     
@@ -95,7 +97,7 @@ public class GpuQueryProcessor {
     
     public void addStream(String streamId, GpuMetaStreamEvent metaStreamEvent) {
         
-        log.info("[addStream] StreamId=" + streamId + " StreamIndex=" + metaStreamEvent.getStreamIndex() + 
+        log.info("<" + queryName + "> [addStream] StreamId=" + streamId + " StreamIndex=" + metaStreamEvent.getStreamIndex() + 
                 " AttributeCount=" + metaStreamEvent.getAttributes().size() + 
                 " SizeOfEvent=" + metaStreamEvent.getEventSizeInBytes());
         
@@ -160,13 +162,13 @@ public class GpuQueryProcessor {
     }
 
     public void AddGpuProcessor(SiddhiGpu.GpuProcessor gpuProcessor) {
-        log.debug("AddGpuProcessor : " + gpuProcessor.GetType());
+        log.info("<" + queryName + "> AddGpuProcessor : " + gpuProcessor.GetType());
         gpuProcessors.add(gpuProcessor);
     }
     
     public void configure() {
         
-        log.debug("configure : ");
+        log.info("<" + queryName + "> configure");
         
         gpuStreamProcessor = new SiddhiGpu.GpuStreamProcessor[metaStreams.size()];
         streamInputEventBuffers = new ByteBufferWriter[metaStreams.size()];
@@ -187,13 +189,13 @@ public class GpuQueryProcessor {
                 bytePointer.position(0);
                 ByteBuffer eventByteBuffer = bytePointer.asBuffer();
                 
-                log.debug("ByteBuffer for StreamId=" + streamId + " StreamIndex=" + streamIndex + " [" + eventByteBuffer + "]");
+                log.info("<" + queryName + "> ByteBuffer for StreamId=" + streamId + " StreamIndex=" + streamIndex + " [" + eventByteBuffer + "]");
                 
                 streamInputEventBuffers[streamIndex] = new ByteBufferWriter(eventByteBuffer);
             }
             
         } else {
-            log.warn("SiddhiGpu.QueryRuntime initialization failed");
+            log.warn("<" + queryName + "> SiddhiGpu.QueryRuntime initialization failed");
             return;
         }
         
