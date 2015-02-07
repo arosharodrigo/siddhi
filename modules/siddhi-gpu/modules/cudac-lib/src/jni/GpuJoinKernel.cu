@@ -47,7 +47,7 @@ bool GpuJoinKernel::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBuffe
 	p_InputEventBuffer = (GpuStreamEventBuffer*) p_Context->GetEventBuffer(i_InputBufferIndex);
 
 	// set resulting event buffer and its meta data
-	p_ResultEventBuffer = new GpuStreamEventBuffer(p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
+	p_ResultEventBuffer = new GpuStreamEventBuffer("JoinResultEventBuffer", p_Context->GetDeviceId(), _pMetaEvent, fp_Log);
 	p_ResultEventBuffer->CreateEventBuffer(_iInputEventBufferSize * 2);
 
 	i_ResultEventBufferIndex = p_Context->AddEventBuffer(p_ResultEventBuffer);

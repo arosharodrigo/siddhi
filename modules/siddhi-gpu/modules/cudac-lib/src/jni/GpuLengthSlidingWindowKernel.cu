@@ -478,7 +478,7 @@ void GpuLengthSlidingWindowFirstKernel::Process(int & _iNumEvents, bool _bLast)
 
 	if(!b_DeviceSet)
 	{
-		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
+		GpuCudaHelper::SelectDevice(i_DeviceId, "GpuLengthSlidingWindowFirstKernel", fp_Log);
 		b_DeviceSet = true;
 	}
 
@@ -663,7 +663,7 @@ void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
 
 	if(!b_DeviceSet)
 	{
-		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
+		GpuCudaHelper::SelectDevice(i_DeviceId, "GpuLengthSlidingWindowFilterKernel", fp_Log);
 		b_DeviceSet = true;
 	}
 

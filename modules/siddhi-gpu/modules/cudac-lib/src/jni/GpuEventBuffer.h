@@ -8,7 +8,10 @@
 #ifndef GPUEVENTBUFFER_H_
 #define GPUEVENTBUFFER_H_
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <string>
 #include "GpuKernelDataTypes.h"
 
 namespace SiddhiGpu

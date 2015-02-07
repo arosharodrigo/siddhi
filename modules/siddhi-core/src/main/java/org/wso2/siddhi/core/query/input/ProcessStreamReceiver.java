@@ -48,9 +48,11 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     protected int stateProcessorsSize;
     
     private float currentEventCount = 0;
+    private long iteration = 0;
     private long startTime = 0;
     private long endTime = 0;
     private long duration = 0;
+    private final List<Double> throughputList = new ArrayList<Double>();
 
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
 
@@ -102,9 +104,24 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             
             duration = endTime - startTime;
             double average = (currentEventCount * 1000000000 / (double)duration);
-            log.info("Batch Throughput : [" + currentEventCount + "/" + duration + "] " + decimalFormat.format(average) + " eps");
+            //log.info("<" + streamId + "> Batch Throughput : [" + currentEventCount + "/" + duration + "] " + decimalFormat.format(average) + " eps");
+            throughputList.add(average);
             
             currentEventCount = 0;
+            iteration++;
+            
+            if(iteration % 100000 == 0)
+            {
+                double totalThroughput = 0;
+                
+                for (Double tp : throughputList) {
+                    totalThroughput += tp;
+                }
+                
+                double avgThroughput = totalThroughput / throughputList.size();
+                log.info("<" + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+                throughputList.clear();
+            }
         }
     }
 

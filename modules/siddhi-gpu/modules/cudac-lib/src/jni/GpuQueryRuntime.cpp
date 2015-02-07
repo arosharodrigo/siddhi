@@ -53,7 +53,7 @@ void GpuQueryRuntime::AddStream(std::string _sStramId, GpuMetaEvent * _pMetaEven
 	fprintf(fp_Log, "[GpuQueryRuntime] AddStream : Id=%s Index=%d \n", _sStramId.c_str(), _pMetaEvent->i_StreamIndex);
 	fflush(fp_Log);
 
-	GpuStreamProcessor * pStreamProcessor = new GpuStreamProcessor(_sStramId, _pMetaEvent->i_StreamIndex, _pMetaEvent);
+	GpuStreamProcessor * pStreamProcessor = new GpuStreamProcessor(s_QueryName, _sStramId, _pMetaEvent->i_StreamIndex, _pMetaEvent);
 	vec_StreamProcessors.push_back(pStreamProcessor);
 	map_StreamProcessorsByStreamId.insert(std::make_pair(_sStramId, pStreamProcessor));
 }
