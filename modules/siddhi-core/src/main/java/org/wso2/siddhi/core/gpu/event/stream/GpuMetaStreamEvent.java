@@ -21,7 +21,7 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 
 public class GpuMetaStreamEvent implements GpuMetaEvent {
-    private int StreamIndex;
+    private int streamIndex;
     private String streamId;
     private AbstractDefinition inputDefinition;
     private StreamDefinition outputStreamDefinition;
@@ -49,6 +49,7 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
     }
     
     public GpuMetaStreamEvent(InputStream inputStream, Map<String, AbstractDefinition> definitionMap, GpuQueryContext gpuQueryContext) {
+        
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
             SingleInputStream singleInputStream = (SingleInputStream) inputStream;
             streamId = singleInputStream.getStreamId();
@@ -185,10 +186,10 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
     }
     
     public int getStreamIndex() {
-        return StreamIndex;
+        return streamIndex;
     }
 
     public void setStreamIndex(int streamIndex) {
-        StreamIndex = streamIndex;
+        this.streamIndex = streamIndex;
     }
 }

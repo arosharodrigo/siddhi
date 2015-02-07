@@ -22,6 +22,7 @@ public class GpuMetaStateEvent implements GpuMetaEvent {
     }
     
     public void addEvent(GpuMetaStreamEvent metaStreamEvent) {
+        metaStreamEvent.setStreamIndex(streamEventCount);
         metaStreamEvents[streamEventCount] = metaStreamEvent;
         streamEventCount++;
     }

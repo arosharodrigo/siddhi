@@ -30,7 +30,6 @@ public class GpuQueryProcessor {
     private Processor selectProcessor;
     private ByteBufferWriter streamInputEventBuffers[];
     private Map<String, GpuMetaStreamEvent> metaStreams = new HashMap<String, GpuMetaStreamEvent>();
-    private GpuMetaEvent gpuMetaEvent;
     private ConversionGpuEventChunk complexEventChunks[];
     private final AtomicLong sequenceNumber;
     private SiddhiGpu.GpuQueryRuntime gpuQueryRuntime;
@@ -39,8 +38,7 @@ public class GpuQueryProcessor {
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
     private GpuQueryPostProcessor gpuQueryPostProcessor;
     
-    public GpuQueryProcessor(GpuMetaEvent gpuMetaEvent, GpuQueryContext gpuQueryContext, String queryName) {
-        this.gpuMetaEvent = gpuMetaEvent;
+    public GpuQueryProcessor(GpuQueryContext gpuQueryContext, String queryName) {
         this.gpuQueryContext = gpuQueryContext;
         this.queryName = queryName;
         this.gpuStreamProcessor = null;
@@ -58,7 +56,7 @@ public class GpuQueryProcessor {
     }
     
     public GpuQueryProcessor clone() {
-        GpuQueryProcessor clonedQueryProcessor = new GpuQueryProcessor(gpuMetaEvent, gpuQueryContext, this.queryName);
+        GpuQueryProcessor clonedQueryProcessor = new GpuQueryProcessor(gpuQueryContext, this.queryName);
         return clonedQueryProcessor;
     }
     

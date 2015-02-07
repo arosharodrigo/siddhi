@@ -18,12 +18,14 @@
  */
 package org.wso2.siddhi.core.util.parser;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
+import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.gpu.util.parser.GpuInputStreamParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.QueryRuntime;
@@ -50,6 +52,7 @@ import java.util.Map;
 
 public class QueryParser {
 
+    private static final Logger log = Logger.getLogger(QueryParser.class);
     /**
      * Parse a query and return corresponding QueryRuntime
      *
@@ -64,6 +67,11 @@ public class QueryParser {
         Element element = null;
         try {
             element = AnnotationHelper.getAnnotationElement("info", "name", query.getAnnotations());
+            if (element != null) {
+                log.info("<" + executionPlanContext.getName() + "> Parsing <" + element.getValue() + ">");
+            } else {
+                log.info("<" + executionPlanContext.getName() + "> Parsing query");
+            }
             
             Annotation gpuAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_GPU, query.getAnnotations());
             if(gpuAnnotation == null) {

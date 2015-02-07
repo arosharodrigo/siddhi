@@ -70,6 +70,11 @@ void GpuJoinProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSi
 			p_JoinKernel->SetInputEventBufferIndex(p_PrevProcessor->GetResultEventBufferIndex());
 		}
 		break;
+		case GpuProcessor::LENGTH_SLIDING_WINDOW:
+		{
+
+		}
+		break;
 		default:
 			break;
 		}
