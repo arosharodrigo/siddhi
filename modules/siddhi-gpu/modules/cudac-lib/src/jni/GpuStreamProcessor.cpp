@@ -22,7 +22,7 @@ GpuStreamProcessor::GpuStreamProcessor(std::string _sQueryName, std::string _sSt
 	s_QueryName(_sQueryName),
 	s_StreamId(_sStreamId),
 	i_StreamIndex(_iStreamIndex),
-	p_MetaEvent(_pMetaEvent),
+	p_MetaEvent(_pMetaEvent->Clone()),
 	p_ProcessorChain(NULL),
 	p_ProcessorContext(NULL)
 {

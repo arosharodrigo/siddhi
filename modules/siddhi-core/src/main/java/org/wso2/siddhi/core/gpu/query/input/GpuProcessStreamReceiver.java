@@ -141,14 +141,14 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     public void init() {
         
-        log.info("[GpuProcessStreamReceiver] Initializing " + streamId );
+        log.info("<" + queryName + "> [GpuProcessStreamReceiver] Initializing " + streamId );
         
 //        streamEventChunk = new ConversionStreamEventChunk(metaStreamEvent, streamEventPool);
         gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
         
         gpuQueryProcessor.configure();
         streamIndex = gpuQueryProcessor.getStreamIndex(getStreamId());
-        log.debug("[GpuProcessStreamReceiver] Set eventBufferWriter : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
+        log.info("<" + queryName + "> [GpuProcessStreamReceiver] Set eventBufferWriter : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
         eventBufferWriter = gpuQueryProcessor.getStreamInputEventBuffer(streamIndex);
         
         gpuQueryProcessor.setComplexEventChunk(streamIndex, gpuEventChunk);

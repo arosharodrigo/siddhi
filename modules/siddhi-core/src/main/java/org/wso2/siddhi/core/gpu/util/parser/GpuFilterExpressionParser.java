@@ -16,6 +16,7 @@ import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu.ConstValue;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu.ExecutorNode;
@@ -69,11 +70,10 @@ public class GpuFilterExpressionParser
     }
 
     public SiddhiGpu.GpuFilterProcessor parseExpression(Expression expression, MetaComplexEvent metaEvent, int currentState, 
-            ExecutionPlanContext executionPlanContext) {
+            ExecutionPlanContext executionPlanContext, GpuQueryContext gpuQueryContext) {
 
-        log.info("parseExpression");
-        log.info("Root Expression = " + expression.toString());
-        log.info("MetaEvent = " + metaEvent.toString());
+        log.info("<" + gpuQueryContext.getQueryName() + "> parseExpression");
+        log.info("<" + gpuQueryContext.getQueryName() + "> Root Expression = " + expression.toString());
 
         List<SiddhiGpu.ExecutorNode> gpuFilterList = new ArrayList<SiddhiGpu.ExecutorNode>();
 
