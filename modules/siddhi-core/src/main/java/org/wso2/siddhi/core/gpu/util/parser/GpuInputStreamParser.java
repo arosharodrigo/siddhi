@@ -95,37 +95,7 @@ public class GpuInputStreamParser {
             
             return JoinInputStreamParser.parseInputStream(leftStreamRuntime, rightStreamRuntime,
                     (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors, gpuQueryContext);
-            
-//            ///////
-//            
-//            ProcessStreamReceiver leftProcessStreamReceiver;
-//            ProcessStreamReceiver rightProcessStreamReceiver;
-//            if (inputStream.getAllStreamIds().size() == 2) {
-//                leftProcessStreamReceiver = new ProcessStreamReceiver(((SingleInputStream) ((JoinInputStream) inputStream)
-//                        .getLeftInputStream()).getStreamId());
-//                rightProcessStreamReceiver = new ProcessStreamReceiver(((SingleInputStream) ((JoinInputStream) inputStream)
-//                        .getRightInputStream()).getStreamId());
-//            } else {
-//                rightProcessStreamReceiver = new MultiProcessStreamReceiver(inputStream.getAllStreamIds().get(0), 2);
-//                leftProcessStreamReceiver = rightProcessStreamReceiver;
-//            }
-//            MetaStateEvent metaStateEvent = new MetaStateEvent(2);
-//            metaStateEvent.addEvent(new MetaStreamEvent());
-//            metaStateEvent.addEvent(new MetaStreamEvent());
-//
-//            SingleStreamRuntime leftStreamRuntime = SingleInputStreamParser.parseInputStream(
-//                    (SingleInputStream) ((JoinInputStream) inputStream).getLeftInputStream(),
-//                    executionPlanContext, executors, definitionMap,
-//                    metaStateEvent.getMetaStreamEvent(0), leftProcessStreamReceiver);
-//
-//            SingleStreamRuntime rightStreamRuntime = SingleInputStreamParser.parseInputStream(
-//                    (SingleInputStream) ((JoinInputStream) inputStream).getRightInputStream(),
-//                    executionPlanContext, executors, definitionMap,
-//                    metaStateEvent.getMetaStreamEvent(1), rightProcessStreamReceiver);
-//
-//            return JoinInputStreamParser.parseInputStream(leftStreamRuntime, rightStreamRuntime,
-//                    (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors);
-            
+                        
         } else if (inputStream instanceof StateInputStream) {
             MetaStateEvent metaStateEvent = new MetaStateEvent(inputStream.getAllStreamIds().size());
             return StateInputStreamParser.parseInputStream(((StateInputStream) inputStream), executionPlanContext,

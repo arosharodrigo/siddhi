@@ -15,9 +15,12 @@ import org.wso2.siddhi.core.gpu.event.stream.GpuEventPool;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribute;
 import org.wso2.siddhi.core.gpu.event.stream.converter.ConversionGpuEventChunk;
+import org.wso2.siddhi.core.gpu.query.processor.GpuQueryPostProcessor;
 import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
 import org.wso2.siddhi.core.gpu.util.ByteBufferWriter;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
+import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 
 public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
@@ -27,6 +30,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private ConversionGpuEventChunk gpuEventChunk;
     private int streamIndex;
     private ByteBufferWriter eventBufferWriter;
+    private SiddhiGpu.GpuStreamProcessor gpuStreamProcessor;
+    private GpuQueryPostProcessor gpuQueryPostProcessor;
+    private Processor selectProcessor;
     
     private float currentEventCount = 0;
     private long iteration = 0;
@@ -44,6 +50,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         this.gpuEventChunk = null;
         this.eventBufferWriter = null;
         this.currentEventCount = 0;
+        this.gpuStreamProcessor = null;
+        this.gpuQueryPostProcessor = null;
+        this.selectProcessor = null;
     }
 
     public GpuProcessStreamReceiver clone(String key) {
@@ -96,7 +105,16 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
             startTime = System.nanoTime();
             
-            gpuQueryProcessor.process(streamIndex, (int)currentEventCount);
+            eventBufferWriter.Reset();
+  
+            int resultEventCount = gpuStreamProcessor.Process((int)currentEventCount);
+            
+            gpuQueryPostProcessor.process(streamIndex, eventBufferWriter.getByteBuffer(), resultEventCount);
+            
+            selectProcessor.process(gpuEventChunk);
+            gpuEventChunk.clear();
+            
+//            gpuQueryProcessor.process(streamIndex, (int)currentEventCount);
             
             endTime = System.nanoTime();
             
@@ -130,7 +148,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         if (stateProcessorsSize != 0) {
             stateProcessors.get(0).updateState();
         }
-        gpuQueryProcessor.process(streamIndex, (int)currentEventCount);
+//        gpuQueryProcessor.process(streamIndex, (int)currentEventCount);
         endTime = System.nanoTime();
         streamEventChunk.clear();
         
@@ -143,15 +161,17 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         log.info("<" + queryName + "> [GpuProcessStreamReceiver] Initializing " + streamId );
         
-//        streamEventChunk = new ConversionStreamEventChunk(metaStreamEvent, streamEventPool);
         gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
         
         gpuQueryProcessor.configure();
+        gpuQueryProcessor.setComplexEventChunk(streamIndex, gpuEventChunk);
+        
         streamIndex = gpuQueryProcessor.getStreamIndex(getStreamId());
         log.info("<" + queryName + "> [GpuProcessStreamReceiver] Set eventBufferWriter : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
         eventBufferWriter = gpuQueryProcessor.getStreamInputEventBuffer(streamIndex);
+        gpuStreamProcessor = gpuQueryProcessor.getGpuStreamProcessor(streamIndex);
+        gpuQueryPostProcessor = gpuQueryProcessor.getGpuQueryPostProcessor();
         
-        gpuQueryProcessor.setComplexEventChunk(streamIndex, gpuEventChunk);
     }
 
     public void setGpuQueryProcessor(GpuQueryProcessor gpuQueryProcessor) {
@@ -168,5 +188,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
     public void setGpuMetaEvent(GpuMetaStreamEvent gpuMetaEvent) {
         this.gpuMetaEvent = gpuMetaEvent;
+    }
+    
+    public void setSelectProcessor(Processor selectProcessor) {
+        this.selectProcessor = selectProcessor;
     }
 }

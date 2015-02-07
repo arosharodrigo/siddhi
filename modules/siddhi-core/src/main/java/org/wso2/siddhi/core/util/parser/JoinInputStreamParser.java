@@ -113,6 +113,10 @@ public class JoinInputStreamParser {
             JoinInputStream joinInputStream, ExecutionPlanContext executionPlanContext,
             MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors, GpuQueryContext gpuQueryContext) {
 
+        
+        
+        /////////////////////////
+        
         JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true);
         JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false);
 

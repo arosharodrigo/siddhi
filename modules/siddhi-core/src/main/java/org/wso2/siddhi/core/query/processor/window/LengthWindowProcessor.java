@@ -23,9 +23,10 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.input.stream.join.Finder;
 import org.wso2.siddhi.core.query.processor.Processor;
 
-public class LengthWindowProcessor extends WindowProcessor {
+public class LengthWindowProcessor extends WindowProcessor implements FindableProcessor {
 
     private int length;
     private int count = 0;
@@ -72,5 +73,18 @@ public class LengthWindowProcessor extends WindowProcessor {
         lengthWindowProcessor.setLength(this.length);
         lengthWindowProcessor.expiredEventChunk = new ComplexEventChunk<StreamEvent>();
         return lengthWindowProcessor;
+    }
+
+    @Override
+    public StreamEvent find(Finder finder) {
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
+        expiredEventChunk.reset();
+        while (expiredEventChunk.hasNext()) {
+            StreamEvent streamEvent = expiredEventChunk.next();
+            if (finder.execute(streamEvent)) {
+                returnEventChunk.add(streamEventCloner.copyStreamEvent(streamEvent));
+            }
+        }
+        return returnEventChunk.getFirst();
     }
 }

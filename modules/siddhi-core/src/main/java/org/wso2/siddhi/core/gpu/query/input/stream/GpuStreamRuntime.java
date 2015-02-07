@@ -71,6 +71,6 @@ public class GpuStreamRuntime extends SingleStreamRuntime {
             processorChain.setToLast(commonProcessor);
         }
         
-        gpuQueryProcessor.setSelectProcessor(commonProcessor);
+        ((GpuProcessStreamReceiver)processStreamReceiver).setSelectProcessor(commonProcessor);
     }
 }
