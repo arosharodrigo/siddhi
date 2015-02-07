@@ -181,10 +181,10 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
     public GpuStreamProcessor() { }
     public GpuStreamProcessor(Pointer p) { super(p); }
 
-	public GpuStreamProcessor(@StdString BytePointer _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent) { allocate(_sStreamId, _iStreamIndex, _pMetaEvent); }
-	private native void allocate(@StdString BytePointer _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent);
-	public GpuStreamProcessor(@StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent) { allocate(_sStreamId, _iStreamIndex, _pMetaEvent); }
-	private native void allocate(@StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent);
+	public GpuStreamProcessor(@StdString BytePointer _sQueryName, @StdString BytePointer _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent) { allocate(_sQueryName, _sStreamId, _iStreamIndex, _pMetaEvent); }
+	private native void allocate(@StdString BytePointer _sQueryName, @StdString BytePointer _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent);
+	public GpuStreamProcessor(@StdString String _sQueryName, @StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent) { allocate(_sQueryName, _sStreamId, _iStreamIndex, _pMetaEvent); }
+	private native void allocate(@StdString String _sQueryName, @StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent);
 
 	public native @Cast("bool") boolean Initialize(int _iDeviceId, int _iInputEventBufferSize);
 	public native void AddProcessor(GpuProcessor _pProcessor);
@@ -275,14 +275,6 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
     @Override public GpuMetaAttribute position(int position) {
         return (GpuMetaAttribute)super.position(position);
     }
-
-	/** enum SiddhiGpu::GpuMetaAttribute::Type */
-	public static final int
-		CURRENT = 0,
-		EXPIRED = 1,
-		TIMER = 2,
-		RESET = 3,
-		NONE = 4;
 
 	public GpuMetaAttribute() { allocate(); }
 	private native void allocate();

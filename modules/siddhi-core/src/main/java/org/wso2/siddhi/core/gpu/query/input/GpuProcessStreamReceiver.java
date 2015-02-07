@@ -37,8 +37,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
     
-    public GpuProcessStreamReceiver(String streamId) {
-        super(streamId);
+    public GpuProcessStreamReceiver(String streamId, String queryName) {
+        super(streamId, queryName);
         this.gpuQueryProcessor = null;
         this.gpuMetaEvent = null;
         this.gpuEventChunk = null;
@@ -47,7 +47,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     public GpuProcessStreamReceiver clone(String key) {
-        GpuProcessStreamReceiver clonedProcessStreamReceiver = new GpuProcessStreamReceiver(streamId + key);
+        GpuProcessStreamReceiver clonedProcessStreamReceiver = new GpuProcessStreamReceiver(streamId + key, queryName);
         clonedProcessStreamReceiver.setMetaStreamEvent(metaStreamEvent);
         clonedProcessStreamReceiver.setGpuQueryProcessor(gpuQueryProcessor.clone());
         return clonedProcessStreamReceiver;
@@ -118,7 +118,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 }
                 
                 double avgThroughput = totalThroughput / throughputList.size();
-                log.info("<" + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+                log.info("<" + queryName + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
                 throughputList.clear();
             }
         }
