@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.gpu.util.ByteBufferWriter;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
+import org.wso2.siddhi.gpu.jni.SiddhiGpu.GpuStreamProcessor;
 
 public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
@@ -120,7 +121,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             selectProcessor.process(gpuEventChunk);
             gpuEventChunk.clear();
             
-//            gpuQueryProcessor.process(streamIndex, (int)currentEventCount);
             
             endTime = System.nanoTime();
             
@@ -155,18 +155,21 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         for(SiddhiGpu.GpuProcessor gpuProcessor: gpuProcessors) {
             gpuQueryProcessor.addGpuProcessor(streamId, gpuProcessor);
         }
+
+        gpuQueryProcessor.configure(this);     
+        
+    }
+    
+    public void configure(ByteBufferWriter eventBufferWriter, GpuStreamProcessor gpuStreamProcessor) {
+        streamIndex = gpuQueryProcessor.getStreamIndex(getStreamId());
+        log.info("<" + queryName + "> [GpuProcessStreamReceiver] configure : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
+
+        this.eventBufferWriter = eventBufferWriter;
+        this.gpuStreamProcessor = gpuStreamProcessor;
         
         gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
         
-        gpuQueryProcessor.configure();
-//        gpuQueryProcessor.setComplexEventChunk(streamIndex, gpuEventChunk);
-        
-        streamIndex = gpuQueryProcessor.getStreamIndex(getStreamId());
-        log.info("<" + queryName + "> [GpuProcessStreamReceiver] Set eventBufferWriter : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
-        eventBufferWriter = gpuQueryProcessor.getStreamInputEventBuffer(streamIndex);
-        gpuStreamProcessor = gpuQueryProcessor.getGpuStreamProcessor(streamIndex);
-//        gpuQueryPostProcessor = gpuQueryProcessor.getGpuQueryPostProcessor();
-        
+        // create QueryPostProcessor - should done after GpuStreamProcessors configured
         SiddhiGpu.GpuProcessor lastGpuProcessor = gpuProcessors.get(gpuProcessors.size() - 1);
         if(lastGpuProcessor != null) {
             if(lastGpuProcessor instanceof SiddhiGpu.GpuFilterProcessor) {
