@@ -154,10 +154,16 @@ int GpuJoinProcessor::Process(int _iStreamIndex, int _iNumEvents)
 
 void GpuJoinProcessor::Print(FILE * _fp)
 {
-	fprintf(_fp, "[GpuJoinProcessor] MetaStreams : Left={StreamIndex=%d|AttrCount=%d|EventSize=%d} \n",
-			p_LeftStreamMetaEvent->i_StreamIndex, p_LeftStreamMetaEvent->i_AttributeCount, p_LeftStreamMetaEvent->i_SizeOfEventInBytes);
-	fprintf(_fp, "[GpuJoinProcessor] MetaStreams : Right={StreamIndex=%d|AttrCount=%d|EventSize=%d} \n",
+	if(p_LeftStreamMetaEvent)
+	{
+		fprintf(_fp, "[GpuJoinProcessor] MetaStreams : Left={StreamIndex=%d|AttrCount=%d|EventSize=%d} \n",
+				p_LeftStreamMetaEvent->i_StreamIndex, p_LeftStreamMetaEvent->i_AttributeCount, p_LeftStreamMetaEvent->i_SizeOfEventInBytes);
+	}
+	if(p_RightStreamMetaEvent)
+	{
+		fprintf(_fp, "[GpuJoinProcessor] MetaStreams : Right={StreamIndex=%d|AttrCount=%d|EventSize=%d} \n",
 				p_RightStreamMetaEvent->i_StreamIndex, p_RightStreamMetaEvent->i_AttributeCount, p_RightStreamMetaEvent->i_SizeOfEventInBytes);
+	}
 	fprintf(_fp, "[GpuJoinProcessor] WindowSize : Left=%d Right=%d \n", i_LeftStraemWindowSize, i_RightStraemWindowSize);
 	fprintf(_fp, "[GpuJoinProcessor] Trigger : Left=%d Right=%d \n", b_LeftTrigger, b_RightTrigger);
 	fprintf(_fp, "[GpuJoinProcessor] WithIn : %" PRIi64 " milliseconds \n", i_WithInTimeMilliSeconds);
