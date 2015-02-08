@@ -63,15 +63,15 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
         System.out.println("JoinSample");
         for(int i=0;i<100; ++i) {
             cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, i});
-            twitterStreamHandler.send(new Object[]{"User1", "Hello World"+i, "WSO2"});
+            twitterStreamHandler.send(new Object[]{"WSO2", i});
             cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, i});
             cseEventStreamHandler.send(new Object[]{"CSCO", 100.2f, i});
-            twitterStreamHandler.send(new Object[]{"User2", "Dummy"+i, "LLOY"});
-            twitterStreamHandler.send(new Object[]{"User3", "Dummy"+i, "CL"});
+            twitterStreamHandler.send(new Object[]{"LLOY", i});
+            twitterStreamHandler.send(new Object[]{"CL", i});
             cseEventStreamHandler.send(new Object[]{"GOOG", 55.0f, i});
             cseEventStreamHandler.send(new Object[]{"BARC", 25.1f, i});
-            twitterStreamHandler.send(new Object[]{"User4", "Dummy"+i, "RB"});
-            twitterStreamHandler.send(new Object[]{"User5", "Dummy"+i, "NG"});
+            twitterStreamHandler.send(new Object[]{"RB", i});
+            twitterStreamHandler.send(new Object[]{"NG", i});
             Thread.sleep(500);
         }
 

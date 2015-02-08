@@ -144,8 +144,16 @@ void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _
 int GpuJoinProcessor::Process(int _iStreamIndex, int _iNumEvents)
 {
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuJoinProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);
-	fflush(fp_Log);
+	if(_iStreamIndex == 0)
+	{
+		fprintf(fp_LeftLog, "[GpuJoinProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);
+		fflush(fp_LeftLog);
+	}
+	else if(_iStreamIndex == 1)
+	{
+		fprintf(fp_RightLog, "[GpuJoinProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);
+		fflush(fp_RightLog);
+	}
 #endif
 
 	p_JoinKernel->Process(_iStreamIndex, _iNumEvents, (p_Next == NULL));
@@ -213,9 +221,9 @@ void GpuJoinProcessor::AddExecutorNode(int _iPos, ExecutorNode & _pNode)
 		ap_ExecutorNodes[_iPos].e_ExpressionType = _pNode.e_ExpressionType;
 		ap_ExecutorNodes[_iPos].m_ConstValue.e_Type = _pNode.m_ConstValue.e_Type;
 		ap_ExecutorNodes[_iPos].m_ConstValue.m_Value = _pNode.m_ConstValue.m_Value;
+		ap_ExecutorNodes[_iPos].m_VarValue.i_StreamIndex = _pNode.m_VarValue.i_StreamIndex;
 		ap_ExecutorNodes[_iPos].m_VarValue.e_Type = _pNode.m_VarValue.e_Type;
 		ap_ExecutorNodes[_iPos].m_VarValue.i_AttributePosition = _pNode.m_VarValue.i_AttributePosition;
-		ap_ExecutorNodes[_iPos].e_EventType = _pNode.e_EventType;
 	}
 	else
 	{

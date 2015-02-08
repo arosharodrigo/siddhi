@@ -474,12 +474,6 @@ enum ExecutorNodeType
 	EXECUTOR_NODE_TYPE_COUNT
 };
 
-enum EventType {
-	IN_EVENT = 0,
-	WINDOW_EVENT,
-	NONE_EVENT
-};
-
 inline const char * GetNodeTypeName(ExecutorNodeType _eType)
 {
 	switch(_eType)
@@ -498,11 +492,12 @@ inline const char * GetNodeTypeName(ExecutorNodeType _eType)
 class VariableValue
 {
 public:
+	int i_StreamIndex;
 	DataType::Value e_Type;
 	int i_AttributePosition;
 
 	VariableValue();
-	VariableValue(DataType::Value _eType, int _iPos);
+	VariableValue(int _iStreamIndex, DataType::Value _eType, int _iPos);
 
 	void Print(FILE * _fp = stdout);
 };
@@ -542,9 +537,6 @@ public:
 	// if var - variable holder
 	VariableValue m_VarValue;
 
-	// event type
-	EventType e_EventType;
-
 	ExecutorNode();
 
 	ExecutorNode & SetNodeType(ExecutorNodeType _eNodeType);
@@ -552,7 +544,6 @@ public:
 	ExecutorNode & SetExpressionType(ExpressionType _eExprType);
 	ExecutorNode & SetConstValue(ConstValue _mConstVal);
 	ExecutorNode & SetVariableValue(VariableValue _mVarValue);
-	ExecutorNode & SetEventType(EventType _eEventType);
 
 	void Print() { Print(stdout); }
 	void Print(FILE * _fp);

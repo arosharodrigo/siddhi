@@ -1258,7 +1258,7 @@ public class GpuExpressionParser
             gpuFilterList.add(new ExecutorNode()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
-            .SetVariableValue(new VariableValue(gpuDataType, position)));
+            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, position)));
 
             return type;
             
@@ -1375,7 +1375,7 @@ public class GpuExpressionParser
             gpuFilterList.add(new ExecutorNode()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
-            .SetVariableValue(new VariableValue(gpuDataType, position)));
+            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, position)));
 
             return type;
         }
