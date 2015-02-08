@@ -175,42 +175,42 @@ public class JoinInputStreamParser {
         
         /////////////////////////
         
-        JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true);
-        JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false);
-
-        WindowProcessor leftWindowProcessor = insertJoinProcessorsAndGetWindow(leftPreJoinProcessor,
-                leftPostJoinProcessor, leftStreamRuntime);
-
-        JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true);
-        JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false);
-
-        WindowProcessor rightWindowProcessor = insertJoinProcessorsAndGetWindow(rightPreJoinProcessor,
-                rightPostJoinProcessor, rightStreamRuntime);
-
-        leftPreJoinProcessor.setFindableProcessor((FindableProcessor) rightWindowProcessor);
-        leftPostJoinProcessor.setFindableProcessor((FindableProcessor) rightWindowProcessor);
-
-        rightPreJoinProcessor.setFindableProcessor((FindableProcessor) leftWindowProcessor);
-        rightPostJoinProcessor.setFindableProcessor((FindableProcessor) leftWindowProcessor);
-
-        //todo fix
-        ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(joinInputStream.getOnCompare(),
-                metaStateEvent, -1, executors, executionPlanContext, false, 0);
-        Finder leftFinder = new Finder(expressionExecutor, 1, 0);
-        Finder rightFinder = new Finder(expressionExecutor, 0, 1);
-
-        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
-            rightPreJoinProcessor.setTrigger(true);
-            rightPreJoinProcessor.setFinder(rightFinder);
-            rightPostJoinProcessor.setTrigger(true);
-            rightPostJoinProcessor.setFinder(rightFinder);
-        }
-        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT) {
-            leftPreJoinProcessor.setTrigger(true);
-            leftPreJoinProcessor.setFinder(leftFinder);
-            leftPostJoinProcessor.setTrigger(true);
-            leftPostJoinProcessor.setFinder(leftFinder);
-        }
+//        JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true);
+//        JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false);
+//
+//        WindowProcessor leftWindowProcessor = insertJoinProcessorsAndGetWindow(leftPreJoinProcessor,
+//                leftPostJoinProcessor, leftStreamRuntime);
+//
+//        JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true);
+//        JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false);
+//
+//        WindowProcessor rightWindowProcessor = insertJoinProcessorsAndGetWindow(rightPreJoinProcessor,
+//                rightPostJoinProcessor, rightStreamRuntime);
+//
+//        leftPreJoinProcessor.setFindableProcessor((FindableProcessor) rightWindowProcessor);
+//        leftPostJoinProcessor.setFindableProcessor((FindableProcessor) rightWindowProcessor);
+//
+//        rightPreJoinProcessor.setFindableProcessor((FindableProcessor) leftWindowProcessor);
+//        rightPostJoinProcessor.setFindableProcessor((FindableProcessor) leftWindowProcessor);
+//
+//        //todo fix
+//        ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(joinInputStream.getOnCompare(),
+//                metaStateEvent, -1, executors, executionPlanContext, false, 0);
+//        Finder leftFinder = new Finder(expressionExecutor, 1, 0);
+//        Finder rightFinder = new Finder(expressionExecutor, 0, 1);
+//
+//        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
+//            rightPreJoinProcessor.setTrigger(true);
+//            rightPreJoinProcessor.setFinder(rightFinder);
+//            rightPostJoinProcessor.setTrigger(true);
+//            rightPostJoinProcessor.setFinder(rightFinder);
+//        }
+//        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT) {
+//            leftPreJoinProcessor.setTrigger(true);
+//            leftPreJoinProcessor.setFinder(leftFinder);
+//            leftPostJoinProcessor.setTrigger(true);
+//            leftPostJoinProcessor.setFinder(leftFinder);
+//        }
 
         JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(executionPlanContext,metaStateEvent);
         joinStreamRuntime.addRuntime(leftStreamRuntime);

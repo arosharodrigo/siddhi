@@ -10,6 +10,7 @@
 #include "GpuRawByteBuffer.h"
 #include "GpuIntBuffer.h"
 #include "GpuKernelDataTypes.h"
+#include "GpuJoinProcessor.h"
 #include "GpuJoinKernel.h"
 #include "GpuCudaHelper.h"
 
@@ -94,7 +95,7 @@ void ProcessEventsJoin(
 }
 
 __global__
-void SetWindowState(
+void JoinSetWindowState(
 		char               * _pInputEventBuffer,     // original input events buffer
 		int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
 		char               * _pEventWindowBuffer,    // Event window buffer
@@ -350,13 +351,29 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 void GpuJoinKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 {
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuJoinKernel] Process : StreamIndex=%d EventCount=%d\n", _iStreamIndex, _iNumEvents);
-	fflush(fp_Log);
+	FILE * fpLog = fp_Log;
+	if(_iStreamIndex == 0)
+	{
+		fpLog = fp_LeftLog;
+	}
+	else if (_iStreamIndex == 1)
+	{
+		fpLog = fp_RightLog;
+	}
+	fprintf(fpLog, "[GpuJoinKernel] Process : StreamIndex=%d EventCount=%d\n", _iStreamIndex, _iNumEvents);
+	fflush(fpLog);
 #endif
 
 	if(!b_DeviceSet)
 	{
-		GpuCudaHelper::SelectDevice(i_DeviceId, fp_Log);
+		if(_iStreamIndex == 0)
+		{
+			GpuCudaHelper::SelectDevice(i_DeviceId, "GpuJoinKernel", fp_LeftLog);
+		}
+		else if (_iStreamIndex == 1)
+		{
+			GpuCudaHelper::SelectDevice(i_DeviceId, "GpuJoinKernel", fp_RightLog);
+		}
 		b_DeviceSet = true;
 	}
 
@@ -371,8 +388,8 @@ void GpuJoinKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuJoinKernel] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
-	fflush(fp_Log);
+	fprintf(fpLog, "[GpuJoinKernel] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
+	fflush(fpLog);
 #endif
 
 //	ProcessEventsJoin<<<numBlocks, numThreads>>>(
@@ -388,7 +405,7 @@ void GpuJoinKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 //			i_ThreadBlockSize
 //	);
 //
-//	SetWindowState<<<numBlocks, numThreads>>>(
+//	JoinSetWindowState<<<numBlocks, numThreads>>>(
 //			p_InputEventBuffer->GetDeviceEventBuffer(),
 //			_iNumEvents,
 //			p_WindowEventBuffer->GetDeviceEventBuffer(),
@@ -408,20 +425,20 @@ void GpuJoinKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuJoinKernel] Kernel complete \n");
-	fflush(fp_Log);
+	fprintf(fpLog, "[GpuJoinKernel] Kernel complete \n");
+	fflush(fpLog);
 #endif
 
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuJoinKernel] Results copied \n");
-	fflush(fp_Log);
+	fprintf(fpLog, "[GpuJoinKernel] Results copied \n");
+	fflush(fpLog);
 #endif
 
 #ifdef KERNEL_TIME
 	sdkStopTimer(&p_StopWatch);
 	float fElapsed = sdkGetTimerValue(&p_StopWatch);
-	fprintf(fp_Log, "[GpuJoinKernel] Stats : Elapsed=%f ms\n", fElapsed);
-	fflush(fp_Log);
+	fprintf(fpLog, "[GpuJoinKernel] Stats : Elapsed=%f ms\n", fElapsed);
+	fflush(fpLog);
 	lst_ElapsedTimes.push_back(fElapsed);
 	sdkResetTimer(&p_StopWatch);
 #endif
