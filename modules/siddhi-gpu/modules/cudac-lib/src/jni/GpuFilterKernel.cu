@@ -249,9 +249,9 @@ GpuFilterKernelStandalone::~GpuFilterKernelStandalone()
 //	p_StopWatch = NULL;
 }
 
-bool GpuFilterKernelStandalone::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
+bool GpuFilterKernelStandalone::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuFilterKernelStandalone] Initialize\n");
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Initialize : StreamIndex=%d\n", _iStreamIndex);
 	fflush(fp_Log);
 
 	// set input event buffer
@@ -318,7 +318,7 @@ bool GpuFilterKernelStandalone::Initialize(GpuMetaEvent * _pMetaEvent, int _iInp
 
 }
 
-void GpuFilterKernelStandalone::Process(int & _iNumEvents, bool _bLast)
+void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 {
 #ifdef GPU_DEBUG
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone", fp_Log);
@@ -446,9 +446,9 @@ GpuFilterKernelFirst::~GpuFilterKernelFirst()
 //	p_StopWatch = NULL;
 }
 
-bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
+bool GpuFilterKernelFirst::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuFilterKernelFirst] Initialize\n");
+	fprintf(fp_Log, "[GpuFilterKernelFirst] Initialize : StreamIndex=%d\n", _iStreamIndex);
 	fflush(fp_Log);
 
 	// set input event buffer
@@ -531,7 +531,7 @@ bool GpuFilterKernelFirst::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEve
 
 }
 
-void GpuFilterKernelFirst::Process(int & _iNumEvents, bool _bLast)
+void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 {
 #ifdef GPU_DEBUG
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelFirst::In", fp_Log);

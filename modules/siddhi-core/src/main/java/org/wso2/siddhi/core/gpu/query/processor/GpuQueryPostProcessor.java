@@ -6,12 +6,12 @@ import org.wso2.siddhi.core.gpu.event.stream.converter.ConversionGpuEventChunk;
 
 public abstract class GpuQueryPostProcessor {
     protected ByteBuffer outputEventBuffer;
-    protected ConversionGpuEventChunk complexEventChunks[];
+    protected ConversionGpuEventChunk complexEventChunk;
     
-    public GpuQueryPostProcessor(ByteBuffer outputEventBuffer, ConversionGpuEventChunk complexEventChunks[]) {
+    public GpuQueryPostProcessor(ByteBuffer outputEventBuffer, ConversionGpuEventChunk complexEventChunk) {
         this.outputEventBuffer = outputEventBuffer;
-        this.complexEventChunks = complexEventChunks;
+        this.complexEventChunk = complexEventChunk;
     }
     
-    public abstract void process(int streamIndex, ByteBuffer inputEventBuffer, int eventCount);
+    public abstract void process(ByteBuffer inputEventBuffer, int eventCount);
 }

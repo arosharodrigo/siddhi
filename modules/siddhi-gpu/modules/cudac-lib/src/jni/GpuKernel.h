@@ -23,8 +23,8 @@ public:
 	GpuKernel(GpuProcessor * _pProc, int _iCudaDeviceId, int _iThreadBlockSize, FILE * _fPLog);
 	virtual ~GpuKernel();
 
-	virtual bool Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize) = 0;
-	virtual void Process(int & _iNumEvents, bool _bLast) = 0;
+	virtual bool Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize) = 0;
+	virtual void Process(int _iStreamIndex, int & _iNumEvents, bool _bLast) = 0;
 
 	virtual char * GetResultEventBuffer() = 0;
 	virtual int GetResultEventBufferSize() = 0;

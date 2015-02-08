@@ -30,7 +30,7 @@ import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.gpu.query.input.stream.GpuStreamRuntime;
 import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
-import org.wso2.siddhi.core.gpu.util.parser.GpuFilterExpressionParser;
+import org.wso2.siddhi.core.gpu.util.parser.GpuExpressionParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
@@ -195,18 +195,19 @@ public class SingleInputStreamParser {
                     context, false, SiddhiConstants.LAST);
         }
         
-        String streamId = gpuProcessStreamReceiver.getStreamId();
-        GpuQueryProcessor gpuQueryProcessor = gpuProcessStreamReceiver.getGpuQueryProcessor();
-        SiddhiGpu.GpuQueryRuntime gpuQueryRuntime = gpuQueryProcessor.getGpuQueryRuntime();
+//        String streamId = gpuProcessStreamReceiver.getStreamId();
+//        GpuQueryProcessor gpuQueryProcessor = gpuProcessStreamReceiver.getGpuQueryProcessor();
+//        SiddhiGpu.GpuQueryRuntime gpuQueryRuntime = gpuQueryProcessor.getGpuQueryRuntime();
         
         if (handler instanceof Filter) {
             
             // add filter processor 
-            GpuFilterExpressionParser gpuExpressionParser = new GpuFilterExpressionParser();
-            SiddhiGpu.GpuFilterProcessor gpuFilterProcessor = gpuExpressionParser.parseExpression(parameters[0], metaEvent, stateIndex, context, gpuQueryContext);
+            GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
+            SiddhiGpu.GpuFilterProcessor gpuFilterProcessor = gpuExpressionParser.parseFilterExpression(parameters[0], metaEvent, stateIndex, context, gpuQueryContext);
             gpuFilterProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
-            gpuQueryRuntime.AddProcessor(streamId, gpuFilterProcessor);
-            gpuQueryProcessor.AddGpuProcessor(gpuFilterProcessor);
+            gpuProcessStreamReceiver.addGpuProcessor(gpuFilterProcessor);
+//            gpuQueryRuntime.AddProcessor(streamId, gpuFilterProcessor);
+//            gpuQueryProcessor.AddGpuProcessor(gpuFilterProcessor);
             
             return new FilterProcessor(inputExpressions[0]);
             
@@ -222,9 +223,10 @@ public class SingleInputStreamParser {
                 
                 SiddhiGpu.GpuLengthSlidingWindowProcessor gpuLengthWindowProcessor = 
                         new SiddhiGpu.GpuLengthSlidingWindowProcessor(lengthWindowProcessor.getLength());
-                
-                gpuQueryRuntime.AddProcessor(streamId, gpuLengthWindowProcessor);
-                gpuQueryProcessor.AddGpuProcessor(gpuLengthWindowProcessor);
+                gpuLengthWindowProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
+                gpuProcessStreamReceiver.addGpuProcessor(gpuLengthWindowProcessor);
+//                gpuQueryRuntime.AddProcessor(streamId, gpuLengthWindowProcessor);
+//                gpuQueryProcessor.AddGpuProcessor(gpuLengthWindowProcessor);
             }
             else
             {

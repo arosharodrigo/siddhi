@@ -186,7 +186,8 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 	public GpuStreamProcessor(@StdString String _sQueryName, @StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent) { allocate(_sQueryName, _sStreamId, _iStreamIndex, _pMetaEvent); }
 	private native void allocate(@StdString String _sQueryName, @StdString String _sStreamId, int _iStreamIndex, GpuMetaEvent _pMetaEvent);
 
-	public native @Cast("bool") boolean Initialize(int _iDeviceId, int _iInputEventBufferSize);
+	public native @Cast("bool") boolean Configure(int _iDeviceId, int _iInputEventBufferSize);
+	public native void Initialize(int _iInputEventBufferSize);
 	public native void AddProcessor(GpuProcessor _pProcessor);
 	public native int Process(int _iNumEvents);
 
@@ -231,9 +232,9 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 		SEQUENCE = 6,
 		PATTERN = 7;
 
-	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
-	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native int Process(int _iNumEvents);
+	public native void Configure(int _iStreamIndex, GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(int _iStreamIndex, GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native int Process(int _iStreamIndex, int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 
@@ -332,10 +333,10 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
     public GpuKernel(Pointer p) { super(p); }
 
 
-	public native @Cast("bool") boolean Initialize(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native void Process(@ByRef IntPointer _iNumEvents, @Cast("bool") boolean _bLast);
-	public native void Process(@ByRef IntBuffer _iNumEvents, @Cast("bool") boolean _bLast);
-	public native void Process(@ByRef int[] _iNumEvents, @Cast("bool") boolean _bLast);
+	public native @Cast("bool") boolean Initialize(int _iStreamIndex, GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native void Process(int _iStreamIndex, @ByRef IntPointer _iNumEvents, @Cast("bool") boolean _bLast);
+	public native void Process(int _iStreamIndex, @ByRef IntBuffer _iNumEvents, @Cast("bool") boolean _bLast);
+	public native void Process(int _iStreamIndex, @ByRef int[] _iNumEvents, @Cast("bool") boolean _bLast);
 
 	public native @Cast("char*") BytePointer GetResultEventBuffer();
 	public native int GetResultEventBufferSize();
@@ -511,34 +512,36 @@ public static final int
 public static final int
 	EXPRESSION_CONST = 0,
 	EXPRESSION_VARIABLE = 1,
+	EXPRESSION_TIME = 2,
+	EXPRESSION_SEQUENCE = 3,
 
-	EXPRESSION_ADD_INT = 2,
-	EXPRESSION_ADD_LONG = 3,
-	EXPRESSION_ADD_FLOAT = 4,
-	EXPRESSION_ADD_DOUBLE = 5,
+	EXPRESSION_ADD_INT = 4,
+	EXPRESSION_ADD_LONG = 5,
+	EXPRESSION_ADD_FLOAT = 6,
+	EXPRESSION_ADD_DOUBLE = 7,
 
-	EXPRESSION_SUB_INT = 6,
-	EXPRESSION_SUB_LONG = 7,
-	EXPRESSION_SUB_FLOAT = 8,
-	EXPRESSION_SUB_DOUBLE = 9,
+	EXPRESSION_SUB_INT = 8,
+	EXPRESSION_SUB_LONG = 9,
+	EXPRESSION_SUB_FLOAT = 10,
+	EXPRESSION_SUB_DOUBLE = 11,
 
-	EXPRESSION_MUL_INT = 10,
-	EXPRESSION_MUL_LONG = 11,
-	EXPRESSION_MUL_FLOAT = 12,
-	EXPRESSION_MUL_DOUBLE = 13,
+	EXPRESSION_MUL_INT = 12,
+	EXPRESSION_MUL_LONG = 13,
+	EXPRESSION_MUL_FLOAT = 14,
+	EXPRESSION_MUL_DOUBLE = 15,
 
-	EXPRESSION_DIV_INT = 14,
-	EXPRESSION_DIV_LONG = 15,
-	EXPRESSION_DIV_FLOAT = 16,
-	EXPRESSION_DIV_DOUBLE = 17,
+	EXPRESSION_DIV_INT = 16,
+	EXPRESSION_DIV_LONG = 17,
+	EXPRESSION_DIV_FLOAT = 18,
+	EXPRESSION_DIV_DOUBLE = 19,
 
-	EXPRESSION_MOD_INT = 18,
-	EXPRESSION_MOD_LONG = 19,
-	EXPRESSION_MOD_FLOAT = 20,
-	EXPRESSION_MOD_DOUBLE = 21,
+	EXPRESSION_MOD_INT = 20,
+	EXPRESSION_MOD_LONG = 21,
+	EXPRESSION_MOD_FLOAT = 22,
+	EXPRESSION_MOD_DOUBLE = 23,
 
-	EXPRESSION_INVALID = 22,
-	EXPRESSION_COUNT = 23;
+	EXPRESSION_INVALID = 24,
+	EXPRESSION_COUNT = 25;
 
 @Namespace("SiddhiGpu") public static native @Cast("const char*") BytePointer GetExpressionTypeName(@Cast("SiddhiGpu::ExpressionType") int _eType);
 
@@ -548,6 +551,12 @@ public static final int
 	EXECUTOR_NODE_EXPRESSION = 1,
 
 	EXECUTOR_NODE_TYPE_COUNT = 2;
+
+/** enum SiddhiGpu::EventType */
+public static final int
+	IN_EVENT = 0,
+	WINDOW_EVENT = 1,
+	NONE_EVENT = 2;
 
 @Namespace("SiddhiGpu") public static native @Cast("const char*") BytePointer GetNodeTypeName(@Cast("SiddhiGpu::ExecutorNodeType") int _eType);
 
@@ -622,6 +631,9 @@ public static final int
 	// if var - variable holder
 	public native @ByRef VariableValue m_VarValue(); public native ExecutorNode m_VarValue(VariableValue m_VarValue);
 
+	// event type
+	public native @Cast("SiddhiGpu::EventType") int e_EventType(); public native ExecutorNode e_EventType(int e_EventType);
+
 	public ExecutorNode() { allocate(); }
 	private native void allocate();
 
@@ -630,6 +642,7 @@ public static final int
 	public native @ByRef ExecutorNode SetExpressionType(@Cast("SiddhiGpu::ExpressionType") int _eExprType);
 	public native @ByRef ExecutorNode SetConstValue(@ByVal ConstValue _mConstVal);
 	public native @ByRef ExecutorNode SetVariableValue(@ByVal VariableValue _mVarValue);
+	public native @ByRef ExecutorNode SetEventType(@Cast("SiddhiGpu::EventType") int _eEventType);
 
 	public native void Print();
 	public native void Print(@Cast("FILE*") Pointer _fp);
@@ -649,9 +662,9 @@ public static final int
 
 	public native void Destroy();
 
-	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
-	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native int Process(int _iNumEvents);
+	public native void Configure(int _iStreamIndex, GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(int _iStreamIndex, GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native int Process(int _iStreamIndex, int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 
@@ -698,9 +711,9 @@ public static final int
 	public GpuLengthSlidingWindowProcessor(int _iWindowSize) { allocate(_iWindowSize); }
 	private native void allocate(int _iWindowSize);
 
-	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
-	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native int Process(int _iNumEvents);
+	public native void Configure(int _iStreamIndex, GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(int _iStreamIndex, GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native int Process(int _iStreamIndex, int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 	public native int GetResultEventBufferIndex();
@@ -745,9 +758,9 @@ public static final int
 	public GpuJoinProcessor(int _iLeftWindowSize, int _iRightWindowSize) { allocate(_iLeftWindowSize, _iRightWindowSize); }
 	private native void allocate(int _iLeftWindowSize, int _iRightWindowSize);
 
-	public native void Configure(GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
-	public native void Init(GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native int Process(int _iNumEvents);
+	public native void Configure(int _iStreamIndex, GpuProcessor _pPrevProcessor, GpuProcessorContext _pContext, @Cast("FILE*") Pointer _fpLog);
+	public native void Init(int _iStreamIndex, GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
+	public native int Process(int _iStreamIndex, int _iNumEvents);
 	public native void Print(@Cast("FILE*") Pointer _fp);
 	public native GpuProcessor Clone();
 	public native int GetResultEventBufferIndex();
@@ -756,8 +769,24 @@ public static final int
 
 	public native void Print();
 
+	public native void SetLeftStreamWindowSize(int _iWindowSize);
+	public native void SetRightStreamWindowSize(int _iWindowSize);
 	public native int GetLeftStreamWindowSize();
 	public native int GetRightStreamWindowSize();
+
+	public native void SetLeftTrigger(@Cast("bool") boolean _bTrigger);
+	public native void SetRightTrigger(@Cast("bool") boolean _bTrigger);
+	public native @Cast("bool") boolean GetLeftTrigger();
+	public native @Cast("bool") boolean GetRightTrigger();
+
+	public native void SetWithInTimeMilliSeconds(long _iTime);
+	public native int GetWithInTimeMilliSeconds();
+
+	public native void SetExecutorNodes(int _iNodeCount);
+	public native void AddExecutorNode(int _iPos, @ByRef ExecutorNode _pNode);
+
+	public native int i_NodeCount(); public native GpuJoinProcessor i_NodeCount(int i_NodeCount);
+	public native ExecutorNode ap_ExecutorNodes(); public native GpuJoinProcessor ap_ExecutorNodes(ExecutorNode ap_ExecutorNodes);
 }
 
 

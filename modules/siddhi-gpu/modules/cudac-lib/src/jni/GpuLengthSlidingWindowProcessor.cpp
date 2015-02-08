@@ -43,20 +43,20 @@ GpuProcessor * GpuLengthSlidingWindowProcessor::Clone()
 	return pCloned;
 }
 
-void GpuLengthSlidingWindowProcessor::Configure(GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog)
+void GpuLengthSlidingWindowProcessor::Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog)
 {
+	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Configure : StreamIndex=%d PrevProcessor=%p Context=%p \n",
+			_iStreamIndex, _pPrevProcessor, _pContext);
+	fflush(fp_Log);
+
 	fp_Log = _fpLog;
 	p_Context = _pContext;
 	p_PrevProcessor = _pPrevProcessor;
-
-	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Configure : PrevProcessor=%p Context=%p \n", _pPrevProcessor, p_Context);
-	fflush(fp_Log);
-
 }
 
-void GpuLengthSlidingWindowProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
+void GpuLengthSlidingWindowProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Init \n");
+	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Init : StreamIndex=%d \n", _iStreamIndex);
 	fflush(fp_Log);
 
 	if(p_PrevProcessor)
@@ -80,22 +80,22 @@ void GpuLengthSlidingWindowProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInp
 		p_WindowKernel->SetInputEventBufferIndex(0);
 	}
 
-	p_WindowKernel->Initialize(_pMetaEvent, _iInputEventBufferSize);
+	p_WindowKernel->Initialize(_iStreamIndex, _pMetaEvent, _iInputEventBufferSize);
 
 }
 
-int GpuLengthSlidingWindowProcessor::Process(int _iNumEvents)
+int GpuLengthSlidingWindowProcessor::Process(int _iStreamIndex, int _iNumEvents)
 {
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Process : NumEvents=%d \n", _iNumEvents);
+	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);
 	fflush(fp_Log);
 #endif
 
-	p_WindowKernel->Process(_iNumEvents, (p_Next == NULL));
+	p_WindowKernel->Process(_iStreamIndex, _iNumEvents, (p_Next == NULL));
 
 	if(p_Next)
 	{
-		_iNumEvents = p_Next->Process(_iNumEvents);
+		_iNumEvents = p_Next->Process(_iStreamIndex, _iNumEvents);
 	}
 
 	return _iNumEvents;

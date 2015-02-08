@@ -27,8 +27,8 @@ public:
 			int _iWindowSize, FILE * _fPLog);
 	~GpuLengthSlidingWindowFirstKernel();
 
-	bool Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	void Process(int & _iNumEvents, bool _bLast);
+	bool Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
+	void Process(int _iStreamIndex, int & _iNumEvents, bool _bLast);
 	char * GetResultEventBuffer();
 	int GetResultEventBufferSize();
 
@@ -51,8 +51,8 @@ public:
 			int _iWindowSize, FILE * _fPLog);
 	~GpuLengthSlidingWindowFilterKernel();
 
-	bool Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	void Process(int & _iNumEvents, bool _bLast);
+	bool Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
+	void Process(int _iStreamIndex, int & _iNumEvents, bool _bLast);
 	char * GetResultEventBuffer();
 	int GetResultEventBufferSize();
 

@@ -46,9 +46,9 @@ import org.wso2.siddhi.query.api.expression.math.Mod;
 import org.wso2.siddhi.query.api.expression.math.Multiply;
 import org.wso2.siddhi.query.api.expression.math.Subtract;
 
-public class GpuFilterExpressionParser
+public class GpuExpressionParser
 {
-    private static final Logger log = Logger.getLogger(GpuFilterExpressionParser.class);
+    private static final Logger log = Logger.getLogger(GpuExpressionParser.class);
     private int variableExpressionCount = 0; 
     
     public static class VariablePosition {
@@ -69,10 +69,10 @@ public class GpuFilterExpressionParser
         return varPositionToAttribNameMap;
     }
 
-    public SiddhiGpu.GpuFilterProcessor parseExpression(Expression expression, MetaComplexEvent metaEvent, int currentState, 
+    public SiddhiGpu.GpuFilterProcessor parseFilterExpression(Expression expression, MetaComplexEvent metaEvent, int currentState, 
             ExecutionPlanContext executionPlanContext, GpuQueryContext gpuQueryContext) {
 
-        log.info("<" + gpuQueryContext.getQueryName() + "> parseExpression");
+        log.info("<" + gpuQueryContext.getQueryName() + "> parseFilterExpression");
         log.info("<" + gpuQueryContext.getQueryName() + "> Root Expression = " + expression.toString());
 
         List<SiddhiGpu.ExecutorNode> gpuFilterList = new ArrayList<SiddhiGpu.ExecutorNode>();
@@ -88,6 +88,26 @@ public class GpuFilterExpressionParser
         }
 
         return filter;
+    }
+    
+    public void parseJoinOnCompareExpression(Expression expression, MetaComplexEvent metaEvent, int currentState, 
+            ExecutionPlanContext executionPlanContext, GpuQueryContext gpuQueryContext, SiddhiGpu.GpuJoinProcessor gpuJoinProcessor) {
+
+        log.info("<" + gpuQueryContext.getQueryName() + "> parseJoinOnCompareExpression");
+        log.info("<" + gpuQueryContext.getQueryName() + "> Root Expression = " + expression.toString());
+
+        List<SiddhiGpu.ExecutorNode> gpuFilterList = new ArrayList<SiddhiGpu.ExecutorNode>();
+
+        parseExpressionTree(expression, metaEvent, currentState, executionPlanContext, gpuFilterList);
+
+        gpuJoinProcessor.SetExecutorNodes(gpuFilterList.size());
+
+        int i = 0;
+        for (SiddhiGpu.ExecutorNode executorNode : gpuFilterList) {
+            gpuJoinProcessor.AddExecutorNode(i, executorNode);
+            i++;
+        }
+
     }
 
     public Attribute.Type parseExpressionTree(Expression expression, MetaComplexEvent metaEvent, int currentState, 

@@ -132,6 +132,7 @@ ExecutorNode::ExecutorNode()
 	e_NodeType = EXECUTOR_NODE_TYPE_COUNT;
 	e_ConditionType = EXECUTOR_INVALID;
 	e_ExpressionType = EXPRESSION_INVALID;
+	e_EventType = NONE_EVENT;
 }
 
 ExecutorNode & ExecutorNode::SetNodeType(ExecutorNodeType _eNodeType)
@@ -166,6 +167,12 @@ ExecutorNode & ExecutorNode::SetVariableValue(VariableValue _mVarValue)
 	return *this;
 }
 
+ExecutorNode & ExecutorNode::SetEventType(EventType _eEventType)
+{
+	e_EventType = _eEventType;
+	return *this;
+}
+
 void ExecutorNode::Print(FILE * _fp)
 {
 	fprintf(_fp, "%s=", GetNodeTypeName(e_NodeType));
@@ -189,6 +196,15 @@ void ExecutorNode::Print(FILE * _fp)
 		break;
 		case EXPRESSION_VARIABLE:
 		{
+			if(e_EventType == IN_EVENT)
+			{
+				fprintf(_fp, "(IN_EVENT)");
+			}
+			else if (e_EventType == WINDOW_EVENT)
+			{
+				fprintf(_fp, "(WINDOW_EVENT)");
+			}
+
 			m_VarValue.Print(_fp);
 		}
 		break;
@@ -261,18 +277,19 @@ GpuProcessor * GpuFilterProcessor::Clone()
 	return f;
 }
 
-void GpuFilterProcessor::Configure(GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog)
+void GpuFilterProcessor::Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog)
 {
 	fp_Log = _fpLog;
 	p_Context = _pContext;
 
-	fprintf(fp_Log, "[GpuFilterProcessor] Configure : PrevProcessor=%p Context=%p \n", _pPrevProcessor, p_Context);
+	fprintf(fp_Log, "[GpuFilterProcessor] Configure : StreamIndex=%d PrevProcessor=%p Context=%p \n", _iStreamIndex, _pPrevProcessor, p_Context);
 	fflush(fp_Log);
 }
 
-void GpuFilterProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
+void GpuFilterProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuFilterProcessor] Init : DeviceId=%d InputEventBufferSize=%d\n", p_Context->GetDeviceId(), _iInputEventBufferSize);
+	fprintf(fp_Log, "[GpuFilterProcessor] Init : StreamIndex=%d DeviceId=%d InputEventBufferSize=%d\n",
+			_iStreamIndex, p_Context->GetDeviceId(), _iInputEventBufferSize);
 	fflush(fp_Log);
 
 	if(p_Next)
@@ -292,22 +309,22 @@ void GpuFilterProcessor::Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBuffer
 		fflush(fp_Log);
 	}
 
-	p_FilterKernel->Initialize(_pMetaEvent, _iInputEventBufferSize);
+	p_FilterKernel->Initialize(_iStreamIndex, _pMetaEvent, _iInputEventBufferSize);
 }
 
-int GpuFilterProcessor::Process(int _iNumEvents)
+int GpuFilterProcessor::Process(int _iStreamIndex, int _iNumEvents)
 {
 #ifdef GPU_DEBUG
-	fprintf(fp_Log, "[GpuFilterProcessor] Process : NumEvents=%d \n", _iNumEvents);
+	fprintf(fp_Log, "[GpuFilterProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);
 	fflush(fp_Log);
 #endif
 	// invoke kernels
 	// get result meta data (resulting events count)
-	p_FilterKernel->Process(_iNumEvents, (p_Next == NULL));
+	p_FilterKernel->Process(_iStreamIndex, _iNumEvents, (p_Next == NULL));
 
 	if(p_Next)
 	{
-		_iNumEvents = p_Next->Process(_iNumEvents);
+		_iNumEvents = p_Next->Process(_iStreamIndex, _iNumEvents);
 	}
 
 	return _iNumEvents;

@@ -26,7 +26,8 @@ public:
 	GpuStreamProcessor(std::string _sQueryName, std::string _sStreamId, int _iStreamIndex, GpuMetaEvent * _pMetaEvent);
 	~GpuStreamProcessor();
 
-	bool Initialize(int _iDeviceId, int _iInputEventBufferSize);
+	bool Configure(int _iDeviceId, int _iInputEventBufferSize);
+	void Initialize(int _iInputEventBufferSize);
 	void AddProcessor(GpuProcessor * _pProcessor);
 	int Process(int _iNumEvents);
 

@@ -24,9 +24,9 @@ public:
 	GpuLengthSlidingWindowProcessor(int _iWindowSize);
 	virtual ~GpuLengthSlidingWindowProcessor();
 
-	void Configure(GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog);
-	void Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	int Process(int _iNumEvents);
+	void Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog);
+	void Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
+	int Process(int _iStreamIndex, int _iNumEvents);
 	void Print(FILE * _fp);
 	GpuProcessor * Clone();
 	int GetResultEventBufferIndex();
