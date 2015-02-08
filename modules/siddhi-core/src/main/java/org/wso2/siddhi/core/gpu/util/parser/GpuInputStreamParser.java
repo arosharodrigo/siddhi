@@ -94,7 +94,8 @@ public class GpuInputStreamParser {
                     metaStateEvent.getMetaStreamEvent(1), rightGpuProcessStreamReceiver, gpuQueryContext);
             
             return JoinInputStreamParser.parseInputStream(leftStreamRuntime, rightStreamRuntime,
-                    (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors, gpuQueryContext);
+                    (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors, 
+                    leftGpuProcessStreamReceiver, rightGpuProcessStreamReceiver, gpuQueryContext);
                         
         } else if (inputStream instanceof StateInputStream) {
             MetaStateEvent metaStateEvent = new MetaStateEvent(inputStream.getAllStreamIds().size());

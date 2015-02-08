@@ -20,6 +20,8 @@ import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
+import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
+import org.wso2.siddhi.core.gpu.util.parser.GpuExpressionParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.input.stream.join.Finder;
 import org.wso2.siddhi.core.query.input.stream.join.JoinProcessor;
@@ -28,7 +30,11 @@ import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.window.FindableProcessor;
 import org.wso2.siddhi.core.query.processor.window.WindowProcessor;
+import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
+import org.wso2.siddhi.query.api.expression.constant.Constant;
+import org.wso2.siddhi.query.api.expression.constant.IntConstant;
+import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.List;
 
@@ -111,9 +117,61 @@ public class JoinInputStreamParser {
     
     public static JoinStreamRuntime parseInputStream(SingleStreamRuntime leftStreamRuntime, SingleStreamRuntime rightStreamRuntime,
             JoinInputStream joinInputStream, ExecutionPlanContext executionPlanContext,
-            MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors, GpuQueryContext gpuQueryContext) {
+            MetaStateEvent metaStateEvent, List<VariableExpressionExecutor> executors, 
+            GpuProcessStreamReceiver leftGpuProcessStreamReceiver, GpuProcessStreamReceiver rightGpuProcessStreamReceiver,
+            GpuQueryContext gpuQueryContext) {
 
+        int leftWindowSize = 0;
+        int rightWindowSize = 0;
         
+        List<SiddhiGpu.GpuProcessor> leftGpuProcessors = leftGpuProcessStreamReceiver.getGpuProcessors();
+        SiddhiGpu.GpuProcessor leftLastGpuProcessor = leftGpuProcessors.get(leftGpuProcessors.size() - 1);
+        if(leftLastGpuProcessor != null) {
+            if(leftLastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
+                leftGpuProcessors.remove(leftGpuProcessors.size() - 1);
+                
+                leftWindowSize = ((SiddhiGpu.GpuLengthSlidingWindowProcessor)leftLastGpuProcessor).GetWindowSize();
+            } else {
+                throw new OperationNotSupportedException("Only streams with window can be joined");
+            }
+        }
+        
+        List<SiddhiGpu.GpuProcessor> rightGpuProcessors = rightGpuProcessStreamReceiver.getGpuProcessors();
+        SiddhiGpu.GpuProcessor rightLastGpuProcessor = rightGpuProcessors.get(rightGpuProcessors.size() - 1);
+        if(rightLastGpuProcessor != null) {
+            if(rightLastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
+                rightGpuProcessors.remove(rightGpuProcessors.size() - 1);
+                
+                rightWindowSize = ((SiddhiGpu.GpuLengthSlidingWindowProcessor)rightLastGpuProcessor).GetWindowSize();
+            } else {
+                throw new OperationNotSupportedException("Only streams with window can be joined");
+            }
+        }
+        
+        SiddhiGpu.GpuJoinProcessor gpuJoinProcessor = new SiddhiGpu.GpuJoinProcessor(leftWindowSize, rightWindowSize);
+        leftGpuProcessors.add(gpuJoinProcessor);
+        rightGpuProcessors.add(gpuJoinProcessor);
+        
+        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
+            gpuJoinProcessor.SetRightTrigger(true);
+        }
+        
+        if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT) {
+            gpuJoinProcessor.SetLeftTrigger(true);
+        }
+        
+        Constant withInConstant = joinInputStream.getWithin();
+        if(withInConstant != null) {
+            gpuJoinProcessor.SetWithInTimeMilliSeconds(((TimeConstant)withInConstant).getValue());
+        }
+        
+        GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
+        gpuExpressionParser.parseJoinOnCompareExpression(joinInputStream.getOnCompare(), metaStateEvent, -1, executionPlanContext, 
+                gpuQueryContext, gpuJoinProcessor);
+        
+        gpuJoinProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
+        leftGpuProcessStreamReceiver.addGpuProcessor(gpuJoinProcessor);
+        rightGpuProcessStreamReceiver.addGpuProcessor(gpuJoinProcessor);
         
         /////////////////////////
         

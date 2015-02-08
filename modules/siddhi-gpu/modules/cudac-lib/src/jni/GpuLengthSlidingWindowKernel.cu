@@ -185,34 +185,6 @@ void ProcessEventsLengthSlidingWindowFilter(
 	memcpy(pResultsInEventBuffer, pInEventBuffer, _iSizeOfEvent);
 }
 
-//__device__
-//__forceinline__
-//void MoveEvent(
-//		int                  _iDestination,       // Position in Window buffer to move source event
-//		char               * _pSourceEvent,       // Source event buffer
-//		char               * _pEventWindowBuffer, // Window data buffer
-//		int                  _iSizeOfEvent,       // Size of an event
-//		int                  _iShift              // Offset of next event
-//)
-//{
-//	// get event in destination position in window
-//	char * pDestinationEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * _iDestination);
-//	GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
-//
-//	if(pDestinationEvent->i_Type != GpuEvent::NONE) // there is an event in destination position
-//	{
-//		// move it to next position first
-//		int iNextPosition = _iDestination - _iShift;
-//		if(iNextPosition >= 0)
-//		{
-//			MoveEvent(iNextPosition, pDestinationEventBuffer, _pEventWindowBuffer, _iSizeOfEvent, _iShift);
-//		}
-//	}
-//
-//	memcpy(pDestinationEventBuffer, _pSourceEvent, _iSizeOfEvent);
-//	pDestinationEvent->i_Type = GpuEvent::EXPIRED;
-//}
-
 __global__
 void SetWindowState(
 		char               * _pInputEventBuffer,     // original input events buffer
@@ -318,80 +290,6 @@ void SetWindowState(
 	}
 }
 
-//__global__
-//void SetWindowState(
-//		char               * _pInputEventBuffer,     // original input events buffer
-//		int                * _pFilterdEventsIndexes, // Matched event indexes from filter kernel
-//		int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
-//		char               * _pEventWindowBuffer,    // Event window buffer
-//		int                  _iWindowLength,         // Length of current events window
-//		int                  _iRemainingCount,       // Remaining free slots in Window buffer
-//		int                  _iMaxEventCount,        // used for setting results array
-//		int                  _iSizeOfEvent,          // Size of an event
-//		int                  _iEventsPerBlock        // number of events allocated per block
-//)
-//{
-//	// avoid out of bound threads
-//	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
-//		return;
-//
-//	if((blockIdx.x == _iNumberOfEvents / _iEventsPerBlock) && // last thread block
-//			(threadIdx.x >= _iNumberOfEvents % _iEventsPerBlock)) // extra threads
-//	{
-//		return;
-//	}
-//
-//	// get assigned event
-//	int iEventIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
-//
-//	// check if event in my index is a matched event
-//	if(_pFilterdEventsIndexes[iEventIdx] < 0)
-//	{
-//		return; // not matched
-//	}
-//
-//	// get in event starting position
-//	char * pInEvent = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
-//
-//	if(_iNumberOfEvents < _iWindowLength)
-//	{
-//		int iWindowPositionShift = _iWindowLength - _iNumberOfEvents;
-//
-//		if(_iRemainingCount < _iNumberOfEvents)
-//		{
-//			int iExitEventCount = _iNumberOfEvents - _iRemainingCount;
-//
-//			//TODO: make this non recursive
-//			MoveEvent((iEventIdx + iWindowPositionShift), pInEvent, _pEventWindowBuffer, _iSizeOfEvent, iExitEventCount);
-//
-//		}
-//		else
-//		{
-//			// just copy event to window
-//			iWindowPositionShift -= (_iRemainingCount - _iNumberOfEvents);
-//
-//			char * pWindowEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx + iWindowPositionShift));
-//
-//			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
-//			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
-//			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
-//		}
-//	}
-//	else
-//	{
-//		int iWindowPositionShift = _iNumberOfEvents - _iWindowLength;
-//
-//		if(iEventIdx >= iWindowPositionShift)
-//		{
-//			char * pWindowEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx - iWindowPositionShift));
-//
-//			memcpy(pWindowEventBuffer, pInEvent, _iSizeOfEvent);
-//			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
-//			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
-//		}
-//	}
-//}
-
 // ===============================================================================================================================
 
 GpuLengthSlidingWindowFirstKernel::GpuLengthSlidingWindowFirstKernel(GpuProcessor * _pProc, GpuProcessorContext * _pContext,
@@ -414,9 +312,9 @@ GpuLengthSlidingWindowFirstKernel::~GpuLengthSlidingWindowFirstKernel()
 	fflush(fp_Log);
 }
 
-bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
+bool GpuLengthSlidingWindowFirstKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Initialize\n");
+	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Initialize : StreamIndex=%d \n", _iStreamIndex);
 	fflush(fp_Log);
 
 	// set input event buffer
@@ -466,7 +364,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(GpuMetaEvent * _pMetaEvent, i
 	return true;
 }
 
-void GpuLengthSlidingWindowFirstKernel::Process(int & _iNumEvents, bool _bLast)
+void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 {
 #ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Process : EventCount=%d WindowRemainingCount=%d\n", _iNumEvents, i_RemainingCount);
@@ -598,9 +496,9 @@ GpuLengthSlidingWindowFilterKernel::~GpuLengthSlidingWindowFilterKernel()
 	fflush(fp_Log);
 }
 
-bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
+bool GpuLengthSlidingWindowFilterKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Initialize\n");
+	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Initialize : StreamIndex=%d \n", _iStreamIndex);
 	fflush(fp_Log);
 
 	// set input event buffer
@@ -647,7 +545,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(GpuMetaEvent * _pMetaEvent, 
 	return true;
 }
 
-void GpuLengthSlidingWindowFilterKernel::Process(int & _iNumEvents, bool _bLast)
+void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
 {
 #ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Process : EventCount=%d\n", _iNumEvents);

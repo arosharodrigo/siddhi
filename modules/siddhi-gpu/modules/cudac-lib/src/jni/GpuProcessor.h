@@ -37,9 +37,9 @@ public:
 	GpuProcessor(Type _eType) : e_Type(_eType), p_Next(NULL), i_ThreadBlockSize(128), fp_Log(NULL) {}
 	virtual ~GpuProcessor() {}
 
-	virtual void Configure(GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog) = 0;
-	virtual void Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize) = 0;
-	virtual int Process(int _iNumEvents) = 0;
+	virtual void Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog) = 0;
+	virtual void Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize) = 0;
+	virtual int Process(int _iStreamIndex, int _iNumEvents) = 0;
 	virtual void Print(FILE * _fp) = 0;
 	virtual GpuProcessor * Clone() = 0;
 

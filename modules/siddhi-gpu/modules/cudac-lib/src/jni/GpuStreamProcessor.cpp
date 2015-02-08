@@ -47,12 +47,12 @@ GpuStreamProcessor::~GpuStreamProcessor()
 	fp_Log = NULL;
 }
 
-bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
+bool  GpuStreamProcessor::Configure(int _iDeviceId, int _iInputEventBufferSize)
 {
-	fprintf(fp_Log, "[GpuStreamProcessor] Initialize : DeviceId=%d InputEventBufferSize=%d \n", _iDeviceId, _iInputEventBufferSize);
+	fprintf(fp_Log, "[GpuStreamProcessor] Configure : DeviceId=%d InputEventBufferSize=%d \n", _iDeviceId, _iInputEventBufferSize);
 	fflush(fp_Log);
 
-	if(GpuCudaHelper::SelectDevice(_iDeviceId, "GpuStreamProcessor::Initialize", fp_Log))
+	if(GpuCudaHelper::SelectDevice(_iDeviceId, "GpuStreamProcessor::Configure", fp_Log))
 	{
 
 		// init ByteBuffer
@@ -62,7 +62,7 @@ bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
 		pInputEventBuffer->CreateEventBuffer(_iInputEventBufferSize);
 		int iBufferIndex = p_ProcessorContext->AddEventBuffer(pInputEventBuffer);
 
-		fprintf(fp_Log, "[GpuStreamProcessor] [Initialize] Input Event Buffer added to index=%d \n", iBufferIndex);
+		fprintf(fp_Log, "[GpuStreamProcessor] [Configure] Input Event Buffer added to index=%d \n", iBufferIndex);
 		fflush(fp_Log);
 		pInputEventBuffer->Print();
 
@@ -74,28 +74,38 @@ bool  GpuStreamProcessor::Initialize(int _iDeviceId, int _iInputEventBufferSize)
 			GpuProcessor * pPreviousProcessor = NULL;
 			while(pCurrentProcessor)
 			{
-				pCurrentProcessor->Configure(pPreviousProcessor, p_ProcessorContext, fp_Log);
+				pCurrentProcessor->Configure(i_StreamIndex, pPreviousProcessor, p_ProcessorContext, fp_Log);
 
 				pPreviousProcessor = pCurrentProcessor;
 				pCurrentProcessor = pCurrentProcessor->GetNext();
 			}
 
-			// initialize
-			pCurrentProcessor = p_ProcessorChain;
-			while(pCurrentProcessor)
-			{
-				pCurrentProcessor->Init(p_MetaEvent, _iInputEventBufferSize);
-
-				pCurrentProcessor = pCurrentProcessor->GetNext();
-			}
 		}
 
 		return true;
 	}
-	fprintf(fp_Log, "[GpuStreamProcessor] Initialization failed \n");
+	fprintf(fp_Log, "[GpuStreamProcessor] Configuring failed \n");
 	fflush(fp_Log);
 
 	return false;
+}
+
+void GpuStreamProcessor::Initialize(int _iInputEventBufferSize)
+{
+	fprintf(fp_Log, "[GpuStreamProcessor] Initialize \n");
+	fflush(fp_Log);
+
+	if(p_ProcessorChain)
+	{
+		// configure
+		GpuProcessor * pCurrentProcessor = p_ProcessorChain;
+		while(pCurrentProcessor)
+		{
+			pCurrentProcessor->Init(i_StreamIndex, p_MetaEvent, _iInputEventBufferSize);
+
+			pCurrentProcessor = pCurrentProcessor->GetNext();
+		}
+	}
 }
 
 void GpuStreamProcessor::AddProcessor(GpuProcessor * _pProcessor)
@@ -118,7 +128,7 @@ int GpuStreamProcessor::Process(int _iNumEvents)
 {
 	if(p_ProcessorChain)
 	{
-		return p_ProcessorChain->Process(_iNumEvents);
+		return p_ProcessorChain->Process(i_StreamIndex, _iNumEvents);
 	}
 
 	return 0;

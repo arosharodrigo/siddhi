@@ -3,6 +3,11 @@ package org.wso2.siddhi.performance;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -36,6 +41,20 @@ public class ComplexFilterMultipleQueryPerformance {
         new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
         new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
         new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 300 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
+        new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1),
         new TestQuery("from cseEventStream[pctchange > 0.1 and change < 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 0),
         new TestQuery("from cseEventStream[pctchange > 0.1 and change > 2.5 and volume > 100 and price < 70] select symbol,price,volume insert into outputStream ;", 1)
     };
@@ -109,7 +128,11 @@ public class ComplexFilterMultipleQueryPerformance {
         
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.getSiddhiContext().setEventBufferSize(defaultBufferSize); //.setDefaultEventBufferSize(defaultBufferSize);
-//        siddhiManager.getSiddhiContext().setExecutorService(Executors.newFixedThreadPool(threadPoolSize));
+        siddhiManager.getSiddhiContext().setExecutorService(new ThreadPoolExecutor(threadPoolSize, Integer.MAX_VALUE,
+                60L, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<Runnable>()));
+//                Executors.new newFixedThreadPool(threadPoolSize);
+        siddhiManager.getSiddhiContext().setScheduledExecutorService(Executors.newScheduledThreadPool(threadPoolSize));
         
         String cseEventStream = "@plan:name('ComplexFilterMultipleQuery') " + (asyncEnabled ? "@plan:parallel" : "" ) + " "
                 + "define stream cseEventStream (symbol string, price float, volume int, change float, pctchange float);";

@@ -375,6 +375,8 @@ enum ExpressionType
 {
 	EXPRESSION_CONST = 0,
 	EXPRESSION_VARIABLE,
+	EXPRESSION_TIME,
+	EXPRESSION_SEQUENCE,
 
 	EXPRESSION_ADD_INT,
 	EXPRESSION_ADD_LONG,
@@ -413,6 +415,10 @@ inline const char * GetExpressionTypeName(ExpressionType _eType)
 			return "CONST";
 		case EXPRESSION_VARIABLE:
 			return "VARIABLE";
+		case EXPRESSION_TIME:
+			return "TIME";
+		case EXPRESSION_SEQUENCE:
+			return "SEQUENCE";
 		case EXPRESSION_ADD_INT:
 			return "ADD_INT";
 		case EXPRESSION_ADD_LONG:
@@ -466,6 +472,12 @@ enum ExecutorNodeType
 	EXECUTOR_NODE_EXPRESSION,
 
 	EXECUTOR_NODE_TYPE_COUNT
+};
+
+enum EventType {
+	IN_EVENT = 0,
+	WINDOW_EVENT,
+	NONE_EVENT
 };
 
 inline const char * GetNodeTypeName(ExecutorNodeType _eType)
@@ -530,6 +542,9 @@ public:
 	// if var - variable holder
 	VariableValue m_VarValue;
 
+	// event type
+	EventType e_EventType;
+
 	ExecutorNode();
 
 	ExecutorNode & SetNodeType(ExecutorNodeType _eNodeType);
@@ -537,6 +552,7 @@ public:
 	ExecutorNode & SetExpressionType(ExpressionType _eExprType);
 	ExecutorNode & SetConstValue(ConstValue _mConstVal);
 	ExecutorNode & SetVariableValue(VariableValue _mVarValue);
+	ExecutorNode & SetEventType(EventType _eEventType);
 
 	void Print() { Print(stdout); }
 	void Print(FILE * _fp);
@@ -554,9 +570,9 @@ public:
 
 	void Destroy();
 
-	void Configure(GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog);
-	void Init(GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	int Process(int _iNumEvents);
+	void Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog);
+	void Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
+	int Process(int _iStreamIndex, int _iNumEvents);
 	void Print(FILE * _fp);
 	GpuProcessor * Clone();
 

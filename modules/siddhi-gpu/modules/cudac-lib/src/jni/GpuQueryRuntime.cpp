@@ -133,11 +133,18 @@ bool GpuQueryRuntime::Configure()
 	StreamProcessorsByStreamId::iterator ite = map_StreamProcessorsByStreamId.begin();
 	while(ite != map_StreamProcessorsByStreamId.end())
 	{
-		if(!ite->second->Initialize(i_DeviceId, i_InputEventBufferSize))
+		if(!ite->second->Configure(i_DeviceId, i_InputEventBufferSize))
 		{
 			return false;
 		}
 
+		++ite;
+	}
+
+	ite = map_StreamProcessorsByStreamId.begin();
+	while(ite != map_StreamProcessorsByStreamId.end())
+	{
+		ite->second->Initialize(i_InputEventBufferSize);
 		++ite;
 	}
 

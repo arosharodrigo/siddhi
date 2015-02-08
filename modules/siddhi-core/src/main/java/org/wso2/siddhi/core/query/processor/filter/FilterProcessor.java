@@ -45,7 +45,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.gpu.util.parser.GpuFilterExpressionParser;
+import org.wso2.siddhi.core.gpu.util.parser.GpuExpressionParser;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;

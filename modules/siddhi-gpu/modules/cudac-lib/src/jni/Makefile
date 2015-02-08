@@ -116,6 +116,7 @@ SRC += GpuJoinProcessor.cpp
 CULIBS = GpuCudaHelper 
 CULIBS += GpuEventBuffer 
 CULIBS += GpuIntBuffer 
+CULIBS += GpuRawByteBuffer 
 CULIBS += GpuProcessorContext 
 CULIBS += GpuStreamEventBuffer 
 CULIBS += GpuFilterKernel 
