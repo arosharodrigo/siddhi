@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -39,6 +40,8 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     protected int stateId;
     protected boolean isStartState;
     protected volatile boolean stateChanged = false;
+    protected StateInputStream.Type stateType;
+    protected StreamPostStateProcessor thisStatePostProcessor;
 
     protected Processor nextProcessor;
 
@@ -52,6 +55,17 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     protected StateEventCloner stateEventCloner;
     protected StreamEventPool streamEventPool;
 
+    public StreamPreStateProcessor(StateInputStream.Type stateType) {
+        this.stateType = stateType;
+    }
+
+    public void setThisStatePostProcessor(StreamPostStateProcessor thisStatePostProcessor) {
+        this.thisStatePostProcessor = thisStatePostProcessor;
+    }
+
+    public StreamPostStateProcessor getThisStatePostProcessor() {
+        return thisStatePostProcessor;
+    }
 
     /**
      * Process the handed StreamEvent
@@ -66,16 +80,27 @@ public class StreamPreStateProcessor implements PreStateProcessor {
         for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
             stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
-            process(stateEvent, streamEvent, iterator);
+            process(stateEvent);
             if (stateChanged) {
                 iterator.remove();
             } else {
-                stateEvent.setEvent(stateId, null);
+                switch (stateType) {
+                    case PATTERN:
+                        stateEvent.setEvent(stateId, null);
+                        break;
+                    case SEQUENCE:
+                        stateEvent.setEvent(stateId, null);
+                        iterator.remove();
+                        if (thisStatePostProcessor.callbackPreStateProcessor != null) {
+                            thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
+                        }
+                        break;
+                }
             }
         }
     }
 
-    protected void process(StateEvent stateEvent, StreamEvent streamEvent, Iterator<StateEvent> iterator) {
+    protected void process(StateEvent stateEvent) {
         currentStateEventChunk.add(stateEvent);
         currentStateEventChunk.reset();
         stateChanged = false;
@@ -120,23 +145,44 @@ public class StreamPreStateProcessor implements PreStateProcessor {
     public void init() {
         if (isStartState) {
             StateEvent stateEvent = stateEventPool.borrowEvent();
-            newAndEveryStateEventList.add(stateEvent);
+            addState(stateEvent);
         }
     }
 
     /**
      * Clone a copy of processor
      *
-     * @return
+     * @return clone of StreamPreStateProcessor
      */
     @Override
-    public Processor cloneProcessor() {
-        return null;
+    public PreStateProcessor cloneProcessor() {
+        StreamPreStateProcessor streamPreStateProcessor = new StreamPreStateProcessor(stateType);
+        cloneProperties(streamPreStateProcessor);
+        return streamPreStateProcessor;
+    }
+
+    protected void cloneProperties(StreamPreStateProcessor streamPreStateProcessor) {
+        streamPreStateProcessor.stateId = this.stateId;
+        streamPreStateProcessor.stateEventPool = this.stateEventPool;
+        streamPreStateProcessor.streamEventCloner = this.streamEventCloner;
+        streamPreStateProcessor.stateEventCloner = this.stateEventCloner;
+        streamPreStateProcessor.streamEventPool = this.streamEventPool;
     }
 
     @Override
     public void addState(StateEvent stateEvent) {
-        newAndEveryStateEventList.add(stateEvent);
+        //        if (stateType == StateInputStream.Type.SEQUENCE) {
+        //            newAndEveryStateEventList.clear();
+        //            pendingStateEventList.clear();
+        //        }
+        if (stateType == StateInputStream.Type.SEQUENCE) {
+            if (newAndEveryStateEventList.isEmpty()) {
+                newAndEveryStateEventList.add(stateEvent);
+            }
+        } else {
+            newAndEveryStateEventList.add(stateEvent);
+
+        }
     }
 
     @Override
@@ -166,6 +212,15 @@ public class StreamPreStateProcessor implements PreStateProcessor {
 
     public void setStateEventCloner(StateEventCloner stateEventCloner) {
         this.stateEventCloner = stateEventCloner;
+    }
+
+    @Override
+    public void resetState() {
+        pendingStateEventList.clear();
+        if (isStartState && newAndEveryStateEventList.isEmpty()) {
+            //        if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList.isEmpty()) {
+            init();
+        }
     }
 
     @Override

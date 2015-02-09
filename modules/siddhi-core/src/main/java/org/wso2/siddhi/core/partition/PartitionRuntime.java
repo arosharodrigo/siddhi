@@ -24,26 +24,26 @@ import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
-import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.partition.executor.PartitionExecutor;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.input.stream.state.StateStreamRuntime;
 import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
-import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.util.parser.OutputParser;
+import org.wso2.siddhi.core.table.EventTable;
+import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
-import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateAnnotationException;
 import org.wso2.siddhi.query.api.execution.partition.Partition;
 import org.wso2.siddhi.query.api.execution.query.Query;
+import org.wso2.siddhi.query.api.execution.query.input.state.*;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
+import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
@@ -63,12 +63,11 @@ public class PartitionRuntime {
     private ConcurrentMap<String, AbstractDefinition> localStreamDefinitionMap = new ConcurrentHashMap<String, AbstractDefinition>(); //contains stream definition
     private ConcurrentMap<String, AbstractDefinition> streamDefinitionMap;
     private ConcurrentMap<String, StreamJunction> streamJunctionMap;
+    private ConcurrentMap<String, EventTable> eventTableMap;
     private ConcurrentMap<String, QueryRuntime> metaQueryRuntimeMap = new ConcurrentHashMap<String, QueryRuntime>();
     private List<PartitionInstanceRuntime> partitionInstanceRuntimeList = new ArrayList<PartitionInstanceRuntime>();
     private ConcurrentMap<String, PartitionStreamReceiver> partitionStreamReceivers = new ConcurrentHashMap<String, PartitionStreamReceiver>();
-    private ExecutionPlanRuntime executionPlanRuntime;
     private ExecutionPlanContext executionPlanContext;
-
 
     public PartitionRuntime(ExecutionPlanRuntime executionPlanRuntime, Partition partition, ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
@@ -78,7 +77,7 @@ public class PartitionRuntime {
                 this.partitionId = element.getValue();
             }
         } catch (DuplicateAnnotationException e) {
-            throw new ExecutionPlanCreationException(e.getMessage() + " for the same Query " + partition.toString());
+            throw new DuplicateAnnotationException(e.getMessage() + " for the same Query " + partition.toString());
         }
         if (partitionId == null) {
             this.partitionId = UUID.randomUUID().toString();
@@ -86,32 +85,48 @@ public class PartitionRuntime {
         this.partition = partition;
         this.streamDefinitionMap = executionPlanRuntime.getStreamDefinitionMap();
         this.streamJunctionMap = executionPlanRuntime.getStreamJunctions();
-        this.executionPlanRuntime = executionPlanRuntime;
+        this.eventTableMap = executionPlanRuntime.getEventTableMap();
     }
 
     public QueryRuntime addQuery(QueryRuntime metaQueryRuntime) {
         Query query = metaQueryRuntime.getQuery();
-        OutputCallback outputCallback;
-        if (query.getOutputStream() instanceof InsertIntoStream && ((InsertIntoStream) query.getOutputStream()).isInnerStream()) {
-            metaQueryRuntime.setToLocalStream(true);
-            outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(), localStreamJunctionMap,
-                    metaQueryRuntime.getOutputStreamDefinition(), executionPlanContext);
-        } else {
-            outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(), streamJunctionMap,
-                    metaQueryRuntime.getOutputStreamDefinition(), executionPlanContext);
-        }
-        metaQueryRuntime.setOutputCallback(outputCallback);
 
-        metaQueryRuntimeMap.put(metaQueryRuntime.getQueryId(), metaQueryRuntime);
-        if (metaQueryRuntime.isToLocalStream()) {
-            if (outputCallback != null && outputCallback instanceof InsertIntoStreamCallback) {
-                defineLocalStream(((InsertIntoStreamCallback) outputCallback).getOutputStreamDefinition());
-            }
-        } else {
-            if (outputCallback != null && outputCallback instanceof InsertIntoStreamCallback) {
-                executionPlanRuntime.defineStream(((InsertIntoStreamCallback) outputCallback).getOutputStreamDefinition());
+        if (query.getOutputStream() instanceof InsertIntoStream) {
+            InsertIntoStreamCallback insertIntoStreamCallback = (InsertIntoStreamCallback) metaQueryRuntime.getOutputCallback();
+            StreamDefinition streamDefinition = insertIntoStreamCallback.getOutputStreamDefinition();
+
+            if (((InsertIntoStream) query.getOutputStream()).isInnerStream()) {
+                metaQueryRuntime.setToLocalStream(true);
+                String id = "#" + streamDefinition.getId();
+                localStreamDefinitionMap.putIfAbsent(id, streamDefinition);
+                DefinitionParserHelper.validateOutputStream(streamDefinition, localStreamDefinitionMap.get(id));
+
+                StreamJunction outputStreamJunction = localStreamJunctionMap.get(id);
+
+                if (outputStreamJunction == null) {
+                    outputStreamJunction = new StreamJunction(streamDefinition,
+                            executionPlanContext.getExecutorService(),
+                            executionPlanContext.getSiddhiContext().getEventBufferSize(), executionPlanContext);
+                    localStreamJunctionMap.putIfAbsent(id, outputStreamJunction);
+                }
+                insertIntoStreamCallback.init(localStreamJunctionMap.get(id));
+            } else {
+                String id =  streamDefinition.getId();
+                streamDefinitionMap.putIfAbsent(id, streamDefinition);
+                DefinitionParserHelper.validateOutputStream(streamDefinition, streamDefinitionMap.get(id));
+                StreamJunction outputStreamJunction = streamJunctionMap.get(id);
+
+                if (outputStreamJunction == null) {
+                    outputStreamJunction = new StreamJunction(streamDefinition,
+                            executionPlanContext.getExecutorService(),
+                            executionPlanContext.getSiddhiContext().getEventBufferSize(), executionPlanContext);
+                    streamJunctionMap.putIfAbsent(id, outputStreamJunction);
+                }
+                insertIntoStreamCallback.init(streamJunctionMap.get(id));
             }
         }
+        metaQueryRuntimeMap.put(metaQueryRuntime.getQueryId(), metaQueryRuntime);
+
         return metaQueryRuntime;
     }
 
@@ -122,26 +137,43 @@ public class PartitionRuntime {
         if (queryRuntime.getStreamRuntime() instanceof SingleStreamRuntime) {
             SingleInputStream singleInputStream = (SingleInputStream) query.getInputStream();
             addPartitionReceiver(singleInputStream.getStreamId(), singleInputStream.isInnerStream(), metaEvent.getMetaStreamEvent(0), partitionExecutors.get(0));
-        } else if(queryRuntime.getStreamRuntime() instanceof JoinStreamRuntime){
+        } else if (queryRuntime.getStreamRuntime() instanceof JoinStreamRuntime) {
             SingleInputStream leftSingleInputStream = (SingleInputStream) ((JoinInputStream) query.getInputStream()).getLeftInputStream();
             addPartitionReceiver(leftSingleInputStream.getStreamId(), leftSingleInputStream.isInnerStream(), metaEvent.getMetaStreamEvent(0), partitionExecutors.get(0));
             SingleInputStream rightSingleInputStream = (SingleInputStream) ((JoinInputStream) query.getInputStream()).getRightInputStream();
             addPartitionReceiver(rightSingleInputStream.getStreamId(), rightSingleInputStream.isInnerStream(), metaEvent.getMetaStreamEvent(1), partitionExecutors.get(1));
+        } else if (queryRuntime.getStreamRuntime() instanceof StateStreamRuntime) {
+            StateElement stateElement = ((StateInputStream) query.getInputStream()).getStateElement();
+            addPartitionReceiverForStateElement(stateElement, metaEvent, partitionExecutors, 0);
         }
+    }
 
-        //TODO: else  patterns
-
+    private int addPartitionReceiverForStateElement(StateElement stateElement, MetaStateEvent metaEvent, List<List<PartitionExecutor>> partitionExecutors, int executorIndex) {
+        if (stateElement instanceof EveryStateElement) {
+            return addPartitionReceiverForStateElement(((EveryStateElement) stateElement).getStateElement(), metaEvent, partitionExecutors, executorIndex);
+        } else if (stateElement instanceof NextStateElement) {
+            executorIndex = addPartitionReceiverForStateElement(((NextStateElement) stateElement).getStateElement(), metaEvent, partitionExecutors, executorIndex);
+            return addPartitionReceiverForStateElement(((NextStateElement) stateElement).getNextStateElement(), metaEvent, partitionExecutors, executorIndex);
+        } else if (stateElement instanceof CountStateElement) {
+            return addPartitionReceiverForStateElement(((CountStateElement) stateElement).getStreamStateElement(), metaEvent, partitionExecutors, executorIndex);
+        } else if (stateElement instanceof LogicalStateElement) {
+            executorIndex = addPartitionReceiverForStateElement(((LogicalStateElement) stateElement).getStreamStateElement1(), metaEvent, partitionExecutors, executorIndex);
+            return addPartitionReceiverForStateElement(((LogicalStateElement) stateElement).getStreamStateElement2(), metaEvent, partitionExecutors, executorIndex);
+        } else {  //if stateElement is an instanceof StreamStateElement
+            SingleInputStream singleInputStream = ((StreamStateElement) stateElement).getBasicSingleInputStream();
+            addPartitionReceiver(singleInputStream.getStreamId(), singleInputStream.isInnerStream(), metaEvent.getMetaStreamEvent(executorIndex), partitionExecutors.get(executorIndex));
+            return ++executorIndex;
+        }
     }
 
     private void addPartitionReceiver(String streamId, boolean isInnerStream, MetaStreamEvent metaStreamEvent, List<PartitionExecutor> partitionExecutors) {
         if (!partitionStreamReceivers.containsKey(streamId) && !isInnerStream) {
-            PartitionStreamReceiver partitionStreamReceiver =new PartitionStreamReceiver(executionPlanContext, metaStreamEvent,
-                    (StreamDefinition) streamDefinitionMap.get(streamId),partitionExecutors, this);
+            PartitionStreamReceiver partitionStreamReceiver = new PartitionStreamReceiver(executionPlanContext, metaStreamEvent,
+                    (StreamDefinition) streamDefinitionMap.get(streamId), partitionExecutors, this);
             partitionStreamReceivers.put(partitionStreamReceiver.getStreamId(), partitionStreamReceiver);
             streamJunctionMap.get(partitionStreamReceiver.getStreamId()).subscribe(partitionStreamReceiver);
         }
     }
-
 
 
     /**
@@ -170,16 +202,17 @@ public class PartitionRuntime {
 
                 if (queryRuntime.isFromLocalStream()) {
                     for (int i = 0; i < clonedQueryRuntime.getStreamRuntime().getSingleStreamRuntimes().size(); i++) {
-                        String streamId = queryRuntime.getInputStreamId().get(i);
+                        String streamId = queryRuntime.getStreamRuntime().getSingleStreamRuntimes().get(i).getProcessStreamReceiver().getStreamId();
+                        StreamDefinition streamDefinition;
+                        if (streamId.startsWith("#")) {
+                            streamDefinition = (StreamDefinition) localStreamDefinitionMap.get(streamId);
+                        } else {
+                            streamDefinition = (StreamDefinition) streamDefinitionMap.get(streamId);
+                        }
                         StreamJunction streamJunction = localStreamJunctionMap.get(streamId + key);
                         if (streamJunction == null) {
-                            StreamDefinition streamDefinition = (StreamDefinition) localStreamDefinitionMap.get("#" + streamId);
-                            if (streamDefinition == null) {
-                                streamDefinition = (StreamDefinition) streamDefinitionMap.get(streamId);
-                            }
-                            streamJunction = new StreamJunction(streamDefinition,executionPlanContext.getExecutorService(),
-                                    executionPlanContext.getSiddhiContext().getEventBufferSize(), executionPlanContext
-                            );
+                            streamJunction = new StreamJunction(streamDefinition, executionPlanContext.getExecutorService(),
+                                    executionPlanContext.getSiddhiContext().getEventBufferSize(), executionPlanContext);
                             localStreamJunctionMap.put(streamId + key, streamJunction);
                         }
                         streamJunction.subscribe(clonedQueryRuntime.getStreamRuntime().getSingleStreamRuntimes().get(i).getProcessStreamReceiver());
@@ -206,10 +239,10 @@ public class PartitionRuntime {
     }
 
     public PartitionInstanceRuntime getPartitionInstanceRuntime(String key) {
-        for(PartitionInstanceRuntime partitionInstanceRuntime:partitionInstanceRuntimeList) {
-             if(key.equals(partitionInstanceRuntime.getKey())){
-                 return partitionInstanceRuntime;
-             }
+        for (PartitionInstanceRuntime partitionInstanceRuntime : partitionInstanceRuntimeList) {
+            if (key.equals(partitionInstanceRuntime.getKey())) {
+                return partitionInstanceRuntime;
+            }
         }
         return null;
     }
@@ -228,40 +261,6 @@ public class PartitionRuntime {
 
     public ConcurrentMap<String, StreamJunction> getLocalStreamJunctionMap() {
         return localStreamJunctionMap;
-    }
-
-    /**
-     * define inner stream
-     *
-     * @param streamDefinition definition of an inner stream
-     */
-    public void defineLocalStream(StreamDefinition streamDefinition) {
-        if (!checkEventStreamExist(streamDefinition, localStreamDefinitionMap)) {
-            localStreamDefinitionMap.put("#"+streamDefinition.getId(), streamDefinition);
-            StreamJunction streamJunction = localStreamJunctionMap.get(streamDefinition.getId());
-            if (streamJunction == null) {
-                streamJunction = new StreamJunction(streamDefinition,
-                        executionPlanContext.getExecutorService(),
-                        executionPlanContext.getSiddhiContext().getEventBufferSize(),executionPlanContext);
-                localStreamJunctionMap.putIfAbsent(streamDefinition.getId(), streamJunction);
-            }
-        }
-    }
-
-    private boolean checkEventStreamExist(StreamDefinition newStreamDefinition, ConcurrentMap<String, AbstractDefinition> streamDefinitionMap) {
-        AbstractDefinition definition = streamDefinitionMap.get(newStreamDefinition.getId());
-        if (definition != null) {
-            if (definition instanceof TableDefinition) {
-                throw new DifferentDefinitionAlreadyExistException("Table " + newStreamDefinition.getId() + " is already defined as "
-                        + definition + ", hence cannot define " + newStreamDefinition);
-            } else if (!definition.getAttributeList().equals(newStreamDefinition.getAttributeList())) {
-                throw new DifferentDefinitionAlreadyExistException("Stream " + newStreamDefinition.getId() + " is already defined as "
-                        + definition + ", hence cannot define " + newStreamDefinition);
-            } else {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

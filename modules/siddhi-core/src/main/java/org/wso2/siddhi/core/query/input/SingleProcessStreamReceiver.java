@@ -29,18 +29,24 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
         super(streamId);
     }
 
+    public SingleProcessStreamReceiver clone(String key) {
+        return new SingleProcessStreamReceiver(streamId + key);
+    }
+
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {
 
         while (streamEventChunk.hasNext()) {
             StreamEvent streamEvent = streamEventChunk.next();
             streamEventChunk.remove();
-            if (stateProcessorsSize != 0) {
-                stateProcessors.get(0).updateState();
-            }
+            stabilizeStates();
             currentStreamEventChunk.add(streamEvent);
             next.process(currentStreamEventChunk);
             currentStreamEventChunk.clear();
         }
+
+    }
+
+    protected void stabilizeStates() {
 
     }
 }

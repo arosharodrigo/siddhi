@@ -21,7 +21,6 @@ package org.wso2.siddhi.core.query;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.config.QueryContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
-import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -36,6 +35,7 @@ import org.wso2.siddhi.query.api.exception.DuplicateAnnotationException;
 import org.wso2.siddhi.query.api.execution.query.Query;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
+import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.List;
@@ -56,11 +56,13 @@ public class QueryRuntime {
     private MetaComplexEvent metaComplexEvent;
 
     public QueryRuntime(Query query, ExecutionPlanContext executionPlanContext, StreamRuntime streamRuntime, QuerySelector selector,
-                        OutputRateLimiter outputRateLimiter, MetaComplexEvent metaComplexEvent) {
+                        OutputRateLimiter outputRateLimiter, OutputCallback outputCallback, MetaComplexEvent metaComplexEvent) {
         this.query = query;
         this.streamRuntime = streamRuntime;
         this.selector = selector;
+        this.outputCallback = outputCallback;
 
+        outputRateLimiter.setOutputCallback(outputCallback);
         this.queryContext = new QueryContext();
         queryContext.setExecutionPlanContext(executionPlanContext);
 
@@ -78,7 +80,7 @@ public class QueryRuntime {
 
             }
         } catch (DuplicateAnnotationException e) {
-            throw new ExecutionPlanCreationException(e.getMessage() + " for the same Query " + query.toString());
+            throw new DuplicateAnnotationException(e.getMessage() + " for the same Query " + query.toString());
         }
         if (queryId == null) {
             queryId = UUID.randomUUID().toString();
@@ -119,8 +121,14 @@ public class QueryRuntime {
             return ((SingleInputStream) query.getInputStream()).isInnerStream();
         } else if (query.getInputStream() instanceof JoinInputStream) {
             return ((SingleInputStream)((JoinInputStream) query.getInputStream()).getLeftInputStream()).isInnerStream() || ((SingleInputStream)((JoinInputStream) query.getInputStream()).getRightInputStream()).isInnerStream();
+        } else if(query.getInputStream() instanceof StateInputStream){
+            for(String streamId :query.getInputStream().getAllStreamIds()) {
+                if(streamId.startsWith("#")){
+                    return true;
+                }
+            }
         }
-        //TODO for pattern and sequence streams
+        //TODO for sequence streams
         return false;
     }
 
@@ -131,7 +139,7 @@ public class QueryRuntime {
         OutputRateLimiter clonedOutputRateLimiter = outputRateLimiter.clone(key);
 
         QueryRuntime queryRuntime = new QueryRuntime(query, queryContext.getExecutionPlanContext(), clonedStreamRuntime, clonedSelector,
-                clonedOutputRateLimiter, this.metaComplexEvent);
+                clonedOutputRateLimiter, outputCallback, this.metaComplexEvent);
         QueryParserHelper.initStreamRuntime(clonedStreamRuntime, metaComplexEvent);
 
         queryRuntime.queryId = this.queryId + key;
@@ -172,9 +180,8 @@ public class QueryRuntime {
         return query;
     }
 
-    public void setOutputCallback(OutputCallback outputCallback) {
-        this.outputCallback = outputCallback;
-        outputRateLimiter.setOutputCallback(outputCallback);
+    public OutputCallback getOutputCallback() {
+        return outputCallback;
     }
 
     public void init() {

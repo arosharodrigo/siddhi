@@ -14,16 +14,24 @@
  */
 package org.wso2.siddhi.core.query.processor.window;
 
+import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.query.input.stream.join.Finder;
+import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.finder.Finder;
 import org.wso2.siddhi.core.query.input.stream.single.SingleThreadEntryValveProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.util.Scheduler;
+import org.wso2.siddhi.core.util.parser.SimpleFinderParser;
+import org.wso2.siddhi.query.api.expression.Expression;
+
+import java.util.List;
 
 public class TimeWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
 
@@ -43,19 +51,6 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     @Override
     public Scheduler getScheduler() {
         return scheduler;
-    }
-
-    @Override
-    public StreamEvent find(Finder finder) {    //todo optimize
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
-        expiredEventChunk.reset();
-        while (expiredEventChunk.hasNext()) {
-            StreamEvent streamEvent = expiredEventChunk.next();
-            if (finder.execute(streamEvent)) {
-                returnEventChunk.add(streamEventCloner.copyStreamEvent(streamEvent));
-            }
-        }
-        return returnEventChunk.getFirst();
     }
 
     @Override
@@ -110,5 +105,26 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
 
     public void cloneScheduler(TimeWindowProcessor timeWindowProcessor, SingleThreadEntryValveProcessor singleThreadEntryValveProcessor) {
         this.scheduler = timeWindowProcessor.scheduler.cloneScheduler(singleThreadEntryValveProcessor);
+    }
+
+    @Override
+    public StreamEvent find(ComplexEvent matchingEvent, Finder finder) {
+        finder.setMatchingEvent(matchingEvent);
+        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
+        expiredEventChunk.reset();
+        while (expiredEventChunk.hasNext()) {
+            StreamEvent streamEvent = expiredEventChunk.next();
+            if (finder.execute(streamEvent)) {
+                returnEventChunk.add(streamEventCloner.copyStreamEvent(streamEvent));
+            }
+        }
+        finder.setMatchingEvent(null);
+        return returnEventChunk.getFirst();
+    }
+
+    @Override
+    public Finder constructFinder(Expression expression, MetaComplexEvent metaEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> executorList, int matchingStreamIndex) {
+        return SimpleFinderParser.parse(expression, metaEvent, executionPlanContext, executorList , matchingStreamIndex, inputDefinition);
+
     }
 }

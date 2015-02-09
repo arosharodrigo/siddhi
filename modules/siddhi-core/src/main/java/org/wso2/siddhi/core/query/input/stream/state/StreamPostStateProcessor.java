@@ -31,6 +31,7 @@ public class StreamPostStateProcessor implements PostStateProcessor {
     protected StreamPreStateProcessor thisStatePreProcessor;
     protected Processor nextProcessor;
     protected int stateId;
+    protected CountPreStateProcessor callbackPreStateProcessor;
 
     /**
      * Process the handed StreamEvent
@@ -58,6 +59,9 @@ public class StreamPostStateProcessor implements PostStateProcessor {
         }
         if (nextEveryStatePerProcessor != null) {
             nextEveryStatePerProcessor.addEveryState(stateEvent);
+        }
+        if (callbackPreStateProcessor != null) {
+            callbackPreStateProcessor.startStateReset();
         }
     }
 
@@ -98,13 +102,18 @@ public class StreamPostStateProcessor implements PostStateProcessor {
     /**
      * Clone a copy of processor
      *
-     * @return
+     * @return clone of StreamPostStateProcessor
      */
     @Override
-    public Processor cloneProcessor() {
-        return null;
+    public PostStateProcessor cloneProcessor() {
+        StreamPostStateProcessor streamPostStateProcessor = new StreamPostStateProcessor();
+        cloneProperties(streamPostStateProcessor);
+        return streamPostStateProcessor;
     }
 
+    protected void cloneProperties(StreamPostStateProcessor streamPostStateProcessor){
+        streamPostStateProcessor.stateId = stateId;
+    }
     public void setNextStatePreProcessor(PreStateProcessor preStateProcessor) {
         this.nextStatePerProcessor = preStateProcessor;
     }
@@ -136,5 +145,10 @@ public class StreamPostStateProcessor implements PostStateProcessor {
 
     public int getStateId() {
         return stateId;
+    }
+
+    @Override
+    public void setCallbackPreStateProcessor(CountPreStateProcessor callbackPreStateProcessor) {
+        this.callbackPreStateProcessor = callbackPreStateProcessor;
     }
 }

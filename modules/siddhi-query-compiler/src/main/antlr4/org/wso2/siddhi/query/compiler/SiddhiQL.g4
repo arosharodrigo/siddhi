@@ -32,8 +32,10 @@ error
     ;
 
 execution_plan
-    :plan_annotation* (definition_stream|definition_table|execution_element|error)
-        (';'  (definition_stream|definition_table|execution_element|error))* ';'?
+    : (plan_annotation|error)*
+      ( (definition_stream|definition_table|error) (';' (definition_stream|definition_table|error))* ';'?
+      || (execution_element|error) (';' (execution_element|error))* ';'?
+      || (definition_stream|definition_table|error) (';' (definition_stream|definition_table|error))* (';' (execution_element|error))* ';'? )
     ;
 
 execution_element
@@ -164,7 +166,7 @@ basic_source_stream_handler
     ;
 
 sequence_stream
-    :EVERY? sequence_source_chain ',' sequence_source_chain
+    :EVERY? sequence_source  within_time?  ',' sequence_source_chain
     ;
 
 sequence_source_chain
@@ -257,6 +259,7 @@ math_operation
     |math_operation (add='+'|substract='-') math_operation              #addition_math_operation
     |math_operation (gt_eq='>='|lt_eq='<='|gt='>'|lt='<') math_operation #greaterthan_lessthan_math_operation
     |math_operation (eq='=='|not_eq='!=') math_operation                #equality_math_operation
+    |math_operation IN name                       #in_math_operation
     |math_operation AND math_operation            #and_math_operation
     |math_operation OR math_operation             #or_math_operation
     |function_operation                           #basic_math_operation
@@ -287,7 +290,7 @@ attribute_reference
     ;
 
 attribute_index
-    : INT_LITERAL| LAST ('-' INT_LITERAL)? 
+    : INT_LITERAL| LAST ('-' INT_LITERAL)?
     ;
 
 function_id
@@ -571,6 +574,7 @@ OF:       O F;
 AS:       A S;
 OR:       O R;
 AND:      A N D;
+IN:       I N;
 ON:       O N;
 IS:       I S;
 NOT:      N O T;

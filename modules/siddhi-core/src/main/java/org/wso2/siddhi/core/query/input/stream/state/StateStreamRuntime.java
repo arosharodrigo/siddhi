@@ -21,8 +21,11 @@ package org.wso2.siddhi.core.query.input.stream.state;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
+import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceMultiProcessStreamReceiver;
+import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceSingleProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.runtime.InnerStateRuntime;
 import org.wso2.siddhi.core.query.processor.Processor;
 
@@ -46,9 +49,15 @@ public class StateStreamRuntime implements StreamRuntime {
     @Override
     public StreamRuntime clone(String key) {
         StateStreamRuntime stateStreamRuntime = new StateStreamRuntime(executionPlanContext, metaStateEvent);
-//        for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
-//            stateStreamRuntime.addRuntime((SingleStreamRuntime) singleStreamRuntime.clone(key));
-//        }
+        stateStreamRuntime.innerStateRuntime = this.innerStateRuntime.clone(key);
+        for(SingleStreamRuntime singleStreamRuntime:stateStreamRuntime.getSingleStreamRuntimes()){
+            ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();
+            if(processStreamReceiver instanceof SequenceMultiProcessStreamReceiver){
+                ((SequenceMultiProcessStreamReceiver) processStreamReceiver).setStateStreamRuntime(stateStreamRuntime);
+            } else if(processStreamReceiver instanceof SequenceSingleProcessStreamReceiver){
+                ((SequenceSingleProcessStreamReceiver) processStreamReceiver).setStateStreamRuntime(stateStreamRuntime);
+            }
+        }
         return stateStreamRuntime;
     }
 
@@ -70,5 +79,10 @@ public class StateStreamRuntime implements StreamRuntime {
 
     public InnerStateRuntime getInnerStateRuntime() {
         return innerStateRuntime;
+    }
+
+    public void resetAndUpdate() {
+        innerStateRuntime.reset();
+        innerStateRuntime.update();
     }
 }
