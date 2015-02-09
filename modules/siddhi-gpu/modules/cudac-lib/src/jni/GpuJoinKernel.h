@@ -52,6 +52,7 @@ private:
 	GpuStreamEventBuffer * p_RightInputEventBuffer;
 	GpuStreamEventBuffer * p_LeftWindowEventBuffer;
 	GpuStreamEventBuffer * p_RightWindowEventBuffer;
+
 	GpuRawByteBuffer * p_ResultEventBuffer;
 
 	int i_LeftStreamWindowSize;
