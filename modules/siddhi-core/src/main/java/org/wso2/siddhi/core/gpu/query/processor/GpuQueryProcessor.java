@@ -19,6 +19,7 @@ import org.wso2.siddhi.core.gpu.event.GpuMetaEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribute;
 import org.wso2.siddhi.core.gpu.event.stream.converter.ConversionGpuEventChunk;
+import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.gpu.util.ByteBufferWriter;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
@@ -27,25 +28,15 @@ public class GpuQueryProcessor {
 
     private static final Logger log = Logger.getLogger(GpuQueryProcessor.class);
     private String queryName;
-//    private Processor selectProcessor;
-    private ByteBufferWriter streamInputEventBuffers[];
     private Map<String, GpuMetaStreamEvent> metaStreams = new HashMap<String, GpuMetaStreamEvent>();
-//    private ConversionGpuEventChunk complexEventChunks[];
     private final AtomicLong sequenceNumber;
     private SiddhiGpu.GpuQueryRuntime gpuQueryRuntime;
     private GpuQueryContext gpuQueryContext;
-    private SiddhiGpu.GpuStreamProcessor gpuStreamProcessor[];
-//    private GpuQueryPostProcessor gpuQueryPostProcessor;
-    private boolean configured;
+    private Map<String, GpuProcessStreamReceiver> processStreamReceivers = new HashMap<String, GpuProcessStreamReceiver>();
     
     public GpuQueryProcessor(GpuQueryContext gpuQueryContext, String queryName) {
         this.gpuQueryContext = gpuQueryContext;
         this.queryName = queryName;
-        this.gpuStreamProcessor = null;
-        this.streamInputEventBuffers = null;
-//        this.gpuQueryPostProcessor = null;
-//        this.complexEventChunks = null;
-        this.configured = false;
         
         sequenceNumber = new AtomicLong(0);
         
@@ -60,47 +51,6 @@ public class GpuQueryProcessor {
         GpuQueryProcessor clonedQueryProcessor = new GpuQueryProcessor(gpuQueryContext, this.queryName);
         return clonedQueryProcessor;
     }
-    
-//    public void process(int streamIndex, int eventCount) {
-//        //log.debug("[process] streamIndex=" + streamIndex + " eventCount=" + eventCount);
-//
-//        // reset bytebuffer writers
-//        streamInputEventBuffers[streamIndex].Reset();
-//        
-//        // start gpu processor
-//        int resultEventCount = gpuStreamProcessor[streamIndex].Process(eventCount);
-//        
-//        // copy events back
-//        //log.debug("[process] convert result events : " + resultEventCount);
-//        
-//        gpuQueryPostProcessor.process(streamIndex, streamInputEventBuffers[streamIndex].getByteBuffer(), resultEventCount);
-//        // convert to StreamEvent
-//        //// streamEventChunk.convertAndAdd(event);
-//        //// processAndClearGpu(streamEventChunk);
-//        
-//        //log.debug("[process] call selector");
-//        // call Selector processor
-//        selectProcessor.process(complexEventChunks[streamIndex]);
-//        complexEventChunks[streamIndex].clear();
-//        
-//        //log.debug("[process] complete");
-//    }
-    
-//    public void setSelectProcessor(Processor selectProcessor) {
-//        this.selectProcessor = selectProcessor;
-//    }
-    
-    public ByteBufferWriter getStreamInputEventBuffer(int streamIndex) {
-        return streamInputEventBuffers[streamIndex];
-    }
-    
-    public SiddhiGpu.GpuStreamProcessor getGpuStreamProcessor(int streamIndex) {
-        return gpuStreamProcessor[streamIndex];
-    }
-    
-//    public GpuQueryPostProcessor getGpuQueryPostProcessor() {
-//        return gpuQueryPostProcessor;
-//    }
     
     public void addStream(String streamId, GpuMetaStreamEvent metaStreamEvent) {
         
@@ -160,10 +110,6 @@ public class GpuQueryProcessor {
         return sequenceNumber.getAndIncrement();
     }
     
-//    public void setComplexEventChunk(int streamIndex, ConversionGpuEventChunk complexEventChunk) {
-//        this.complexEventChunks[streamIndex] = complexEventChunk;
-//    }
-    
     public SiddhiGpu.GpuQueryRuntime getGpuQueryRuntime() {
         return gpuQueryRuntime;
     }
@@ -174,86 +120,45 @@ public class GpuQueryProcessor {
         gpuQueryRuntime.AddProcessor(streamId, gpuProcessor);
     }
     
-    public void configure() {
-        if(configured) {
-            log.info("<" + queryName + "> already configured");
-            return;
-        }
-        configured = true;
+    public void configure(GpuProcessStreamReceiver processStreamReceiver) {
         
-        log.info("<" + queryName + "> configure : MetaStream count " + metaStreams.size());
+        log.info("<" + queryName + "> configure " + processStreamReceiver.getStreamId() + " : MetaStream count " + metaStreams.size());
         
-        gpuStreamProcessor = new SiddhiGpu.GpuStreamProcessor[metaStreams.size()];
-        streamInputEventBuffers = new ByteBufferWriter[metaStreams.size()];
-//        complexEventChunks = new ConversionGpuEventChunk[metaStreams.size()];
+        processStreamReceivers.put(processStreamReceiver.getStreamId(), processStreamReceiver);
         
-        if(gpuQueryRuntime.Configure()) {
-
-            for(Entry<String, GpuMetaStreamEvent> entry : metaStreams.entrySet()) {
-                int streamIndex = entry.getValue().getStreamIndex();
-                String streamId = entry.getValue().getStreamId();
-
-                gpuStreamProcessor[streamIndex] = gpuQueryRuntime.GetStream(streamId);
-                
-                BytePointer bytePointer = gpuQueryRuntime.GetInputEventBuffer(new BytePointer(streamId));
-                int bufferSize = gpuQueryRuntime.GetInputEventBufferSizeInBytes(streamId);
-                bytePointer.capacity(bufferSize);
-                bytePointer.limit(bufferSize);
-                bytePointer.position(0);
-                ByteBuffer eventByteBuffer = bytePointer.asBuffer();
-                
-                log.info("<" + queryName + "> ByteBuffer for StreamId=" + streamId + " StreamIndex=" + streamIndex + " [" + eventByteBuffer + "]");
-                
-                streamInputEventBuffers[streamIndex] = new ByteBufferWriter(eventByteBuffer);
-            }
+        if(processStreamReceivers.size() == metaStreams.size()) {
+            log.info("All streams added to GpuQueryRuntime. Configure GpuQueryRuntime.");
             
+            if(gpuQueryRuntime.Configure()) {
+
+                for(Entry<String, GpuMetaStreamEvent> entry : metaStreams.entrySet()) {
+                    int streamIndex = entry.getValue().getStreamIndex();
+                    String myStreamId = entry.getValue().getStreamId();
+
+                    SiddhiGpu.GpuStreamProcessor gpuStreamProcessor = gpuQueryRuntime.GetStream(myStreamId);
+
+                    BytePointer bytePointer = gpuQueryRuntime.GetInputEventBuffer(new BytePointer(myStreamId));
+                    int bufferSize = gpuQueryRuntime.GetInputEventBufferSizeInBytes(myStreamId);
+                    bytePointer.capacity(bufferSize);
+                    bytePointer.limit(bufferSize);
+                    bytePointer.position(0);
+                    ByteBuffer eventByteBuffer = bytePointer.asBuffer();
+
+                    log.info("<" + queryName + "> ByteBuffer for StreamId=" + myStreamId + " StreamIndex=" + streamIndex + " [" + eventByteBuffer + "]");
+
+                    ByteBufferWriter streamInputEventBuffer = new ByteBufferWriter(eventByteBuffer);
+                    
+                    processStreamReceivers.get(myStreamId).configure(streamInputEventBuffer, gpuStreamProcessor);
+                }
+
+            } else {
+                log.warn("<" + queryName + "> SiddhiGpu.QueryRuntime initialization failed");
+                return;
+            }
         } else {
-            log.warn("<" + queryName + "> SiddhiGpu.QueryRuntime initialization failed");
-            return;
+            log.info("Waiting until all streams add to GpuQueryRuntime");
         }
         
-//        SiddhiGpu.GpuProcessor lastGpuProcessor = gpuProcessors.get(gpuProcessors.size() - 1);
-//        if(lastGpuProcessor != null) {
-//            if(lastGpuProcessor instanceof SiddhiGpu.GpuFilterProcessor) {
-//                
-//                BytePointer bytePointer = ((SiddhiGpu.GpuFilterProcessor)lastGpuProcessor).GetResultEventBuffer();
-//                int bufferSize = ((SiddhiGpu.GpuFilterProcessor)lastGpuProcessor).GetResultEventBufferSize();
-//                bytePointer.capacity(bufferSize);
-//                bytePointer.limit(bufferSize);
-//                bytePointer.position(0);
-//                ByteBuffer eventByteBuffer = bytePointer.asBuffer();
-//                
-//                gpuQueryPostProcessor = new GpuFilterQueryPostProcessor(
-//                        eventByteBuffer,
-//                        complexEventChunks);
-//                
-//            } else if (lastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
-//                
-//                BytePointer bytePointer = ((SiddhiGpu.GpuLengthSlidingWindowProcessor)lastGpuProcessor).GetResultEventBuffer();
-//                int bufferSize = ((SiddhiGpu.GpuLengthSlidingWindowProcessor)lastGpuProcessor).GetResultEventBufferSize();
-//                bytePointer.capacity(bufferSize);
-//                bytePointer.limit(bufferSize);
-//                bytePointer.position(0);
-//                ByteBuffer eventByteBuffer = bytePointer.asBuffer();
-//                
-//                gpuQueryPostProcessor = new GpuLengthWindowQueryPostProcessor(
-//                        eventByteBuffer,
-//                        complexEventChunks);
-//                
-//            } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
-//                
-//                BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetResultEventBuffer();
-//                int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetResultEventBufferSize();
-//                bytePointer.capacity(bufferSize);
-//                bytePointer.limit(bufferSize);
-//                bytePointer.position(0);
-//                ByteBuffer eventByteBuffer = bytePointer.asBuffer();
-//                
-//                gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
-//                        eventByteBuffer,
-//                        complexEventChunks);
-//            }
-//        }
     }
 
 }

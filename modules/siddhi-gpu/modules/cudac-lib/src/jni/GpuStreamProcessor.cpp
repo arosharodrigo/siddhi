@@ -82,6 +82,8 @@ bool  GpuStreamProcessor::Configure(int _iDeviceId, int _iInputEventBufferSize)
 
 		}
 
+		fprintf(fp_Log, "[GpuStreamProcessor] Configuring successfull \n");
+		fflush(fp_Log);
 		return true;
 	}
 	fprintf(fp_Log, "[GpuStreamProcessor] Configuring failed \n");

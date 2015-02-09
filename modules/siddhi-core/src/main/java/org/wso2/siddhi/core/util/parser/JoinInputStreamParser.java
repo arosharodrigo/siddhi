@@ -14,6 +14,7 @@
  */
 package org.wso2.siddhi.core.util.parser;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
@@ -40,6 +41,7 @@ import java.util.List;
 
 public class JoinInputStreamParser {
 
+    private static final Logger log = Logger.getLogger(JoinInputStreamParser.class);
 
     public static JoinStreamRuntime parseInputStream(SingleStreamRuntime leftStreamRuntime, SingleStreamRuntime rightStreamRuntime,
                                                      JoinInputStream joinInputStream, ExecutionPlanContext executionPlanContext,
@@ -121,48 +123,62 @@ public class JoinInputStreamParser {
             GpuProcessStreamReceiver leftGpuProcessStreamReceiver, GpuProcessStreamReceiver rightGpuProcessStreamReceiver,
             GpuQueryContext gpuQueryContext) {
 
+        log.debug("JoinInputStreamParser::parseInputStream");
+        
         int leftWindowSize = 0;
         int rightWindowSize = 0;
         
         List<SiddhiGpu.GpuProcessor> leftGpuProcessors = leftGpuProcessStreamReceiver.getGpuProcessors();
+        log.debug("leftGpuProcessors count : " + leftGpuProcessors.size());
         SiddhiGpu.GpuProcessor leftLastGpuProcessor = leftGpuProcessors.get(leftGpuProcessors.size() - 1);
         if(leftLastGpuProcessor != null) {
             if(leftLastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
                 leftGpuProcessors.remove(leftGpuProcessors.size() - 1);
                 
                 leftWindowSize = ((SiddhiGpu.GpuLengthSlidingWindowProcessor)leftLastGpuProcessor).GetWindowSize();
+                
+                log.debug("GpuLengthSlidingWindowProcessor removed from leftGpuProcessors : size=" + leftGpuProcessStreamReceiver.getGpuProcessors().size());
             } else {
                 throw new OperationNotSupportedException("Only streams with window can be joined");
             }
         }
         
         List<SiddhiGpu.GpuProcessor> rightGpuProcessors = rightGpuProcessStreamReceiver.getGpuProcessors();
+        log.debug("rightGpuProcessors count : " + rightGpuProcessors.size());
         SiddhiGpu.GpuProcessor rightLastGpuProcessor = rightGpuProcessors.get(rightGpuProcessors.size() - 1);
         if(rightLastGpuProcessor != null) {
             if(rightLastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
                 rightGpuProcessors.remove(rightGpuProcessors.size() - 1);
                 
                 rightWindowSize = ((SiddhiGpu.GpuLengthSlidingWindowProcessor)rightLastGpuProcessor).GetWindowSize();
+                log.debug("GpuLengthSlidingWindowProcessor removed from rightGpuProcessors : size=" + rightGpuProcessStreamReceiver.getGpuProcessors().size());
             } else {
                 throw new OperationNotSupportedException("Only streams with window can be joined");
             }
         }
         
         SiddhiGpu.GpuJoinProcessor gpuJoinProcessor = new SiddhiGpu.GpuJoinProcessor(leftWindowSize, rightWindowSize);
-        leftGpuProcessors.add(gpuJoinProcessor);
-        rightGpuProcessors.add(gpuJoinProcessor);
+        log.debug("SiddhiGpu.GpuJoinProcessor created : leftWindowSize=" + leftWindowSize + " rightWindowSize=" + rightWindowSize);
+        
+        leftGpuProcessStreamReceiver.addGpuProcessor(gpuJoinProcessor);
+        rightGpuProcessStreamReceiver.addGpuProcessor(gpuJoinProcessor);
+        log.debug("GpuJoinProcessor added to leftGpuProcessors : size=" + leftGpuProcessStreamReceiver.getGpuProcessors().size());
+        log.debug("GpuJoinProcessor added to rightGpuProcessors : size=" + rightGpuProcessStreamReceiver.getGpuProcessors().size());
         
         if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
             gpuJoinProcessor.SetRightTrigger(true);
+            log.debug("SiddhiGpu.GpuJoinProcessor : RightTrigger");
         }
         
         if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT) {
             gpuJoinProcessor.SetLeftTrigger(true);
+            log.debug("SiddhiGpu.GpuJoinProcessor : LeftTrigger");
         }
         
         Constant withInConstant = joinInputStream.getWithin();
         if(withInConstant != null) {
             gpuJoinProcessor.SetWithInTimeMilliSeconds(((TimeConstant)withInConstant).getValue());
+            log.debug("SiddhiGpu.GpuJoinProcessor : WithIn=" + ((TimeConstant)withInConstant).getValue());
         }
         
         GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
@@ -170,8 +186,6 @@ public class JoinInputStreamParser {
                 gpuQueryContext, gpuJoinProcessor);
         
         gpuJoinProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
-        leftGpuProcessStreamReceiver.addGpuProcessor(gpuJoinProcessor);
-        rightGpuProcessStreamReceiver.addGpuProcessor(gpuJoinProcessor);
         
         /////////////////////////
         

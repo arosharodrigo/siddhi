@@ -90,10 +90,16 @@ void GpuJoinProcessor::Configure(int _iStreamIndex, GpuProcessor * _pPrevProcess
 
 void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_LeftLog, "[GpuJoinProcessor] Init : StreamIndex=%d\n", _iStreamIndex);
-	fflush(fp_LeftLog);
-	fprintf(fp_RightLog, "[GpuJoinProcessor] Init : StreamIndex=%d\n", _iStreamIndex);
-	fflush(fp_RightLog);
+	if(_iStreamIndex == 0)
+	{
+		fprintf(fp_LeftLog, "[GpuJoinProcessor] Init : StreamIndex=%d\n", _iStreamIndex);
+		fflush(fp_LeftLog);
+	}
+	else if(_iStreamIndex == 1)
+	{
+		fprintf(fp_RightLog, "[GpuJoinProcessor] Init : StreamIndex=%d\n", _iStreamIndex);
+		fflush(fp_RightLog);
+	}
 
 	if(p_JoinKernel == NULL)
 	{

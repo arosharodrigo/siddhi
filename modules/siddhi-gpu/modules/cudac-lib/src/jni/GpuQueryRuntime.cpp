@@ -122,7 +122,7 @@ int GpuQueryRuntime::GetInputEventBufferSizeInBytes(std::string _sStramId)
 
 bool GpuQueryRuntime::Configure()
 {
-	fprintf(fp_Log, "[GpuQueryRuntime] Configure \n");
+	fprintf(fp_Log, "[GpuQueryRuntime] Configure : StreamCount=%d \n", map_StreamProcessorsByStreamId.size());
 	fflush(fp_Log);
 	GpuUtils::PrintThreadInfo(s_QueryName.c_str(), fp_Log);
 
