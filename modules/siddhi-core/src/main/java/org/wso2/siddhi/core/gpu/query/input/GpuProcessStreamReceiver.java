@@ -72,7 +72,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     @Override
     public void receive(Event event, boolean endOfBatch) {
         
-        //log.debug("[receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
+        log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
         ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
         eventBufferWriter.writeShort((short)type.ordinal());
@@ -142,7 +142,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 }
                 
                 double avgThroughput = totalThroughput / throughputList.size();
-                log.info("<" + queryName + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+                log.info("<" + queryName + " - " + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
                 throughputList.clear();
             }
         }

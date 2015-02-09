@@ -18,19 +18,21 @@ namespace SiddhiGpu
 
 VariableValue::VariableValue()
 {
+	i_StreamIndex = 0;
 	e_Type = DataType::None;
 	i_AttributePosition = -1;
 }
 
-VariableValue::VariableValue(DataType::Value _eType, int _iPos)
+VariableValue::VariableValue(int _iStreamIndex, DataType::Value _eType, int _iPos)
 {
+	i_StreamIndex = _iStreamIndex;
 	e_Type = _eType;
 	i_AttributePosition = _iPos;
 }
 
 void VariableValue::Print(FILE * _fp)
 {
-	fprintf(_fp, "(%s-POS-%d)", DataType::GetTypeName(e_Type), i_AttributePosition);
+	fprintf(_fp, "(%s-POS-%d:%d)", DataType::GetTypeName(e_Type), i_StreamIndex, i_AttributePosition);
 }
 
 // ============================================================================================================
@@ -132,7 +134,6 @@ ExecutorNode::ExecutorNode()
 	e_NodeType = EXECUTOR_NODE_TYPE_COUNT;
 	e_ConditionType = EXECUTOR_INVALID;
 	e_ExpressionType = EXPRESSION_INVALID;
-	e_EventType = NONE_EVENT;
 }
 
 ExecutorNode & ExecutorNode::SetNodeType(ExecutorNodeType _eNodeType)
@@ -167,12 +168,6 @@ ExecutorNode & ExecutorNode::SetVariableValue(VariableValue _mVarValue)
 	return *this;
 }
 
-ExecutorNode & ExecutorNode::SetEventType(EventType _eEventType)
-{
-	e_EventType = _eEventType;
-	return *this;
-}
-
 void ExecutorNode::Print(FILE * _fp)
 {
 	fprintf(_fp, "%s=", GetNodeTypeName(e_NodeType));
@@ -196,15 +191,6 @@ void ExecutorNode::Print(FILE * _fp)
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(e_EventType == IN_EVENT)
-			{
-				fprintf(_fp, "(IN_EVENT)");
-			}
-			else if (e_EventType == WINDOW_EVENT)
-			{
-				fprintf(_fp, "(WINDOW_EVENT)");
-			}
-
 			m_VarValue.Print(_fp);
 		}
 		break;

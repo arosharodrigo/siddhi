@@ -552,12 +552,6 @@ public static final int
 
 	EXECUTOR_NODE_TYPE_COUNT = 2;
 
-/** enum SiddhiGpu::EventType */
-public static final int
-	IN_EVENT = 0,
-	WINDOW_EVENT = 1,
-	NONE_EVENT = 2;
-
 @Namespace("SiddhiGpu") public static native @Cast("const char*") BytePointer GetNodeTypeName(@Cast("SiddhiGpu::ExecutorNodeType") int _eType);
 
 @Namespace("SiddhiGpu") @NoOffset public static class VariableValue extends Pointer {
@@ -569,13 +563,14 @@ public static final int
         return (VariableValue)super.position(position);
     }
 
+	public native int i_StreamIndex(); public native VariableValue i_StreamIndex(int i_StreamIndex);
 	public native @Cast("SiddhiGpu::DataType::Value") int e_Type(); public native VariableValue e_Type(int e_Type);
 	public native int i_AttributePosition(); public native VariableValue i_AttributePosition(int i_AttributePosition);
 
 	public VariableValue() { allocate(); }
 	private native void allocate();
-	public VariableValue(@Cast("SiddhiGpu::DataType::Value") int _eType, int _iPos) { allocate(_eType, _iPos); }
-	private native void allocate(@Cast("SiddhiGpu::DataType::Value") int _eType, int _iPos);
+	public VariableValue(int _iStreamIndex, @Cast("SiddhiGpu::DataType::Value") int _eType, int _iPos) { allocate(_iStreamIndex, _eType, _iPos); }
+	private native void allocate(int _iStreamIndex, @Cast("SiddhiGpu::DataType::Value") int _eType, int _iPos);
 
 	public native void Print(@Cast("FILE*") Pointer _fp/*=stdout*/);
 	public native void Print();
@@ -631,9 +626,6 @@ public static final int
 	// if var - variable holder
 	public native @ByRef VariableValue m_VarValue(); public native ExecutorNode m_VarValue(VariableValue m_VarValue);
 
-	// event type
-	public native @Cast("SiddhiGpu::EventType") int e_EventType(); public native ExecutorNode e_EventType(int e_EventType);
-
 	public ExecutorNode() { allocate(); }
 	private native void allocate();
 
@@ -642,7 +634,6 @@ public static final int
 	public native @ByRef ExecutorNode SetExpressionType(@Cast("SiddhiGpu::ExpressionType") int _eExprType);
 	public native @ByRef ExecutorNode SetConstValue(@ByVal ConstValue _mConstVal);
 	public native @ByRef ExecutorNode SetVariableValue(@ByVal VariableValue _mVarValue);
-	public native @ByRef ExecutorNode SetEventType(@Cast("SiddhiGpu::EventType") int _eEventType);
 
 	public native void Print();
 	public native void Print(@Cast("FILE*") Pointer _fp);

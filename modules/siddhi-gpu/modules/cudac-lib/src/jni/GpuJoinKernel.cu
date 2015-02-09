@@ -335,6 +335,8 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 
 			fprintf(fp_LeftLog, "[GpuJoinKernel] ResultEventBuffer created : Size=%d bytes\n", p_ResultEventBuffer->GetEventBufferSizeInBytes());
 			fflush(fp_LeftLog);
+			fprintf(fp_RightLog, "[GpuJoinKernel] ResultEventBuffer created : Size=%d bytes\n", p_ResultEventBuffer->GetEventBufferSizeInBytes());
+			fflush(fp_RightLog);
 			p_ResultEventBuffer->Print();
 
 		}
