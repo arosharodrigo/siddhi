@@ -35,7 +35,6 @@ GpuJoinProcessor::GpuJoinProcessor(int _iLeftWindowSize, int _iRightWindowSize) 
 	fp_LeftLog(NULL),
 	fp_RightLog(NULL)
 {
-
 }
 
 GpuJoinProcessor::~GpuJoinProcessor()
@@ -60,6 +59,7 @@ GpuJoinProcessor::~GpuJoinProcessor()
 
 	p_LeftStreamMetaEvent = NULL;
 	p_RightStreamMetaEvent = NULL;
+
 }
 
 GpuProcessor * GpuJoinProcessor::Clone()
@@ -163,6 +163,7 @@ int GpuJoinProcessor::Process(int _iStreamIndex, int _iNumEvents)
 		_iNumEvents = p_Next->Process(_iStreamIndex, _iNumEvents);
 	}
 
+
 	return _iNumEvents;
 }
 
@@ -229,6 +230,26 @@ void GpuJoinProcessor::AddExecutorNode(int _iPos, ExecutorNode & _pNode)
 	{
 		printf("[ERROR] [GpuJoinProcessor::AddExecutorNode] array out of bound : %d >= %d\n", _iPos, i_NodeCount);
 	}
+}
+
+char * GpuJoinProcessor::GetLeftResultEventBuffer()
+{
+	return p_JoinKernel->GetLeftResultEventBuffer();
+}
+
+int GpuJoinProcessor::GetLeftResultEventBufferSize()
+{
+	return p_JoinKernel->GetLeftResultEventBufferSize();
+}
+
+char * GpuJoinProcessor::GetRightResultEventBuffer()
+{
+	return p_JoinKernel->GetRightResultEventBuffer();
+}
+
+int GpuJoinProcessor::GetRightResultEventBufferSize()
+{
+	return p_JoinKernel->GetRightResultEventBufferSize();
 }
 
 }

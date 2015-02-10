@@ -165,6 +165,7 @@ ExecutorNode & ExecutorNode::SetVariableValue(VariableValue _mVarValue)
 {
 	m_VarValue.e_Type = _mVarValue.e_Type;
 	m_VarValue.i_AttributePosition = _mVarValue.i_AttributePosition;
+	m_VarValue.i_StreamIndex = _mVarValue.i_StreamIndex;
 	return *this;
 }
 

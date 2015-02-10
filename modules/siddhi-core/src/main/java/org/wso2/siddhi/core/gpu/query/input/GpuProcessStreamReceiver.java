@@ -200,12 +200,27 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 
             } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
                 
-                BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetResultEventBuffer();
-                int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetResultEventBufferSize();
-                bytePointer.capacity(bufferSize);
-                bytePointer.limit(bufferSize);
-                bytePointer.position(0);
-                ByteBuffer eventByteBuffer = bytePointer.asBuffer();
+                ByteBuffer eventByteBuffer = null;
+                
+                if(streamIndex == 0) {
+
+                    BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftResultEventBuffer();
+                    int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftResultEventBufferSize();
+                    bytePointer.capacity(bufferSize);
+                    bytePointer.limit(bufferSize);
+                    bytePointer.position(0);
+                    eventByteBuffer = bytePointer.asBuffer();
+
+                } else if(streamIndex == 1) {
+                    
+                    BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightResultEventBuffer();
+                    int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightResultEventBufferSize();
+                    bytePointer.capacity(bufferSize);
+                    bytePointer.limit(bufferSize);
+                    bytePointer.position(0);
+                    eventByteBuffer = bytePointer.asBuffer();
+                    
+                }
                 
                 gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
                         eventByteBuffer,
