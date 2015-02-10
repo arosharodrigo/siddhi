@@ -14,6 +14,7 @@
 #include "GpuJoinKernel.h"
 #include "GpuCudaHelper.h"
 #include "GpuJoinKernelCore.h"
+#include "GpuFilterProcessor.h"
 
 namespace SiddhiGpu
 {

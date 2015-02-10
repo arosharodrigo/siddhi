@@ -11,7 +11,6 @@
 namespace SiddhiGpu
 {
 
-
 __device__ int AddExpressionInt(GpuKernelFilter & _mOnCompare, GpuKernelMetaEvent * _pLeftMeta, char * _pLeftEvent, GpuKernelMetaEvent * _pRightMeta, char * _pRightEvent, int & _iCurrentNodeIndex)
 {
 	_iCurrentNodeIndex++;

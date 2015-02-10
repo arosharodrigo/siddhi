@@ -9,13 +9,13 @@
 #define GPUJOINKERNELCORE_H_
 
 #include "GpuKernelDataTypes.h"
+#include "GpuCudaCommon.h"
 
 namespace SiddhiGpu
 {
 
 // executor function pointer type
 typedef bool (*OnCompareFuncPointer)(GpuKernelFilter &, GpuKernelMetaEvent *, char *, GpuKernelMetaEvent *, char *, int &);
-
 
 extern __device__ bool NoopOperator(GpuKernelFilter & _mOnCompare, GpuKernelMetaEvent * _pLeftMeta, char * _pLeftEvent, GpuKernelMetaEvent * _pRightMeta, char * _pRightEvent, int & _iCurrentNodeIndex);
 

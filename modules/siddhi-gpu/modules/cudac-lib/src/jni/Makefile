@@ -113,7 +113,8 @@ SRC += GpuFilterProcessor.cpp
 SRC += GpuLengthSlidingWindowProcessor.cpp  
 SRC += GpuJoinProcessor.cpp 
 
-CULIBS = GpuCudaHelper 
+CULIBS = GpuCudaHelper
+CULIBS += GpuCudaCommon 
 CULIBS += GpuEventBuffer 
 CULIBS += GpuIntBuffer 
 CULIBS += GpuRawByteBuffer 
