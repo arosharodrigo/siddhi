@@ -34,6 +34,11 @@ public:
 	char * GetResultEventBuffer();
 	int GetResultEventBufferSize();
 
+	char * GetLeftResultEventBuffer();
+	int GetLeftResultEventBufferSize();
+	char * GetRightResultEventBuffer();
+	int GetRightResultEventBufferSize();
+
 	void Print() { Print(stdout); }
 
 	void SetLeftStreamWindowSize(int _iWindowSize) { i_LeftStraemWindowSize = _iWindowSize; }

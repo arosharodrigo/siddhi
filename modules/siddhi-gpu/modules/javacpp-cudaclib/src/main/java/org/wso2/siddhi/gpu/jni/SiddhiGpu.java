@@ -758,6 +758,11 @@ public static final int
 	public native @Cast("char*") BytePointer GetResultEventBuffer();
 	public native int GetResultEventBufferSize();
 
+	public native @Cast("char*") BytePointer GetLeftResultEventBuffer();
+	public native int GetLeftResultEventBufferSize();
+	public native @Cast("char*") BytePointer GetRightResultEventBuffer();
+	public native int GetRightResultEventBufferSize();
+
 	public native void Print();
 
 	public native void SetLeftStreamWindowSize(int _iWindowSize);

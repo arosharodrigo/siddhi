@@ -123,6 +123,7 @@ CULIBS += GpuFilterKernel
 CULIBS += GpuLengthSlidingWindowKernel
 CULIBS += GpuJoinKernel 
 CULIBS += GpuFilterKernelCore 
+CULIBS += GpuJoinKernelCore
 
 CULIBSRC = $(addsuffix .cu , $(CULIBS))
 CULIBSTATIC = $(addsuffix .a, $(addprefix lib, $(CULIBS)))

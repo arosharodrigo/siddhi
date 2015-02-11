@@ -26,23 +26,23 @@ public class JoinSample {
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
 
-        executionPlanRuntime.addCallback("cseEventStream", new StreamCallback() {
-            @Override
-            public void receive(Event[] events) {
-                EventPrinter.print(events);
-                
-            }
-
-        });
+//        executionPlanRuntime.addCallback("cseEventStream", new StreamCallback() {
+//            @Override
+//            public void receive(Event[] events) {
+//                EventPrinter.print(events);
+//                
+//            }
+//
+//        });
         
-        executionPlanRuntime.addCallback("twitterStream", new StreamCallback() {
-            @Override
-            public void receive(Event[] events) {
-                EventPrinter.print(events);
-                
-            }
-
-        });
+//        executionPlanRuntime.addCallback("twitterStream", new StreamCallback() {
+//            @Override
+//            public void receive(Event[] events) {
+//                EventPrinter.print(events);
+//                
+//            }
+//
+//        });
         
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -58,7 +58,7 @@ public class JoinSample {
         executionPlanRuntime.start();
         
         System.out.println("JoinSample");
-        for(int i=0;i<100; ++i) {
+        for(int i=0;i<100000; ++i) {
             cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, i});
             twitterStreamHandler.send(new Object[]{"User1", "Hello World"+i, "WSO2"});
             cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, i});

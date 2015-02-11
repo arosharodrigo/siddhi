@@ -9,6 +9,7 @@
 #define GPUJOINKERNEL_H_
 
 #include <stdio.h>
+#include "GpuKernelDataTypes.h"
 #include "GpuKernel.h"
 
 namespace SiddhiGpu
@@ -39,7 +40,15 @@ public:
 	int GetRightInputEventBufferIndex() { return i_RightInputBufferIndex; }
 	void SetRightInputEventBufferIndex(int _iIndex) { i_RightInputBufferIndex = _iIndex; }
 
+	char * GetLeftResultEventBuffer();
+	int GetLeftResultEventBufferSize();
+	char * GetRightResultEventBuffer();
+	int GetRightResultEventBufferSize();
+
 private:
+	void ProcessLeftStream(int _iStreamIndex, int & _iNumEvents, bool _bLast);
+	void ProcessRightStream(int _iStreamIndex, int & _iNumEvents, bool _bLast);
+
 	GpuJoinProcessor * p_JoinProcessor;
 
 	GpuProcessorContext * p_LeftContext;
@@ -53,17 +62,22 @@ private:
 	GpuStreamEventBuffer * p_LeftWindowEventBuffer;
 	GpuStreamEventBuffer * p_RightWindowEventBuffer;
 
-	GpuRawByteBuffer * p_ResultEventBuffer;
+	GpuRawByteBuffer * p_LeftResultEventBuffer;
+	GpuRawByteBuffer * p_RightResultEventBuffer;
+	GpuKernelFilter * p_DeviceOnCompareFilter;
 
 	int i_LeftStreamWindowSize;
 	int i_RightStreamWindowSize;
 	int i_LeftRemainingCount;
 	int i_RightRemainingCount;
 
-	bool b_DeviceSet;
+	bool b_LeftDeviceSet;
+	bool b_RightDeviceSet;
 	int i_InitializedStreamCount;
 	FILE * fp_LeftLog;
 	FILE * fp_RightLog;
+
+	pthread_mutex_t mtx_Lock;
 };
 
 }

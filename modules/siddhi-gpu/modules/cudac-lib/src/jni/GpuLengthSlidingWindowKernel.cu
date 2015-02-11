@@ -94,6 +94,7 @@ void ProcessEventsLengthSlidingWindow(
 
 }
 
+ // not used
 __global__
 void ProcessEventsLengthSlidingWindowFilter(
 		char               * _pInputEventBuffer,     // original input events buffer
