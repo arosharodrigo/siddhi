@@ -16,6 +16,10 @@ GpuKernel::GpuKernel(GpuProcessor * _pProc, int _iCudaDeviceId, int _iThreadBloc
 	i_ThreadBlockSize(_iThreadBlockSize),
 	i_ResultEventBufferIndex(-1),
 	i_InputBufferIndex(-1),
+	p_OutputStreamMeta(NULL),
+	p_HostOutputAttributeMapping(NULL),
+	p_DeviceOutputAttributeMapping(NULL),
+	b_LastKernel(false),
 	p_Processor(_pProc),
 	fp_Log(_fPLog)
 {
@@ -24,7 +28,6 @@ GpuKernel::GpuKernel(GpuProcessor * _pProc, int _iCudaDeviceId, int _iThreadBloc
 
 GpuKernel::~GpuKernel()
 {
-
 }
 
 };

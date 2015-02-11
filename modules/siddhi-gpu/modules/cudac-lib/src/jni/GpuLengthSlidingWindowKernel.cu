@@ -365,7 +365,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(int _iStreamIndex, GpuMetaEve
 	return true;
 }
 
-void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
+void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEvents)
 {
 #ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Process : EventCount=%d WindowRemainingCount=%d\n", _iNumEvents, i_RemainingCount);
@@ -422,7 +422,7 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 			i_ThreadBlockSize
 	);
 
-	if(_bLast)
+	if(b_LastKernel)
 	{
 		p_ResultEventBuffer->CopyToHost(true);
 #ifdef GPU_DEBUG
@@ -435,7 +435,7 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 #ifdef GPU_DEBUG
-	if(_bLast)
+	if(b_LastKernel)
 	{
 		GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents * 2, p_ResultEventBuffer->GetHostMetaEvent(),
 				"GpuLengthSlidingWindowFirstKernel::Out", fp_Log);
@@ -546,7 +546,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(int _iStreamIndex, GpuMetaEv
 	return true;
 }
 
-void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
+void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumEvents)
 {
 #ifdef GPU_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Process : EventCount=%d\n", _iNumEvents);
@@ -605,7 +605,7 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 			i_ThreadBlockSize
 	);
 
-	if(_bLast)
+	if(b_LastKernel)
 	{
 		p_ResultEventBuffer->CopyToHost(true);
 
@@ -619,7 +619,7 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 #ifdef GPU_DEBUG
-	if(_bLast)
+	if(b_LastKernel)
 	{
 		GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents * 2, p_ResultEventBuffer->GetHostMetaEvent(),
 				"GpuLengthSlidingWindowFilterKernel::Out", fp_Log);

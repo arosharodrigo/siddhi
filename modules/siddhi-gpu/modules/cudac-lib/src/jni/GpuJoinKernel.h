@@ -31,7 +31,7 @@ public:
 	~GpuJoinKernel();
 
 	bool Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	void Process(int _iStreamIndex, int &_iNumEvents, bool _bLast);
+	void Process(int _iStreamIndex, int &_iNumEvents);
 	char * GetResultEventBuffer();
 	int GetResultEventBufferSize();
 
@@ -46,8 +46,8 @@ public:
 	int GetRightResultEventBufferSize();
 
 private:
-	void ProcessLeftStream(int _iStreamIndex, int & _iNumEvents, bool _bLast);
-	void ProcessRightStream(int _iStreamIndex, int & _iNumEvents, bool _bLast);
+	void ProcessLeftStream(int _iStreamIndex, int & _iNumEvents);
+	void ProcessRightStream(int _iStreamIndex, int & _iNumEvents);
 
 	GpuJoinProcessor * p_JoinProcessor;
 
@@ -62,8 +62,8 @@ private:
 	GpuStreamEventBuffer * p_LeftWindowEventBuffer;
 	GpuStreamEventBuffer * p_RightWindowEventBuffer;
 
-	GpuRawByteBuffer * p_LeftResultEventBuffer;
-	GpuRawByteBuffer * p_RightResultEventBuffer;
+	GpuStreamEventBuffer * p_LeftResultEventBuffer;
+	GpuStreamEventBuffer * p_RightResultEventBuffer;
 	GpuKernelFilter * p_DeviceOnCompareFilter;
 
 	int i_LeftStreamWindowSize;

@@ -11,13 +11,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <list>
+#include "DataTypes.h"
+#include "GpuMetaEvent.h"
 
 namespace SiddhiGpu
 {
 
 class GpuKernel;
 class GpuProcessorContext;
-class GpuMetaEvent;
 
 class GpuProcessor
 {
@@ -34,7 +35,17 @@ public:
 		PATTERN
 	};
 
-	GpuProcessor(Type _eType) : e_Type(_eType), p_Next(NULL), i_ThreadBlockSize(128), fp_Log(NULL) {}
+	GpuProcessor(Type _eType) :
+		e_Type(_eType),
+		p_Next(NULL),
+		i_ThreadBlockSize(128),
+		p_OutputStreamMeta(NULL),
+		p_OutputAttributeMapping(NULL),
+		b_CurrentOn(true),
+		b_ExpiredOn(true),
+		fp_Log(NULL)
+	{}
+
 	virtual ~GpuProcessor() {}
 
 	virtual void Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog) = 0;
@@ -53,11 +64,26 @@ public:
 	void AddToLast(GpuProcessor * _pProc) { if(p_Next) p_Next->AddToLast(_pProc); else p_Next = _pProc; }
 	void SetThreadBlockSize(int _iThreadBlockSize) { i_ThreadBlockSize = _iThreadBlockSize; }
 
+	void SetOutputStream(GpuMetaEvent * _pOutputStreamMeta, AttributeMappings * _pMappings)
+	{
+		p_OutputStreamMeta = _pOutputStreamMeta->Clone();
+		p_OutputAttributeMapping = _pMappings->Clone();
+	}
+
+	void SetCurrentOn(bool _on) { b_CurrentOn = _on; }
+	void SetExpiredOn(bool _on) { b_ExpiredOn = _on; }
+
+	bool GetCurrentOn() { return b_CurrentOn; }
+	bool GetExpiredOn() { return b_ExpiredOn; }
+
 protected:
 	Type e_Type;
 	GpuProcessor * p_Next;
-	std::list<GpuKernel*> lst_Kernels;
 	int i_ThreadBlockSize;
+	GpuMetaEvent * p_OutputStreamMeta;
+	AttributeMappings * p_OutputAttributeMapping;
+	bool b_CurrentOn;
+	bool b_ExpiredOn;
 	FILE * fp_Log;
 };
 

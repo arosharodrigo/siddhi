@@ -318,7 +318,7 @@ bool GpuFilterKernelStandalone::Initialize(int _iStreamIndex, GpuMetaEvent * _pM
 
 }
 
-void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
+void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 {
 #ifdef GPU_DEBUG
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone", fp_Log);
@@ -359,7 +359,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents, bo
 			p_ResultEventBuffer->GetDeviceEventBuffer()
 	);
 
-	if(_bLast)
+	if(b_LastKernel)
 	{
 		p_ResultEventBuffer->CopyToHost(true);
 	}
@@ -531,7 +531,7 @@ bool GpuFilterKernelFirst::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEv
 
 }
 
-void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents, bool _bLast)
+void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents)
 {
 #ifdef GPU_DEBUG
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelFirst::In", fp_Log);
@@ -606,7 +606,7 @@ void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents, bool _b
 			p_ResultEventBuffer->GetDeviceEventBuffer()
 	);
 
-	if(_bLast)
+	if(b_LastKernel)
 	{
 		p_ResultEventBuffer->CopyToHost(true);
 	}
@@ -620,7 +620,7 @@ void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents, bool _b
 	_iNumEvents = pPrefixSumResults[_iNumEvents - 1];
 
 #ifdef GPU_DEBUG
-	if(_bLast)
+	if(b_LastKernel)
 	{
 		GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents, p_ResultEventBuffer->GetHostMetaEvent(),
 				"GpuFilterKernelFirst::Out", fp_Log);

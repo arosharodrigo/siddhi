@@ -13,7 +13,7 @@ public class JoinSample {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "@plan:name('planname') @plan:parallel " +
+        String streams = "@plan:name('planname') " + //@plan:parallel " +
 //        String streams = "" +
                 "define stream cseEventStream (symbol string, price float, volume int); " +
                 "define stream twitterStream (user string, tweet string, company string); ";

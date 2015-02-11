@@ -296,6 +296,11 @@ void GpuFilterProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int
 		fflush(fp_Log);
 	}
 
+	if(p_Next == NULL)
+	{
+		p_FilterKernel->SetOutputStream(p_OutputStreamMeta, p_OutputAttributeMapping);
+	}
+
 	p_FilterKernel->Initialize(_iStreamIndex, _pMetaEvent, _iInputEventBufferSize);
 }
 
@@ -307,7 +312,7 @@ int GpuFilterProcessor::Process(int _iStreamIndex, int _iNumEvents)
 #endif
 	// invoke kernels
 	// get result meta data (resulting events count)
-	p_FilterKernel->Process(_iStreamIndex, _iNumEvents, (p_Next == NULL));
+	p_FilterKernel->Process(_iStreamIndex, _iNumEvents);
 
 	if(p_Next)
 	{

@@ -167,8 +167,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         this.eventBufferWriter = eventBufferWriter;
         this.gpuStreamProcessor = gpuStreamProcessor;
         
-        gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
-        
         // create QueryPostProcessor - should done after GpuStreamProcessors configured
         SiddhiGpu.GpuProcessor lastGpuProcessor = gpuProcessors.get(gpuProcessors.size() - 1);
         if(lastGpuProcessor != null) {
@@ -180,6 +178,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 bytePointer.limit(bufferSize);
                 bytePointer.position(0);
                 ByteBuffer eventByteBuffer = bytePointer.asBuffer();
+                
+                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
                 
                 gpuQueryPostProcessor = new GpuFilterQueryPostProcessor(
                         eventByteBuffer,
@@ -194,6 +194,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 bytePointer.position(0);
                 ByteBuffer eventByteBuffer = bytePointer.asBuffer();
                 
+                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
+
                 gpuQueryPostProcessor = new GpuLengthWindowQueryPostProcessor(
                         eventByteBuffer,
                         gpuEventChunk);
@@ -221,6 +223,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     eventByteBuffer = bytePointer.asBuffer();
                     
                 }
+                
+                // TODO: this should be metastream event of output stream
+                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
                 
                 gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
                         eventByteBuffer,

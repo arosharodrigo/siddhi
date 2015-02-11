@@ -179,6 +179,8 @@ public class JoinInputStreamParser {
         if(withInConstant != null) {
             gpuJoinProcessor.SetWithInTimeMilliSeconds(((TimeConstant)withInConstant).getValue());
             log.debug("SiddhiGpu.GpuJoinProcessor : WithIn=" + ((TimeConstant)withInConstant).getValue());
+        } else {
+            gpuJoinProcessor.SetWithInTimeMilliSeconds(Long.MAX_VALUE);
         }
         
         GpuExpressionParser gpuExpressionParser = new GpuExpressionParser();
