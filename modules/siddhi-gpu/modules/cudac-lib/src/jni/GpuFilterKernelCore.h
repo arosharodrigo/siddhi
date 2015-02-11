@@ -9,14 +9,13 @@
 #define GPUFILTERKERNELCORE_H_
 
 #include "GpuKernelDataTypes.h"
+#include "GpuCudaCommon.h"
 
 namespace SiddhiGpu
 {
 
 // executor function pointer type
 typedef bool (*ExecutorFuncPointer)(GpuKernelFilter &, GpuKernelMetaEvent *, char *, int &);
-
-extern __device__ bool cuda_strcmp(const char *s1, const char *s2);
 
 extern __device__ bool NoopOperator(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex);
 
