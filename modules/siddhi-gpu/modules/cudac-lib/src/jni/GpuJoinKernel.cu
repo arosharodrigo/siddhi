@@ -15,6 +15,7 @@
 #include "GpuCudaHelper.h"
 #include "GpuJoinKernelCore.h"
 #include "GpuFilterProcessor.h"
+#include "GpuUtils.h"
 
 namespace SiddhiGpu
 {
@@ -1139,13 +1140,13 @@ GpuJoinKernel::~GpuJoinKernel()
 
 bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
-	fprintf(fp_LeftLog, "[GpuJoinKernel] Initialize : StreamIndex=%d\n", _iStreamIndex);
-	fflush(fp_LeftLog);
-	fprintf(fp_RightLog, "[GpuJoinKernel] Initialize : StreamIndex=%d\n", _iStreamIndex);
-	fflush(fp_RightLog);
-
 	if(_iStreamIndex == 0)
 	{
+		fprintf(fp_LeftLog, "[GpuJoinKernel] Initialize : StreamIndex=%d LeftTrigger=%d RightTrigger=%d CurrentOn=%d ExpireOn=%d\n",
+				_iStreamIndex, p_JoinProcessor->GetLeftTrigger(), p_JoinProcessor->GetRightTrigger(),
+				p_JoinProcessor->GetCurrentOn(), p_JoinProcessor->GetExpiredOn());
+		fflush(fp_LeftLog);
+
 		// set input event buffer
 		fprintf(fp_LeftLog, "[GpuJoinKernel] Left InpuEventBufferIndex=%d\n", i_LeftInputBufferIndex);
 		fflush(fp_LeftLog);
@@ -1178,9 +1179,16 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 		p_LeftWindowEventBuffer->CopyToDevice(false);
 
 		i_InitializedStreamCount++;
+
+		GpuUtils::PrintThreadInfo("GpuJoinKernel", fp_LeftLog);
 	}
 	else if(_iStreamIndex == 1)
 	{
+		fprintf(fp_RightLog, "[GpuJoinKernel] Initialize : StreamIndex=%d LeftTrigger=%d RightTrigger=%d CurrentOn=%d ExpireOn=%d\n",
+				_iStreamIndex, p_JoinProcessor->GetLeftTrigger(), p_JoinProcessor->GetRightTrigger(),
+				p_JoinProcessor->GetCurrentOn(), p_JoinProcessor->GetExpiredOn());
+		fflush(fp_RightLog);
+
 		fprintf(fp_RightLog, "[GpuJoinKernel] Right InpuEventBufferIndex=%d\n", i_RightInputBufferIndex);
 		fflush(fp_RightLog);
 		p_RightInputEventBuffer = (GpuStreamEventBuffer*) p_RightContext->GetEventBuffer(i_RightInputBufferIndex);
@@ -1212,10 +1220,17 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 		p_RightWindowEventBuffer->CopyToDevice(false);
 
 		i_InitializedStreamCount++;
+
+		GpuUtils::PrintThreadInfo("GpuJoinKernel", fp_RightLog);
 	}
 
 	if(i_InitializedStreamCount == 2)
 	{
+		fprintf(fp_LeftLog, "[GpuJoinKernel] StreamId=%d Creating result event buffer\n", _iStreamIndex);
+		fflush(fp_LeftLog);
+		fprintf(fp_RightLog, "[GpuJoinKernel] StreamId=%d Creating result event buffer\n", _iStreamIndex);
+		fflush(fp_RightLog);
+
 		p_LeftResultEventBuffer = new GpuStreamEventBuffer("JoinLeftResultEventBuffer", p_LeftContext->GetDeviceId(), p_OutputStreamMeta, fp_LeftLog);
 		if(p_JoinProcessor->GetLeftTrigger())
 		{
@@ -1356,6 +1371,7 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 {
 #ifdef GPU_DEBUG
 	fprintf(fp_LeftLog, "[GpuJoinKernel] ProcessLeftStream : StreamIndex=%d EventCount=%d\n", _iStreamIndex, _iNumEvents);
+	GpuUtils::PrintThreadInfo("GpuJoinKernel::ProcessLeftStream", fp_LeftLog);
 	fflush(fp_LeftLog);
 #endif
 
@@ -1467,6 +1483,9 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 			);
 		}
 
+		CUDA_CHECK_RETURN(cudaPeekAtLastError());
+		CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
 	}
 
 //	char               * _pInputEventBuffer,     // original input events buffer
@@ -1539,6 +1558,7 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 {
 #ifdef GPU_DEBUG
 	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessRightStream : StreamIndex=%d EventCount=%d\n", _iStreamIndex, _iNumEvents);
+	GpuUtils::PrintThreadInfo("GpuJoinKernel::ProcessRightStream", fp_RightLog);
 	fflush(fp_RightLog);
 #endif
 
@@ -1648,6 +1668,9 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 					i_ThreadBlockSize
 			);
 		}
+
+		CUDA_CHECK_RETURN(cudaPeekAtLastError());
+		CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	}
 
