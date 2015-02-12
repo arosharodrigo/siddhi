@@ -767,32 +767,26 @@ __device__ bool ExecuteBoolExpression(GpuKernelFilter & _mOnCompare, GpuKernelMe
 		case EXPRESSION_VARIABLE:
 		{
 			// if filter data type matches event attribute data type, return attribute value
-			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 0)
-			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Boolean &&
-						_pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
-				{
-					// get attribute value
-					int16_t i;
-					memcpy(&i, _pLeftEvent + _pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-					_iCurrentNodeIndex++;
-					return i;
-				}
-			}
-			else if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 1)
-			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Boolean &&
-						_pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
-				{
-					// get attribute value
-					int16_t i;
-					memcpy(&i, _pRightEvent + _pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-					_iCurrentNodeIndex++;
-					return i;
-				}
-			}
 
+			GpuKernelMetaEvent * aMeta[2];
+			char * aEvent[2];
 
+			aMeta[0] = _pLeftMeta;
+			aMeta[1] = _pRightMeta;
+			aEvent[0] = _pLeftEvent;
+			aEvent[1] = _pRightEvent;
+
+			int iStreamIndex = _mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex;
+
+			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Boolean &&
+					aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
+			{
+				// get attribute value
+				int16_t i;
+				memcpy(&i, aEvent[iStreamIndex] + aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
+				_iCurrentNodeIndex++;
+				return i;
+			}
 		}
 		break;
 		default:
@@ -820,28 +814,25 @@ __device__ int ExecuteIntExpression(GpuKernelFilter & _mOnCompare, GpuKernelMeta
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 0)
+			GpuKernelMetaEvent * aMeta[2];
+			char * aEvent[2];
+
+			aMeta[0] = _pLeftMeta;
+			aMeta[1] = _pRightMeta;
+			aEvent[0] = _pLeftEvent;
+			aEvent[1] = _pRightEvent;
+
+			int iStreamIndex = _mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex;
+
+			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Int &&
+					aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Int)
 			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Int &&
-						_pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Int)
-				{
-					int32_t i;
-					memcpy(&i, _pLeftEvent + _pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
-					_iCurrentNodeIndex++;
-					return i;
-				}
+				int32_t i;
+				memcpy(&i, aEvent[iStreamIndex] + aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				_iCurrentNodeIndex++;
+				return i;
 			}
-			else if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 1)
-			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Int &&
-						_pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Int)
-				{
-					int32_t i;
-					memcpy(&i, _pRightEvent + _pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
-					_iCurrentNodeIndex++;
-					return i;
-				}
-			}
+
 		}
 		break;
 		case EXPRESSION_ADD_INT:
@@ -889,28 +880,25 @@ __device__ int64_t ExecuteLongExpression(GpuKernelFilter & _mOnCompare, GpuKerne
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 0)
+			GpuKernelMetaEvent * aMeta[2];
+			char * aEvent[2];
+
+			aMeta[0] = _pLeftMeta;
+			aMeta[1] = _pRightMeta;
+			aEvent[0] = _pLeftEvent;
+			aEvent[1] = _pRightEvent;
+
+			int iStreamIndex = _mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex;
+
+			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Long &&
+					aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Long)
 			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Long &&
-						_pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Long)
-				{
-					int64_t i;
-					memcpy(&i, _pLeftEvent + _pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
-					_iCurrentNodeIndex++;
-					return i;
-				}
+				int64_t i;
+				memcpy(&i, aEvent[iStreamIndex] + aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				_iCurrentNodeIndex++;
+				return i;
 			}
-			else if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 1)
-			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Long &&
-						_pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Long)
-				{
-					int64_t i;
-					memcpy(&i, _pRightEvent + _pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
-					_iCurrentNodeIndex++;
-					return i;
-				}
-			}
+
 		}
 		break;
 		case EXPRESSION_ADD_LONG:
@@ -958,28 +946,25 @@ __device__ float ExecuteFloatExpression(GpuKernelFilter & _mOnCompare, GpuKernel
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 0)
+			GpuKernelMetaEvent * aMeta[2];
+			char * aEvent[2];
+
+			aMeta[0] = _pLeftMeta;
+			aMeta[1] = _pRightMeta;
+			aEvent[0] = _pLeftEvent;
+			aEvent[1] = _pRightEvent;
+
+			int iStreamIndex = _mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex;
+
+			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Float &&
+					aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Float)
 			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Float &&
-						_pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Float)
-				{
-					float f;
-					memcpy(&f, _pLeftEvent + _pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
-					_iCurrentNodeIndex++;
-					return f;
-				}
+				float f;
+				memcpy(&f, aEvent[iStreamIndex] + aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				_iCurrentNodeIndex++;
+				return f;
 			}
-			else if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 1)
-			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Float &&
-						_pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Float)
-				{
-					float f;
-					memcpy(&f, _pRightEvent + _pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
-					_iCurrentNodeIndex++;
-					return f;
-				}
-			}
+
 		}
 		break;
 		case EXPRESSION_ADD_FLOAT:
@@ -1027,27 +1012,23 @@ __device__ double ExecuteDoubleExpression(GpuKernelFilter & _mOnCompare, GpuKern
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 0)
+			GpuKernelMetaEvent * aMeta[2];
+			char * aEvent[2];
+
+			aMeta[0] = _pLeftMeta;
+			aMeta[1] = _pRightMeta;
+			aEvent[0] = _pLeftEvent;
+			aEvent[1] = _pRightEvent;
+
+			int iStreamIndex = _mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex;
+
+			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Double &&
+					aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Double)
 			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Double &&
-						_pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Double)
-				{
-					double f;
-					memcpy(&f, _pLeftEvent + _pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
-					_iCurrentNodeIndex++;
-					return f;
-				}
-			}
-			else if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 1)
-			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Double &&
-						_pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Double)
-				{
-					double f;
-					memcpy(&f, _pRightEvent + _pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
-					_iCurrentNodeIndex++;
-					return f;
-				}
+				double f;
+				memcpy(&f, aEvent[iStreamIndex] + aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				_iCurrentNodeIndex++;
+				return f;
 			}
 		}
 		break;
@@ -1100,31 +1081,25 @@ __device__ const char * ExecuteStringExpression(GpuKernelFilter & _mOnCompare, G
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 0)
+			GpuKernelMetaEvent * aMeta[2];
+			char * aEvent[2];
+
+			aMeta[0] = _pLeftMeta;
+			aMeta[1] = _pRightMeta;
+			aEvent[0] = _pLeftEvent;
+			aEvent[1] = _pRightEvent;
+
+			int iStreamIndex = _mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex;
+
+			if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::StringIn &&
+					aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
 			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::StringIn &&
-						_pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
-				{
-					int16_t i;
-					memcpy(&i, _pLeftEvent + _pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-					char * z = _pLeftEvent + _pLeftMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position + 2;
-					z[i] = 0;
-					_iCurrentNodeIndex++;
-					return z;
-				}
-			}
-			else if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_StreamIndex == 1)
-			{
-				if(_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::StringIn &&
-						_pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
-				{
-					int16_t i;
-					memcpy(&i, _pRightEvent + _pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-					char * z = _pRightEvent + _pRightMeta->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position + 2;
-					z[i] = 0;
-					_iCurrentNodeIndex++;
-					return z;
-				}
+				int16_t i;
+				memcpy(&i, aEvent[iStreamIndex] + aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
+				char * z = aEvent[iStreamIndex] + aMeta[iStreamIndex]->p_Attributes[_mOnCompare.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position + 2;
+				z[i] = 0;
+				_iCurrentNodeIndex++;
+				return z;
 			}
 		}
 		break;
