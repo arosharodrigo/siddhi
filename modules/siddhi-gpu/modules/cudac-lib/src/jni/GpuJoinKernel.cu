@@ -34,7 +34,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 		int                  _iOtherWindowLength,        // Length of current events window of other stream
 		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
 		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		int                  _iWithInTime,               // WithIn time in milliseconds
+		uint64_t             _iWithInTime,               // WithIn time in milliseconds
 		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
 		char               * _pResultsBuffer,            // Resulting events buffer for this stream
 		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
@@ -249,7 +249,7 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 		int                  _iOtherWindowLength,        // Length of current events window of other stream
 		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
 		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		int                  _iWithInTime,               // WithIn time in milliseconds
+		uint64_t             _iWithInTime,               // WithIn time in milliseconds
 		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
 		char               * _pResultsBuffer,            // Resulting events buffer for this stream
 		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
@@ -362,7 +362,7 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 		int                  _iOtherWindowLength,        // Length of current events window of other stream
 		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
 		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		int                  _iWithInTime,               // WithIn time in milliseconds
+		uint64_t             _iWithInTime,               // WithIn time in milliseconds
 		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
 		char               * _pResultsBuffer,            // Resulting events buffer for this stream
 		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
@@ -515,7 +515,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 		int                  _iOtherWindowLength,        // Length of current events window of other stream
 		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
 		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		int                  _iWithInTime,               // WithIn time in milliseconds
+		uint64_t             _iWithInTime,               // WithIn time in milliseconds
 		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
 		char               * _pResultsBuffer,            // Resulting events buffer for this stream
 		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
@@ -730,7 +730,7 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 		int                  _iOtherWindowLength,        // Length of current events window of other stream
 		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
 		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		int                  _iWithInTime,               // WithIn time in milliseconds
+		uint64_t             _iWithInTime,               // WithIn time in milliseconds
 		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
 		char               * _pResultsBuffer,            // Resulting events buffer for this stream
 		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
@@ -843,7 +843,7 @@ void ProcessEventsJoinRightTriggerExpireOn(
 		int                  _iOtherWindowLength,        // Length of current events window of other stream
 		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
 		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		int                  _iWithInTime,               // WithIn time in milliseconds
+		uint64_t             _iWithInTime,               // WithIn time in milliseconds
 		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
 		char               * _pResultsBuffer,            // Resulting events buffer for this stream
 		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
@@ -1109,6 +1109,8 @@ GpuJoinKernel::GpuJoinKernel(GpuProcessor * _pProc, GpuProcessorContext * _pLeft
 	i_RightStreamWindowSize(_iRightWindowSize),
 	i_LeftRemainingCount(_iLeftWindowSize),
 	i_RightRemainingCount(_iRightWindowSize),
+	b_LeftFirstKernel(true),
+	b_RightFirstKernel(true),
 	b_LeftDeviceSet(false),
 	b_RightDeviceSet(false),
 	i_InitializedStreamCount(0),
@@ -1315,6 +1317,21 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			fprintf(fp_RightLog, "[GpuJoinKernel] Copying AttributeMappings to device \n");
 			fflush(fp_RightLog);
 
+			fprintf(fp_LeftLog, "[GpuJoinKernel] AttributeMapCount : %d \n", p_HostOutputAttributeMapping->i_MappingCount);
+			fprintf(fp_RightLog, "[GpuJoinKernel] AttributeMapCount : %d \n", p_HostOutputAttributeMapping->i_MappingCount);
+			for(int c=0; c<p_HostOutputAttributeMapping->i_MappingCount; ++c)
+			{
+				fprintf(fp_LeftLog, "[GpuJoinKernel] Map : Form [Stream=%d, Attrib=%d] To [Attrib=%d] \n",
+						p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::STREAM_INDEX],
+						p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::ATTRIBUTE_INDEX],
+						p_HostOutputAttributeMapping->p_Mappings[c].to);
+
+				fprintf(fp_RightLog, "[GpuJoinKernel] Map : Form [Stream=%d, Attrib=%d] To [Attrib=%d] \n",
+						p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::STREAM_INDEX],
+						p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::ATTRIBUTE_INDEX],
+						p_HostOutputAttributeMapping->p_Mappings[c].to);
+			}
+
 			CUDA_CHECK_RETURN(cudaMalloc(
 					(void**) &p_DeviceOutputAttributeMapping,
 					sizeof(AttributeMappings)));
@@ -1385,6 +1402,11 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 	sdkStartTimer(&p_StopWatch);
 #endif
 
+	if(b_LeftFirstKernel)
+	{
+		p_LeftInputEventBuffer->CopyToDevice(true);
+	}
+
 	// call entry kernel
 	int numBlocksX = ceil((float)_iNumEvents / (float)i_ThreadBlockSize);
 	int numBlocksY = 1;
@@ -1396,6 +1418,21 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 
 #ifdef GPU_DEBUG
 	fprintf(fp_LeftLog, "[GpuJoinKernel] ProcessLeftStream : Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
+	fprintf(fp_LeftLog, "[GpuJoinKernel] ProcessLeftStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
+			_iNumEvents, i_LeftRemainingCount, i_LeftStreamWindowSize, i_RightRemainingCount, i_RightStreamWindowSize,
+			p_JoinProcessor->GetWithInTimeMilliSeconds());
+
+	GpuUtils::PrintByteBuffer(p_LeftInputEventBuffer->GetHostEventBuffer(), _iNumEvents,
+			p_LeftInputEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftInputBuffer", fp_LeftLog);
+
+	p_LeftWindowEventBuffer->CopyToHost(false);
+	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - i_LeftRemainingCount),
+			p_LeftWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftWindowBuffer", fp_LeftLog);
+
+	p_RightWindowEventBuffer->CopyToHost(false);
+	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - i_RightRemainingCount),
+			p_RightWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightWindowBuffer", fp_LeftLog);
+
 	fflush(fp_LeftLog);
 #endif
 
@@ -1572,6 +1609,11 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 	sdkStartTimer(&p_StopWatch);
 #endif
 
+	if(b_RightFirstKernel)
+	{
+		p_RightInputEventBuffer->CopyToDevice(true);
+	}
+
 	// call entry kernel
 	int numBlocksX = ceil((float)_iNumEvents / (float)i_ThreadBlockSize);
 	int numBlocksY = 1;
@@ -1583,6 +1625,21 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 
 #ifdef GPU_DEBUG
 	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessRightStream : Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
+	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessLeftStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
+			_iNumEvents, i_LeftRemainingCount, i_LeftStreamWindowSize, i_RightRemainingCount, i_RightStreamWindowSize,
+			p_JoinProcessor->GetWithInTimeMilliSeconds());
+
+	GpuUtils::PrintByteBuffer(p_RightInputEventBuffer->GetHostEventBuffer(), _iNumEvents,
+			p_RightInputEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightInputBuffer", fp_RightLog);
+
+	p_LeftWindowEventBuffer->CopyToHost(false);
+	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - i_LeftRemainingCount),
+			p_LeftWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftWindowBuffer", fp_RightLog);
+
+	p_RightWindowEventBuffer->CopyToHost(false);
+	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - i_RightRemainingCount),
+			p_RightWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightWindowBuffer", fp_RightLog);
+
 	fflush(fp_RightLog);
 #endif
 
@@ -1739,7 +1796,6 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 
 	pthread_mutex_unlock(&mtx_Lock);
 }
-
 
 char * GpuJoinKernel::GetResultEventBuffer()
 {

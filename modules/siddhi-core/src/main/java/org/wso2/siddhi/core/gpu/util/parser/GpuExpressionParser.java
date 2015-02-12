@@ -49,26 +49,7 @@ import org.wso2.siddhi.query.api.expression.math.Subtract;
 public class GpuExpressionParser
 {
     private static final Logger log = Logger.getLogger(GpuExpressionParser.class);
-    private int variableExpressionCount = 0; 
     
-    public static class VariablePosition {
-        public Attribute.Type type;
-        public String attributeName;
-        public int [] position;
-        
-        public VariablePosition(String attributeName, Attribute.Type type) {
-            this.attributeName = attributeName;
-            this.type = type;
-            this.position = new int[]{UNKNOWN_STATE, UNKNOWN_STATE, UNKNOWN_STATE, UNKNOWN_STATE};
-        }
-    }
-        
-    private Map<Integer, VariablePosition> varPositionToAttribNameMap = new HashMap<Integer, VariablePosition>();
-
-    public Map<Integer, VariablePosition> getVariablePositionToAttributeNameMapper() {
-        return varPositionToAttribNameMap;
-    }
-
     public SiddhiGpu.GpuFilterProcessor parseFilterExpression(Expression expression, MetaComplexEvent metaEvent, int currentState, 
             ExecutionPlanContext executionPlanContext, GpuQueryContext gpuQueryContext) {
 
@@ -1203,30 +1184,25 @@ public class GpuExpressionParser
         
         String attributeName = variable.getAttributeName();
         int[] eventPosition = new int[2];
+        int attributeIndex = -1;
 
         if (metaEvent instanceof MetaStreamEvent) {
             
             MetaStreamEvent metaStreamEvent = (MetaStreamEvent) metaEvent;
             AbstractDefinition abstractDefinition;
             Attribute.Type type;
-            int position;// = variableExpressionCount++; 
             
             if (currentState == HAVING_STATE) {
                 abstractDefinition = metaStreamEvent.getOutputStreamDefinition();
                 type = abstractDefinition.getAttributeType(attributeName);
-                position = abstractDefinition.getAttributePosition(attributeName);
+                attributeIndex = abstractDefinition.getAttributePosition(attributeName);
                 eventPosition[STREAM_EVENT_CHAIN_INDEX] = HAVING_STATE;
             } else {
                 abstractDefinition = metaStreamEvent.getInputDefinition();
                 eventPosition[STREAM_EVENT_CHAIN_INDEX] = UNKNOWN_STATE;
                 type = abstractDefinition.getAttributeType(attributeName);
-                position = abstractDefinition.getAttributePosition(attributeName);
+                attributeIndex = abstractDefinition.getAttributePosition(attributeName);
             }
-            
-            VariablePosition varPos = new VariablePosition(attributeName, type);
-            varPos.position[STREAM_EVENT_CHAIN_INDEX] = eventPosition[STREAM_EVENT_CHAIN_INDEX];
-            varPos.position[STREAM_EVENT_INDEX] = eventPosition[STREAM_EVENT_INDEX];
-            varPositionToAttribNameMap.put(position, varPos);
             
             int gpuDataType = SiddhiGpu.DataType.None;
 
@@ -1258,7 +1234,7 @@ public class GpuExpressionParser
             gpuFilterList.add(new ExecutorNode()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
-            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, position)));
+            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, attributeIndex)));
 
             return type;
             
@@ -1277,6 +1253,7 @@ public class GpuExpressionParser
                     try {
                         type = streamDefinition.getAttributeType(attributeName);
                         eventPosition[STREAM_EVENT_CHAIN_INDEX] = HAVING_STATE;
+                        attributeIndex = streamDefinition.getAttributePosition(attributeName);
                     } catch (AttributeNotExistException e) {
                         currentState = UNKNOWN_STATE;
                     }
@@ -1292,6 +1269,7 @@ public class GpuExpressionParser
                                 firstInput = "Input Stream: " + streamDefinition.getId() + " with " +
                                         "reference: " + metaStreamEvent.getInputReferenceId();
                                 eventPosition[STREAM_EVENT_CHAIN_INDEX] = i;
+                                attributeIndex = streamDefinition.getAttributePosition(attributeName);
                             } catch (AttributeNotExistException e) {
                                 // do nothing
                             }
@@ -1312,6 +1290,7 @@ public class GpuExpressionParser
                     try {
                         type = streamDefinition.getAttributeType(attributeName);
                         eventPosition[STREAM_EVENT_CHAIN_INDEX] = currentState;
+                        attributeIndex = streamDefinition.getAttributePosition(attributeName);
                     } catch (AttributeNotExistException e) {
                         throw new ExecutionPlanValidationException(e.getMessage() + " Input Stream: " +
                                 streamDefinition.getId() + " with " + "reference: " + metaStreamEvent.getInputReferenceId());
@@ -1322,15 +1301,18 @@ public class GpuExpressionParser
                 for (int i = 0, metaStreamEventsLength = metaStreamEvents.length; i < metaStreamEventsLength; i++) {
                     MetaStreamEvent metaStreamEvent = metaStreamEvents[i];
                     streamDefinition = (StreamDefinition) metaStreamEvent.getInputDefinition();
+                    
                     if (metaStreamEvent.getInputReferenceId() == null) {
                         if (streamDefinition.getId().equals(variable.getStreamId())) {
                             type = streamDefinition.getAttributeType(attributeName);
+                            attributeIndex = streamDefinition.getAttributePosition(attributeName);
                             eventPosition[STREAM_EVENT_CHAIN_INDEX] = i;
                             break;
                         }
                     } else {
                         if (metaStreamEvent.getInputReferenceId().equals(variable.getStreamId())) {
                             type = streamDefinition.getAttributeType(attributeName);
+                            attributeIndex = streamDefinition.getAttributePosition(attributeName);
                             eventPosition[STREAM_EVENT_CHAIN_INDEX] = i;
                             break;
                         }
@@ -1338,12 +1320,6 @@ public class GpuExpressionParser
 
                 }
             }
-            
-            int position = variableExpressionCount++; 
-            VariablePosition varPos = new VariablePosition(attributeName, type);
-            varPos.position[STREAM_EVENT_CHAIN_INDEX] = eventPosition[STREAM_EVENT_CHAIN_INDEX];
-            varPos.position[STREAM_EVENT_INDEX] = eventPosition[STREAM_EVENT_INDEX];
-            varPositionToAttribNameMap.put(position, varPos);
             
             int gpuDataType = SiddhiGpu.DataType.None;
 
@@ -1375,7 +1351,7 @@ public class GpuExpressionParser
             gpuFilterList.add(new ExecutorNode()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
-            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, position)));
+            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, attributeIndex)));
 
             return type;
         }

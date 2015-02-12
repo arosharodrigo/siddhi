@@ -6,6 +6,8 @@ namespace SiddhiGpu
 
 __device__ bool cuda_strcmp(const char *s1, const char *s2)
 {
+	if(!s1 || !s2) return false;
+
 	for ( ; *s1==*s2; ++s1, ++s2) {
 		if (*s1=='\0') return true;
 	}
@@ -14,6 +16,8 @@ __device__ bool cuda_strcmp(const char *s1, const char *s2)
 
 __device__ bool cuda_prefix(char *s1, char *s2)
 {
+	if(!s1 || !s2) return false;
+
 	for ( ; *s1==*s2; ++s1, ++s2) {
 		if (*(s2+1)=='\0') return true;
 	}
@@ -22,6 +26,8 @@ __device__ bool cuda_prefix(char *s1, char *s2)
 
 __device__ bool cuda_contains(const char *s1, const char *s2)
 {
+	if(!s1 || !s2) return false;
+
 	int size1 = 0;
 	int size2 = 0;
 

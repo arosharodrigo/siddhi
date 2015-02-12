@@ -120,6 +120,7 @@ void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _
 		case GpuProcessor::FILTER:
 		{
 			p_JoinKernel->SetLeftInputEventBufferIndex(p_LeftPrevProcessor->GetResultEventBufferIndex());
+			p_JoinKernel->SetLeftFirstKernel(false);
 		}
 		break;
 		default:
@@ -134,6 +135,7 @@ void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _
 		case GpuProcessor::FILTER:
 		{
 			p_JoinKernel->SetRightInputEventBufferIndex(p_RightPrevProcessor->GetResultEventBufferIndex());
+			p_JoinKernel->SetRightFirstKernel(false);
 		}
 		break;
 		default:
