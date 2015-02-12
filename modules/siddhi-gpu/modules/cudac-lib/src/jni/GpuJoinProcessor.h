@@ -51,8 +51,8 @@ public:
 	bool GetLeftTrigger() { return b_LeftTrigger; }
 	bool GetRightTrigger() { return b_RightTrigger; }
 
-	void SetWithInTimeMilliSeconds(int64_t _iTime) { i_WithInTimeMilliSeconds = _iTime; }
-	int GetWithInTimeMilliSeconds() { return i_WithInTimeMilliSeconds; }
+	void SetWithInTimeMilliSeconds(uint64_t _iTime) { i_WithInTimeMilliSeconds = _iTime; }
+	uint64_t GetWithInTimeMilliSeconds() { return i_WithInTimeMilliSeconds; }
 
 	void SetExecutorNodes(int _iNodeCount);
 	void AddExecutorNode(int _iPos, ExecutorNode & _pNode);
@@ -70,7 +70,7 @@ private:
 	bool b_LeftTrigger;
 	bool b_RightTrigger;
 
-	int64_t i_WithInTimeMilliSeconds;
+	uint64_t i_WithInTimeMilliSeconds;
 
 	GpuProcessorContext * p_LeftContext;
 	GpuProcessorContext * p_RightContext;

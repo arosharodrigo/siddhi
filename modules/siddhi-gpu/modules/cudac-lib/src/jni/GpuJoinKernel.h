@@ -45,6 +45,9 @@ public:
 	char * GetRightResultEventBuffer();
 	int GetRightResultEventBufferSize();
 
+	void SetLeftFirstKernel(bool _bSet) { b_LeftFirstKernel = _bSet; }
+	void SetRightFirstKernel(bool _bSet) { b_RightFirstKernel = _bSet; }
+
 private:
 	void ProcessLeftStream(int _iStreamIndex, int & _iNumEvents);
 	void ProcessRightStream(int _iStreamIndex, int & _iNumEvents);
@@ -71,8 +74,12 @@ private:
 	int i_LeftRemainingCount;
 	int i_RightRemainingCount;
 
+	bool b_LeftFirstKernel;
+	bool b_RightFirstKernel;
+
 	bool b_LeftDeviceSet;
 	bool b_RightDeviceSet;
+
 	int i_InitializedStreamCount;
 	FILE * fp_LeftLog;
 	FILE * fp_RightLog;
