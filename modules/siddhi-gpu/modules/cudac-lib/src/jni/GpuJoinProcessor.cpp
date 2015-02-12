@@ -107,6 +107,10 @@ void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _
 				i_LeftStraemWindowSize, i_RightStraemWindowSize, fp_LeftLog, fp_RightLog);
 		p_JoinKernel->SetLeftInputEventBufferIndex(0);
 		p_JoinKernel->SetRightInputEventBufferIndex(0);
+		if(p_Next == NULL)
+		{
+			p_JoinKernel->SetOutputStream(p_OutputStreamMeta, p_OutputAttributeMapping);
+		}
 	}
 
 	if(p_LeftPrevProcessor)
@@ -156,7 +160,7 @@ int GpuJoinProcessor::Process(int _iStreamIndex, int _iNumEvents)
 	}
 #endif
 
-	p_JoinKernel->Process(_iStreamIndex, _iNumEvents, (p_Next == NULL));
+	p_JoinKernel->Process(_iStreamIndex, _iNumEvents);
 
 	if(p_Next)
 	{

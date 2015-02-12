@@ -48,6 +48,46 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 	public static native @Cast("const char*") BytePointer GetTypeName(@Cast("SiddhiGpu::DataType::Value") int _eType);
 }
 
+// #pragma pack(1)
+
+@Namespace("SiddhiGpu") public static class AttributeMapping extends Pointer {
+    static { Loader.load(); }
+    public AttributeMapping() { allocate(); }
+    public AttributeMapping(int size) { allocateArray(size); }
+    public AttributeMapping(Pointer p) { super(p); }
+    private native void allocate();
+    private native void allocateArray(int size);
+    @Override public AttributeMapping position(int position) {
+        return (AttributeMapping)super.position(position);
+    }
+
+	/** enum SiddhiGpu::AttributeMapping:: */
+	public static final int
+		STREAM_INDEX = 0,
+		ATTRIBUTE_INDEX = 1;
+
+	public native int from(int i); public native AttributeMapping from(int i, int from);
+	@MemberGetter public native IntPointer from();
+	public native int to(); public native AttributeMapping to(int to);
+}
+
+@Namespace("SiddhiGpu") @NoOffset public static class AttributeMappings extends Pointer {
+    static { Loader.load(); }
+    public AttributeMappings() { }
+    public AttributeMappings(Pointer p) { super(p); }
+
+	public AttributeMappings(int _iMappingCount) { allocate(_iMappingCount); }
+	private native void allocate(int _iMappingCount);
+
+	public native void AddMapping(int _iPos, int _iFromStream, int _iFromAttribute, int _iToAttribute);
+
+	public native AttributeMappings Clone();
+
+	public native int i_MappingCount(); public native AttributeMappings i_MappingCount(int i_MappingCount);
+	public native AttributeMapping p_Mappings(); public native AttributeMappings p_Mappings(AttributeMapping p_Mappings);
+}
+
+// #pragma pack()
 
 
 
@@ -215,6 +255,8 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 // #include <stdlib.h>
 // #include <stdio.h>
 // #include <list>
+// #include "DataTypes.h"
+// #include "GpuMetaEvent.h"
 
 @Namespace("SiddhiGpu") @NoOffset public static class GpuProcessor extends Pointer {
     static { Loader.load(); }
@@ -247,6 +289,14 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 	public native void SetNext(GpuProcessor _pProc);
 	public native void AddToLast(GpuProcessor _pProc);
 	public native void SetThreadBlockSize(int _iThreadBlockSize);
+
+	public native void SetOutputStream(GpuMetaEvent _pOutputStreamMeta, AttributeMappings _pMappings);
+
+	public native void SetCurrentOn(@Cast("bool") boolean _on);
+	public native void SetExpiredOn(@Cast("bool") boolean _on);
+
+	public native @Cast("bool") boolean GetCurrentOn();
+	public native @Cast("bool") boolean GetExpiredOn();
 }
 
 
@@ -334,9 +384,9 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 
 	public native @Cast("bool") boolean Initialize(int _iStreamIndex, GpuMetaEvent _pMetaEvent, int _iInputEventBufferSize);
-	public native void Process(int _iStreamIndex, @ByRef IntPointer _iNumEvents, @Cast("bool") boolean _bLast);
-	public native void Process(int _iStreamIndex, @ByRef IntBuffer _iNumEvents, @Cast("bool") boolean _bLast);
-	public native void Process(int _iStreamIndex, @ByRef int[] _iNumEvents, @Cast("bool") boolean _bLast);
+	public native void Process(int _iStreamIndex, @ByRef IntPointer _iNumEvents);
+	public native void Process(int _iStreamIndex, @ByRef IntBuffer _iNumEvents);
+	public native void Process(int _iStreamIndex, @ByRef int[] _iNumEvents);
 
 	public native @Cast("char*") BytePointer GetResultEventBuffer();
 	public native int GetResultEventBufferSize();
@@ -348,6 +398,8 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 	public native int GetInputEventBufferIndex();
 	public native void SetInputEventBufferIndex(int _iIndex);
+
+	public native void SetOutputStream(GpuMetaEvent _pOutputStreamMeta, AttributeMappings _pMappings);
 }
 
 

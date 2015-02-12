@@ -62,79 +62,20 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
                 throw new DefinitionNotExistException("Stream definition with stream ID '" + singleInputStream.getStreamId() + "' has not been defined");
             }
             
-            String stringAttributeSizesAnnotation = gpuQueryContext.getStringAttributeSizes();
-            if(stringAttributeSizesAnnotation != null) {
-                String [] tokens = stringAttributeSizesAnnotation.split(",");
-                if (tokens.length > 0) {
-                    this.stringAttributeSizes = new HashMap<String, Integer>(); 
-
-                    for (String token : tokens) {
-                        String [] keyVal = token.split("=");
-                        this.stringAttributeSizes.put(keyVal[0], Integer.parseInt(keyVal[1]));
-                    }
-                }
-            }
-            
-            int position = 8 + 8 + 2; // time + seq + type
-            for(Attribute attrib : inputDefinition.getAttributeList()) {
-                GpuEventAttribute gpuAttrib = new GpuEventAttribute();
-                gpuAttrib.name = attrib.getName();
-                
-                switch(attrib.getType()) {
-                case BOOL:
-                    gpuAttrib.type = Type.BOOL;
-                    gpuAttrib.length = 2;
-                    gpuAttrib.position = position;
-                    position += gpuAttrib.length; 
-                    break;
-                case INT:
-                    gpuAttrib.type = Type.INT;
-                    gpuAttrib.length = 4;
-                    gpuAttrib.position = position;
-                    position += gpuAttrib.length; 
-                    break;
-                case LONG:
-                    gpuAttrib.type = Type.LONG;
-                    gpuAttrib.length = 8;
-                    gpuAttrib.position = position;
-                    position += gpuAttrib.length; 
-                    break;
-                case DOUBLE:
-                    gpuAttrib.type = Type.DOUBLE;
-                    gpuAttrib.length = 8;
-                    gpuAttrib.position = position;
-                    position += gpuAttrib.length; 
-                    break;
-                case FLOAT:
-                    gpuAttrib.type = Type.FLOAT;
-                    gpuAttrib.length = 4;
-                    gpuAttrib.position = position;
-                    position += gpuAttrib.length; 
-                    break;
-                case STRING: {
-                    gpuAttrib.type = Type.STRING;
-                    
-                    int strBodyLength = 8; 
-                    if(stringAttributeSizes != null && stringAttributeSizes.containsKey(attrib.getName())) {
-                        strBodyLength = stringAttributeSizes.get(attrib.getName());
-                    }
-                    gpuAttrib.length = strBodyLength;
-                    gpuAttrib.position = position;
-                    position += (gpuAttrib.length + 2); // + length
-                }
-                break;
-                default:
-                    break;
-                }
-                
-                attributes.add(gpuAttrib);
-            }
-            
-            eventSizeInBytes = position;
+            processGpuQueryContext(gpuQueryContext);
+            processAbastractDefinition();            
             
         } else {
             throw new OperationNotSupportedException("GpuMetaStreamEvent can only be created using SingleInputStream");
         }
+    }
+    
+    public GpuMetaStreamEvent(String streamId, AbstractDefinition abstractDefinition, GpuQueryContext gpuQueryContext) {
+        this.streamId = streamId;
+        this.inputDefinition = abstractDefinition;
+        
+        processGpuQueryContext(gpuQueryContext);
+        processAbastractDefinition();   
     }
 
     public String getStreamId() {
@@ -191,5 +132,80 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
 
     public void setStreamIndex(int streamIndex) {
         this.streamIndex = streamIndex;
+    }
+    
+    private void processGpuQueryContext(GpuQueryContext gpuQueryContext) {
+        String stringAttributeSizesAnnotation = gpuQueryContext.getStringAttributeSizes();
+        if(stringAttributeSizesAnnotation != null) {
+            String [] tokens = stringAttributeSizesAnnotation.split(",");
+            if (tokens.length > 0) {
+                this.stringAttributeSizes = new HashMap<String, Integer>(); 
+
+                for (String token : tokens) {
+                    String [] keyVal = token.split("=");
+                    this.stringAttributeSizes.put(keyVal[0], Integer.parseInt(keyVal[1]));
+                }
+            }
+        }
+    }
+    
+    private void processAbastractDefinition() {
+        
+        int position = 8 + 8 + 2; // time + seq + type
+        for(Attribute attrib : inputDefinition.getAttributeList()) {
+            GpuEventAttribute gpuAttrib = new GpuEventAttribute();
+            gpuAttrib.name = attrib.getName();
+            
+            switch(attrib.getType()) {
+            case BOOL:
+                gpuAttrib.type = Type.BOOL;
+                gpuAttrib.length = 2;
+                gpuAttrib.position = position;
+                position += gpuAttrib.length; 
+                break;
+            case INT:
+                gpuAttrib.type = Type.INT;
+                gpuAttrib.length = 4;
+                gpuAttrib.position = position;
+                position += gpuAttrib.length; 
+                break;
+            case LONG:
+                gpuAttrib.type = Type.LONG;
+                gpuAttrib.length = 8;
+                gpuAttrib.position = position;
+                position += gpuAttrib.length; 
+                break;
+            case DOUBLE:
+                gpuAttrib.type = Type.DOUBLE;
+                gpuAttrib.length = 8;
+                gpuAttrib.position = position;
+                position += gpuAttrib.length; 
+                break;
+            case FLOAT:
+                gpuAttrib.type = Type.FLOAT;
+                gpuAttrib.length = 4;
+                gpuAttrib.position = position;
+                position += gpuAttrib.length; 
+                break;
+            case STRING: {
+                gpuAttrib.type = Type.STRING;
+                
+                int strBodyLength = 8; 
+                if(stringAttributeSizes != null && stringAttributeSizes.containsKey(attrib.getName())) {
+                    strBodyLength = stringAttributeSizes.get(attrib.getName());
+                }
+                gpuAttrib.length = strBodyLength;
+                gpuAttrib.position = position;
+                position += (gpuAttrib.length + 2); // + length
+            }
+            break;
+            default:
+                break;
+            }
+            
+            attributes.add(gpuAttrib);
+        }
+        
+        eventSizeInBytes = position;
     }
 }

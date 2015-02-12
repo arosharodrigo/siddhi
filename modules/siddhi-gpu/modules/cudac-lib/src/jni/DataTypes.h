@@ -51,6 +51,54 @@ struct DataType
 	}
 };
 
+#pragma pack(1)
+
+typedef struct AttributeMapping
+{
+	enum {
+		STREAM_INDEX = 0,
+		ATTRIBUTE_INDEX = 1
+	};
+
+	int from[2];
+	int to;
+}AttributeMapping;
+
+typedef struct AttributeMappings
+{
+	AttributeMappings(int _iMappingCount) :
+		i_MappingCount(_iMappingCount)
+	{
+		p_Mappings = new AttributeMapping[_iMappingCount];
+	}
+
+	void AddMapping(int _iPos, int _iFromStream, int _iFromAttribute, int _iToAttribute)
+	{
+		if(_iPos >= 0 && _iPos < i_MappingCount)
+		{
+			p_Mappings[_iPos].from[AttributeMapping::STREAM_INDEX] = _iFromStream;
+			p_Mappings[_iPos].from[AttributeMapping::ATTRIBUTE_INDEX] = _iFromAttribute;
+			p_Mappings[_iPos].to = _iToAttribute;
+		}
+	}
+
+	AttributeMappings * Clone()
+	{
+		AttributeMappings * pRet = new AttributeMappings(i_MappingCount);
+		for(int i=0; i<i_MappingCount; ++i)
+		{
+			pRet->p_Mappings[i].from[AttributeMapping::STREAM_INDEX] = p_Mappings[i].from[AttributeMapping::STREAM_INDEX];
+			pRet->p_Mappings[i].from[AttributeMapping::ATTRIBUTE_INDEX] = p_Mappings[i].from[AttributeMapping::ATTRIBUTE_INDEX];
+			pRet->p_Mappings[i].to = p_Mappings[i].to;
+		}
+		return pRet;
+	}
+
+	int i_MappingCount;
+	AttributeMapping * p_Mappings;
+}AttributeMappings;
+
+#pragma pack()
 
 };
 

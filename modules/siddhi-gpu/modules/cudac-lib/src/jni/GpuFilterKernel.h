@@ -28,7 +28,7 @@ public:
 	~GpuFilterKernelStandalone();
 
 	bool Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	void Process(int _iStreamIndex, int & _iNumEvents, bool _bLast);
+	void Process(int _iStreamIndex, int & _iNumEvents);
 	char * GetResultEventBuffer();
 	int GetResultEventBufferSize();
 
@@ -47,7 +47,7 @@ public:
 	~GpuFilterKernelFirst();
 
 	bool Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize);
-	void Process(int _iStreamIndex, int & _iNumEvents, bool _bLast);
+	void Process(int _iStreamIndex, int & _iNumEvents);
 	char * GetResultEventBuffer();
 	int GetResultEventBufferSize();
 

@@ -80,6 +80,11 @@ void GpuLengthSlidingWindowProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pM
 		p_WindowKernel->SetInputEventBufferIndex(0);
 	}
 
+	if(p_Next == NULL)
+	{
+		p_WindowKernel->SetOutputStream(p_OutputStreamMeta, p_OutputAttributeMapping);
+	}
+
 	p_WindowKernel->Initialize(_iStreamIndex, _pMetaEvent, _iInputEventBufferSize);
 
 }
@@ -91,7 +96,7 @@ int GpuLengthSlidingWindowProcessor::Process(int _iStreamIndex, int _iNumEvents)
 	fflush(fp_Log);
 #endif
 
-	p_WindowKernel->Process(_iStreamIndex, _iNumEvents, (p_Next == NULL));
+	p_WindowKernel->Process(_iStreamIndex, _iNumEvents);
 
 	if(p_Next)
 	{

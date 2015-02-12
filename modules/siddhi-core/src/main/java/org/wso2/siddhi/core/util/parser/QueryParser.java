@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.util.parser;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.event.state.populater.SkipStateEventPopulator;
 import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
@@ -27,6 +28,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.gpu.util.parser.GpuInputStreamParser;
+import org.wso2.siddhi.core.gpu.util.parser.GpuSelectorParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
@@ -104,15 +106,21 @@ public class QueryParser {
                 StreamRuntime streamRuntime = GpuInputStreamParser.parse(query.getInputStream(),
                         executionPlanContext, definitionMap, executors, gpuQueryContext);
                 
-                QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                        executionPlanContext, streamRuntime.getMetaComplexEvent(), executors);
+                QuerySelector selector = GpuSelectorParser.parse(query.getSelector(), query.getOutputStream(),
+                        executionPlanContext, streamRuntime.getMetaComplexEvent(), executors, streamRuntime, gpuQueryContext);
+                
                 OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(), query.getOutputRate());
 
                 QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
                 QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
                 QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent());
 
-                selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
+                // if join processor make this skip event populator - state events are mapped to stream event at GPU
+                if(streamRuntime instanceof JoinStreamRuntime) {
+                    selector.setEventPopulator(new SkipStateEventPopulator());
+                } else {
+                    selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
+                }
 
                 queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter, streamRuntime.getMetaComplexEvent());
                 
