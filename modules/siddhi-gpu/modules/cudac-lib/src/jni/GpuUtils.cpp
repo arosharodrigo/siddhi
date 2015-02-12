@@ -49,7 +49,7 @@ void GpuUtils::PrintByteBuffer(char * _pEventBuffer, int _iNumEvents, GpuMetaEve
 		char * pEventBuffer = _pEventBuffer + (_pEventMeta->i_SizeOfEventInBytes * e);
 		GpuEvent * pEvent = (GpuEvent*) pEventBuffer;
 
-		fprintf(_fpLog, "[%s] [PrintByteBuffer] Event_%" PRIu64 " <%" PRIu64 "> Type=%u ", _zTag, pEvent->i_Sequence, pEvent->i_Timestamp, pEvent->i_Type);
+		fprintf(_fpLog, "[%s] [PrintByteBuffer] [%-5d] Event_%" PRIu64 " <%" PRIu64 "> Type=%u ", _zTag, e, pEvent->i_Sequence, pEvent->i_Timestamp, pEvent->i_Type);
 
 		if(pEvent->i_Type != GpuEvent::NONE)
 		{

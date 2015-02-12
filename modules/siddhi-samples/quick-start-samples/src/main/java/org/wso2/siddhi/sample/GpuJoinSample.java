@@ -16,13 +16,13 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
 
         // Create Siddhi Manager
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().setEventBufferSize(4096);
+        siddhiManager.getSiddhiContext().setEventBufferSize(1024);
 
         String executionPlan = "@plan:name('GpuJoinSample') @plan:parallel "
                 + "define stream cseEventStream (symbol string, price float, volume int); "
                 + "define stream twitterStream (company string, numoccur int); "
                 + "@info(name = 'query1') @gpu(block.size='128', cuda.device='1', string.sizes='symbol=8,company=8') "
-                + " from cseEventStream#window.length(1000) join twitterStream#window.length(1000) " 
+                + " from cseEventStream#window.length(10) join twitterStream#window.length(20) " 
                 + " on cseEventStream.symbol== twitterStream.company " 
                 + " select cseEventStream.symbol as symbol, twitterStream.numoccur, cseEventStream.price, cseEventStream.volume " 
                 + " insert into outputStream ;";
@@ -32,6 +32,7 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
         executionPlanRuntime.addCallback("cseEventStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+                System.out.print("cseEventStream : ");
                 EventPrinter.print(events);
                 
             }
@@ -41,6 +42,7 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
         executionPlanRuntime.addCallback("twitterStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+                System.out.print("twitterStream : ");
                 EventPrinter.print(events);
                 
             }
@@ -50,7 +52,7 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                System.out.print("OutEvents : ");
+                System.out.print(">>> OutEvents : ");
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
             }
 
