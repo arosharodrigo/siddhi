@@ -203,11 +203,13 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
                 
                 ByteBuffer eventByteBuffer = null;
+                int segmentEventCount  = 0;
                 
                 if(streamIndex == 0) {
 
                     BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftResultEventBuffer();
                     int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftResultEventBufferSize();
+                    segmentEventCount = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightStreamWindowSize();
                     bytePointer.capacity(bufferSize);
                     bytePointer.limit(bufferSize);
                     bytePointer.position(0);
@@ -217,6 +219,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     
                     BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightResultEventBuffer();
                     int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightResultEventBufferSize();
+                    segmentEventCount = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftStreamWindowSize();
                     bytePointer.capacity(bufferSize);
                     bytePointer.limit(bufferSize);
                     bytePointer.position(0);
@@ -229,7 +232,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 
                 gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
                         eventByteBuffer,
-                        gpuEventChunk);
+                        gpuEventChunk,
+                        segmentEventCount);
             }
         }
     }

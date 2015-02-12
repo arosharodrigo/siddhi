@@ -120,6 +120,68 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
         }
     }
     
+    public void convertAndAdd(ByteBuffer eventBuffer, int eventCount, int eventSegmentSize) {
+        int segmentIndex = 0;
+        for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
+
+            StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+
+            ComplexEvent.Type type = eventTypes[eventBuffer.getShort()];
+            
+            if(type != Type.NONE && type != Type.RESET) {
+                long sequence = eventBuffer.getLong();
+                long timestamp = eventBuffer.getLong();
+
+                int index = 0;
+                for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+                    switch(attrib.type) {
+                    case BOOL:
+                        attributeData[index++] = eventBuffer.getShort();
+                        break;
+                    case INT:
+                        attributeData[index++] = eventBuffer.getInt();
+                        break;
+                    case LONG:
+                        attributeData[index++] = eventBuffer.getLong();
+                        break;
+                    case FLOAT:
+                        attributeData[index++] = eventBuffer.getFloat();
+                        break;
+                    case DOUBLE:
+                        attributeData[index++] = eventBuffer.getDouble();
+                        break;
+                    case STRING:
+                        short length = eventBuffer.getShort();
+                        byte string[] = new byte[attrib.length];
+                        eventBuffer.get(string, 0, attrib.length);
+                        attributeData[index++] = new String(string, 0, length); // TODO: avoid allocation
+                        break;
+                    }
+                }
+
+                streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
+                log.debug("Converted event " + borrowedEvent.toString());
+
+                if (first == null) {
+                    first = borrowedEvent;
+                    last = first;
+                    currentEventCount = 1;
+                } else {
+                    last.setNext(borrowedEvent);
+                    last = borrowedEvent;
+                    currentEventCount++;
+                }
+                
+            } else if (type == Type.RESET){
+                // skip remaining bytes in segment
+                eventBuffer.position(eventBuffer.position() + ((eventSegmentSize - segmentIndex) * gpuMetaStreamEvent.getEventSizeInBytes()) - 2);
+            }
+            
+            segmentIndex++;
+            segmentIndex = segmentIndex % eventSegmentSize;
+        }
+    }
+    
     public void convertAndAdd(IntBuffer indexBuffer, ByteBuffer eventBuffer, int eventCount) {
         
         for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {

@@ -67,6 +67,8 @@ void ProcessEventsJoinLeftTriggerAllOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
+	__threadfence_block();
+
 	// reset first result event
 	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
 	pFirstResultEvent->i_Type = GpuEvent::RESET;
@@ -281,6 +283,8 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
+	__threadfence_block();
+
 	// reset first result event
 	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
 	pFirstResultEvent->i_Type = GpuEvent::RESET;
@@ -391,6 +395,8 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 
 	// clear whole result buffer segment for this in event
 	memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
+
+	__threadfence_block();
 
 	// reset first result event
 	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
@@ -546,6 +552,8 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
+
+	__threadfence_block();
 
 	// reset first result event
 	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
@@ -761,6 +769,8 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
+	__threadfence_block();
+
 	// reset first result event
 	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
 	pFirstResultEvent->i_Type = GpuEvent::RESET;
@@ -871,6 +881,8 @@ void ProcessEventsJoinRightTriggerExpireOn(
 
 	// clear whole result buffer segment for this in event
 	memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
+
+	__threadfence_block();
 
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
@@ -1557,10 +1569,6 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 		p_LeftResultEventBuffer->CopyToHost(true);
 #ifdef GPU_DEBUG
 	fprintf(fp_LeftLog, "[GpuJoinKernel] Results copied \n");
-
-	GpuUtils::PrintByteBuffer(p_LeftResultEventBuffer->GetHostEventBuffer(), p_LeftResultEventBuffer->GetMaxEventCount(),
-			p_LeftResultEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftResultEventBuffer", fp_LeftLog);
-
 	fflush(fp_LeftLog);
 #endif
 	}
@@ -1604,6 +1612,9 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 	}
 
 #ifdef GPU_DEBUG
+	GpuUtils::PrintByteBuffer(p_LeftResultEventBuffer->GetHostEventBuffer(), _iNumEvents,
+			p_LeftResultEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftResultEventBuffer", fp_LeftLog);
+
 	p_LeftWindowEventBuffer->CopyToHost(true);
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
@@ -1780,10 +1791,6 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 		p_RightResultEventBuffer->CopyToHost(true);
 #ifdef GPU_DEBUG
 	fprintf(fp_RightLog, "[GpuJoinKernel] Results copied \n");
-
-	GpuUtils::PrintByteBuffer(p_RightResultEventBuffer->GetHostEventBuffer(), p_RightResultEventBuffer->GetMaxEventCount(),
-			p_RightResultEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightResultEventBuffer", fp_RightLog);
-
 	fflush(fp_RightLog);
 #endif
 	}
@@ -1827,6 +1834,9 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 	}
 
 #ifdef GPU_DEBUG
+	GpuUtils::PrintByteBuffer(p_RightResultEventBuffer->GetHostEventBuffer(), _iNumEvents,
+			p_RightResultEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightResultEventBuffer", fp_RightLog);
+
 	p_RightWindowEventBuffer->CopyToHost(true);
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
