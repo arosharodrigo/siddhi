@@ -39,6 +39,7 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;
 
@@ -132,7 +133,23 @@ public class QueryParserHelper {
         if (runtime instanceof GpuStreamRuntime) {
             initGpuStreamRuntime((GpuStreamRuntime) runtime, 0, metaComplexEvent, null);
         } else if (runtime instanceof GpuJoinStreamRuntime) {
+            MetaStateEvent metaStateEvent = (MetaStateEvent) metaComplexEvent;
             
+            MetaStreamEvent outputMetaStreamEvent = new MetaStreamEvent();
+            outputMetaStreamEvent.setInputDefinition(metaStateEvent.getOutputStreamDefinition());
+            outputMetaStreamEvent.setInitialAttributeSize(metaStateEvent.getOutputDataAttributes().size());
+            
+            StreamDefinition streamDef = metaStateEvent.getOutputStreamDefinition();
+            for(Attribute attrib : streamDef.getAttributeList()) {
+                outputMetaStreamEvent.addOutputData(attrib);
+            }
+            
+            StateEventPool stateEventPool = new StateEventPool(metaStateEvent, 5);
+            MetaStreamEvent[] metaStreamEvents = metaStateEvent.getMetaStreamEvents();
+            for (int i = 0, metaStreamEventsLength = metaStreamEvents.length; i < metaStreamEventsLength; i++) {
+                initSingleStreamRuntime(runtime.getSingleStreamRuntimes().get(i),
+                        i, outputMetaStreamEvent, stateEventPool);
+            }
         } else if (runtime instanceof SingleStreamRuntime) {
             initSingleStreamRuntime((SingleStreamRuntime) runtime, 0, metaComplexEvent, null);
         } else {

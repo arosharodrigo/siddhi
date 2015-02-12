@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu.GpuStreamProcessor;
+import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
@@ -227,8 +228,13 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     
                 }
                 
+                StreamDefinition outputStreamDef = metaStreamEvent.getOutputStreamDefinition();
+                GpuMetaStreamEvent outputMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
+                        gpuQueryProcessor.getGpuQueryContext());
+                outputMetaEvent.setStreamIndex(0);
+                
                 // TODO: this should be metastream event of output stream
-                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
+                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, outputMetaEvent);
                 
                 gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
                         eventByteBuffer,

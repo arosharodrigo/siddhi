@@ -11,34 +11,31 @@ import org.wso2.siddhi.core.query.processor.Processor;
 
 public class GpuJoinStreamRuntime extends JoinStreamRuntime {
     
-    private GpuQueryProcessor gpuQueryProcessor;
-
     public GpuJoinStreamRuntime(ExecutionPlanContext executionPlanContext, MetaStateEvent metaStateEvent) {
         super(executionPlanContext, metaStateEvent);
-        gpuQueryProcessor = null;
     }
     
-    public void addRuntime(GpuStreamRuntime singleStreamRuntime) {
-        singleStreamRuntimeList.add(singleStreamRuntime);
-        
-        if(gpuQueryProcessor == null) {
-//            gpuQueryProcessor = singleStreamRuntime.getProcessStreamReceiver();
-        }
-    }
-
-    @Override
-    public void setCommonProcessor(Processor commonProcessor) {
-        for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
-            singleStreamRuntime.setCommonProcessor(commonProcessor);
-        }
-        
-//        if (processorChain == null) {
-//            processStreamReceiver.setNext(commonProcessor);
-//        } else {
-//            processStreamReceiver.setNext(processorChain);
-//            processorChain.setToLast(commonProcessor);
+//    public void addRuntime(GpuStreamRuntime singleStreamRuntime) {
+//        singleStreamRuntimeList.add(singleStreamRuntime);
+//        
+//        if(gpuQueryProcessor == null) {
+////            gpuQueryProcessor = singleStreamRuntime.getProcessStreamReceiver();
+//        }
+//    }
+//
+//    @Override
+//    public void setCommonProcessor(Processor commonProcessor) {
+//        for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
+//            singleStreamRuntime.setCommonProcessor(commonProcessor);
 //        }
 //        
-//        ((GpuProcessStreamReceiver)processStreamReceiver).setSelectProcessor(commonProcessor);
-    }
+////        if (processorChain == null) {
+////            processStreamReceiver.setNext(commonProcessor);
+////        } else {
+////            processStreamReceiver.setNext(processorChain);
+////            processorChain.setToLast(commonProcessor);
+////        }
+////        
+////        ((GpuProcessStreamReceiver)processStreamReceiver).setSelectProcessor(commonProcessor);
+//    }
 }

@@ -113,6 +113,10 @@ public class GpuQueryProcessor {
     public SiddhiGpu.GpuQueryRuntime getGpuQueryRuntime() {
         return gpuQueryRuntime;
     }
+    
+    public GpuQueryContext getGpuQueryContext() {
+        return gpuQueryContext;
+    }
 
     public void addGpuProcessor(String streamId, SiddhiGpu.GpuProcessor gpuProcessor) {
         log.info("<" + queryName + "> AddGpuProcessor : ToStream=" + streamId + 
