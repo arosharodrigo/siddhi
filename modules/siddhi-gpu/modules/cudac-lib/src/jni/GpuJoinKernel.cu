@@ -67,14 +67,6 @@ void ProcessEventsJoinLeftTriggerAllOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
-	__threadfence_block();
-
-	// reset first result event
-	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
-	pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
-
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -166,10 +158,6 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 				iMatchedCount++;
 			}
-			else
-			{
-				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
-			}
 		}
 		else
 		{
@@ -177,6 +165,13 @@ void ProcessEventsJoinLeftTriggerAllOn(
 			pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 			break;
 		}
+	}
+
+	if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+	{
+		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+		GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
+		pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 	}
 
 	if(pExpiredEventBuffer != NULL)
@@ -230,10 +225,6 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 					iMatchedCount++;
 				}
-				else
-				{
-					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
-				}
 			}
 			else
 			{
@@ -241,6 +232,13 @@ void ProcessEventsJoinLeftTriggerAllOn(
 				pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				break;
 			}
+		}
+
+		if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+		{
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
+			pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 		}
 	}
 
@@ -290,12 +288,6 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
-
-	__threadfence_block();
-
-	// reset first result event
-	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
 
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
@@ -351,10 +343,6 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 
 				iMatchedCount++;
 			}
-			else
-			{
-				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
-			}
 		}
 		else
 		{
@@ -362,6 +350,13 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 			pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 			break;
 		}
+	}
+
+	if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+	{
+		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+		GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
+		pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 	}
 
 }
@@ -407,12 +402,6 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 
 	// clear whole result buffer segment for this in event
 	memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
-
-	__threadfence_block();
-
-	// reset first result event
-	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
 
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
@@ -507,10 +496,6 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 
 					iMatchedCount++;
 				}
-				else
-				{
-					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
-				}
 			}
 			else
 			{
@@ -518,6 +503,13 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 				pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				break;
 			}
+		}
+
+		if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+		{
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
+			pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 		}
 	}
 
@@ -568,14 +560,6 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
-
-	__threadfence_block();
-
-	// reset first result event
-	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
-	pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
 
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
@@ -668,16 +652,19 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 				iMatchedCount++;
 			}
-			else
-			{
-				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
-			}
 		}
 		else
 		{
 			// cannot continue, last result event for this segment
 			pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 			break;
+		}
+
+		if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+		{
+			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
+			pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 		}
 	}
 
@@ -732,10 +719,6 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 					iMatchedCount++;
 				}
-				else
-				{
-					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
-				}
 			}
 			else
 			{
@@ -743,6 +726,13 @@ void ProcessEventsJoinRightTriggerAllOn(
 				pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				break;
 			}
+		}
+
+		if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+		{
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
+			pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 		}
 	}
 
@@ -792,12 +782,6 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
-
-	__threadfence_block();
-
-	// reset first result event
-	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
 
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
@@ -853,10 +837,6 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 
 				iMatchedCount++;
 			}
-			else
-			{
-				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
-			}
 		}
 		else
 		{
@@ -864,6 +844,13 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 			pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 			break;
 		}
+	}
+
+	if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+	{
+		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+		GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
+		pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 	}
 
 }
@@ -910,14 +897,8 @@ void ProcessEventsJoinRightTriggerExpireOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
 
-	__threadfence_block();
-
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
-
-	// reset first result event
-	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
-	pFirstResultEvent->i_Type = GpuEvent::RESET;
 
 	// calculate in/expired event pair for this event
 
@@ -1012,10 +993,6 @@ void ProcessEventsJoinRightTriggerExpireOn(
 
 					iMatchedCount++;
 				}
-				else
-				{
-					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
-				}
 			}
 			else
 			{
@@ -1023,6 +1000,13 @@ void ProcessEventsJoinRightTriggerExpireOn(
 				pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				break;
 			}
+		}
+
+		if(iMatchedCount < iOtherWindowFillCount || iOtherWindowFillCount == 0)
+		{
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
+			pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 		}
 	}
 
