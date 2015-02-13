@@ -78,6 +78,98 @@ public class JoinMultipleQueryPerformance {
         }
     }
     
+    public interface EventSender 
+    {
+        public int sendEvents(long iteration) throws InterruptedException;
+    } 
+    
+    private static class EventSenderRunner implements Runnable {
+
+        private EventSender eventSender;
+        private long numberOfEvents;
+
+        public EventSenderRunner(EventSender eventSender, long numberOfEvents) {
+            super();
+            this.eventSender = eventSender;
+            this.numberOfEvents = numberOfEvents;
+        }
+        
+        @Override
+        public void run() {
+            try {
+                
+                long currentGenEventCount = 0;
+                while (currentGenEventCount < numberOfEvents) {
+                    currentGenEventCount += eventSender.sendEvents(currentGenEventCount);
+                }
+                
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
+    }
+    
+    private static class StockEventSender implements EventSender {
+
+        private InputHandler inputHandler;
+        
+        public StockEventSender(InputHandler inputHandler) {
+            super();
+            this.inputHandler = inputHandler;
+        }
+
+        @Override
+        public int sendEvents(long iteration) throws InterruptedException {
+            inputHandler.send(new Object[]{"WSO2", 55.6f, 1000 });
+            inputHandler.send(new Object[]{"IBM", 75.6f, 100});
+            inputHandler.send(new Object[]{"GOOG", 55.6f, 500});
+            inputHandler.send(new Object[]{"AAPL", 75.6f, 50});
+            inputHandler.send(new Object[]{"INTC", 75.6f, 100});
+            return 5;
+        }
+        
+    }
+    
+    private static class TwitterEventSender implements EventSender {
+
+        private InputHandler inputHandler;
+        
+        public TwitterEventSender(InputHandler inputHandler) {
+            super();
+            this.inputHandler = inputHandler;
+        }
+
+        @Override
+        public int sendEvents(long iteration) throws InterruptedException {
+            inputHandler.send(new Object[]{"WSO2", iteration});
+            inputHandler.send(new Object[]{"BARC", iteration});
+            inputHandler.send(new Object[]{"VOD", iteration});
+            inputHandler.send(new Object[]{"AAPL", iteration});
+            inputHandler.send(new Object[]{"QQQQ", iteration});
+            return 5;
+        }
+    }
+    
+    private static class TradeEventSender implements EventSender {
+
+        private InputHandler inputHandler;
+        
+        public TradeEventSender(InputHandler inputHandler) {
+            super();
+            this.inputHandler = inputHandler;
+        }
+
+        @Override
+        public int sendEvents(long iteration) throws InterruptedException {
+            inputHandler.send(new Object[]{"QQQQ", 20.5f, 100});
+            inputHandler.send(new Object[]{"BARC", 200.0f, 1000});
+            inputHandler.send(new Object[]{"GOOG", 200.5f, 1000});
+            inputHandler.send(new Object[]{"WSO2", 100.5f, 100});
+            inputHandler.send(new Object[]{"AAPL", 150.5f, 100});
+            return 5;
+        }
+    }
     
     private static class TestQuery {
         public String query;
@@ -125,7 +217,8 @@ public class JoinMultipleQueryPerformance {
         cliOptions.addOption("e", "event-count", true, "Total number of events to be generated");
         cliOptions.addOption("q", "query-count", true, "Number of Siddhi Queries to be generated");
         cliOptions.addOption("r", "ringbuffer-size", true, "Disruptor RingBuffer size - in power of two");
-        cliOptions.addOption("z", "batch-size", true, "GPU Event batch size");
+        cliOptions.addOption("Z", "batch-max-size", true, "GPU Event batch max size");
+        cliOptions.addOption("z", "batch-min-size", true, "GPU Event batch min size");
         cliOptions.addOption("t", "threadpool-size", true, "Executor service pool size");
         cliOptions.addOption("b", "events-per-tblock", true, "Number of Events per thread block in GPU");
         cliOptions.addOption("s", "strict-batch-scheduling", true, "Strict batch size policy");
@@ -145,7 +238,8 @@ public class JoinMultipleQueryPerformance {
         int threadPoolSize = 4;
         int eventBlockSize = 256;
         boolean softBatchScheduling = true;
-        int eventBatchSize = 1024;
+        int maxEventBatchSize = 1024;
+        int minEventBatchSize = 32;
         
         try {
             cmd = cliParser.parse(cliOptions, args);
@@ -170,8 +264,11 @@ public class JoinMultipleQueryPerformance {
             if (cmd.hasOption("b")) {
                 eventBlockSize = Integer.parseInt(cmd.getOptionValue("b"));
             }
+            if (cmd.hasOption("Z")) {
+                maxEventBatchSize = Integer.parseInt(cmd.getOptionValue("Z"));
+            }
             if (cmd.hasOption("z")) {
-                eventBatchSize = Integer.parseInt(cmd.getOptionValue("z"));
+                minEventBatchSize = Integer.parseInt(cmd.getOptionValue("z"));
             }
             if (cmd.hasOption("s")) {
                 softBatchScheduling = !Boolean.parseBoolean(cmd.getOptionValue("s"));
@@ -188,7 +285,8 @@ public class JoinMultipleQueryPerformance {
                 "|RingBufferSize=" + defaultBufferSize +
                 "|ThreadPoolSize=" + threadPoolSize +
                 "|EventBlockSize=" + eventBlockSize + 
-                "|EventBatchSize=" + eventBatchSize +
+                "|EventBatchMaxSize=" + maxEventBatchSize +
+                "|EventBatchMinSize=" + minEventBatchSize +
                 "|SoftBatchScheduling=" + softBatchScheduling + 
                 "]");
         
@@ -216,7 +314,8 @@ public class JoinMultipleQueryPerformance {
             {
                 sb.append("@gpu(")
                 .append("cuda.device='").append(queries[i].cudaDeviceId).append("', ")
-                .append("batch.size='").append(eventBatchSize).append("', ")
+                .append("batch.max.size='").append(maxEventBatchSize).append("', ")
+                .append("batch.min.size='").append(minEventBatchSize).append("', ")
                 .append("block.size='").append(eventBlockSize).append("', ")
                 .append("batch.schedule='").append(softBatchScheduling ? "soft" : "hard").append("', ")
                 .append("string.sizes='symbol=8' ")
@@ -255,31 +354,18 @@ public class JoinMultipleQueryPerformance {
         InputHandler inputHandlerTrade = executionPlanRuntime.getInputHandler("cseTradeStream");
         executionPlanRuntime.start();
         
-        long currentGenEventCount = 0;
-        while (currentGenEventCount < totalEventCount) {
-            inputHandlerStock.send(new Object[]{"WSO2", 55.6f, 1000 });
-            inputHandlerStock.send(new Object[]{"IBM", 75.6f, 100});
-            inputHandlerStock.send(new Object[]{"GOOG", 55.6f, 500});
-            inputHandlerStock.send(new Object[]{"AAPL", 75.6f, 50});
-            inputHandlerStock.send(new Object[]{"INTC", 75.6f, 100});
-            
-            inputHandlerTwitter.send(new Object[]{"WSO2", currentGenEventCount});
-            inputHandlerTwitter.send(new Object[]{"BARC", currentGenEventCount});
-            inputHandlerTwitter.send(new Object[]{"VOD", currentGenEventCount});
-            inputHandlerTwitter.send(new Object[]{"AAPL", currentGenEventCount});
-            inputHandlerTwitter.send(new Object[]{"QQQQ", currentGenEventCount});
-            
-            inputHandlerTrade.send(new Object[]{"QQQQ", 20.5f, 100});
-            inputHandlerTrade.send(new Object[]{"BARC", 200.0f, 1000});
-            inputHandlerTrade.send(new Object[]{"GOOG", 200.5f, 1000});
-            inputHandlerTrade.send(new Object[]{"WSO2", 100.5f, 100});
-            inputHandlerTrade.send(new Object[]{"AAPL", 150.5f, 100});
-            
-//            Thread.sleep(1);
-            currentGenEventCount += 15;
-        }
+        Thread stockThread = new Thread(new EventSenderRunner(new StockEventSender(inputHandlerStock), totalEventCount/3));
+        Thread twitterThread = new Thread(new EventSenderRunner(new TwitterEventSender(inputHandlerTwitter), totalEventCount/3));
+        Thread tradeThread = new Thread(new EventSenderRunner(new TradeEventSender(inputHandlerTrade), totalEventCount/3));
 
-        
+        stockThread.start();
+        twitterThread.start();
+        tradeThread.start();
+
+        stockThread.join();
+        twitterThread.join();
+        tradeThread.join();
+              
         System.out.println("ComplexFilterMultipleQueryPerformance [EnableAsync=" + asyncEnabled +
                 " GPUEnabled=" + gpuEnabled +
                 " TotalEventCount=" + totalEventCount +
@@ -287,7 +373,8 @@ public class JoinMultipleQueryPerformance {
                 " DefaultRingBufferSize=" + defaultBufferSize +
                 " ThreadPoolSize=" + threadPoolSize +
                 " EventBlockSize=" + eventBlockSize +
-                " EventBatchSize=" + eventBatchSize +
+                " EventBatchMaxSize=" + maxEventBatchSize +
+                " EventBatchMinSize=" + minEventBatchSize +
                 " SoftBatchScheduling=" + softBatchScheduling + 
                 "]");
         

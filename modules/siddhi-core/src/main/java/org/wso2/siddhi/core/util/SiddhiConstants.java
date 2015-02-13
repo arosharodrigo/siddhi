@@ -41,7 +41,8 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_ELEMENT_INFO_NAME = "name";
     
     public static final String ANNOTATION_GPU = "gpu";
-    public static final String ANNOTATION_ELEMENT_GPU_BATCH_SIZE = "batch.size";
+    public static final String ANNOTATION_ELEMENT_GPU_BATCH_MAX_SIZE = "batch.max.size";
+    public static final String ANNOTATION_ELEMENT_GPU_BATCH_MIN_SIZE = "batch.min.size";
     public static final String ANNOTATION_ELEMENT_GPU_BLOCK_SIZE = "block.size";
     public static final String ANNOTATION_ELEMENT_GPU_STRING_SIZES = "string.sizes";
     public static final String ANNOTATION_ELEMENT_GPU_CUDA_DEVICE = "cuda.device";

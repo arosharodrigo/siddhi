@@ -35,7 +35,8 @@
 	<property name="block.size" value="256" />
 	<property name="gpu.enabled" value="false" />
 	<property name="async.enabled" value="true" />
-	<property name="event.batch.size" value="1024" />
+	<property name="event.batch.max.size" value="1024" />
+	<property name="event.batch.min.size" value="1" />
 	<property name="strict.batch.scheduling" value="false" />
 
     <target name="clean">
@@ -100,7 +101,7 @@
 			classpathref="classpath" fork="true">
 			<arg line="--enable-async ${async.enabled} --enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} 
 				--threadpool-size ${threadpool.size} --events-per-tblock ${block.size} 
-				--batch-size ${event.batch.size} --strict-batch-scheduling ${strict.batch.scheduling}" />
+				--batch-max-size ${event.batch.max.size} --batch-min-size ${event.batch.min.size} --strict-batch-scheduling ${strict.batch.scheduling}" />
 		</java>
 	</target>
 	

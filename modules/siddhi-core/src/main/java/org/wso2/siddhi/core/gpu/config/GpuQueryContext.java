@@ -15,7 +15,8 @@ public class GpuQueryContext {
     private Integer cudaDeviceId;
     private String queryName;
     private int inputEventBufferSize;
-    private Integer eventBatchSize;
+    private Integer eventBatchMaximumSize;
+    private Integer eventBatchMinimumSize;
     private Integer perfromanceCalculateBatchCount;
     private boolean batchSoftScheduling;
     
@@ -35,8 +36,11 @@ public class GpuQueryContext {
         perfromanceCalculateBatchCount = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_PERFORMANCE, 
                 SiddhiConstants.ANNOTATION_ELEMENT_PERFORMANCE_CALC_BATCH_COUNT, annotationList);
         
-        eventBatchSize = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
-                SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_SIZE, annotationList);
+        eventBatchMaximumSize = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+                SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_MAX_SIZE, annotationList);
+        
+        eventBatchMinimumSize = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+                SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_MIN_SIZE, annotationList);
         
         String gpuBatchScheludeString = getAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
                 SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_SCHEDULE, annotationList);
@@ -59,6 +63,11 @@ public class GpuQueryContext {
         }
      
         inputEventBufferSize = 1024;
+        
+        if(eventBatchMinimumSize == null) {
+            eventBatchMinimumSize = 1;
+        }
+            
     }
 
     public boolean isBatchSoftScheduling() {
@@ -163,13 +172,21 @@ public class GpuQueryContext {
         this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
     }
 
-    public int getEventBatchSize() {
-        if(eventBatchSize == null)
+    public int getEventBatchMaximumSize() {
+        if(eventBatchMaximumSize == null)
             return inputEventBufferSize;
-        return eventBatchSize;
+        return eventBatchMaximumSize;
     }
 
-    public void setEventBatchSize(int eventBatchSize) {
-        this.eventBatchSize = eventBatchSize;
+    public void setEventBatchMaximumSize(int eventBatchSize) {
+        this.eventBatchMaximumSize = eventBatchSize;
+    }
+
+    public Integer getEventBatchMinimumSize() {
+        return eventBatchMinimumSize;
+    }
+
+    public void setEventBatchMinimumSize(Integer eventBatchMinimumSize) {
+        this.eventBatchMinimumSize = eventBatchMinimumSize;
     }
 }

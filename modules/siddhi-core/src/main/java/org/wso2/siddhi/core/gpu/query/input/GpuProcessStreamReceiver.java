@@ -41,8 +41,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
     private GpuQueryPostProcessor gpuQueryPostProcessor;
     private Processor selectProcessor;
-    private int eventBatchSize;
-    private boolean softBatchScheduling = true;
+    private int maximumEventBatchSize;
+    private int minimumEventBatchSize;
+    private boolean softBatchScheduling;
     
     private float currentEventCount = 0;
     private long iteration = 0;
@@ -66,6 +67,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         this.gpuStreamProcessor = null;
         this.gpuQueryPostProcessor = null;
         this.selectProcessor = null;
+        this.maximumEventBatchSize = 1024;
+        this.minimumEventBatchSize = 1;
+        this.softBatchScheduling = true;
     }
 
     public GpuProcessStreamReceiver clone(String key) {
@@ -78,7 +82,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     @Override
     public void receive(Event event, boolean endOfBatch) {
         
-//        log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
+        log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
         ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
         eventBufferWriter.writeShort((short)type.ordinal());
@@ -114,7 +118,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         }
         currentEventCount++;
         
-        if (endOfBatch || (eventBatchSize == currentEventCount)) { //TODO: implement soft/hard batch scheduling
+        if ((endOfBatch && (currentEventCount >= minimumEventBatchSize)) || (maximumEventBatchSize == currentEventCount)) { //TODO: implement soft/hard batch scheduling
 
             startTime = System.nanoTime();
             
@@ -136,10 +140,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             duration = endTime - startTime;
             double average = (currentEventCount * 1000000000 / (double)duration);
-//            log.info("Batch Times : " + currentEventCount + " [Total=" + (endTime - startTime) + 
-//                    " Gpu=" + (gpuProcEndTime - startTime) + 
-//                    " Post=" + (postProcEndTime - gpuProcEndTime) + 
-//                    " Select=" + (endTime - postProcEndTime) + "]");
+            
+            log.info("<" + queryName + " - " + streamId + "> Batch Times : " + currentEventCount + " [Total=" + (endTime - startTime) + 
+                    " Gpu=" + (gpuProcEndTime - startTime) + 
+                    " Post=" + (postProcEndTime - gpuProcEndTime) + 
+                    " Select=" + (endTime - postProcEndTime) + "]");
             
             throughputList.add(average);
             
@@ -294,15 +299,23 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
     }
     
-    public int getEventBatchSize() {
-        return eventBatchSize;
+    public int getMaximumEventBatchSize() {
+        return maximumEventBatchSize;
     }
 
-    public void setEventBatchSize(int eventBatchSize) {
-        this.eventBatchSize = eventBatchSize;
+    public void setMaximumEventBatchSize(int eventBatchSize) {
+        this.maximumEventBatchSize = eventBatchSize;
     }
     
     public void setSoftBatchScheduling(boolean softBatchScheduling) {
         this.softBatchScheduling = softBatchScheduling;
+    }
+
+    public int getMinimumEventBatchSize() {
+        return minimumEventBatchSize;
+    }
+
+    public void setMinimumEventBatchSize(int minimumEventBatchSize) {
+        this.minimumEventBatchSize = minimumEventBatchSize;
     }
 }

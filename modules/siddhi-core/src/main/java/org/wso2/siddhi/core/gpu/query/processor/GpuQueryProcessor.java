@@ -41,10 +41,10 @@ public class GpuQueryProcessor {
         sequenceNumber = new AtomicLong(0);
         
         log.info("<" + this.queryName + "> Creating SiddhiGpu.GpuQueryRuntime using device [" + 
-                gpuQueryContext.getCudaDeviceId() + "] input buffer size [" + gpuQueryContext.getEventBatchSize() + "]");
+                gpuQueryContext.getCudaDeviceId() + "] input buffer size [" + gpuQueryContext.getEventBatchMaximumSize() + "]");
         
         gpuQueryRuntime = new SiddhiGpu.GpuQueryRuntime(this.queryName, gpuQueryContext.getCudaDeviceId(), 
-                gpuQueryContext.getEventBatchSize());
+                gpuQueryContext.getEventBatchMaximumSize());
     }
     
     public GpuQueryProcessor clone() {

@@ -53,6 +53,8 @@ public class GpuInputStreamParser {
             processStreamReceiver.setGpuQueryProcessor(gpuQueryProcessor);
             processStreamReceiver.setPerfromanceCalculateBatchCount(gpuQueryContext.getPerfromanceCalculateBatchCount());
             processStreamReceiver.setSoftBatchScheduling(gpuQueryContext.isBatchSoftScheduling());
+            processStreamReceiver.setMaximumEventBatchSize(gpuQueryContext.getEventBatchMaximumSize());
+            processStreamReceiver.setMinimumEventBatchSize(gpuQueryContext.getEventBatchMinimumSize());
             
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
                     executionPlanContext, executors, definitionMap, new MetaStreamEvent(), processStreamReceiver, gpuQueryContext);
@@ -87,6 +89,12 @@ public class GpuInputStreamParser {
             
             leftGpuProcessStreamReceiver.setSoftBatchScheduling(gpuQueryContext.isBatchSoftScheduling());
             rightGpuProcessStreamReceiver.setSoftBatchScheduling(gpuQueryContext.isBatchSoftScheduling());
+            
+            leftGpuProcessStreamReceiver.setMaximumEventBatchSize(gpuQueryContext.getEventBatchMaximumSize());
+            rightGpuProcessStreamReceiver.setMaximumEventBatchSize(gpuQueryContext.getEventBatchMaximumSize());
+            
+            leftGpuProcessStreamReceiver.setMinimumEventBatchSize(gpuQueryContext.getEventBatchMinimumSize());
+            rightGpuProcessStreamReceiver.setMinimumEventBatchSize(gpuQueryContext.getEventBatchMinimumSize());
             
             MetaStateEvent metaStateEvent = new MetaStateEvent(2);
             metaStateEvent.addEvent(new MetaStreamEvent());
