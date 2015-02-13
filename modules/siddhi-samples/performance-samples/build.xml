@@ -91,5 +91,14 @@
 				--threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
 		</java>
 	</target>
-
+	
+	
+	<target name="JoinMultipleQuery" depends="compile">
+		<java classname="org.wso2.siddhi.performance.JoinMultipleQueryPerformance"
+			classpathref="classpath" fork="true">
+			<arg line="--enable-async ${async.enabled} --enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} 
+				--threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
+		</java>
+	</target>
+	
 </project>

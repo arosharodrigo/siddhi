@@ -48,6 +48,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private long endTime = 0;
     private long duration = 0;
     private final List<Double> throughputList = new ArrayList<Double>();
+    private int perfromanceCalculateBatchCount;
     
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
     
@@ -73,7 +74,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     @Override
     public void receive(Event event, boolean endOfBatch) {
         
-        log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
+//        log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
         ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
         eventBufferWriter.writeShort((short)type.ordinal());
@@ -134,7 +135,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             currentEventCount = 0;
             iteration++;
             
-            if(iteration % 100000 == 0)
+            if(iteration % perfromanceCalculateBatchCount == 0)
             {
                 double totalThroughput = 0;
                 
@@ -272,5 +273,13 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     public List<SiddhiGpu.GpuProcessor> getGpuProcessors() {
         return gpuProcessors;
+    }
+    
+    public int getPerfromanceCalculateBatchCount() {
+        return perfromanceCalculateBatchCount;
+    }
+
+    public void setPerfromanceCalculateBatchCount(int perfromanceCalculateBatchCount) {
+        this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
     }
 }
