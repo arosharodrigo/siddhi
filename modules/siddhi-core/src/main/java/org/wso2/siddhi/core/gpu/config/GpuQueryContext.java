@@ -15,6 +15,7 @@ public class GpuQueryContext {
     private Integer cudaDeviceId;
     private String queryName;
     private int inputEventBufferSize;
+    private Integer perfromanceCalculateBatchCount;
     
     public GpuQueryContext(List<Annotation> annotationList) {
         threadsPerBlock = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
@@ -28,6 +29,9 @@ public class GpuQueryContext {
 
         queryName = getAnnotationStringValue(SiddhiConstants.ANNOTATION_INFO, 
                 SiddhiConstants.ANNOTATION_ELEMENT_INFO_NAME, annotationList);
+        
+        perfromanceCalculateBatchCount = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_PERFORMANCE, 
+                SiddhiConstants.ANNOTATION_ELEMENT_PERFORMANCE_CALC_BATCH_COUNT, annotationList);
 
         if(threadsPerBlock == null) {
             threadsPerBlock = new Integer(128);
@@ -35,6 +39,10 @@ public class GpuQueryContext {
 
         if(cudaDeviceId == null) {
             cudaDeviceId = new Integer(0); //default CUDA device 
+        }
+        
+        if(perfromanceCalculateBatchCount == null) {
+            perfromanceCalculateBatchCount = 100000;
         }
     }
 
@@ -122,5 +130,13 @@ public class GpuQueryContext {
 
     public void setInputEventBufferSize(int getInputEventBufferSize) {
         this.inputEventBufferSize = getInputEventBufferSize;
+    }
+    
+    public int getPerfromanceCalculateBatchCount() {
+        return perfromanceCalculateBatchCount;
+    }
+
+    public void setPerfromanceCalculateBatchCount(int perfromanceCalculateBatchCount) {
+        this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
     }
 }

@@ -51,6 +51,7 @@ public class GpuInputStreamParser {
             gpuQueryProcessor.addStream(((SingleInputStream) inputStream).getStreamId(), gpuMetaEvent);
             processStreamReceiver.setGpuMetaEvent(gpuMetaEvent);
             processStreamReceiver.setGpuQueryProcessor(gpuQueryProcessor);
+            processStreamReceiver.setPerfromanceCalculateBatchCount(gpuQueryContext.getPerfromanceCalculateBatchCount());
             
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
                     executionPlanContext, executors, definitionMap, new MetaStreamEvent(), processStreamReceiver, gpuQueryContext);
@@ -79,6 +80,9 @@ public class GpuInputStreamParser {
             
             leftGpuProcessStreamReceiver.setGpuQueryProcessor(gpuQueryProcessor);
             rightGpuProcessStreamReceiver.setGpuQueryProcessor(gpuQueryProcessor);
+            
+            leftGpuProcessStreamReceiver.setPerfromanceCalculateBatchCount(gpuQueryContext.getPerfromanceCalculateBatchCount());
+            rightGpuProcessStreamReceiver.setPerfromanceCalculateBatchCount(gpuQueryContext.getPerfromanceCalculateBatchCount());
             
             MetaStateEvent metaStateEvent = new MetaStateEvent(2);
             metaStateEvent.addEvent(new MetaStreamEvent());

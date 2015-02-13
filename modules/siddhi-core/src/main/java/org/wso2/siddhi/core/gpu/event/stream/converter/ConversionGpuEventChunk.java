@@ -121,7 +121,7 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
     }
     
     public void convertAndAdd(ByteBuffer eventBuffer, int eventCount, int eventSegmentSize) {
-        log.debug("<" + eventCount + "> Converting eventCount=" + eventCount + " eventSegmentSize=" + eventSegmentSize);
+        //log.debug("<" + eventCount + "> Converting eventCount=" + eventCount + " eventSegmentSize=" + eventSegmentSize);
         int indexInsideSegment = 0;
         int segIdx = 0;
         for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
@@ -132,8 +132,8 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
             ComplexEvent.Type type = eventTypes[eventBuffer.getShort()];
             
-            log.debug("<" + eventCount + "> Converting eventIndex=" + resultsIndex + " type=" + type 
-                    + " segIdx=" + segIdx + " segInternalIdx=" + indexInsideSegment);
+//            log.debug("<" + eventCount + "> Converting eventIndex=" + resultsIndex + " type=" + type 
+//                    + " segIdx=" + segIdx + " segInternalIdx=" + indexInsideSegment);
             
             if(type != Type.NONE && type != Type.RESET) {
                 long sequence = eventBuffer.getLong();
@@ -167,7 +167,7 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                 }
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
-                log.debug("<" + eventCount + "> Converted event " + resultsIndex + " : " + borrowedEvent.toString());
+//                log.debug("<" + eventCount + "> Converted event " + resultsIndex + " : " + borrowedEvent.toString());
 
                 if (first == null) {
                     first = borrowedEvent;
@@ -184,10 +184,12 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
             } else if (type == Type.RESET){
                 // skip remaining bytes in segment
-                log.debug("<" + eventCount + "> Skip to next segment : CurrPos=" + eventBuffer.position() + " SegIdx=" + indexInsideSegment + 
-                        " EventSize=" + gpuMetaStreamEvent.getEventSizeInBytes());
+//                log.debug("<" + eventCount + "> Skip to next segment : CurrPos=" + eventBuffer.position() + " SegIdx=" + indexInsideSegment + 
+//                        " EventSize=" + gpuMetaStreamEvent.getEventSizeInBytes());
+                
                 eventBuffer.position(eventBuffer.position() + ((eventSegmentSize - indexInsideSegment) * gpuMetaStreamEvent.getEventSizeInBytes()) - 2);
-                log.debug("<" + eventCount + "> buffer new pos : " + eventBuffer.position());
+                
+//                log.debug("<" + eventCount + "> buffer new pos : " + eventBuffer.position());
                 resultsIndex = ((segIdx + 1) * eventSegmentSize) - 1;
                 indexInsideSegment = 0;
             }

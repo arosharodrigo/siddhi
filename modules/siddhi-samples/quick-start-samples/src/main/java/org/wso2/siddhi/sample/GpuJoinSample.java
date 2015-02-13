@@ -22,9 +22,9 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
                 + "define stream cseEventStream (symbol string, price float, volume int); "
                 + "define stream twitterStream (company string, numoccur int); "
                 + "@info(name = 'query1') @gpu(block.size='128', cuda.device='1', string.sizes='symbol=8,company=8') "
-                + " from cseEventStream#window.length(10) join twitterStream#window.length(20) " 
-                + " on cseEventStream.symbol== twitterStream.company " 
-                + " select cseEventStream.symbol as symbol, twitterStream.numoccur, cseEventStream.price, cseEventStream.volume " 
+                + " from cseEventStream#window.length(1000) as a join twitterStream#window.length(200) as b " 
+                + " on a.symbol== b.company " 
+                + " select a.symbol as symbol, b.numoccur, a.price, a.volume " 
                 + " insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
@@ -63,7 +63,7 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
         executionPlanRuntime.start();
         
         System.out.println("JoinSample");
-        for(int i=0;i<100; ++i) {
+        for(int i=0;i<10000000; ++i) {
             cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, i});
             twitterStreamHandler.send(new Object[]{"WSO2", i});
             cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, i});
@@ -74,7 +74,7 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
             cseEventStreamHandler.send(new Object[]{"BARC", 25.1f, i});
             twitterStreamHandler.send(new Object[]{"RB", i});
             twitterStreamHandler.send(new Object[]{"NG", i});
-            Thread.sleep(500);
+//            Thread.sleep(500);
         }
 
         executionPlanRuntime.shutdown();
