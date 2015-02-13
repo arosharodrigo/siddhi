@@ -6,9 +6,12 @@ import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
 import org.wso2.siddhi.core.gpu.event.stream.converter.ConversionGpuEventChunk;
 
 public class GpuJoinQueryPostProcessor extends GpuQueryPostProcessor {
+    
+    private int eventSegmentSize;
 
-    public GpuJoinQueryPostProcessor(ByteBuffer outputEventBuffer, ConversionGpuEventChunk complexEventChunk) {
+    public GpuJoinQueryPostProcessor(ByteBuffer outputEventBuffer, ConversionGpuEventChunk complexEventChunk, int eventSegmentSize) {
         super(outputEventBuffer, complexEventChunk);
+        this.eventSegmentSize = eventSegmentSize;
     }
 
     @Override
@@ -16,7 +19,7 @@ public class GpuJoinQueryPostProcessor extends GpuQueryPostProcessor {
         outputEventBuffer.position(0);
         inputEventBuffer.position(0);
         
-        complexEventChunk.convertAndAdd(outputEventBuffer, eventCount);
+        complexEventChunk.convertAndAdd(outputEventBuffer, eventCount, eventSegmentSize);
 
     }
 
