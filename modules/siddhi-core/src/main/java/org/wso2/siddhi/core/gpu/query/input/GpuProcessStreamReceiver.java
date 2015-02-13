@@ -228,7 +228,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     
                 }
                 
-                StreamDefinition outputStreamDef = metaStreamEvent.getOutputStreamDefinition();
+                StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
                 GpuMetaStreamEvent outputMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
                         gpuQueryProcessor.getGpuQueryContext());
                 outputMetaEvent.setStreamIndex(0);

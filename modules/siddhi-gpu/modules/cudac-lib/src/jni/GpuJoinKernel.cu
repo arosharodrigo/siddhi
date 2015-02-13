@@ -166,6 +166,10 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 				iMatchedCount++;
 			}
+			else
+			{
+				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
+			}
 		}
 		else
 		{
@@ -225,6 +229,10 @@ void ProcessEventsJoinLeftTriggerAllOn(
 					}
 
 					iMatchedCount++;
+				}
+				else
+				{
+					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				}
 			}
 			else
@@ -342,6 +350,10 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 				}
 
 				iMatchedCount++;
+			}
+			else
+			{
+				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 			}
 		}
 		else
@@ -494,6 +506,10 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 					}
 
 					iMatchedCount++;
+				}
+				else
+				{
+					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				}
 			}
 			else
@@ -652,6 +668,10 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 				iMatchedCount++;
 			}
+			else
+			{
+				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
+			}
 		}
 		else
 		{
@@ -711,6 +731,10 @@ void ProcessEventsJoinRightTriggerAllOn(
 					}
 
 					iMatchedCount++;
+				}
+				else
+				{
+					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				}
 			}
 			else
@@ -828,6 +852,10 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 				}
 
 				iMatchedCount++;
+			}
+			else
+			{
+				pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 			}
 		}
 		else
@@ -983,6 +1011,10 @@ void ProcessEventsJoinRightTriggerExpireOn(
 					}
 
 					iMatchedCount++;
+				}
+				else
+				{
+					pResultExpireMatchingEvent->i_Type = GpuEvent::RESET;
 				}
 			}
 			else
