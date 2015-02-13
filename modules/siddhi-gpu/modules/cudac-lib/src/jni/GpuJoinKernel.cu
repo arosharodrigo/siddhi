@@ -67,6 +67,12 @@ void ProcessEventsJoinLeftTriggerAllOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
+	// reset first result event
+	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+	pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -113,6 +119,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+	int iMatchedCount = 0;
 	for(int i=0; i<iOtherWindowFillCount; ++i)
 	{
 		// get other window event
@@ -120,7 +127,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 		GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 		// get buffer position for in event matching results
-		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 		GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
@@ -155,11 +162,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 					);
 				}
 
-			}
-			else
-			{
-				// null event
-				pResultInMatchingEvent->i_Type = GpuEvent::NONE;
+				iMatchedCount++;
 			}
 		}
 		else
@@ -174,6 +177,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 	{
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
 
+		iMatchedCount = 0;
 		// for each events in other window
 		for(int i=0; i<iOtherWindowFillCount; ++i)
 		{
@@ -182,7 +186,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 			GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 			// get buffer position for expire event matching results
-			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
 
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
@@ -218,11 +222,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 						);
 					}
 
-				}
-				else
-				{
-					// null event
-					pResultExpireMatchingEvent->i_Type = GpuEvent::NONE;
+					iMatchedCount++;
 				}
 			}
 			else
@@ -281,6 +281,10 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
+	// reset first result event
+	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
@@ -290,6 +294,7 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+	int iMatchedCount = 0;
 	for(int i=0; i<iOtherWindowFillCount; ++i)
 	{
 		// get other window event
@@ -297,7 +302,7 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 		GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 		// get buffer position for in event matching results
-		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 		GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
@@ -332,11 +337,7 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 					);
 				}
 
-			}
-			else
-			{
-				// null event
-				pResultInMatchingEvent->i_Type = GpuEvent::NONE;
+				iMatchedCount++;
 			}
 		}
 		else
@@ -391,6 +392,10 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
 
+	// reset first result event
+	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -427,19 +432,17 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 		// no expiring event
 	}
 
-
-	// get all matching event for in event from other window buffer and copy them to output event buffer
-
-	// get assigned filter
-	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
-
-	// for each events in other window
-	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
-
 	if(pExpiredEventBuffer != NULL)
 	{
+		// get assigned filter
+		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
 
+		// for each events in other window
+		//	 get all matching event for in event from other window buffer and copy them to output event buffer
+		int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+		int iMatchedCount = 0;
 		// for each events in other window
 		for(int i=0; i<iOtherWindowFillCount; ++i)
 		{
@@ -448,7 +451,7 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 			GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 			// get buffer position for expire event matching results
-			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
 
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
@@ -484,11 +487,7 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 						);
 					}
 
-				}
-				else
-				{
-					// null event
-					pResultExpireMatchingEvent->i_Type = GpuEvent::NONE;
+					iMatchedCount++;
 				}
 			}
 			else
@@ -548,6 +547,12 @@ void ProcessEventsJoinRightTriggerAllOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
+	// reset first result event
+	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+	pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -594,6 +599,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+	int iMatchedCount = 0;
 	for(int i=0; i<iOtherWindowFillCount; ++i)
 	{
 		// get other window event
@@ -601,7 +607,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 		GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 		// get buffer position for in event matching results
-		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 		GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
@@ -636,11 +642,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 					);
 				}
 
-			}
-			else
-			{
-				// null event
-				pResultInMatchingEvent->i_Type = GpuEvent::NONE;
+				iMatchedCount++;
 			}
 		}
 		else
@@ -655,6 +657,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 	{
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
 
+		iMatchedCount = 0;
 		// for each events in other window
 		for(int i=0; i<iOtherWindowFillCount; ++i)
 		{
@@ -663,7 +666,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 			GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 			// get buffer position for expire event matching results
-			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
 
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
@@ -699,11 +702,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 						);
 					}
 
-				}
-				else
-				{
-					// null event
-					pResultExpireMatchingEvent->i_Type = GpuEvent::NONE;
+					iMatchedCount++;
 				}
 			}
 			else
@@ -762,6 +761,10 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 	// clear whole result buffer segment for this in event
 	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
+	// reset first result event
+	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsInEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
@@ -771,6 +774,7 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+	int iMatchedCount = 0;
 	for(int i=0; i<iOtherWindowFillCount; ++i)
 	{
 		// get other window event
@@ -778,7 +782,7 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 		GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 		// get buffer position for in event matching results
-		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+		char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 		GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
@@ -813,11 +817,7 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 					);
 				}
 
-			}
-			else
-			{
-				// null event
-				pResultInMatchingEvent->i_Type = GpuEvent::NONE;
+				iMatchedCount++;
 			}
 		}
 		else
@@ -875,6 +875,10 @@ void ProcessEventsJoinRightTriggerExpireOn(
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
+	// reset first result event
+	GpuEvent * pFirstResultEvent = (GpuEvent*) pResultsExpiredEventBufferSegment;
+	pFirstResultEvent->i_Type = GpuEvent::RESET;
+
 	// calculate in/expired event pair for this event
 
 	if(iEventIdx >= _iRemainingCount)
@@ -908,18 +912,19 @@ void ProcessEventsJoinRightTriggerExpireOn(
 		// no expiring event
 	}
 
-
-	// get all matching event for in event from other window buffer and copy them to output event buffer
-
-	// get assigned filter
-	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
-
-	// for each events in other window
-	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
-
 	if(pExpiredEventBuffer != NULL)
 	{
+
+		// get all matching event for in event from other window buffer and copy them to output event buffer
+
+		// get assigned filter
+		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
+
+		// for each events in other window
+		int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+		int iMatchedCount = 0;
 
 		// for each events in other window
 		for(int i=0; i<iOtherWindowFillCount; ++i)
@@ -929,7 +934,7 @@ void ProcessEventsJoinRightTriggerExpireOn(
 			GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 			// get buffer position for expire event matching results
-			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * i);
+			char * pResultExpireMatchingEventBuffer = pResultsExpiredEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultExpireMatchingEvent = (GpuEvent*) pResultExpireMatchingEventBuffer;
 
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
@@ -965,11 +970,7 @@ void ProcessEventsJoinRightTriggerExpireOn(
 						);
 					}
 
-				}
-				else
-				{
-					// null event
-					pResultExpireMatchingEvent->i_Type = GpuEvent::NONE;
+					iMatchedCount++;
 				}
 			}
 			else
@@ -1109,6 +1110,8 @@ GpuJoinKernel::GpuJoinKernel(GpuProcessor * _pProc, GpuProcessorContext * _pLeft
 	i_RightStreamWindowSize(_iRightWindowSize),
 	i_LeftRemainingCount(_iLeftWindowSize),
 	i_RightRemainingCount(_iRightWindowSize),
+	i_LeftNumEventPerSegment(0),
+	i_RightNumEventPerSegment(0),
 	b_LeftFirstKernel(true),
 	b_RightFirstKernel(true),
 	b_LeftDeviceSet(false),
@@ -1240,10 +1243,12 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			if(p_JoinProcessor->GetCurrentOn())
 			{
 				iEventCount += i_RightStreamWindowSize * p_LeftInputEventBuffer->GetMaxEventCount();
+				i_LeftNumEventPerSegment = i_RightStreamWindowSize;
 			}
 			if(p_JoinProcessor->GetExpiredOn())
 			{
 				iEventCount += i_RightStreamWindowSize * p_LeftInputEventBuffer->GetMaxEventCount();
+				i_LeftNumEventPerSegment += i_RightStreamWindowSize;
 			}
 			p_LeftResultEventBuffer->CreateEventBuffer(iEventCount);
 			fprintf(fp_LeftLog, "[GpuJoinKernel] LeftResultEventBuffer created : Size=%d bytes\n", p_LeftResultEventBuffer->GetEventBufferSizeInBytes());
@@ -1259,10 +1264,12 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			if(p_JoinProcessor->GetCurrentOn())
 			{
 				iEventCount += i_LeftStreamWindowSize * p_RightInputEventBuffer->GetMaxEventCount();
+				i_RightNumEventPerSegment = i_LeftStreamWindowSize;
 			}
 			if(p_JoinProcessor->GetExpiredOn())
 			{
 				iEventCount += i_LeftStreamWindowSize * p_RightInputEventBuffer->GetMaxEventCount();
+				i_RightNumEventPerSegment += i_LeftStreamWindowSize;
 			}
 
 			p_RightResultEventBuffer->CreateEventBuffer(iEventCount);
@@ -1550,6 +1557,10 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 		p_LeftResultEventBuffer->CopyToHost(true);
 #ifdef GPU_DEBUG
 	fprintf(fp_LeftLog, "[GpuJoinKernel] Results copied \n");
+
+	GpuUtils::PrintByteBuffer(p_LeftResultEventBuffer->GetHostEventBuffer(), p_LeftResultEventBuffer->GetMaxEventCount(),
+			p_LeftResultEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftResultEventBuffer", fp_LeftLog);
+
 	fflush(fp_LeftLog);
 #endif
 	}
@@ -1587,6 +1598,19 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 	{
 		_iNumEvents = 0;
 	}
+	else
+	{
+		_iNumEvents = _iNumEvents * i_LeftNumEventPerSegment;
+	}
+
+#ifdef GPU_DEBUG
+	p_LeftWindowEventBuffer->CopyToHost(true);
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - i_LeftRemainingCount),
+			p_LeftWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftWindowBuffer", fp_LeftLog);
+	fflush(fp_LeftLog);
+#endif
 
 	pthread_mutex_unlock(&mtx_Lock);
 }
@@ -1756,6 +1780,10 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 		p_RightResultEventBuffer->CopyToHost(true);
 #ifdef GPU_DEBUG
 	fprintf(fp_RightLog, "[GpuJoinKernel] Results copied \n");
+
+	GpuUtils::PrintByteBuffer(p_RightResultEventBuffer->GetHostEventBuffer(), p_RightResultEventBuffer->GetMaxEventCount(),
+			p_RightResultEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightResultEventBuffer", fp_RightLog);
+
 	fflush(fp_RightLog);
 #endif
 	}
@@ -1793,6 +1821,19 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 	{
 		_iNumEvents = 0;
 	}
+	else
+	{
+		_iNumEvents = _iNumEvents * i_RightNumEventPerSegment;
+	}
+
+#ifdef GPU_DEBUG
+	p_RightWindowEventBuffer->CopyToHost(true);
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - i_RightRemainingCount),
+			p_RightWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightWindowBuffer", fp_RightLog);
+	fflush(fp_RightLog);
+#endif
 
 	pthread_mutex_unlock(&mtx_Lock);
 }

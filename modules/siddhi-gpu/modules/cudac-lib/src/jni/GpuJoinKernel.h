@@ -74,6 +74,9 @@ private:
 	int i_LeftRemainingCount;
 	int i_RightRemainingCount;
 
+	int i_LeftNumEventPerSegment;
+	int i_RightNumEventPerSegment;
+
 	bool b_LeftFirstKernel;
 	bool b_RightFirstKernel;
 

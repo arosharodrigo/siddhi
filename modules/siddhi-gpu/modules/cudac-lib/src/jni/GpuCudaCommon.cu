@@ -6,7 +6,7 @@ namespace SiddhiGpu
 
 __device__ bool cuda_strcmp(const char *s1, const char *s2)
 {
-	if(!s1 || !s2) return false;
+//	if(!s1 || !s2) return false; TODO: uncomment
 
 	for ( ; *s1==*s2; ++s1, ++s2) {
 		if (*s1=='\0') return true;
