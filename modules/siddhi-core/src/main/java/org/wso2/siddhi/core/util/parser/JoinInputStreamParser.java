@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
+import org.wso2.siddhi.core.gpu.query.input.stream.join.GpuJoinStreamRuntime;
 import org.wso2.siddhi.core.gpu.util.parser.GpuExpressionParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
 import org.wso2.siddhi.core.query.input.stream.join.Finder;
@@ -189,6 +190,11 @@ public class JoinInputStreamParser {
         
         gpuJoinProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
         
+        GpuJoinStreamRuntime gpuJoinStreamRuntime = new GpuJoinStreamRuntime(executionPlanContext,metaStateEvent);
+        gpuJoinStreamRuntime.addRuntime(leftStreamRuntime);
+        gpuJoinStreamRuntime.addRuntime(rightStreamRuntime);
+        return gpuJoinStreamRuntime;
+        
         /////////////////////////
         
 //        JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true);
@@ -227,10 +233,10 @@ public class JoinInputStreamParser {
 //            leftPostJoinProcessor.setTrigger(true);
 //            leftPostJoinProcessor.setFinder(leftFinder);
 //        }
-
-        JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(executionPlanContext,metaStateEvent);
-        joinStreamRuntime.addRuntime(leftStreamRuntime);
-        joinStreamRuntime.addRuntime(rightStreamRuntime);
-        return joinStreamRuntime;
+//
+//        JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(executionPlanContext,metaStateEvent);
+//        joinStreamRuntime.addRuntime(leftStreamRuntime);
+//        joinStreamRuntime.addRuntime(rightStreamRuntime);
+//        return joinStreamRuntime;
     }
 }
