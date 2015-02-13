@@ -1448,9 +1448,6 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
-	// we need to synchronize processing of JoinKernel as only one batch of events can be there at a time
-	pthread_mutex_lock(&mtx_Lock);
-
 #ifdef GPU_DEBUG
 	fprintf(fp_LeftLog, "[GpuJoinKernel] ProcessLeftStream : Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fprintf(fp_LeftLog, "[GpuJoinKernel] ProcessLeftStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
@@ -1555,10 +1552,10 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 			);
 		}
 
-		CUDA_CHECK_RETURN(cudaPeekAtLastError());
-		CUDA_CHECK_RETURN(cudaThreadSynchronize());
-
 	}
+
+	// we need to synchronize processing of JoinKernel as only one batch of events can be there at a time
+	pthread_mutex_lock(&mtx_Lock);
 
 //	char               * _pInputEventBuffer,     // original input events buffer
 //	int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
@@ -1671,9 +1668,6 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
-	// we need to synchronize processing of JoinKernel as only one batch of events can be there at a time
-	pthread_mutex_lock(&mtx_Lock);
-
 #ifdef GPU_DEBUG
 	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessRightStream : Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessLeftStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
@@ -1777,10 +1771,10 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 			);
 		}
 
-		CUDA_CHECK_RETURN(cudaPeekAtLastError());
-		CUDA_CHECK_RETURN(cudaThreadSynchronize());
-
 	}
+
+	// we need to synchronize processing of JoinKernel as only one batch of events can be there at a time
+	pthread_mutex_lock(&mtx_Lock);
 
 //	char               * _pInputEventBuffer,     // original input events buffer
 //	int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)

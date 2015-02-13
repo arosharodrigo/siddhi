@@ -143,10 +143,10 @@ public class JoinMultipleQueryPerformance {
         @Override
         public int sendEvents(long iteration) throws InterruptedException {
             inputHandler.send(new Object[]{"WSO2", iteration});
-            inputHandler.send(new Object[]{"BARC", iteration});
+            inputHandler.send(new Object[]{"IBM", iteration});
             inputHandler.send(new Object[]{"VOD", iteration});
             inputHandler.send(new Object[]{"AAPL", iteration});
-            inputHandler.send(new Object[]{"QQQQ", iteration});
+            inputHandler.send(new Object[]{"GOOG", iteration});
             return 5;
         }
     }
@@ -194,12 +194,12 @@ public class JoinMultipleQueryPerformance {
         new TestQuery("from cseStockStream#window.length(1000) as a join twitterStream#window.length(200) as b " 
                 + " on a.symbol==b.company " 
                 + " select a.symbol as symbol, b.numoccur, a.bidPrice, a.qty " 
-                + " insert into twitterStockStream ; ", 0),
+                + " insert into twitterStockStream ; ", 1),
                 
         new TestQuery("from cseStockStream#window.length(100) as a join cseTradeStream#window.length(1000) as b " 
                 + " on a.bidPrice <= b.tradePrice and a.qty <= b.volume " 
                 + " select a.symbol as symbol, a.bidPrice, b.tradePrice " 
-                + " insert into stockTradeStream ; ", 1)
+                + " insert into stockTradeStream ; ", 0)
     };
     
     private static void Help() {
