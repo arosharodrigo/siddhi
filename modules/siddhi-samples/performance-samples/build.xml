@@ -35,6 +35,8 @@
 	<property name="block.size" value="256" />
 	<property name="gpu.enabled" value="false" />
 	<property name="async.enabled" value="true" />
+	<property name="event.batch.size" value="1024" />
+	<property name="strict.batch.scheduling" value="false" />
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -97,7 +99,8 @@
 		<java classname="org.wso2.siddhi.performance.JoinMultipleQueryPerformance"
 			classpathref="classpath" fork="true">
 			<arg line="--enable-async ${async.enabled} --enable-gpu ${gpu.enabled} --ringbuffer-size ${ringbuffer.size} 
-				--threadpool-size ${threadpool.size} --events-per-tblock ${block.size}" />
+				--threadpool-size ${threadpool.size} --events-per-tblock ${block.size} 
+				--batch-size ${event.batch.size} --strict-batch-scheduling ${strict.batch.scheduling}" />
 		</java>
 	</target>
 	

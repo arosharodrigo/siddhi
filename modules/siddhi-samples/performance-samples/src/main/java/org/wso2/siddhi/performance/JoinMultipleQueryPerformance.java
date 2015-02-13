@@ -96,7 +96,7 @@ public class JoinMultipleQueryPerformance {
                 
         new TestQuery("from cseStockStream#window.length(100) as a join cseTradeStream#window.length(1000) as b " 
                 + " on a.bidPrice <= b.tradePrice and a.qty <= b.volume " 
-                + " select a.symbol as symbol, b.bidPrice, a.tradePrice " 
+                + " select a.symbol as symbol, a.bidPrice, b.tradePrice " 
                 + " insert into stockTradeStream ; ", 1),
                 
         new TestQuery("from cseStockStream#window.length(1000) as a join twitterStream#window.length(200) as b " 
@@ -106,7 +106,7 @@ public class JoinMultipleQueryPerformance {
                 
         new TestQuery("from cseStockStream#window.length(100) as a join cseTradeStream#window.length(1000) as b " 
                 + " on a.bidPrice <= b.tradePrice and a.qty <= b.volume " 
-                + " select a.symbol as symbol, b.bidPrice, a.tradePrice " 
+                + " select a.symbol as symbol, a.bidPrice, b.tradePrice " 
                 + " insert into stockTradeStream ; ", 1)
     };
     
@@ -125,8 +125,10 @@ public class JoinMultipleQueryPerformance {
         cliOptions.addOption("e", "event-count", true, "Total number of events to be generated");
         cliOptions.addOption("q", "query-count", true, "Number of Siddhi Queries to be generated");
         cliOptions.addOption("r", "ringbuffer-size", true, "Disruptor RingBuffer size - in power of two");
+        cliOptions.addOption("z", "batch-size", true, "GPU Event batch size");
         cliOptions.addOption("t", "threadpool-size", true, "Executor service pool size");
         cliOptions.addOption("b", "events-per-tblock", true, "Number of Events per thread block in GPU");
+        cliOptions.addOption("s", "strict-batch-scheduling", true, "Strict batch size policy");
         
         CommandLineParser cliParser = new BasicParser();
         CommandLine cmd = null;
@@ -142,8 +144,8 @@ public class JoinMultipleQueryPerformance {
         int defaultBufferSize = 1024;
         int threadPoolSize = 4;
         int eventBlockSize = 256;
-        
-        final List<Double> throughputList = new ArrayList<Double>();
+        boolean softBatchScheduling = true;
+        int eventBatchSize = 1024;
         
         try {
             cmd = cliParser.parse(cliOptions, args);
@@ -168,6 +170,12 @@ public class JoinMultipleQueryPerformance {
             if (cmd.hasOption("b")) {
                 eventBlockSize = Integer.parseInt(cmd.getOptionValue("b"));
             }
+            if (cmd.hasOption("z")) {
+                eventBatchSize = Integer.parseInt(cmd.getOptionValue("z"));
+            }
+            if (cmd.hasOption("s")) {
+                softBatchScheduling = !Boolean.parseBoolean(cmd.getOptionValue("s"));
+            }
         } catch (ParseException e) {
             e.printStackTrace();
             Help();
@@ -179,7 +187,10 @@ public class JoinMultipleQueryPerformance {
                 "|QueryCount=" + queryCount +
                 "|RingBufferSize=" + defaultBufferSize +
                 "|ThreadPoolSize=" + threadPoolSize +
-                "|EventBlockSize=" + eventBlockSize + "]");
+                "|EventBlockSize=" + eventBlockSize + 
+                "|EventBatchSize=" + eventBatchSize +
+                "|SoftBatchScheduling=" + softBatchScheduling + 
+                "]");
         
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.getSiddhiContext().setEventBufferSize(defaultBufferSize); //.setDefaultEventBufferSize(defaultBufferSize);
@@ -203,8 +214,14 @@ public class JoinMultipleQueryPerformance {
             sb.append("@info(name = 'query" + (i + 1) + "') ");
             if(gpuEnabled)
             {
-                sb.append("@gpu(cuda.device='").append(queries[i].cudaDeviceId)
-                .append("', block.size='").append(eventBlockSize).append("', string.sizes='symbol=8') ");
+                sb.append("@gpu(")
+                .append("cuda.device='").append(queries[i].cudaDeviceId).append("', ")
+                .append("batch.size='").append(eventBatchSize).append("', ")
+                .append("block.size='").append(eventBlockSize).append("', ")
+                .append("batch.schedule='").append(softBatchScheduling ? "soft" : "hard").append("', ")
+                .append("string.sizes='symbol=8' ")
+                .append(") ")
+                .append("@perf(batch.count='1000') ");
             }
             sb.append(queries[i].query);
             String query = sb.toString();
@@ -258,7 +275,7 @@ public class JoinMultipleQueryPerformance {
             inputHandlerTrade.send(new Object[]{"WSO2", 100.5f, 100});
             inputHandlerTrade.send(new Object[]{"AAPL", 150.5f, 100});
             
-            Thread.sleep(1);
+//            Thread.sleep(1);
             currentGenEventCount += 15;
         }
 
@@ -267,9 +284,11 @@ public class JoinMultipleQueryPerformance {
                 " GPUEnabled=" + gpuEnabled +
                 " TotalEventCount=" + totalEventCount +
                 " QueryCount=" + queryCount +
-                " DefaultEventBufferSize=" + defaultBufferSize +
+                " DefaultRingBufferSize=" + defaultBufferSize +
                 " ThreadPoolSize=" + threadPoolSize +
                 " EventBlockSize=" + eventBlockSize +
+                " EventBatchSize=" + eventBatchSize +
+                " SoftBatchScheduling=" + softBatchScheduling + 
                 "]");
         
         twitterPerformanceCalculator.printAverageThroughput();

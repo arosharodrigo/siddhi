@@ -41,11 +41,15 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
     private GpuQueryPostProcessor gpuQueryPostProcessor;
     private Processor selectProcessor;
+    private int eventBatchSize;
+    private boolean softBatchScheduling = true;
     
     private float currentEventCount = 0;
     private long iteration = 0;
     private long startTime = 0;
     private long endTime = 0;
+    private long gpuProcEndTime = 0;
+    private long postProcEndTime = 0;
     private long duration = 0;
     private final List<Double> throughputList = new ArrayList<Double>();
     private int perfromanceCalculateBatchCount;
@@ -110,7 +114,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         }
         currentEventCount++;
         
-        if (endOfBatch) {
+        if (endOfBatch || (eventBatchSize == currentEventCount)) { //TODO: implement soft/hard batch scheduling
 
             startTime = System.nanoTime();
             
@@ -118,7 +122,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
   
             int resultEventCount = gpuStreamProcessor.Process((int)currentEventCount);
             
+            gpuProcEndTime = System.nanoTime();
+            
             gpuQueryPostProcessor.process(eventBufferWriter.getByteBuffer(), resultEventCount);
+            
+            postProcEndTime = System.nanoTime();
             
             selectProcessor.process(gpuEventChunk);
             gpuEventChunk.clear();
@@ -128,7 +136,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             duration = endTime - startTime;
             double average = (currentEventCount * 1000000000 / (double)duration);
-            //log.info("Batch Throughput : [" + currentEventCount + "/" + duration + "] " + decimalFormat.format(average) + " eps");
+//            log.info("Batch Times : " + currentEventCount + " [Total=" + (endTime - startTime) + 
+//                    " Gpu=" + (gpuProcEndTime - startTime) + 
+//                    " Post=" + (postProcEndTime - gpuProcEndTime) + 
+//                    " Select=" + (endTime - postProcEndTime) + "]");
             
             throughputList.add(average);
             
@@ -281,5 +292,17 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
     public void setPerfromanceCalculateBatchCount(int perfromanceCalculateBatchCount) {
         this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
+    }
+    
+    public int getEventBatchSize() {
+        return eventBatchSize;
+    }
+
+    public void setEventBatchSize(int eventBatchSize) {
+        this.eventBatchSize = eventBatchSize;
+    }
+    
+    public void setSoftBatchScheduling(boolean softBatchScheduling) {
+        this.softBatchScheduling = softBatchScheduling;
     }
 }

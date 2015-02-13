@@ -15,7 +15,9 @@ public class GpuQueryContext {
     private Integer cudaDeviceId;
     private String queryName;
     private int inputEventBufferSize;
+    private Integer eventBatchSize;
     private Integer perfromanceCalculateBatchCount;
+    private boolean batchSoftScheduling;
     
     public GpuQueryContext(List<Annotation> annotationList) {
         threadsPerBlock = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
@@ -32,6 +34,12 @@ public class GpuQueryContext {
         
         perfromanceCalculateBatchCount = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_PERFORMANCE, 
                 SiddhiConstants.ANNOTATION_ELEMENT_PERFORMANCE_CALC_BATCH_COUNT, annotationList);
+        
+        eventBatchSize = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+                SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_SIZE, annotationList);
+        
+        String gpuBatchScheludeString = getAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
+                SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_SCHEDULE, annotationList);
 
         if(threadsPerBlock == null) {
             threadsPerBlock = new Integer(128);
@@ -44,6 +52,21 @@ public class GpuQueryContext {
         if(perfromanceCalculateBatchCount == null) {
             perfromanceCalculateBatchCount = 100000;
         }
+        
+        batchSoftScheduling = true;
+        if(gpuBatchScheludeString != null && gpuBatchScheludeString.compareTo("hard") == 0) {
+            batchSoftScheduling = false;
+        }
+     
+        inputEventBufferSize = 1024;
+    }
+
+    public boolean isBatchSoftScheduling() {
+        return batchSoftScheduling;
+    }
+
+    public void setBatchSoftScheduling(boolean batchSoftScheduling) {
+        this.batchSoftScheduling = batchSoftScheduling;
     }
 
     public int getThreadsPerBlock() {
@@ -138,5 +161,15 @@ public class GpuQueryContext {
 
     public void setPerfromanceCalculateBatchCount(int perfromanceCalculateBatchCount) {
         this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
+    }
+
+    public int getEventBatchSize() {
+        if(eventBatchSize == null)
+            return inputEventBufferSize;
+        return eventBatchSize;
+    }
+
+    public void setEventBatchSize(int eventBatchSize) {
+        this.eventBatchSize = eventBatchSize;
     }
 }

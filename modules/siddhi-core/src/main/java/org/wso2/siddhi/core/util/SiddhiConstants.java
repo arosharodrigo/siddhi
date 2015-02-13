@@ -41,11 +41,13 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_ELEMENT_INFO_NAME = "name";
     
     public static final String ANNOTATION_GPU = "gpu";
+    public static final String ANNOTATION_ELEMENT_GPU_BATCH_SIZE = "batch.size";
     public static final String ANNOTATION_ELEMENT_GPU_BLOCK_SIZE = "block.size";
     public static final String ANNOTATION_ELEMENT_GPU_STRING_SIZES = "string.sizes";
     public static final String ANNOTATION_ELEMENT_GPU_CUDA_DEVICE = "cuda.device";
+    public static final String ANNOTATION_ELEMENT_GPU_BATCH_SCHEDULE = "batch.schedule";
     
-    public static final String ANNOTATION_PERFORMANCE = "perf";
+    public static final String ANNOTATION_PERFORMANCE = "performance";
     public static final String ANNOTATION_ELEMENT_PERFORMANCE_CALC_BATCH_COUNT = "batch.count";
 
 //    public static final String ANNOTATION_CONFIG = "config";
