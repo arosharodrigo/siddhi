@@ -59,11 +59,13 @@ void ProcessEventsFilterKernelStandalone(
 
 	char * pEvent = _pInByteBuffer + (_iSizeOfEvent * iEventIdx);
 
-	// get assigned filter
-	/*__shared__*/ GpuKernelFilter mFilter = *_apFilter;
+	FilterEvalParameters mEvalParameters;
+	mEvalParameters.p_Filter = _apFilter;
+	mEvalParameters.p_Meta = _pMetaEvent;
+	mEvalParameters.p_Event = pEvent;
+	mEvalParameters.i_CurrentIndex = 0;
 
-	int iCurrentNodeIdx = 0;
-	bool bResult = Evaluate(mFilter, _pMetaEvent, pEvent, iCurrentNodeIdx);
+	bool bResult = Evaluate(mEvalParameters);
 
 	//TODO improve results sending
 	if(bResult)
@@ -112,11 +114,13 @@ void ProcessEventsFilterKernelFirst(
 
 	char * pInEventBuffer = _pInByteBuffer + (_iSizeOfEvent * iEventIdx);
 
-	// get assigned filter
-	/*__shared__*/ GpuKernelFilter mFilter = *_apFilter;
+	FilterEvalParameters mEvalParameters;
+	mEvalParameters.p_Filter = _apFilter;
+	mEvalParameters.p_Meta = _pMetaEvent;
+	mEvalParameters.p_Event = pInEventBuffer;
+	mEvalParameters.i_CurrentIndex = 0;
 
-	int iCurrentNodeIdx = 0;
-	bool bMatched = Evaluate(mFilter, _pMetaEvent, pInEventBuffer, iCurrentNodeIdx);
+	bool bMatched = Evaluate(mEvalParameters);
 
 	int iPositionInBlock;
 
@@ -172,11 +176,13 @@ void ProcessEventsFilterKernelFirstV2(
 
 	char * pInEventBuffer = _pInByteBuffer + (_iSizeOfEvent * iEventIdx);
 
-	// get assigned filter
-	/*__shared__*/ GpuKernelFilter mFilter = *_apFilter;
+	FilterEvalParameters mEvalParameters;
+	mEvalParameters.p_Filter = _apFilter;
+	mEvalParameters.p_Meta = _pMetaEvent;
+	mEvalParameters.p_Event = pInEventBuffer;
+	mEvalParameters.i_CurrentIndex = 0;
 
-	int iCurrentNodeIdx = 0;
-	bool bMatched = Evaluate(mFilter, _pMetaEvent, pInEventBuffer, iCurrentNodeIdx);
+	bool bMatched = Evaluate(mEvalParameters);
 
 	if(bMatched)
 	{

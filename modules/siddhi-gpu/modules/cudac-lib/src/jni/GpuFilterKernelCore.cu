@@ -13,768 +13,723 @@ namespace SiddhiGpu
 
 // ========================= INT ==============================================
 
-__device__ int AddExpressionInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int AddExpressionInt(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) +
-			ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteIntExpression(_rParameters) +
+			ExecuteIntExpression(_rParameters));
 }
 
-__device__ int MinExpressionInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int MinExpressionInt(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) -
-			ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteIntExpression(_rParameters) -
+			ExecuteIntExpression(_rParameters));
 }
 
-__device__ int MulExpressionInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int MulExpressionInt(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) *
-			ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteIntExpression(_rParameters) *
+			ExecuteIntExpression(_rParameters));
 }
 
-__device__ int DivExpressionInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int DivExpressionInt(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) /
-			ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteIntExpression(_rParameters) /
+			ExecuteIntExpression(_rParameters));
 }
 
-__device__ int ModExpressionInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int ModExpressionInt(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) %
-			ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteIntExpression(_rParameters) %
+			ExecuteIntExpression(_rParameters));
 }
 
 // ========================= LONG ==============================================
 
-__device__ int64_t AddExpressionLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t AddExpressionLong(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) +
-			ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteLongExpression(_rParameters) +
+			ExecuteLongExpression(_rParameters));
 }
 
-__device__ int64_t MinExpressionLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t MinExpressionLong(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) -
-			ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteLongExpression(_rParameters) -
+			ExecuteLongExpression(_rParameters));
 }
 
-__device__ int64_t MulExpressionLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t MulExpressionLong(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) *
-			ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteLongExpression(_rParameters) *
+			ExecuteLongExpression(_rParameters));
 }
 
-__device__ int64_t DivExpressionLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t DivExpressionLong(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) /
-			ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteLongExpression(_rParameters) /
+			ExecuteLongExpression(_rParameters));
 }
 
-__device__ int64_t ModExpressionLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t ModExpressionLong(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) %
-			ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteLongExpression(_rParameters) %
+			ExecuteLongExpression(_rParameters));
 }
 
 
 // ========================= FLOAT ==============================================
 
-__device__ float AddExpressionFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ float AddExpressionFloat(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) +
-			ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteFloatExpression(_rParameters) +
+			ExecuteFloatExpression(_rParameters));
 }
 
-__device__ float MinExpressionFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ float MinExpressionFloat(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) -
-			ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteFloatExpression(_rParameters) -
+			ExecuteFloatExpression(_rParameters));
 }
 
-__device__ float MulExpressionFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ float MulExpressionFloat(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) *
-			ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteFloatExpression(_rParameters) *
+			ExecuteFloatExpression(_rParameters));
 }
 
-__device__ float DivExpressionFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ float DivExpressionFloat(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) /
-			ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteFloatExpression(_rParameters) /
+			ExecuteFloatExpression(_rParameters));
 }
 
-__device__ float ModExpressionFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ float ModExpressionFloat(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-//	return ((int64_t)ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) %
-//			(int64_t)ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+//	return ((int64_t)ExecuteFloatExpression(_rParameters) %
+//			(int64_t)ExecuteFloatExpression(_rParameters));
 
-	return fmod(ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex),
-			ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return fmod(ExecuteFloatExpression(_rParameters),
+			ExecuteFloatExpression(_rParameters));
 }
 
 // ========================= DOUBLE ===========================================
 
-__device__ double AddExpressionDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ double AddExpressionDouble(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) +
-			ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteDoubleExpression(_rParameters) +
+			ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ double MinExpressionDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ double MinExpressionDouble(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) -
-			ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteDoubleExpression(_rParameters) -
+			ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ double MulExpressionDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ double MulExpressionDouble(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) *
-			ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteDoubleExpression(_rParameters) *
+			ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ double DivExpressionDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ double DivExpressionDouble(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) /
-			ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return (ExecuteDoubleExpression(_rParameters) /
+			ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ double ModExpressionDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ double ModExpressionDouble(FilterEvalParameters & _rParameters)
 {
-	_iCurrentNodeIndex++;
-//	return ((int64_t)ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) %
-//			(int64_t)ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
-
-	return fmod(ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex),
-				ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	_rParameters.i_CurrentIndex++;
+	return fmod(ExecuteDoubleExpression(_rParameters),
+				ExecuteDoubleExpression(_rParameters));
 }
 
 /// ============================ CONDITION EXECUTORS ==========================
 
-__device__ bool InvalidOperator(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool InvalidOperator(FilterEvalParameters & _rParameters)
 {
 	return false;
 }
 
-__device__ bool NoopOperator(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NoopOperator(FilterEvalParameters & _rParameters)
 {
 	return true;
 }
 
 // Equal operators
 
-__device__ bool EqualCompareBoolBool(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareBoolBool(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) == ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool EqualCompareIntInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) == ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool EqualCompareIntLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) == ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool EqualCompareIntFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool EqualCompareIntDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool EqualCompareLongInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) == ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool EqualCompareLongLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) == ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool EqualCompareLongFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool EqualCompareLongDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool EqualCompareFloatInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) == ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool EqualCompareFloatLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) == ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool EqualCompareFloatFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool EqualCompareFloatDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool EqualCompareDoubleInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) == ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool EqualCompareDoubleLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) == ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool EqualCompareDoubleFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool EqualCompareDoubleDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) == ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool EqualCompareStringString(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool EqualCompareStringString(FilterEvalParameters & _rParameters)
 {
-	return (cuda_strcmp(ExecuteStringExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex), ExecuteStringExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex)));
+	return (cuda_strcmp(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
 }
-
-//__device__ bool EqualCompareExecutorExecutor(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
-//{
-//	switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex + 1].e_NodeType)
-//	{
-//		case EXECUTOR_NODE_CONST:
-//		{
-//			switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex + 1].m_ConstValue.e_Type)
-//			{
-//			case INT:
-//			{
-////				return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex++) ==
-////						ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex++));
-//			}
-//			break;
-//			case LONG:
-//			case FLOAT:
-//			case DOUBLE:
-//			case STRING:
-//			}
-//
-//			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DOUBLE)
-//			{
-//				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.d_DoubleVal;
-//			}
-//		}
-//		break;
-//		case EXECUTOR_NODE_VARIABLE:
-//		{
-//			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DOUBLE &&
-//					_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition < _mEvent.i_NumAttributes &&
-//					_mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].e_Type == DOUBLE)
-//			{
-//				return _mEvent.a_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_VarValue.i_AttributePosition].m_Value.d_DoubleVal;
-//			}
-//		}
-//		break;
-//		case EXECUTOR_NODE_CONDITION:
-////			return ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex++);
-//		default:
-//			break;
-//	}
-////	return (Execute(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex) ==
-////			Execute(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex));
-//}
 
 /// ============================================================================
 // NotEqual operator
 
-__device__ bool NotEqualCompareBoolBool(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareBoolBool(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) != ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareIntInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) != ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareIntLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) != ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareIntFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareIntDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareLongInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) != ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareLongLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) != ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareLongFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareLongDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareFloatInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) != ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareFloatLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) != ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareFloatFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareFloatDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareDoubleInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) != ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareDoubleLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) != ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareDoubleFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareDoubleDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) != ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool NotEqualCompareStringString(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotEqualCompareStringString(FilterEvalParameters & _rParameters)
 {
-	return (!cuda_strcmp(ExecuteStringExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex),ExecuteStringExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex)));
+	return (!cuda_strcmp(ExecuteStringExpression(_rParameters),ExecuteStringExpression(_rParameters)));
 }
 
 /// ============================================================================
 
 // GreaterThan operator
 
-__device__ bool GreaterThanCompareIntInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) > ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareIntLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) > ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareIntFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareIntDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareLongInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) > ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareLongLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) > ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareLongFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareLongDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareFloatInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) > ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareFloatLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) > ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareFloatFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareFloatDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareDoubleInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) > ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareDoubleLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) > ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareDoubleFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterThanCompareDoubleDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterThanCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) > ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
 }
 
 
 /// ============================================================================
 // LessThan operator
 
-__device__ bool LessThanCompareIntInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) < ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareIntLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) < ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareIntFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareIntDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareLongInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) < ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareLongLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) < ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareLongFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareLongDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareFloatInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) < ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareFloatLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) < ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareFloatFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareFloatDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareDoubleInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) < ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareDoubleLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) < ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareDoubleFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessThanCompareDoubleDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessThanCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) < ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
 }
 
 /// ============================================================================
 // GreaterAndEqual operator
 
-__device__ bool GreaterAndEqualCompareIntInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareIntLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareIntFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareIntDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareLongInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareLongLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareLongFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareLongDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareFloatInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareFloatLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareFloatFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareFloatDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool GreaterAndEqualCompareDoubleDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool GreaterAndEqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) >= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
 }
 
 /// ============================================================================
 // LessAndEqual operator
 
-__device__ bool LessAndEqualCompareIntInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareIntLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareIntFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareIntDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteIntExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareLongInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareLongLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareLongFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareLongDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteLongExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareFloatInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareFloatLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareFloatFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareFloatDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteFloatExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareDoubleInt(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteIntExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareDoubleLong(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteLongExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareDoubleFloat(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteFloatExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
 }
 
-__device__ bool LessAndEqualCompareDoubleDouble(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool LessAndEqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	return (ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) <= ExecuteDoubleExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (ExecuteDoubleExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
 }
 
 
-__device__ bool ContainsOperator(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool ContainsOperator(FilterEvalParameters & _rParameters)
 {
-	return (cuda_contains(ExecuteStringExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex), ExecuteStringExpression(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex)));
+	return (cuda_contains(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
 }
 
 
 /// ============================================================================
 
-__device__ bool ExecuteBoolExpression(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool ExecuteBoolExpression(FilterEvalParameters & _rParameters)
 {
-	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DataType::Boolean)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Boolean)
 			{
-				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.b_BoolVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.b_BoolVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
 			// if filter data type matches event attribute data type, return attribute value
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Boolean &&
-					_pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Boolean &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
 			{
 				// get attribute value
 				int16_t i;
-				memcpy(&i, _pEvent + _pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-				_iCurrentNodeIndex++;
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 2);
+				_rParameters.i_CurrentIndex++;
 				return i;
 			}
 		}
@@ -784,258 +739,274 @@ __device__ bool ExecuteBoolExpression(GpuKernelFilter & _mFilter, GpuKernelMetaE
 		}
 	}
 
-	_iCurrentNodeIndex++;
+	_rParameters.i_CurrentIndex++;
 	return false;
 }
 
-__device__ int ExecuteIntExpression(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int ExecuteIntExpression(FilterEvalParameters & _rParameters)
 {
-	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DataType::Int)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Int)
 			{
-				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.i_IntVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.i_IntVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Int &&
-					_pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Int)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Int &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Int)
 			{
 				int32_t i;
-				memcpy(&i, _pEvent + _pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
-				_iCurrentNodeIndex++;
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 4);
+				_rParameters.i_CurrentIndex++;
 				return i;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_INT:
 		{
-			return AddExpressionInt(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return AddExpressionInt(_rParameters);
 		}
 		case EXPRESSION_SUB_INT:
 		{
-			return MinExpressionInt(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MinExpressionInt(_rParameters);
 		}
 		case EXPRESSION_MUL_INT:
 		{
-			return MulExpressionInt(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MulExpressionInt(_rParameters);
 		}
 		case EXPRESSION_DIV_INT:
 		{
-			return DivExpressionInt(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return DivExpressionInt(_rParameters);
 		}
 		case EXPRESSION_MOD_INT:
 		{
-			return ModExpressionInt(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return ModExpressionInt(_rParameters);
 		}
 		default:
 			break;
 		}
 	}
 
-	_iCurrentNodeIndex++;
+	_rParameters.i_CurrentIndex++;
 	return INT_MIN;
 }
 
-__device__ int64_t ExecuteLongExpression(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ int64_t ExecuteLongExpression(FilterEvalParameters & _rParameters)
 {
-	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DataType::Long)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Long)
 			{
-				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.l_LongVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.l_LongVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Long &&
-					_pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Long)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Long &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Long)
 			{
 				int64_t i;
-				memcpy(&i, _pEvent + _pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
-				_iCurrentNodeIndex++;
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 8);
+				_rParameters.i_CurrentIndex++;
 				return i;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_LONG:
 		{
-			return AddExpressionLong(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return AddExpressionLong(_rParameters);
 		}
 		case EXPRESSION_SUB_LONG:
 		{
-			return MinExpressionLong(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MinExpressionLong(_rParameters);
 		}
 		case EXPRESSION_MUL_LONG:
 		{
-			return MulExpressionLong(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MulExpressionLong(_rParameters);
 		}
 		case EXPRESSION_DIV_LONG:
 		{
-			return DivExpressionLong(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return DivExpressionLong(_rParameters);
 		}
 		case EXPRESSION_MOD_LONG:
 		{
-			return ModExpressionLong(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return ModExpressionLong(_rParameters);
 		}
 		default:
 			break;
 		}
 	}
 
-	_iCurrentNodeIndex++;
+	_rParameters.i_CurrentIndex++;
 	return LLONG_MIN;
 }
 
-__device__ float ExecuteFloatExpression(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ float ExecuteFloatExpression(FilterEvalParameters & _rParameters)
 {
-	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DataType::Float)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Float)
 			{
-				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.f_FloatVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.f_FloatVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Float &&
-					_pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Float)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Float &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Float)
 			{
 				float f;
-				memcpy(&f, _pEvent + _pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 4);
-				_iCurrentNodeIndex++;
+				memcpy(&f, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 4);
+				_rParameters.i_CurrentIndex++;
 				return f;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_FLOAT:
 		{
-			return AddExpressionFloat(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return AddExpressionFloat(_rParameters);
 		}
 		case EXPRESSION_SUB_FLOAT:
 		{
-			return MinExpressionFloat(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MinExpressionFloat(_rParameters);
 		}
 		case EXPRESSION_MUL_FLOAT:
 		{
-			return MulExpressionFloat(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MulExpressionFloat(_rParameters);
 		}
 		case EXPRESSION_DIV_FLOAT:
 		{
-			return DivExpressionFloat(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return DivExpressionFloat(_rParameters);
 		}
 		case EXPRESSION_MOD_FLOAT:
 		{
-			return ModExpressionFloat(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return ModExpressionFloat(_rParameters);
 		}
 		default:
 			break;
 		}
 	}
 
-	_iCurrentNodeIndex++;
+	_rParameters.i_CurrentIndex++;
 	return FLT_MIN;
 }
 
-__device__ double ExecuteDoubleExpression(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ double ExecuteDoubleExpression(FilterEvalParameters & _rParameters)
 {
-	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DataType::Double)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Double)
 			{
-				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.d_DoubleVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.d_DoubleVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::Double &&
-					_pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Double)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Double &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Double)
 			{
 				double f;
-				memcpy(&f, _pEvent + _pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 8);
-				_iCurrentNodeIndex++;
+				memcpy(&f, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 8);
+				_rParameters.i_CurrentIndex++;
 				return f;
 			}
 		}
 		break;
 		case EXPRESSION_ADD_DOUBLE:
 		{
-			return AddExpressionDouble(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return AddExpressionDouble(_rParameters);
 		}
 		case EXPRESSION_SUB_DOUBLE:
 		{
-			return MinExpressionDouble(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MinExpressionDouble(_rParameters);
 		}
 		case EXPRESSION_MUL_DOUBLE:
 		{
-			return MulExpressionDouble(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return MulExpressionDouble(_rParameters);
 		}
 		case EXPRESSION_DIV_DOUBLE:
 		{
-			return DivExpressionDouble(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return DivExpressionDouble(_rParameters);
 		}
 		case EXPRESSION_MOD_DOUBLE:
 		{
-			return ModExpressionDouble(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+			return ModExpressionDouble(_rParameters);
 		}
 		default:
 			break;
 		}
 	}
 
-	_iCurrentNodeIndex++;
+	_rParameters.i_CurrentIndex++;
 	return DBL_MIN;
 }
 
-__device__ const char * ExecuteStringExpression(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ const char * ExecuteStringExpression(FilterEvalParameters & _rParameters)
 {
-	if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DataType::StringIn)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::StringIn)
 			{
-				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.z_StringVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.z_StringVal;
 			}
-			else if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_ConstValue.e_Type == DataType::StringExt)
+			else if(mExecutorNode.m_ConstValue.e_Type == DataType::StringExt)
 			{
-				return _mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].m_ConstValue.m_Value.z_ExtString;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.z_ExtString;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.e_Type == DataType::StringIn &&
-					_pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::StringIn &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
 			{
 				int16_t i;
-				memcpy(&i, _pEvent + _pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-				char * z = _pEvent + _pEventMeta->p_Attributes[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex].m_VarValue.i_AttributePosition].i_Position + 2;
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 2);
+				char * z = _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position + 2;
 				z[i] = 0;
-				_iCurrentNodeIndex++;
+				_rParameters.i_CurrentIndex++;
 				return z;
 			}
 		}
@@ -1045,30 +1016,30 @@ __device__ const char * ExecuteStringExpression(GpuKernelFilter & _mFilter, GpuK
 		}
 	}
 
-	_iCurrentNodeIndex++;
+	_rParameters.i_CurrentIndex++;
 	return NULL;
 }
 
 // ==================================================================================================
 
-__device__ bool AndCondition(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool AndCondition(FilterEvalParameters & _rParameters)
 {
-	return (Evaluate(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) && Evaluate(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (Evaluate(_rParameters) && Evaluate(_rParameters));
 }
 
-__device__ bool OrCondition(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool OrCondition(FilterEvalParameters & _rParameters)
 {
-	return (Evaluate(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex) || Evaluate(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (Evaluate(_rParameters) || Evaluate(_rParameters));
 }
 
-__device__ bool NotCondition(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool NotCondition(FilterEvalParameters & _rParameters)
 {
-	return (!Evaluate(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (!Evaluate(_rParameters));
 }
 
-__device__ bool BooleanCondition(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool BooleanCondition(FilterEvalParameters & _rParameters)
 {
-	return (Evaluate(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex));
+	return (Evaluate(_rParameters));
 }
 
 // =========================================
@@ -1196,9 +1167,9 @@ __device__ ExecutorFuncPointer mExecutors[EXECUTOR_CONDITION_COUNT] = {
 // =========================================
 
 // evaluate event with an executor tree
-__device__ bool Evaluate(GpuKernelFilter & _mFilter, GpuKernelMetaEvent * _pEventMeta, char * _pEvent, int & _iCurrentNodeIndex)
+__device__ bool Evaluate(FilterEvalParameters & _rParameters)
 {
-	return (*mExecutors[_mFilter.ap_ExecutorNodes[_iCurrentNodeIndex++].e_ConditionType])(_mFilter, _pEventMeta, _pEvent, _iCurrentNodeIndex);
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 };

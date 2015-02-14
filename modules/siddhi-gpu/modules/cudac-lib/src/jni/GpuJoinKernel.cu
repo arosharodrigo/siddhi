@@ -64,9 +64,6 @@ void ProcessEventsJoinLeftTriggerAllOn(
 	char * pResultsInEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 	char * pResultsExpiredEventBufferSegment = pResultsInEventBufferSegment + (iOutputSegmentSize / 2);
 
-	// clear whole result buffer segment for this in event
-	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
-
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -108,9 +105,6 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
 
-	// get assigned filter
-//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
-
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
 	int iMatchedCount = 0;
@@ -135,7 +129,6 @@ void ProcessEventsJoinLeftTriggerAllOn(
 			mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
 			mExpressionParam.i_CurrentIndex = 0;
 
-//			bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pInEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);;
 			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
@@ -202,7 +195,6 @@ void ProcessEventsJoinLeftTriggerAllOn(
 				mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
 
-//				bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pExpiredEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
 				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
@@ -287,15 +279,9 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 
 	char * pResultsInEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
-	// clear whole result buffer segment for this in event
-	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
-
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
-
-	// get assigned filter
-//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
@@ -321,7 +307,6 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 			mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
 			mExpressionParam.i_CurrentIndex = 0;
 
-//			bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pInEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
 			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
@@ -403,9 +388,6 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 
 	char * pResultsExpiredEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
-	// clear whole result buffer segment for this in event
-	//memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
-
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -444,9 +426,6 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 
 	if(pExpiredEventBuffer != NULL)
 	{
-		// get assigned filter
-//		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
-
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
 
 		// for each events in other window
@@ -475,7 +454,6 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 				mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
 
-//				bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pExpiredEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
 				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
@@ -561,9 +539,6 @@ void ProcessEventsJoinRightTriggerAllOn(
 	char * pResultsInEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 	char * pResultsExpiredEventBufferSegment = pResultsInEventBufferSegment + (iOutputSegmentSize / 2);
 
-	// clear whole result buffer segment for this in event
-	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
-
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -602,11 +577,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 		// no expiring event
 	}
 
-
 	// get all matching event for in event from other window buffer and copy them to output event buffer
-
-	// get assigned filter
-//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
@@ -632,7 +603,6 @@ void ProcessEventsJoinRightTriggerAllOn(
 			mExpressionParam.a_Event[1] = pInEventBuffer;
 			mExpressionParam.i_CurrentIndex = 0;
 
-//			bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pInEventBuffer, iCurrentNodeIdx);;
 			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
@@ -699,7 +669,6 @@ void ProcessEventsJoinRightTriggerAllOn(
 				mExpressionParam.a_Event[1] = pExpiredEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
 
-//				bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pExpiredEventBuffer, iCurrentNodeIdx);
 				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
@@ -784,15 +753,9 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 
 	char * pResultsInEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
-	// clear whole result buffer segment for this in event
-	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
-
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
-
-	// get assigned filter
-//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
@@ -819,7 +782,6 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 			mExpressionParam.a_Event[1] = pInEventBuffer;
 			mExpressionParam.i_CurrentIndex = 0;
 
-//			bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pInEventBuffer, iCurrentNodeIdx);
 			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
@@ -900,9 +862,6 @@ void ProcessEventsJoinRightTriggerExpireOn(
 
 	char * pResultsExpiredEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
-	// clear whole result buffer segment for this in event
-	//memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
-
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
 
@@ -944,9 +903,6 @@ void ProcessEventsJoinRightTriggerExpireOn(
 
 		// get all matching event for in event from other window buffer and copy them to output event buffer
 
-		// get assigned filter
-//		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
-
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
 
 		// for each events in other window
@@ -975,7 +931,6 @@ void ProcessEventsJoinRightTriggerExpireOn(
 				mExpressionParam.a_Event[1] = pExpiredEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
 
-//				bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pExpiredEventBuffer, iCurrentNodeIdx);
 				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
