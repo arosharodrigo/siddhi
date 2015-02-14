@@ -5,9 +5,11 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.gpu.query.input.stream.GpuStreamRuntime;
 import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
+import org.wso2.siddhi.core.gpu.query.selector.GpuJoinQuerySelector;
 import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
 
 public class GpuJoinStreamRuntime extends JoinStreamRuntime {
     
@@ -22,20 +24,19 @@ public class GpuJoinStreamRuntime extends JoinStreamRuntime {
 ////            gpuQueryProcessor = singleStreamRuntime.getProcessStreamReceiver();
 //        }
 //    }
-//
-//    @Override
-//    public void setCommonProcessor(Processor commonProcessor) {
-//        for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
-//            singleStreamRuntime.setCommonProcessor(commonProcessor);
-//        }
-//        
-////        if (processorChain == null) {
-////            processStreamReceiver.setNext(commonProcessor);
-////        } else {
-////            processStreamReceiver.setNext(processorChain);
-////            processorChain.setToLast(commonProcessor);
-////        }
-////        
-////        ((GpuProcessStreamReceiver)processStreamReceiver).setSelectProcessor(commonProcessor);
-//    }
+    
+    @Override
+    public void setCommonProcessor(Processor commonProcessor) {
+        if(commonProcessor instanceof GpuJoinQuerySelector) {
+            GpuJoinQuerySelector joinQuerySelector = (GpuJoinQuerySelector)commonProcessor;
+            
+            for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
+                singleStreamRuntime.setCommonProcessor(joinQuerySelector.clone(""));
+            }
+        } else {
+            for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
+                singleStreamRuntime.setCommonProcessor(commonProcessor);
+            }
+        }
+    }
 }

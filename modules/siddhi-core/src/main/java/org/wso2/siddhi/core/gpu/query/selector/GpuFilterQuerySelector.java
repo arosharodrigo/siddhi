@@ -17,7 +17,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
     public GpuFilterQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, ExecutionPlanContext executionPlanContext) {
         super(id, selector, currentOn, expiredOn, executionPlanContext);
     }
-
+    
     @Override
     public void process(int eventCount) {
         outputEventIndexBuffer.position(0);
@@ -36,7 +36,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
                 //                log.debug("matched event : index=" + resultsIndex + " type=" + type + " seq=" + sequence + " time=" + timestamp);
 
                 int index = 0;
-                for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+                for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
                     switch(attrib.type) {
                     case BOOL:
                         attributeData[index++] = inputEventBuffer.getShort();

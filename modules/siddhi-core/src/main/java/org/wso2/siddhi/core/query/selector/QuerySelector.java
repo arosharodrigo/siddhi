@@ -144,7 +144,7 @@ public class QuerySelector implements Processor {
 
     @Override
     public Processor cloneProcessor() {
-        return null;
+        return clone("");
     }
 
     public List<AttributeProcessor> getAttributeProcessorList() {

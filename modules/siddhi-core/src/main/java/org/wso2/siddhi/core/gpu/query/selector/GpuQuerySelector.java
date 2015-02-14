@@ -30,6 +30,7 @@ public class GpuQuerySelector extends QuerySelector {
     protected GpuMetaStreamEvent gpuMetaStreamEvent;
     protected StreamEventConverter streamEventConverter;
     protected ComplexEventChunk outputComplexEventChunk;
+    protected List<GpuEventAttribute> gpuMetaEventAttributeList;
     
     protected Object attributeData[];
     protected ComplexEvent.Type eventTypes[]; 
@@ -44,6 +45,16 @@ public class GpuQuerySelector extends QuerySelector {
         
         this.firstEvent = null;
         this.lastEvent = null;
+        
+        this.outputEventBuffer = null;
+        this.inputEventBuffer = null;
+        this.streamEventPool = null;
+        this.metaStreamEvent = null;
+        this.gpuMetaStreamEvent = null;
+        this.streamEventConverter = null;
+        this.attributeData = null;
+        this.preAllocatedByteArray = null;
+        this.gpuMetaEventAttributeList = null;
     }
     
     @Override
@@ -75,7 +86,7 @@ public class GpuQuerySelector extends QuerySelector {
             outputRateLimiter.process(complexEventChunk);
         }
     }
-    
+       
     public void process(int eventCount) {
         outputEventBuffer.position(0);
         inputEventBuffer.position(0);
@@ -91,7 +102,7 @@ public class GpuQuerySelector extends QuerySelector {
                 long timestamp = outputEventBuffer.getLong();
 
                 int index = 0;
-                for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+                for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
                     switch(attrib.type) {
                     case BOOL:
                         attributeData[index++] = outputEventBuffer.getShort();
@@ -148,14 +159,16 @@ public class GpuQuerySelector extends QuerySelector {
         lastEvent = null;
         outputComplexEventChunk.clear();
     }
-    
-    public GpuQuerySelector clone(String key) {
+     
+    public QuerySelector clone(String key) {
         GpuQuerySelector clonedQuerySelector = new GpuQuerySelector(id + key, selector, currentOn, expiredOn, executionPlanContext);
         List<AttributeProcessor> clonedAttributeProcessorList = new ArrayList<AttributeProcessor>();
         for (AttributeProcessor attributeProcessor : attributeProcessorList) {
             clonedAttributeProcessorList.add(attributeProcessor.cloneProcessor());
         }
         clonedQuerySelector.attributeProcessorList = clonedAttributeProcessorList;
+        clonedQuerySelector.eventPopulator = eventPopulator;
+        
         return clonedQuerySelector;
     }
 
@@ -199,12 +212,13 @@ public class GpuQuerySelector extends QuerySelector {
 
     public void setGpuMetaStreamEvent(GpuMetaStreamEvent gpuMetaStreamEvent) {
         this.gpuMetaStreamEvent = gpuMetaStreamEvent;
+        this.gpuMetaEventAttributeList = gpuMetaStreamEvent.getAttributes();
         
         int maxStringLength = 0;
         
-        attributeData = new Object[gpuMetaStreamEvent.getAttributes().size()];
+        attributeData = new Object[gpuMetaEventAttributeList.size()];
         int index = 0;
-        for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+        for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
             switch(attrib.type) {
             case BOOL:
                 attributeData[index++] = new Boolean(false);
@@ -228,6 +242,6 @@ public class GpuQuerySelector extends QuerySelector {
             }
         }
         
-        preAllocatedByteArray = new byte[maxStringLength];
+        preAllocatedByteArray = new byte[maxStringLength + 1];
     }
 }
