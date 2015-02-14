@@ -25,11 +25,14 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
     private GpuMetaStreamEvent gpuMetaStreamEvent;
     private Object attributeData[];
     private ComplexEvent.Type eventTypes[]; 
+    private byte preAllocatedByteArray[];
     
     public ConversionGpuEventChunk(MetaStreamEvent metaStreamEvent, StreamEventPool streamEventPool, GpuMetaStreamEvent gpuMetaStreamEvent) {
         super(metaStreamEvent, streamEventPool);
         this.gpuMetaStreamEvent = gpuMetaStreamEvent;
         eventTypes = ComplexEvent.Type.values();
+        
+        int maxStringLength = 0;
         
         attributeData = new Object[gpuMetaStreamEvent.getAttributes().size()];
         int index = 0;
@@ -52,9 +55,12 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                 break;
             case STRING:
                 attributeData[index++] = new String();
+                maxStringLength = (attrib.length > maxStringLength ? attrib.length : maxStringLength);
                 break;
             }
         }
+        
+        preAllocatedByteArray = new byte[maxStringLength];
     }
 
     public ConversionGpuEventChunk(StreamEventConverter streamEventConverter, StreamEventPool streamEventPool, GpuMetaStreamEvent gpuMetaStreamEvent) {
@@ -93,9 +99,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                         break;
                     case STRING:
                         short length = eventBuffer.getShort();
-                        byte string[] = new byte[attrib.length];
-                        eventBuffer.get(string, 0, attrib.length);
-                        attributeData[index++] = new String(string, 0, length); // TODO: avoid allocation
+//                        byte string[] = new byte[attrib.length];
+                        eventBuffer.get(preAllocatedByteArray, 0, attrib.length);
+                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
                         break;
                     }
                 }
@@ -159,9 +165,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                         break;
                     case STRING:
                         short length = eventBuffer.getShort();
-                        byte string[] = new byte[attrib.length];
-                        eventBuffer.get(string, 0, attrib.length);
-                        attributeData[index++] = new String(string, 0, length); // TODO: avoid allocation
+//                        byte string[] = new byte[attrib.length];
+                        eventBuffer.get(preAllocatedByteArray, 0, attrib.length);
+                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
                         break;
                     }
                 }
@@ -230,9 +236,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                         break;
                     case STRING:
                         short length = eventBuffer.getShort();
-                        byte string[] = new byte[attrib.length];
-                        eventBuffer.get(string, 0, attrib.length);
-                        attributeData[index++] = new String(string, 0, length); // TODO: avoid allocation
+//                        byte string[] = new byte[attrib.length];
+                        eventBuffer.get(preAllocatedByteArray, 0, attrib.length);
+                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
                         break;
                     }
                 }

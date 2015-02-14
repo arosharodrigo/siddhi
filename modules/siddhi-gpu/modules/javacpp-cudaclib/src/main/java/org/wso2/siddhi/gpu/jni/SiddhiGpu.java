@@ -827,8 +827,8 @@ public static final int
 	public native @Cast("bool") boolean GetLeftTrigger();
 	public native @Cast("bool") boolean GetRightTrigger();
 
-	public native void SetWithInTimeMilliSeconds(long _iTime);
-	public native int GetWithInTimeMilliSeconds();
+	public native void SetWithInTimeMilliSeconds(@Cast("uint64_t") long _iTime);
+	public native @Cast("uint64_t") long GetWithInTimeMilliSeconds();
 
 	public native void SetExecutorNodes(int _iNodeCount);
 	public native void AddExecutorNode(int _iPos, @ByRef ExecutorNode _pNode);

@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.gpu.config.GpuQueryContext;
 import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
+import org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelector;
 import org.wso2.siddhi.core.gpu.util.parser.GpuInputStreamParser;
 import org.wso2.siddhi.core.gpu.util.parser.GpuSelectorParser;
 import org.wso2.siddhi.core.query.QueryAnnotations;
@@ -106,7 +107,7 @@ public class QueryParser {
                 StreamRuntime streamRuntime = GpuInputStreamParser.parse(query.getInputStream(),
                         executionPlanContext, definitionMap, executors, gpuQueryContext);
                 
-                QuerySelector selector = GpuSelectorParser.parse(query.getSelector(), query.getOutputStream(),
+                GpuQuerySelector selector = GpuSelectorParser.parse(query.getSelector(), query.getOutputStream(),
                         executionPlanContext, streamRuntime.getMetaComplexEvent(), executors, streamRuntime, gpuQueryContext);
                 
                 OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(), query.getOutputRate());

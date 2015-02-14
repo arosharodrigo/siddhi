@@ -125,4 +125,17 @@ public class MetaStreamEvent implements MetaComplexEvent {
         return outputStreamDefinition;
     }
 
+    @Override
+    public String toString() {
+        return "MetaStreamEvent [beforeWindowData=" + getBeforeWindowData().size() + 
+                ", onAfterWindowData=" + getOnAfterWindowData().size() + 
+                ", outputData=" + getOutputData().size()
+                + ", inputDefinition=" + inputDefinition + 
+                ", initialAttributeSize=" + initialAttributeSize + 
+                ", inputReferenceId=" + inputReferenceId + 
+                ", outputStreamDefinition=" + outputStreamDefinition + "]";
+    }
+    
+    
+
 }

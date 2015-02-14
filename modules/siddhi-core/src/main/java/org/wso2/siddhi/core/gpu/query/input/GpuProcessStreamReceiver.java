@@ -22,6 +22,8 @@ import org.wso2.siddhi.core.gpu.query.processor.GpuJoinQueryPostProcessor;
 import org.wso2.siddhi.core.gpu.query.processor.GpuLengthWindowQueryPostProcessor;
 import org.wso2.siddhi.core.gpu.query.processor.GpuQueryPostProcessor;
 import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
+import org.wso2.siddhi.core.gpu.query.selector.GpuJoinQuerySelector;
+import org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelector;
 import org.wso2.siddhi.core.gpu.util.ByteBufferWriter;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.processor.Processor;
@@ -34,13 +36,13 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private static final Logger log = Logger.getLogger(GpuProcessStreamReceiver.class);
     private GpuQueryProcessor gpuQueryProcessor;
     private GpuMetaStreamEvent gpuMetaEvent;
-    private ConversionGpuEventChunk gpuEventChunk;
+//    private ConversionGpuEventChunk gpuEventChunk;
     private int streamIndex;
     private ByteBufferWriter eventBufferWriter;
     private SiddhiGpu.GpuStreamProcessor gpuStreamProcessor;
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
-    private GpuQueryPostProcessor gpuQueryPostProcessor;
-    private Processor selectProcessor;
+//    private GpuQueryPostProcessor gpuQueryPostProcessor;
+    private GpuQuerySelector selectProcessor;
     private int maximumEventBatchSize;
     private int minimumEventBatchSize;
     private boolean softBatchScheduling;
@@ -51,6 +53,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private long endTime = 0;
     private long gpuProcEndTime = 0;
     private long postProcEndTime = 0;
+    private long serializeBeginTime = 0;
+    private long serializeTime = 0;
     private long duration = 0;
     private final List<Double> throughputList = new ArrayList<Double>();
     private int perfromanceCalculateBatchCount;
@@ -61,11 +65,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         super(streamId, queryName);
         this.gpuQueryProcessor = null;
         this.gpuMetaEvent = null;
-        this.gpuEventChunk = null;
+//        this.gpuEventChunk = null;
         this.eventBufferWriter = null;
         this.currentEventCount = 0;
         this.gpuStreamProcessor = null;
-        this.gpuQueryPostProcessor = null;
+//        this.gpuQueryPostProcessor = null;
         this.selectProcessor = null;
         this.maximumEventBatchSize = 1024;
         this.minimumEventBatchSize = 1;
@@ -84,8 +88,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         //log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
-        ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
-        eventBufferWriter.writeShort((short)type.ordinal());
+//        serializeBeginTime = System.nanoTime();
+        
+//        ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
+//        eventBufferWriter.writeShort((short)type.ordinal());
+        eventBufferWriter.writeShort((short)(!event.isExpired() ? 0 : 1));
         eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
         eventBufferWriter.writeLong(event.getTimestamp());
         
@@ -116,6 +123,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 break;
             }
         }
+        
+//        serializeTime += (System.nanoTime() - serializeBeginTime);
+        
         currentEventCount++;
         
         if ((endOfBatch && (currentEventCount >= minimumEventBatchSize)) || (maximumEventBatchSize == currentEventCount)) { //TODO: implement soft/hard batch scheduling
@@ -128,27 +138,32 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             gpuProcEndTime = System.nanoTime();
             
-            gpuQueryPostProcessor.process(eventBufferWriter.getByteBuffer(), resultEventCount);
+//            gpuQueryPostProcessor.process(eventBufferWriter.getByteBuffer(), resultEventCount);
+//            
+//            postProcEndTime = System.nanoTime();
+//            
+//            selectProcessor.process(gpuEventChunk);
             
-            postProcEndTime = System.nanoTime();
+            selectProcessor.process(resultEventCount);
             
-            selectProcessor.process(gpuEventChunk);
-            gpuEventChunk.clear();
+//            gpuEventChunk.clear();
             
             
             endTime = System.nanoTime();
             
-            duration = endTime - startTime;
+            duration = endTime - startTime; // + serializeTime
             double average = (currentEventCount * 1000000000 / (double)duration);
             
             log.info("<" + queryName + " - " + streamId + "> Batch Times : " + currentEventCount + " [Total=" + (endTime - startTime) + 
+                    " Serialize=" + serializeTime +
                     " Gpu=" + (gpuProcEndTime - startTime) + 
-                    " Post=" + (postProcEndTime - gpuProcEndTime) + 
-                    " Select=" + (endTime - postProcEndTime) + "]");
+//                    " Post=" + (postProcEndTime - gpuProcEndTime) + 
+                    " Select=" + (endTime - gpuProcEndTime) + "]");
             
             throughputList.add(average);
             
             currentEventCount = 0;
+            serializeTime = 0;
             iteration++;
             
             if(iteration % perfromanceCalculateBatchCount == 0)
@@ -181,6 +196,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     public void configure(ByteBufferWriter eventBufferWriter, GpuStreamProcessor gpuStreamProcessor) {
         streamIndex = gpuQueryProcessor.getStreamIndex(getStreamId());
         log.info("<" + queryName + "> [GpuProcessStreamReceiver] configure : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
+        log.info("<" + queryName + "> [GpuProcessStreamReceiver] configure : metaStreamEvent : " + metaStreamEvent.toString());
 
         this.eventBufferWriter = eventBufferWriter;
         this.gpuStreamProcessor = gpuStreamProcessor;
@@ -197,11 +213,22 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 bytePointer.position(0);
                 ByteBuffer eventByteBuffer = bytePointer.asBuffer();
                 
-                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
+//                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
+//                
+//                gpuQueryPostProcessor = new GpuFilterQueryPostProcessor(
+//                        eventByteBuffer,
+//                        gpuEventChunk);
                 
-                gpuQueryPostProcessor = new GpuFilterQueryPostProcessor(
-                        eventByteBuffer,
-                        gpuEventChunk);
+                StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
+                GpuMetaStreamEvent outputGpuMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
+                        gpuQueryProcessor.getGpuQueryContext());
+                outputGpuMetaEvent.setStreamIndex(0);
+                
+                selectProcessor.setInputEventBuffer(eventBufferWriter.getByteBuffer());
+                selectProcessor.setOutputEventBuffer(eventByteBuffer);
+                selectProcessor.setStreamEventPool(streamEventPool);
+                selectProcessor.setMetaStreamEvent(metaStreamEvent);
+                selectProcessor.setGpuMetaStreamEvent(outputGpuMetaEvent);
                 
             } else if (lastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
                 
@@ -212,16 +239,28 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 bytePointer.position(0);
                 ByteBuffer eventByteBuffer = bytePointer.asBuffer();
                 
-                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
-
-                gpuQueryPostProcessor = new GpuLengthWindowQueryPostProcessor(
-                        eventByteBuffer,
-                        gpuEventChunk);
+//                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
+//
+//                gpuQueryPostProcessor = new GpuLengthWindowQueryPostProcessor(
+//                        eventByteBuffer,
+//                        gpuEventChunk);
+                
+                StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
+                GpuMetaStreamEvent outputGpuMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
+                        gpuQueryProcessor.getGpuQueryContext());
+                outputGpuMetaEvent.setStreamIndex(0);
+                
+                selectProcessor.setInputEventBuffer(eventBufferWriter.getByteBuffer());
+                selectProcessor.setOutputEventBuffer(eventByteBuffer);
+                selectProcessor.setStreamEventPool(streamEventPool);
+                selectProcessor.setMetaStreamEvent(metaStreamEvent);
+                selectProcessor.setGpuMetaStreamEvent(outputGpuMetaEvent);
                 
             } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
                 
                 ByteBuffer eventByteBuffer = null;
                 int segmentEventCount  = 0;
+                GpuJoinQuerySelector gpuJoinQuerySelector = (GpuJoinQuerySelector) selectProcessor;
                 
                 if(streamIndex == 0) {
 
@@ -246,17 +285,24 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 }
                 
                 StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
-                GpuMetaStreamEvent outputMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
+                GpuMetaStreamEvent outputGpuMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
                         gpuQueryProcessor.getGpuQueryContext());
-                outputMetaEvent.setStreamIndex(0);
+                outputGpuMetaEvent.setStreamIndex(0);
                 
                 // TODO: this should be metastream event of output stream
-                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, outputMetaEvent);
+//                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, outputGpuMetaEvent);
+//                
+//                gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
+//                        eventByteBuffer,
+//                        gpuEventChunk,
+//                        segmentEventCount);
                 
-                gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
-                        eventByteBuffer,
-                        gpuEventChunk,
-                        segmentEventCount);
+                gpuJoinQuerySelector.setInputEventBuffer(eventBufferWriter.getByteBuffer());
+                gpuJoinQuerySelector.setOutputEventBuffer(eventByteBuffer);
+                gpuJoinQuerySelector.setSegmentEventCount(segmentEventCount);
+                gpuJoinQuerySelector.setStreamEventPool(streamEventPool);
+                gpuJoinQuerySelector.setMetaStreamEvent(metaStreamEvent);
+                gpuJoinQuerySelector.setGpuMetaStreamEvent(outputGpuMetaEvent);
             }
         }
     }
@@ -278,7 +324,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     }
     
     public void setSelectProcessor(Processor selectProcessor) {
-        this.selectProcessor = selectProcessor;
+        this.selectProcessor = (GpuQuerySelector) selectProcessor;
     }
     
     public void addGpuProcessor(SiddhiGpu.GpuProcessor gpuProcessor) {

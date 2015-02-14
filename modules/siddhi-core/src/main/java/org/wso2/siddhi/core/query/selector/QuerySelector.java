@@ -41,17 +41,17 @@ public class QuerySelector implements Processor {
 
     private static final Logger log = Logger.getLogger(QuerySelector.class);
     private static final ThreadLocal<String> keyThreadLocal = new ThreadLocal<String>();
-    private Selector selector;
-    private ExecutionPlanContext executionPlanContext;
-    private boolean currentOn = false;
-    private boolean expiredOn = false;
-    private OutputRateLimiter outputRateLimiter;
-    private List<AttributeProcessor> attributeProcessorList;
+    protected Selector selector;
+    protected ExecutionPlanContext executionPlanContext;
+    protected boolean currentOn = false;
+    protected boolean expiredOn = false;
+    protected OutputRateLimiter outputRateLimiter;
+    protected List<AttributeProcessor> attributeProcessorList;
     private ConditionExpressionExecutor havingConditionExecutor = null;
     private boolean isGroupBy = false;
     private GroupByKeyGenerator groupByKeyGenerator;
-    private String id;
-    private StateEventPopulator eventPopulator;
+    protected String id;
+    protected StateEventPopulator eventPopulator;
 
     public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, ExecutionPlanContext executionPlanContext) {
         this.id = id;

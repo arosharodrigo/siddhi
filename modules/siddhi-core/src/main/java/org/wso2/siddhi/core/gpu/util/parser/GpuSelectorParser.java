@@ -8,6 +8,7 @@ import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEventAttribute;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.condition.ConditionExpressionExecutor;
@@ -16,6 +17,9 @@ import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribute;
 import org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver;
 import org.wso2.siddhi.core.gpu.query.input.stream.GpuStreamRuntime;
+import org.wso2.siddhi.core.gpu.query.selector.GpuFilterQuerySelector;
+import org.wso2.siddhi.core.gpu.query.selector.GpuJoinQuerySelector;
+import org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelector;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
@@ -41,7 +45,7 @@ public class GpuSelectorParser {
      * @param executors            List to hold VariableExpressionExecutors to update after query parsing
      * @return
      */
-    public static QuerySelector parse(Selector selector, OutputStream outStream, ExecutionPlanContext executionPlanContext,
+    public static GpuQuerySelector parse(Selector selector, OutputStream outStream, ExecutionPlanContext executionPlanContext,
                                       MetaComplexEvent metaComplexEvent, List<VariableExpressionExecutor> executors,
                                       StreamRuntime streamRuntime, GpuQueryContext gpuQueryContext) {
         boolean currentOn = false;
@@ -56,7 +60,27 @@ public class GpuSelectorParser {
         }
 
         id = outStream.getId();
-        QuerySelector querySelector = new QuerySelector(id, selector, currentOn, expiredOn, executionPlanContext);
+        GpuQuerySelector querySelector = null;
+        
+        if(streamRuntime instanceof JoinStreamRuntime) {
+            
+            querySelector = new GpuJoinQuerySelector(id, selector, currentOn, expiredOn, executionPlanContext);
+        
+        } else if (streamRuntime instanceof GpuStreamRuntime){
+            
+            List<SiddhiGpu.GpuProcessor> gpuProcessors = 
+                    ((GpuProcessStreamReceiver)((GpuStreamRuntime) streamRuntime).getProcessStreamReceiver()).getGpuProcessors();
+
+            SiddhiGpu.GpuProcessor lastGpuProcessor = gpuProcessors.get(gpuProcessors.size() - 1);
+            if(lastGpuProcessor != null) {
+                if(lastGpuProcessor instanceof SiddhiGpu.GpuFilterProcessor) {
+                    querySelector = new GpuFilterQuerySelector(id, selector, currentOn, expiredOn, executionPlanContext);
+                }
+            } else {
+                querySelector = new GpuQuerySelector(id, selector, currentOn, expiredOn, executionPlanContext);
+            }
+        }
+        
         querySelector.setAttributeProcessorList(getAttributeProcessors(selector, id, executionPlanContext, 
                 metaComplexEvent, executors, streamRuntime, gpuQueryContext, currentOn, expiredOn));
 
