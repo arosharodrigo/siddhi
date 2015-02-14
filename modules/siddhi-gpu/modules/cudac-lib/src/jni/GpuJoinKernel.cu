@@ -287,7 +287,7 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 	char * pResultsInEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
 	// clear whole result buffer segment for this in event
-	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
+	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize); ~ XXX: removed to check performance
 
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 

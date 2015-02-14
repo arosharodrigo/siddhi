@@ -93,11 +93,11 @@ public class GpuQuerySelector extends QuerySelector {
         
         for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
 
-            StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-
             ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()];
             
             if(type != Type.NONE) {
+                StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+                
                 long sequence = outputEventBuffer.getLong();
                 long timestamp = outputEventBuffer.getLong();
 
@@ -168,6 +168,7 @@ public class GpuQuerySelector extends QuerySelector {
         }
         clonedQuerySelector.attributeProcessorList = clonedAttributeProcessorList;
         clonedQuerySelector.eventPopulator = eventPopulator;
+        clonedQuerySelector.outputRateLimiter = outputRateLimiter;
         
         return clonedQuerySelector;
     }
