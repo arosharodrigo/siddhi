@@ -65,7 +65,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 	char * pResultsExpiredEventBufferSegment = pResultsInEventBufferSegment + (iOutputSegmentSize / 2);
 
 	// clear whole result buffer segment for this in event
-	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
+	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
@@ -109,7 +109,7 @@ void ProcessEventsJoinLeftTriggerAllOn(
 	// get all matching event for in event from other window buffer and copy them to output event buffer
 
 	// get assigned filter
-	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
@@ -127,17 +127,18 @@ void ProcessEventsJoinLeftTriggerAllOn(
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
 				(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _iWithInTime)
 		{
-			int iCurrentNodeIdx = 0;
-			bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pInEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);;
+			ExpressionEvalParameters mExpressionParam;
+			mExpressionParam.p_OnCompare = _pOnCompareFilter;
+			mExpressionParam.a_Meta[0] = _pInputMetaEvent;
+			mExpressionParam.a_Event[0] = pInEventBuffer;
+			mExpressionParam.a_Meta[1] = _pOtherStreamMetaEvent;
+			mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
+			mExpressionParam.i_CurrentIndex = 0;
+
+//			bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pInEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);;
+			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
-				GpuKernelMetaEvent * aMetaEvents[2];
-				char * aInputStreamBuffers[2];
-				aMetaEvents[0] = _pInputMetaEvent;
-				aMetaEvents[1] = _pOtherStreamMetaEvent;
-				aInputStreamBuffers[0] = pInEventBuffer;
-				aInputStreamBuffers[1] = pOtherWindowEventBuffer;
-
 				// copy output event to buffer - map attributes from input streams to output stream
 				pResultInMatchingEvent->i_Type = GpuEvent::CURRENT;
 				pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
@@ -151,8 +152,8 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 					memcpy(
 						pResultInMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-						aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-						aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+						mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+						mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 					);
 				}
 
@@ -193,18 +194,18 @@ void ProcessEventsJoinLeftTriggerAllOn(
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
 					(pOtherWindowEvent->i_Timestamp - pExpiredEvent->i_Timestamp) <= _iWithInTime)
 			{
-				int iCurrentNodeIdx = 0;
-				bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pExpiredEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
+				ExpressionEvalParameters mExpressionParam;
+				mExpressionParam.p_OnCompare = _pOnCompareFilter;
+				mExpressionParam.a_Meta[0] = _pInputMetaEvent;
+				mExpressionParam.a_Event[0] = pExpiredEventBuffer;
+				mExpressionParam.a_Meta[1] = _pOtherStreamMetaEvent;
+				mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
+				mExpressionParam.i_CurrentIndex = 0;
 
+//				bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pExpiredEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
+				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
-					GpuKernelMetaEvent * aMetaEvents[2];
-					char * aInputStreamBuffers[2];
-					aMetaEvents[0] = _pInputMetaEvent;
-					aMetaEvents[1] = _pOtherStreamMetaEvent;
-					aInputStreamBuffers[0] = pExpiredEventBuffer;
-					aInputStreamBuffers[1] = pOtherWindowEventBuffer;
-
 					// copy output event to buffer - map attributes from input streams to output stream
 					pResultExpireMatchingEvent->i_Type = GpuEvent::EXPIRED;
 					pResultExpireMatchingEvent->i_Sequence = pExpiredEvent->i_Sequence;
@@ -218,8 +219,8 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 						memcpy(
 								pResultExpireMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-								aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-								aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+								mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+								mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 						);
 					}
 
@@ -287,14 +288,14 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 	char * pResultsInEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
 	// clear whole result buffer segment for this in event
-	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize); ~ XXX: removed to check performance
+	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
 
 	// get assigned filter
-	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
@@ -312,22 +313,24 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
 				(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _iWithInTime)
 		{
-			int iCurrentNodeIdx = 0;
-			bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pInEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);;
+			ExpressionEvalParameters mExpressionParam;
+			mExpressionParam.p_OnCompare = _pOnCompareFilter;
+			mExpressionParam.a_Meta[0] = _pInputMetaEvent;
+			mExpressionParam.a_Event[0] = pInEventBuffer;
+			mExpressionParam.a_Meta[1] = _pOtherStreamMetaEvent;
+			mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
+			mExpressionParam.i_CurrentIndex = 0;
+
+//			bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pInEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
+			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
-				GpuKernelMetaEvent * aMetaEvents[2];
-				char * aInputStreamBuffers[2];
-				aMetaEvents[0] = _pInputMetaEvent;
-				aMetaEvents[1] = _pOtherStreamMetaEvent;
-				aInputStreamBuffers[0] = pInEventBuffer;
-				aInputStreamBuffers[1] = pOtherWindowEventBuffer;
-
 				// copy output event to buffer - map attributes from input streams to output stream
 				pResultInMatchingEvent->i_Type = GpuEvent::CURRENT;
 				pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
 				pResultInMatchingEvent->i_Timestamp = pInEvent->i_Timestamp;
 
+				//TODO: #pragma __unroll__ 5
 				for(int m=0; m < _pOutputAttribMappings->i_MappingCount; ++m)
 				{
 					int iFromStreamIndex = _pOutputAttribMappings->p_Mappings[m].from[AttributeMapping::STREAM_INDEX];
@@ -336,8 +339,8 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 
 					memcpy(
 						pResultInMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-						aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-						aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+						mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+						mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 					);
 				}
 
@@ -401,7 +404,7 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 	char * pResultsExpiredEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
 	// clear whole result buffer segment for this in event
-	memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
+	//memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
 
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
@@ -442,7 +445,7 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 	if(pExpiredEventBuffer != NULL)
 	{
 		// get assigned filter
-		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+//		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
 
@@ -464,18 +467,18 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
 					(pOtherWindowEvent->i_Timestamp - pExpiredEvent->i_Timestamp) <= _iWithInTime)
 			{
-				int iCurrentNodeIdx = 0;
-				bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pExpiredEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
+				ExpressionEvalParameters mExpressionParam;
+				mExpressionParam.p_OnCompare = _pOnCompareFilter;
+				mExpressionParam.a_Meta[0] = _pInputMetaEvent;
+				mExpressionParam.a_Event[0] = pExpiredEventBuffer;
+				mExpressionParam.a_Meta[1] = _pOtherStreamMetaEvent;
+				mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
+				mExpressionParam.i_CurrentIndex = 0;
 
+//				bool bOnCompareMatched = Evaluate(mOnCompare, _pInputMetaEvent, pExpiredEventBuffer, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, iCurrentNodeIdx);
+				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
-					GpuKernelMetaEvent * aMetaEvents[2];
-					char * aInputStreamBuffers[2];
-					aMetaEvents[0] = _pInputMetaEvent;
-					aMetaEvents[1] = _pOtherStreamMetaEvent;
-					aInputStreamBuffers[0] = pExpiredEventBuffer;
-					aInputStreamBuffers[1] = pOtherWindowEventBuffer;
-
 					// copy output event to buffer - map attributes from input streams to output stream
 					pResultExpireMatchingEvent->i_Type = GpuEvent::EXPIRED;
 					pResultExpireMatchingEvent->i_Sequence = pExpiredEvent->i_Sequence;
@@ -489,8 +492,8 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 
 						memcpy(
 								pResultExpireMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-								aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-								aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+								mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+								mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 						);
 					}
 
@@ -559,7 +562,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 	char * pResultsExpiredEventBufferSegment = pResultsInEventBufferSegment + (iOutputSegmentSize / 2);
 
 	// clear whole result buffer segment for this in event
-	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
+	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
@@ -603,7 +606,7 @@ void ProcessEventsJoinRightTriggerAllOn(
 	// get all matching event for in event from other window buffer and copy them to output event buffer
 
 	// get assigned filter
-	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
@@ -621,17 +624,18 @@ void ProcessEventsJoinRightTriggerAllOn(
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
 				(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _iWithInTime)
 		{
-			int iCurrentNodeIdx = 0;
-			bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pInEventBuffer, iCurrentNodeIdx);;
+			ExpressionEvalParameters mExpressionParam;
+			mExpressionParam.p_OnCompare = _pOnCompareFilter;
+			mExpressionParam.a_Meta[0] = _pOtherStreamMetaEvent;
+			mExpressionParam.a_Event[0] = pOtherWindowEventBuffer;
+			mExpressionParam.a_Meta[1] = _pInputMetaEvent;
+			mExpressionParam.a_Event[1] = pInEventBuffer;
+			mExpressionParam.i_CurrentIndex = 0;
+
+//			bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pInEventBuffer, iCurrentNodeIdx);;
+			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
-				GpuKernelMetaEvent * aMetaEvents[2];
-				char * aInputStreamBuffers[2];
-				aMetaEvents[0] = _pOtherStreamMetaEvent;
-				aMetaEvents[1] = _pInputMetaEvent;
-				aInputStreamBuffers[0] = pOtherWindowEventBuffer;
-				aInputStreamBuffers[1] = pInEventBuffer;
-
 				// copy output event to buffer - map attributes from input streams to output stream
 				pResultInMatchingEvent->i_Type = GpuEvent::CURRENT;
 				pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
@@ -645,8 +649,8 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 					memcpy(
 						pResultInMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-						aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-						aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+						mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+						mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 					);
 				}
 
@@ -687,18 +691,18 @@ void ProcessEventsJoinRightTriggerAllOn(
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
 					(pOtherWindowEvent->i_Timestamp - pExpiredEvent->i_Timestamp) <= _iWithInTime)
 			{
-				int iCurrentNodeIdx = 0;
-				bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pExpiredEventBuffer, iCurrentNodeIdx);
+				ExpressionEvalParameters mExpressionParam;
+				mExpressionParam.p_OnCompare = _pOnCompareFilter;
+				mExpressionParam.a_Meta[0] = _pOtherStreamMetaEvent;
+				mExpressionParam.a_Event[0] = pOtherWindowEventBuffer;
+				mExpressionParam.a_Meta[1] = _pInputMetaEvent;
+				mExpressionParam.a_Event[1] = pExpiredEventBuffer;
+				mExpressionParam.i_CurrentIndex = 0;
 
+//				bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pExpiredEventBuffer, iCurrentNodeIdx);
+				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
-					GpuKernelMetaEvent * aMetaEvents[2];
-					char * aInputStreamBuffers[2];
-					aMetaEvents[0] = _pOtherStreamMetaEvent;
-					aMetaEvents[1] = _pInputMetaEvent;
-					aInputStreamBuffers[0] = pOtherWindowEventBuffer;
-					aInputStreamBuffers[1] = pExpiredEventBuffer;
-
 					// copy output event to buffer - map attributes from input streams to output stream
 					pResultExpireMatchingEvent->i_Type = GpuEvent::EXPIRED;
 					pResultExpireMatchingEvent->i_Sequence = pExpiredEvent->i_Sequence;
@@ -712,8 +716,8 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 						memcpy(
 								pResultExpireMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-								aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-								aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+								mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+								mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 						);
 					}
 
@@ -781,14 +785,14 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 	char * pResultsInEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
 	// clear whole result buffer segment for this in event
-	memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
+	//memset(pResultsInEventBufferSegment, 0, iOutputSegmentSize);
 
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
 
 	// get assigned filter
-	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+//	GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 	// for each events in other window
 	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
@@ -806,17 +810,19 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 		if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
 				(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _iWithInTime)
 		{
-			int iCurrentNodeIdx = 0;
-			bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pInEventBuffer, iCurrentNodeIdx);;
+
+			ExpressionEvalParameters mExpressionParam;
+			mExpressionParam.p_OnCompare = _pOnCompareFilter;
+			mExpressionParam.a_Meta[0] = _pOtherStreamMetaEvent;
+			mExpressionParam.a_Event[0] = pOtherWindowEventBuffer;
+			mExpressionParam.a_Meta[1] = _pInputMetaEvent;
+			mExpressionParam.a_Event[1] = pInEventBuffer;
+			mExpressionParam.i_CurrentIndex = 0;
+
+//			bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pInEventBuffer, iCurrentNodeIdx);
+			bool bOnCompareMatched = Evaluate(mExpressionParam);
 			if(bOnCompareMatched)
 			{
-				GpuKernelMetaEvent * aMetaEvents[2];
-				char * aInputStreamBuffers[2];
-				aMetaEvents[0] = _pOtherStreamMetaEvent;
-				aMetaEvents[1] = _pInputMetaEvent;
-				aInputStreamBuffers[0] = pOtherWindowEventBuffer;
-				aInputStreamBuffers[1] = pInEventBuffer;
-
 				// copy output event to buffer - map attributes from input streams to output stream
 				pResultInMatchingEvent->i_Type = GpuEvent::CURRENT;
 				pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
@@ -830,8 +836,8 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 
 					memcpy(
 						pResultInMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-						aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-						aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+						mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+						mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 					);
 				}
 
@@ -895,7 +901,7 @@ void ProcessEventsJoinRightTriggerExpireOn(
 	char * pResultsExpiredEventBufferSegment = _pResultsBuffer + (iOutputSegmentSize * iEventIdx);
 
 	// clear whole result buffer segment for this in event
-	memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
+	//memset(pResultsExpiredEventBufferSegment, 0, iOutputSegmentSize);
 
 	char * pExpiredEventBuffer = NULL;
 	GpuEvent * pExpiredEvent = NULL;
@@ -939,7 +945,7 @@ void ProcessEventsJoinRightTriggerExpireOn(
 		// get all matching event for in event from other window buffer and copy them to output event buffer
 
 		// get assigned filter
-		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
+//		GpuKernelFilter mOnCompare = *_pOnCompareFilter;
 
 		pExpiredEvent = (GpuEvent*) pExpiredEventBuffer;
 
@@ -961,18 +967,18 @@ void ProcessEventsJoinRightTriggerExpireOn(
 			if(pExpiredEvent->i_Sequence < pOtherWindowEvent->i_Sequence &&
 					(pOtherWindowEvent->i_Timestamp - pExpiredEvent->i_Timestamp) <= _iWithInTime)
 			{
-				int iCurrentNodeIdx = 0;
-				bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pExpiredEventBuffer, iCurrentNodeIdx);
+				ExpressionEvalParameters mExpressionParam;
+				mExpressionParam.p_OnCompare = _pOnCompareFilter;
+				mExpressionParam.a_Meta[0] = _pOtherStreamMetaEvent;
+				mExpressionParam.a_Event[0] = pOtherWindowEventBuffer;
+				mExpressionParam.a_Meta[1] = _pInputMetaEvent;
+				mExpressionParam.a_Event[1] = pExpiredEventBuffer;
+				mExpressionParam.i_CurrentIndex = 0;
 
+//				bool bOnCompareMatched = Evaluate(mOnCompare, _pOtherStreamMetaEvent, pOtherWindowEventBuffer, _pInputMetaEvent, pExpiredEventBuffer, iCurrentNodeIdx);
+				bool bOnCompareMatched = Evaluate(mExpressionParam);
 				if(bOnCompareMatched)
 				{
-					GpuKernelMetaEvent * aMetaEvents[2];
-					char * aInputStreamBuffers[2];
-					aMetaEvents[0] = _pOtherStreamMetaEvent;
-					aMetaEvents[1] = _pInputMetaEvent;
-					aInputStreamBuffers[0] = pOtherWindowEventBuffer;
-					aInputStreamBuffers[1] = pExpiredEventBuffer;
-
 					// copy output event to buffer - map attributes from input streams to output stream
 					pResultExpireMatchingEvent->i_Type = GpuEvent::EXPIRED;
 					pResultExpireMatchingEvent->i_Sequence = pExpiredEvent->i_Sequence;
@@ -986,8 +992,8 @@ void ProcessEventsJoinRightTriggerExpireOn(
 
 						memcpy(
 								pResultExpireMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
-								aInputStreamBuffers[iFromStreamIndex] + aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
-								aMetaEvents[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
+								mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
+								mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 						);
 					}
 
