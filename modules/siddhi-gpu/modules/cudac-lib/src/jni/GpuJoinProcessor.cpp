@@ -27,6 +27,7 @@ GpuJoinProcessor::GpuJoinProcessor(int _iLeftWindowSize, int _iRightWindowSize) 
 	b_LeftTrigger(true),
 	b_RightTrigger(true),
 	i_WithInTimeMilliSeconds(0),
+	i_ThreadWorkSize(0),
 	p_LeftContext(NULL),
 	p_RightContext(NULL),
 	p_JoinKernel(NULL),

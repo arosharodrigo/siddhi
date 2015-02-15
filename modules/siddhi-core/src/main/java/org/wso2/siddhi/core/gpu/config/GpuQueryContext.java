@@ -19,6 +19,7 @@ public class GpuQueryContext {
     private Integer eventBatchMinimumSize;
     private Integer perfromanceCalculateBatchCount;
     private boolean batchSoftScheduling;
+    private Integer threadWorkSize;
     
     public GpuQueryContext(List<Annotation> annotationList) {
         threadsPerBlock = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
@@ -41,6 +42,9 @@ public class GpuQueryContext {
         
         eventBatchMinimumSize = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
                 SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_MIN_SIZE, annotationList);
+        
+        threadWorkSize = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+                SiddhiConstants.ANNOTATION_ELEMENT_GPU_THREAD_WORK_SIZE, annotationList);
         
         String gpuBatchScheludeString = getAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
                 SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_SCHEDULE, annotationList);
@@ -66,6 +70,10 @@ public class GpuQueryContext {
         
         if(eventBatchMinimumSize == null) {
             eventBatchMinimumSize = 1;
+        }
+        
+        if(threadWorkSize == null) {
+            threadWorkSize = 0;
         }
             
     }
@@ -182,11 +190,19 @@ public class GpuQueryContext {
         this.eventBatchMaximumSize = eventBatchSize;
     }
 
-    public Integer getEventBatchMinimumSize() {
+    public int getEventBatchMinimumSize() {
         return eventBatchMinimumSize;
     }
 
     public void setEventBatchMinimumSize(Integer eventBatchMinimumSize) {
         this.eventBatchMinimumSize = eventBatchMinimumSize;
+    }
+
+    public int getThreadWorkSize() {
+        return threadWorkSize;
+    }
+
+    public void setThreadWorkSize(int threadWorkSize) {
+        this.threadWorkSize = threadWorkSize;
     }
 }

@@ -57,6 +57,9 @@ public:
 	void SetExecutorNodes(int _iNodeCount);
 	void AddExecutorNode(int _iPos, ExecutorNode & _pNode);
 
+	void SetThreadWorkSize(int _iSize) { i_ThreadWorkSize = _iSize; }
+	int GetThreadWorkSize() { return i_ThreadWorkSize; }
+
 	int            i_NodeCount;
 	ExecutorNode * ap_ExecutorNodes; // nodes are stored in in-order
 
@@ -71,6 +74,7 @@ private:
 	bool b_RightTrigger;
 
 	uint64_t i_WithInTimeMilliSeconds;
+	int i_ThreadWorkSize;
 
 	GpuProcessorContext * p_LeftContext;
 	GpuProcessorContext * p_RightContext;

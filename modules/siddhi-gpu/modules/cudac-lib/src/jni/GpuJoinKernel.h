@@ -83,6 +83,11 @@ private:
 	bool b_LeftDeviceSet;
 	bool b_RightDeviceSet;
 
+	int i_LeftThreadWorkSize;
+	int i_RightThreadWorkSize;
+	int i_LeftThreadWorkCount;
+	int i_RightThreadWorkCount;
+
 	int i_InitializedStreamCount;
 	FILE * fp_LeftLog;
 	FILE * fp_RightLog;

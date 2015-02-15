@@ -319,8 +319,9 @@ public class JoinMultipleQueryPerformance {
                 .append("block.size='").append(eventBlockSize).append("', ")
                 .append("batch.schedule='").append(softBatchScheduling ? "soft" : "hard").append("', ")
                 .append("string.sizes='symbol=8' ")
+                .append("work.size='100' ")
                 .append(") ")
-                .append("@perf(batch.count='1000') ");
+                .append("@performance(batch.count='1000') ");
             }
             sb.append(queries[i].query);
             String query = sb.toString();

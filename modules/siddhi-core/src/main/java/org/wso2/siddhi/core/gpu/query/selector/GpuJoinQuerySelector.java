@@ -16,10 +16,12 @@ import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 public class GpuJoinQuerySelector extends GpuQuerySelector {
     private static final Logger log = Logger.getLogger(GpuJoinQuerySelector.class);
     private int segmentEventCount;
+    private int threadWorkSize;
     
     public GpuJoinQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, ExecutionPlanContext executionPlanContext) {
         super(id, selector, currentOn, expiredOn, executionPlanContext);
         this.segmentEventCount = -1;
+        this.setThreadWorkSize(0);
     }
   
     @Override
@@ -145,5 +147,16 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
         clonedQuerySelector.segmentEventCount = segmentEventCount;
         clonedQuerySelector.outputRateLimiter = outputRateLimiter;
         return clonedQuerySelector;
+    }
+
+    public int getThreadWorkSize() {
+        return threadWorkSize;
+    }
+
+    public void setThreadWorkSize(int threadWorkSize) {
+        this.threadWorkSize = threadWorkSize;
+        if(threadWorkSize != 0) {
+            segmentEventCount = threadWorkSize;
+        }
     }
 }

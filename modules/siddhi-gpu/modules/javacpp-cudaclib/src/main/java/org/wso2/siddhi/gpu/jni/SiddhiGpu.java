@@ -833,6 +833,9 @@ public static final int
 	public native void SetExecutorNodes(int _iNodeCount);
 	public native void AddExecutorNode(int _iPos, @ByRef ExecutorNode _pNode);
 
+	public native void SetThreadWorkSize(int _iSize);
+	public native int GetThreadWorkSize();
+
 	public native int i_NodeCount(); public native GpuJoinProcessor i_NodeCount(int i_NodeCount);
 	public native ExecutorNode ap_ExecutorNodes(); public native GpuJoinProcessor ap_ExecutorNodes(ExecutorNode ap_ExecutorNodes);
 }

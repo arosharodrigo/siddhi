@@ -52,7 +52,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private long startTime = 0;
     private long endTime = 0;
     private long gpuProcEndTime = 0;
-    private long postProcEndTime = 0;
     private long serializeBeginTime = 0;
     private long serializeTime = 0;
     private long duration = 0;
@@ -74,6 +73,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         this.maximumEventBatchSize = 1024;
         this.minimumEventBatchSize = 1;
         this.softBatchScheduling = true;
+        this.perfromanceCalculateBatchCount = 1000;
     }
 
     public GpuProcessStreamReceiver clone(String key) {
@@ -138,16 +138,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             gpuProcEndTime = System.nanoTime();
             
-//            gpuQueryPostProcessor.process(eventBufferWriter.getByteBuffer(), resultEventCount);
-//            
-//            postProcEndTime = System.nanoTime();
-//            
-//            selectProcessor.process(gpuEventChunk);
-            
             selectProcessor.process(resultEventCount);
-            
-//            gpuEventChunk.clear();
-            
             
             endTime = System.nanoTime();
             
@@ -157,8 +148,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             log.info("<" + queryName + " - " + streamId + "> Batch Times : " + currentEventCount + " [Total=" + (endTime - startTime) + 
                     " Serialize=" + serializeTime +
                     " Gpu=" + (gpuProcEndTime - startTime) + 
-//                    " Post=" + (postProcEndTime - gpuProcEndTime) + 
-                    " Select=" + (endTime - gpuProcEndTime) + "]");
+                    " Select=" + (endTime - gpuProcEndTime) + "] iter=" + iteration);
             
             throughputList.add(average);
             
@@ -324,6 +314,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
                 ByteBuffer eventByteBuffer = null;
                 int segmentEventCount  = 0;
+                int threadWorkSize = 0;
 
                 if(streamIndex == 0) {
 
@@ -334,6 +325,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     bytePointer.limit(bufferSize);
                     bytePointer.position(0);
                     eventByteBuffer = bytePointer.asBuffer();
+                    
+                    threadWorkSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetThreadWorkSize();
 
                 } else if(streamIndex == 1) {
 
@@ -345,6 +338,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     bytePointer.position(0);
                     eventByteBuffer = bytePointer.asBuffer();
 
+                    threadWorkSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetThreadWorkSize();
                 }
 
                 StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
@@ -367,6 +361,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 gpuJoinQuerySelector.setStreamEventPool(streamEventPool);
                 gpuJoinQuerySelector.setMetaStreamEvent(metaStreamEvent);
                 gpuJoinQuerySelector.setGpuMetaStreamEvent(outputGpuMetaEvent);
+                gpuJoinQuerySelector.setThreadWorkSize(threadWorkSize);
             }
         }
     }

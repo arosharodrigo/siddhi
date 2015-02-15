@@ -190,6 +190,8 @@ public class JoinInputStreamParser {
         
         gpuJoinProcessor.SetThreadBlockSize(gpuQueryContext.getThreadsPerBlock());
         
+        gpuJoinProcessor.SetThreadWorkSize(gpuQueryContext.getThreadWorkSize());
+        
         GpuJoinStreamRuntime gpuJoinStreamRuntime = new GpuJoinStreamRuntime(executionPlanContext,metaStateEvent);
         gpuJoinStreamRuntime.addRuntime(leftStreamRuntime);
         gpuJoinStreamRuntime.addRuntime(rightStreamRuntime);
