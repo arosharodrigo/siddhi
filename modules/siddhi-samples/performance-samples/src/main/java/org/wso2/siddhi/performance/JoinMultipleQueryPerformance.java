@@ -318,7 +318,7 @@ public class JoinMultipleQueryPerformance {
                 .append("batch.min.size='").append(minEventBatchSize).append("', ")
                 .append("block.size='").append(eventBlockSize).append("', ")
                 .append("batch.schedule='").append(softBatchScheduling ? "soft" : "hard").append("', ")
-                .append("string.sizes='symbol=8' ")
+                .append("string.sizes='symbol=8', ")
                 .append("work.size='100' ")
                 .append(") ")
                 .append("@performance(batch.count='1000') ");

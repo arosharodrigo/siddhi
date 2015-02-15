@@ -127,7 +127,7 @@ void GpuStreamEventBuffer::Print()
 
 void GpuStreamEventBuffer::CopyToDevice(bool _bAsync)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> CopyToDevice : Async=%d\n", s_Name.c_str(), _bAsync);
 #endif
 
@@ -143,7 +143,7 @@ void GpuStreamEventBuffer::CopyToDevice(bool _bAsync)
 
 void GpuStreamEventBuffer::CopyToHost(bool _bAsync)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuStreamEventBuffer] <%s> CopyToHost : Async=%d\n", s_Name.c_str(), _bAsync);
 #endif
 

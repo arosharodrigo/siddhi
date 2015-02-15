@@ -13,6 +13,7 @@
 #include <string.h>
 #include <string>
 #include "GpuKernelDataTypes.h"
+#include "CommonDefs.h"
 
 namespace SiddhiGpu
 {

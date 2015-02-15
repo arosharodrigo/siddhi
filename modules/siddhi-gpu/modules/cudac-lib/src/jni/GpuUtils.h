@@ -9,6 +9,7 @@
 #define GPUUTILS_H_
 
 #include <stdio.h>
+#include "CommonDefs.h"
 
 namespace SiddhiGpu
 {

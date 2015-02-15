@@ -150,7 +150,7 @@ void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _
 
 int GpuJoinProcessor::Process(int _iStreamIndex, int _iNumEvents)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	if(_iStreamIndex == 0)
 	{
 		fprintf(fp_LeftLog, "[GpuJoinProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);

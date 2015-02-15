@@ -306,7 +306,7 @@ void GpuFilterProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int
 
 int GpuFilterProcessor::Process(int _iStreamIndex, int _iNumEvents)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	fprintf(fp_Log, "[GpuFilterProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);
 	fflush(fp_Log);
 #endif

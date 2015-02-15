@@ -13,6 +13,7 @@
 #include <list>
 #include "DataTypes.h"
 #include "GpuMetaEvent.h"
+#include "CommonDefs.h"
 
 namespace SiddhiGpu
 {

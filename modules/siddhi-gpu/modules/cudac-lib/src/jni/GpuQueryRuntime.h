@@ -20,6 +20,7 @@
 #include <string>
 
 #include "GpuMetaEvent.h"
+#include "CommonDefs.h"
 
 namespace SiddhiGpu
 {

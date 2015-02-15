@@ -91,7 +91,7 @@ void GpuLengthSlidingWindowProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pM
 
 int GpuLengthSlidingWindowProcessor::Process(int _iStreamIndex, int _iNumEvents)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Process : StreamIndex=%d NumEvents=%d \n", _iStreamIndex, _iNumEvents);
 	fflush(fp_Log);
 #endif

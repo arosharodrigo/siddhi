@@ -30,8 +30,10 @@ public class GpuJoinStreamRuntime extends JoinStreamRuntime {
         if(commonProcessor instanceof GpuJoinQuerySelector) {
             GpuJoinQuerySelector joinQuerySelector = (GpuJoinQuerySelector)commonProcessor;
             
+            int iIndex = 0;
             for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
-                singleStreamRuntime.setCommonProcessor(joinQuerySelector.clone(""));
+                singleStreamRuntime.setCommonProcessor(joinQuerySelector.clone(Integer.toString(iIndex)));
+                iIndex++;
             }
         } else {
             for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {

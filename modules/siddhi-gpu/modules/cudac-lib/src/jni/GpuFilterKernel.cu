@@ -326,7 +326,7 @@ bool GpuFilterKernelStandalone::Initialize(int _iStreamIndex, GpuMetaEvent * _pM
 
 void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone", fp_Log);
 #endif
 
@@ -349,7 +349,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuFilterKernelStandalone] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fflush(fp_Log);
 #endif
@@ -373,8 +373,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-#ifdef GPU_DEBUG
-
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	fprintf(fp_Log, "[GpuFilterKernelStandalone] ProcessEventsFilterKernelStandalone results\n");
 	int * pResults = p_ResultEventBuffer->GetHostEventBuffer();
 	for(int i=0; i<_iNumEvents; ++i)
@@ -385,7 +384,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 	fflush(fp_Log);
 #endif
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuFilterKernelStandalone] Kernel complete \n");
 	fflush(fp_Log);
 #endif
@@ -539,7 +538,7 @@ bool GpuFilterKernelFirst::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEv
 
 void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelFirst::In", fp_Log);
 #endif
 
@@ -562,7 +561,7 @@ void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents)
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuFilterKernelFirst] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fflush(fp_Log);
 #endif
@@ -625,13 +624,15 @@ void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents)
 	int * pPrefixSumResults = p_PrefixSumBuffer->GetHostEventBuffer();
 	_iNumEvents = pPrefixSumResults[_iNumEvents - 1];
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	if(b_LastKernel)
 	{
 		GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents, p_ResultEventBuffer->GetHostMetaEvent(),
 				"GpuFilterKernelFirst::Out", fp_Log);
 	}
+#endif
 
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuFilterKernelFirst] Kernel complete : ResultCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
 #endif

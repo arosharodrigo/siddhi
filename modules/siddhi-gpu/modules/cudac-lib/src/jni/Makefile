@@ -69,7 +69,23 @@ else
 endif
 
 ifeq ($(GPU_DEBUG),1)
-	CCFLAGS += -DGPU_DEBUG
+	CCFLAGS += -DGPU_DEBUG=1
+endif
+
+ifeq ($(GPU_DEBUG),2)
+	CCFLAGS += -DGPU_DEBUG=2
+endif
+
+ifeq ($(GPU_DEBUG),3)
+	CCFLAGS += -DGPU_DEBUG=3
+endif
+
+ifeq ($(GPU_DEBUG),4)
+	CCFLAGS += -DGPU_DEBUG=4
+endif
+
+ifeq ($(GPU_DEBUG),5)
+	CCFLAGS += -DGPU_DEBUG=5
 endif
 
 ifeq ($(KERNEL_TIME),1)

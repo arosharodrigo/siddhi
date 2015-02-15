@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "CommonDefs.h"
 
 namespace SiddhiGpu
 {

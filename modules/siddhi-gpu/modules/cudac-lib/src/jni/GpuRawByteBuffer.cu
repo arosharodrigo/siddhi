@@ -5,6 +5,7 @@
 #include "GpuMetaEvent.h"
 #include "GpuCudaHelper.h"
 #include "GpuRawByteBuffer.h"
+#include "CommonDefs.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -70,7 +71,7 @@ void GpuRawByteBuffer::Print()
 
 void GpuRawByteBuffer::CopyToDevice(bool _bAsync)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuRawByteBuffer] <%s> CopyToDevice : Async=%d\n", s_Name.c_str(), _bAsync);
 #endif
 
@@ -86,7 +87,7 @@ void GpuRawByteBuffer::CopyToDevice(bool _bAsync)
 
 void GpuRawByteBuffer::CopyToHost(bool _bAsync)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuRawByteBuffer] <%s> CopyToHost : Async=%d\n", s_Name.c_str(), _bAsync);
 #endif
 

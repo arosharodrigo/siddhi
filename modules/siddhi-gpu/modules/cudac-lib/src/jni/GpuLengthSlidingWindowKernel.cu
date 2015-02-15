@@ -367,7 +367,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(int _iStreamIndex, GpuMetaEve
 
 void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEvents)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Process : EventCount=%d WindowRemainingCount=%d\n", _iNumEvents, i_RemainingCount);
 	fflush(fp_Log);
 
@@ -393,7 +393,7 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fflush(fp_Log);
 #endif
@@ -425,7 +425,7 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 	if(b_LastKernel)
 	{
 		p_ResultEventBuffer->CopyToHost(true);
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
 	fflush(fp_Log);
 #endif
@@ -434,13 +434,16 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	if(b_LastKernel)
 	{
 		GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents * 2, p_ResultEventBuffer->GetHostMetaEvent(),
 				"GpuLengthSlidingWindowFirstKernel::Out", fp_Log);
 	}
+	fflush(fp_Log);
+#endif
 
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Kernel complete \n");
 	fflush(fp_Log);
 #endif
@@ -548,7 +551,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(int _iStreamIndex, GpuMetaEv
 
 void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumEvents)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Process : EventCount=%d\n", _iNumEvents);
 	fflush(fp_Log);
 
@@ -576,7 +579,7 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 	dim3 numBlocks = dim3(numBlocksX, numBlocksY);
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fflush(fp_Log);
 #endif
@@ -609,7 +612,7 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 	{
 		p_ResultEventBuffer->CopyToHost(true);
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
 	fflush(fp_Log);
 #endif
@@ -618,13 +621,16 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	if(b_LastKernel)
 	{
 		GpuUtils::PrintByteBuffer(p_ResultEventBuffer->GetHostEventBuffer(), _iNumEvents * 2, p_ResultEventBuffer->GetHostMetaEvent(),
 				"GpuLengthSlidingWindowFilterKernel::Out", fp_Log);
 	}
+	fflush(fp_Log);
+#endif
 
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Kernel complete \n");
 	fflush(fp_Log);
 #endif

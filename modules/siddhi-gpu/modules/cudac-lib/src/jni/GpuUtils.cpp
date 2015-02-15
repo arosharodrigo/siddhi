@@ -22,7 +22,7 @@ namespace SiddhiGpu
 
 void GpuUtils::PrintThreadInfo(const char * _zTag, FILE * _fpLog)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	pid_t pid = getpid();
 	int tid = syscall(__NR_gettid);
 	fprintf(_fpLog, "[%s] PrintThreadInfo : PID=%d TID=%d\n", _zTag, pid, tid);
@@ -31,7 +31,7 @@ void GpuUtils::PrintThreadInfo(const char * _zTag, FILE * _fpLog)
 
 void GpuUtils::PrintByteBuffer(char * _pEventBuffer, int _iNumEvents, GpuMetaEvent * _pEventMeta, const char * _zTag, FILE * _fpLog)
 {
-#ifdef GPU_DEBUG
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(_fpLog, "[%s] [PrintByteBuffer] EventMeta [Attribs=%d] [", _zTag, _pEventMeta->i_AttributeCount);
 	for(int i=0; i<_pEventMeta->i_AttributeCount; ++i)
 	{
