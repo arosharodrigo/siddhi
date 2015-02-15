@@ -16,17 +16,32 @@ LOG=logs/JoinMultipleQueryPerformance/JoinMultipleQueryPerformance
 
 a="false"
 g="true"
-r=1024
+r=4096
 t=16
 b=128
 c=$((5000000 * r))
+z=1024
+Z=2048
 q=1
+s="false"
 
 #echo "${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu false --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_gpu_${r}_${t}_${b}.log"
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async false --enable-gpu false --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_cpu_singlethread_${r}_${t}_${b}.log
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async false --enable-gpu false --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} #&>${LOG}_cpu_singlethread_${r}_${t}_${b}.log
 #${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu false --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} #&>${LOG}_cpu_${r}_${t}_${b}.log
-${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} &>${LOG}_gpu_${r}_${t}_${b}.log
+
+${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} --batch-max-size ${Z} --batch-min-size ${z} --strict-batch-scheduling ${s} #&>${LOG}_gpu_${r}_${t}_${b}.log
+
+#cuda-memcheck --leak-check full ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} --batch-max-size ${Z} --batch-min-size ${z} --strict-batch-scheduling ${s}
+
+#nvprof --print-api-trace --print-gpu-trace --output-profile prof.out --log-file prof.log ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} --batch-max-size ${Z} --batch-min-size ${z} --strict-batch-scheduling ${s}
+#nvprof ${APP}
+#nvprof --print-summary ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} --batch-max-size ${Z} --batch-min-size ${z} --strict-batch-scheduling ${s}
+#--print-summary
+#--csv
+
+#nvprof --events all --metrics all ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} --batch-max-size ${Z} --batch-min-size ${z} --strict-batch-scheduling ${s}
+#nvprof --events warps_launched,branch --metrics ipc ${JVM} ${AGENTLIB} -classpath ${CLASSPATH} ${APP} --enable-async true --enable-gpu true --query-count ${q} --event-count ${c} --ringbuffer-size ${r} --threadpool-size ${t} --events-per-tblock ${b} --batch-max-size ${Z} --batch-min-size ${z} --strict-batch-scheduling ${s}
 
 exit
 

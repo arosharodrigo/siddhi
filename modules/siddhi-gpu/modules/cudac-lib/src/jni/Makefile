@@ -15,6 +15,8 @@ ifndef PLATFORM
 $(error PLATFORM not defined!!)
 endif
 
+MAXREGCOUNT=40
+
 # internal flags
 NVCCFLAGS   := -m${OS_SIZE}
 CCFLAGS     := -fPIC -m${OS_SIZE}
@@ -57,10 +59,10 @@ endif
 
 # Debug build flags
 ifeq ($(dbg),1)
-      NVCCFLAGS += -g -G --ptxas-options=-v -maxrregcount=32 -lineinfo
+      NVCCFLAGS += -g -G --ptxas-options=-v -maxrregcount=${MAXREGCOUNT} -lineinfo
       TARGET := debug
 else
-      NVCCFLAGS += -po -maxrregcount=32 -O3
+      NVCCFLAGS += -po -maxrregcount=${MAXREGCOUNT} -O3  --ptxas-options=-v
       CCFLAGS += -O3
       LDFLAGS += -O3
       TARGET := release
