@@ -35,7 +35,7 @@ public:
 	void ResetDeviceEventBuffer(int _iResetVal);
 	void Print();
 
-private:
+protected:
 	char * p_HostEventBuffer;
 	char * p_UnalignedBuffer;
 	char * p_DeviceEventBuffer;

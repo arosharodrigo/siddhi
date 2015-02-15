@@ -54,6 +54,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     private long endTime = 0;
     private long duration = 0;
     private final List<Double> throughputList = new ArrayList<Double>();
+    private final List<Long> durationList = new ArrayList<Long>();
 
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
 
@@ -81,20 +82,77 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
     @Override
     public void receive(ComplexEvent complexEvent) {
+        startTime = System.nanoTime();
+        
         streamEventChunk.convertAndAssign(complexEvent);
         processAndClear(streamEventChunk);
+        
+        endTime = System.nanoTime();
+        durationList.add(endTime - startTime);
+        currentEventCount++;
+        
+        if(currentEventCount == 1000000) {
+            long totalDuration = 0;
+            
+            for (Long tp : durationList) {
+                totalDuration += tp;
+            }
+            
+            double avgThroughput = currentEventCount * 1000000000 / totalDuration;
+            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            durationList.clear();
+            currentEventCount = 0;
+        }
     }
 
     @Override
     public void receive(Event event) {
+        startTime = System.nanoTime();
+        
         streamEventChunk.convertAndAssign(event);
         processAndClear(streamEventChunk);
+        
+        endTime = System.nanoTime();
+        durationList.add(endTime - startTime);
+        currentEventCount++;
+        
+        if(currentEventCount == 1000000) {
+            long totalDuration = 0;
+            
+            for (Long tp : durationList) {
+                totalDuration += tp;
+            }
+            
+            double avgThroughput = currentEventCount * 1000000000 / totalDuration;
+            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            durationList.clear();
+            currentEventCount = 0;
+        }
     }
 
     @Override
     public void receive(Event[] events) {
+        startTime = System.nanoTime();
+        
         streamEventChunk.convertAndAssign(events);
         processAndClear(streamEventChunk);
+        
+        endTime = System.nanoTime();
+        durationList.add(endTime - startTime);
+        currentEventCount++;
+        
+        if(currentEventCount == 1000000) {
+            long totalDuration = 0;
+            
+            for (Long tp : durationList) {
+                totalDuration += tp;
+            }
+            
+            double avgThroughput = currentEventCount * 1000000000 / totalDuration;
+            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            durationList.clear();
+            currentEventCount = 0;
+        }
     }
 
 
@@ -134,8 +192,27 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
     @Override
     public void receive(long timeStamp, Object[] data) {
+        startTime = System.nanoTime();
+        
         streamEventChunk.convertAndAssign(timeStamp, data);
         processAndClear(streamEventChunk);
+        
+        endTime = System.nanoTime();
+        durationList.add(endTime - startTime);
+        currentEventCount++;
+        
+        if(currentEventCount == 1000000) {
+            long totalDuration = 0;
+            
+            for (Long tp : durationList) {
+                totalDuration += tp;
+            }
+            
+            double avgThroughput = currentEventCount * 1000000000 / totalDuration;
+            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            durationList.clear();
+            currentEventCount = 0;
+        }
     }
     
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {

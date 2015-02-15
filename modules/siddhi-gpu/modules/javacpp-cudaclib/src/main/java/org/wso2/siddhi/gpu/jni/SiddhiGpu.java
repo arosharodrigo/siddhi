@@ -161,6 +161,7 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 // #include <string>
 
 // #include "GpuMetaEvent.h"
+// #include "CommonDefs.h"
 
 @Namespace("SiddhiGpu") @NoOffset public static class GpuQueryRuntime extends Pointer {
     static { Loader.load(); }
@@ -211,6 +212,7 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 // #include <stdio.h>
 // #include <string.h>
 // #include <string>
+// #include "CommonDefs.h"
 @Namespace("SiddhiGpu") @Opaque public static class GpuProcessorContext extends Pointer {
     public GpuProcessorContext() { }
     public GpuProcessorContext(Pointer p) { super(p); }
@@ -257,6 +259,7 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 // #include <list>
 // #include "DataTypes.h"
 // #include "GpuMetaEvent.h"
+// #include "CommonDefs.h"
 
 @Namespace("SiddhiGpu") @NoOffset public static class GpuProcessor extends Pointer {
     static { Loader.load(); }
@@ -376,6 +379,7 @@ public class SiddhiGpu extends org.wso2.siddhi.gpu.jni.presets.SiddhiGpu {
 
 // #include <stdlib.h>
 // #include <stdio.h>
+// #include "CommonDefs.h"
 
 @Namespace("SiddhiGpu") @NoOffset public static class GpuKernel extends Pointer {
     static { Loader.load(); }

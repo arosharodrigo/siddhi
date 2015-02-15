@@ -24,7 +24,7 @@
     <parent>
         <artifactId>siddhi-samples</artifactId>
         <groupId>org.wso2.siddhi</groupId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0.gpu-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

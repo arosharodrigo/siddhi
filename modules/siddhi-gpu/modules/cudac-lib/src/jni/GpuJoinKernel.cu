@@ -325,6 +325,8 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 				if(bOnCompareMatched)
 				{
 					// copy output event to buffer - map attributes from input streams to output stream
+					//
+
 					pResultInMatchingEvent->i_Type = GpuEvent::CURRENT;
 					pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
 					pResultInMatchingEvent->i_Timestamp = pInEvent->i_Timestamp;
@@ -1641,6 +1643,8 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 		i_LeftRemainingCount -= _iNumEvents;
 	}
 
+	pthread_mutex_unlock(&mtx_Lock);
+
 	if(!p_JoinProcessor->GetLeftTrigger())
 	{
 		_iNumEvents = 0;
@@ -1650,7 +1654,6 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 		_iNumEvents = _iNumEvents * i_LeftNumEventPerSegment;
 	}
 
-	pthread_mutex_unlock(&mtx_Lock);
 
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
 	GpuUtils::PrintByteBuffer(p_LeftResultEventBuffer->GetHostEventBuffer(), _iNumEvents,
@@ -1870,6 +1873,8 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 		i_RightRemainingCount -= _iNumEvents;
 	}
 
+	pthread_mutex_unlock(&mtx_Lock);
+
 	if(!p_JoinProcessor->GetRightTrigger())
 	{
 		_iNumEvents = 0;
@@ -1879,7 +1884,6 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 		_iNumEvents = _iNumEvents * i_RightNumEventPerSegment;
 	}
 
-	pthread_mutex_unlock(&mtx_Lock);
 
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
 	GpuUtils::PrintByteBuffer(p_RightResultEventBuffer->GetHostEventBuffer(), _iNumEvents,

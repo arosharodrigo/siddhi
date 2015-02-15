@@ -367,7 +367,7 @@ public class JoinMultipleQueryPerformance {
         twitterThread.join();
         tradeThread.join();
               
-        System.out.println("ComplexFilterMultipleQueryPerformance [EnableAsync=" + asyncEnabled +
+        System.out.println("JoinMultipleQueryPerformance [EnableAsync=" + asyncEnabled +
                 " GPUEnabled=" + gpuEnabled +
                 " TotalEventCount=" + totalEventCount +
                 " QueryCount=" + queryCount +
