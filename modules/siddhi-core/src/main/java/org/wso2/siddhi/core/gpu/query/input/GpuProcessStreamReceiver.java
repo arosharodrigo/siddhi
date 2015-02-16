@@ -36,12 +36,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private static final Logger log = Logger.getLogger(GpuProcessStreamReceiver.class);
     private GpuQueryProcessor gpuQueryProcessor;
     private GpuMetaStreamEvent gpuMetaEvent;
-//    private ConversionGpuEventChunk gpuEventChunk;
     private int streamIndex;
     private ByteBufferWriter eventBufferWriter;
     private SiddhiGpu.GpuStreamProcessor gpuStreamProcessor;
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
-//    private GpuQueryPostProcessor gpuQueryPostProcessor;
     private GpuQuerySelector selectProcessor;
     private int maximumEventBatchSize;
     private int minimumEventBatchSize;
@@ -64,11 +62,9 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         super(streamId, queryName);
         this.gpuQueryProcessor = null;
         this.gpuMetaEvent = null;
-//        this.gpuEventChunk = null;
         this.eventBufferWriter = null;
         this.currentEventCount = 0;
         this.gpuStreamProcessor = null;
-//        this.gpuQueryPostProcessor = null;
         this.selectProcessor = null;
         this.maximumEventBatchSize = 1024;
         this.minimumEventBatchSize = 1;
@@ -90,8 +86,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
 //        serializeBeginTime = System.nanoTime();
         
-//        ComplexEvent.Type type = event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT;
-//        eventBufferWriter.writeShort((short)type.ordinal());
         eventBufferWriter.writeShort((short)(!event.isExpired() ? 0 : 1));
         eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
         eventBufferWriter.writeLong(event.getTimestamp());
@@ -100,8 +94,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         int index = 0;
         for (GpuEventAttribute attrib : gpuMetaEvent.getAttributes()) {
-            //log.debug("[receive] writing attribute index=" + index + " attrib=" + attrib.toString() + " val=" + data[index] + 
-            //        " BufferIndex=" + eventBufferWriter.getBufferIndex() + " BufferPosition=" + eventBufferWriter.getBufferPosition());
+//            log.debug("[receive] writing attribute index=" + index + " attrib=" + attrib.toString() + " val=" + data[index] + 
+//                    " BufferIndex=" + eventBufferWriter.getBufferIndex() + " BufferPosition=" + eventBufferWriter.getBufferPosition());
             switch(attrib.type) {
             case BOOL:
                 eventBufferWriter.writeBool(((Boolean) data[index++]).booleanValue());

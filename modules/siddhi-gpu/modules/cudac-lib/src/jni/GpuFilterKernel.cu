@@ -14,6 +14,7 @@
 #include "GpuKernelDataTypes.h"
 #include "GpuFilterKernelCore.h"
 #include "GpuFilterKernel.h"
+#include "CpuFilterKernel.h"
 
 #include <cub/cub.cuh>
 
@@ -328,6 +329,8 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 {
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone", fp_Log);
+
+	EvaluateEvenetsInCpu(_iNumEvents);
 #endif
 
 	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
@@ -364,6 +367,9 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 			_iNumEvents,
 			p_ResultEventBuffer->GetDeviceEventBuffer()
 	);
+
+	CUDA_CHECK_RETURN(cudaPeekAtLastError());
+	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
 	if(b_LastKernel)
 	{
@@ -407,6 +413,129 @@ char * GpuFilterKernelStandalone::GetResultEventBuffer()
 int GpuFilterKernelStandalone::GetResultEventBufferSize()
 {
 	return p_ResultEventBuffer->GetEventBufferSizeInBytes();
+}
+
+void GpuFilterKernelStandalone::EvaluateEvenetsInCpu(int _iNumEvents)
+{
+	fprintf(fp_Log, "EvaluateEvenetsInCpu [NumEvents=%d] \n", _iNumEvents);
+
+	GpuMetaEvent * pEventMeta = p_InputEventBuffer->GetHostMetaEvent();
+	char * pBuffer = p_InputEventBuffer->GetHostEventBuffer();
+
+	fprintf(fp_Log, "EventMeta %d [", pEventMeta->i_AttributeCount);
+	for(int i=0; i<pEventMeta->i_AttributeCount; ++i)
+	{
+		fprintf(fp_Log, "Pos=%d,Type=%d,Len=%d|",
+				pEventMeta->p_Attributes[i].i_Position,
+				pEventMeta->p_Attributes[i].i_Type,
+				pEventMeta->p_Attributes[i].i_Length);
+	}
+	fprintf(fp_Log, "]\n");
+	fflush(fp_Log);
+
+	// get assigned filter
+	GpuFilterProcessor * pFilter = (GpuFilterProcessor*)p_Processor;
+	pFilter->Print(fp_Log);
+
+	int iNumBlocks = ceil((float)_iNumEvents / (float)i_ThreadBlockSize);
+
+	fprintf(fp_Log, "EvaluateEvenetsInCpu [Blocks=%d|ThreadsPerBlock=%d] \n", iNumBlocks, i_ThreadBlockSize);
+	fflush(fp_Log);
+
+	for(int blockidx=0; blockidx<iNumBlocks; ++blockidx)
+	{
+		for(int threadidx=0; threadidx<i_ThreadBlockSize; ++threadidx)
+		{
+			if((blockidx == _iNumEvents / i_ThreadBlockSize) && // last thread block
+					(threadidx >= _iNumEvents % i_ThreadBlockSize))
+			{
+				continue;
+			}
+
+			// get assigned event
+			int iEventIdx = (blockidx * i_ThreadBlockSize) +  threadidx;
+			char * pEvent = pBuffer + (pEventMeta->i_SizeOfEventInBytes * iEventIdx);
+
+			fprintf(fp_Log, "Event_%d <%p> ", iEventIdx, pEvent);
+
+			for(int a=0; a<pEventMeta->i_AttributeCount; ++a)
+			{
+				switch(pEventMeta->p_Attributes[a].i_Type)
+				{
+				case DataType::Boolean:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 2);
+					fprintf(fp_Log, "[Bool|Pos=%d|Len=2|Val=%d] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Int:
+				{
+					int32_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Int|Pos=%d|Len=4|Val=%d] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Long:
+				{
+					int64_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Long|Pos=%d|Len=8|Val=%" PRIi64 "] ", pEventMeta->p_Attributes[a].i_Position, i);
+				}
+				break;
+				case DataType::Float:
+				{
+					float f;
+					memcpy(&f, pEvent + pEventMeta->p_Attributes[a].i_Position, 4);
+					fprintf(fp_Log, "[Float|Pos=%d|Len=4|Val=%f] ", pEventMeta->p_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::Double:
+				{
+					double f;
+					memcpy(&f, pEvent + pEventMeta->p_Attributes[a].i_Position, 8);
+					fprintf(fp_Log, "[Double|Pos=%d|Len=8|Val=%f] ", pEventMeta->p_Attributes[a].i_Position, f);
+				}
+				break;
+				case DataType::StringIn:
+				{
+					int16_t i;
+					memcpy(&i, pEvent + pEventMeta->p_Attributes[a].i_Position, 2);
+					char * z = pEvent + pEventMeta->p_Attributes[a].i_Position + 2;
+					z[i] = 0;
+					fprintf(fp_Log, "[String|Pos=%d|Len=%d|Val=%s] ", pEventMeta->p_Attributes[a].i_Position, i, z);
+				}
+				break;
+				default:
+					break;
+				}
+			}
+
+			fprintf(fp_Log, "\n");
+			fflush(fp_Log);
+
+			SiddhiCpu::FilterEvalParameters mEval;
+			mEval.p_Filter = pFilter;
+			mEval.p_Meta = pEventMeta;
+			mEval.p_Event = pEvent;
+			mEval.i_CurrentIndex = 0;
+			mEval.fp_Log = fp_Log;
+
+			bool bResult = SiddhiCpu::Evaluate(mEval);
+			fflush(fp_Log);
+
+			if(bResult)
+			{
+				fprintf(fp_Log, "Matched [%d] \n", iEventIdx);
+			}
+			else // ~ possible way to avoid cudaMemset from host
+			{
+				fprintf(fp_Log, "Not Matched [%d] \n", iEventIdx);
+			}
+
+			fflush(fp_Log);
+		}
+	}
 }
 
 // ============================================================================================================

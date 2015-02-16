@@ -88,7 +88,6 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
             }
         }
         
-        // call output rate limiter
         if (firstEvent != null) {
             outputComplexEventChunk.add(firstEvent);
             outputRateLimiter.process(outputComplexEventChunk);
