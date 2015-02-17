@@ -2,17 +2,25 @@
 #define __GPU_WINDOW_EVENT_BUFFER_CU_
 
 #include "GpuWindowEventBuffer.h"
+#include "GpuMetaEvent.h"
+#include "GpuCudaHelper.h"
+#include "GpuUtils.h"
+#include <stdbool.h>
 
 namespace SiddhiGpu
 {
 
 GpuWindowEventBuffer::GpuWindowEventBuffer(std::string _sName, int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog) :
 		GpuStreamEventBuffer(_sName, _iDeviceId, _pMetaEvent, _fpLog),
-		i_RemainingCount(0),
-		p_ReadOnlyDeviceEventBufferPtr(NULL)
+		i_RemainingCount(0)
 {
 	fprintf(fp_Log, "[GpuWindowEventBuffer] <%s> Created with device id : %d \n", _sName.c_str(), i_DeviceId);
 	fflush(fp_Log);
+
+	i_ReadWriteIndex = 0;
+	i_ReadOnlyIndex = 1;
+	p_DeviceBufferPtrs[i_ReadWriteIndex] = NULL;
+	p_DeviceBufferPtrs[i_ReadOnlyIndex] = NULL;
 }
 
 GpuWindowEventBuffer::~GpuWindowEventBuffer()
@@ -21,10 +29,10 @@ GpuWindowEventBuffer::~GpuWindowEventBuffer()
 	fflush(fp_Log);
 
 
-	if(p_ReadOnlyDeviceEventBufferPtr)
+	if(p_DeviceBufferPtrs[i_ReadOnlyIndex])
 	{
-		CUDA_CHECK_RETURN(cudaFree(p_ReadOnlyDeviceEventBufferPtr));
-		p_ReadOnlyDeviceEventBufferPtr = NULL;
+		CUDA_CHECK_RETURN(cudaFree(p_DeviceBufferPtrs[i_ReadOnlyIndex]));
+		p_DeviceBufferPtrs[i_ReadOnlyIndex] = NULL;
 	}
 }
 
@@ -41,11 +49,14 @@ char * GpuWindowEventBuffer::CreateEventBuffer(int _iEventCount)
 	GpuCudaHelper::AllocateHostMemory(true, &p_UnalignedBuffer, &p_HostEventBuffer, i_EventBufferSizeInBytes, s_Name.c_str(), fp_Log);
 
 	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceEventBuffer, i_EventBufferSizeInBytes));
-	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_ReadOnlyDeviceEventBufferPtr, i_EventBufferSizeInBytes));
+	p_DeviceBufferPtrs[i_ReadWriteIndex] = p_DeviceEventBuffer;
+	char * pReadOnlyDeviceEventBufferPtr = NULL;
+	CUDA_CHECK_RETURN(cudaMalloc((void**) &pReadOnlyDeviceEventBufferPtr, i_EventBufferSizeInBytes));
+	p_DeviceBufferPtrs[i_ReadOnlyIndex] = pReadOnlyDeviceEventBufferPtr;
 
 	fprintf(fp_Log, "[GpuWindowEventBuffer] <%s> Host ByteBuffer [Ptr=%p Size=%d]\n", s_Name.c_str(), p_HostEventBuffer, i_EventBufferSizeInBytes);
-	fprintf(fp_Log, "[GpuWindowEventBuffer] <%s> Device ReadWrite ByteBuffer [Ptr=%p] \n", s_Name.c_str(), p_DeviceEventBuffer);
-	fprintf(fp_Log, "[GpuWindowEventBuffer] <%s> Device ReadOnly ByteBuffer [Ptr=%p] \n", s_Name.c_str(), p_ReadOnlyDeviceEventBufferPtr);
+	fprintf(fp_Log, "[GpuWindowEventBuffer] <%s> Device ReadWrite ByteBuffer [Ptr=%p] \n", s_Name.c_str(), p_DeviceBufferPtrs[i_ReadWriteIndex]);
+	fprintf(fp_Log, "[GpuWindowEventBuffer] <%s> Device ReadOnly ByteBuffer [Ptr=%p] \n", s_Name.c_str(), p_DeviceBufferPtrs[i_ReadOnlyIndex]);
 	fflush(fp_Log);
 
 	int GpuMetaEventSize = sizeof(GpuKernelMetaEvent) + sizeof(GpuKernelMetaAttribute) * p_HostMetaEvent->i_AttributeCount;
@@ -86,24 +97,24 @@ void GpuWindowEventBuffer::Sync(int _iNumEvents, bool _bAsync)
 	fprintf(fp_Log, "[GpuWindowEventBuffer] <%s> Sync : Async=%d\n", s_Name.c_str(), _bAsync);
 #endif
 
-#ifdef _GLIBCXX_ATOMIC_BUILTINS
+//#ifdef _GLIBCXX_ATOMIC_BUILTINS
 
 	// swap two buffers
 	// priority is for readonly buffer
 
-	char* tmp = p_ReadOnlyDeviceEventBufferPtr;
+	int tmp = i_ReadOnlyIndex;
 	while(!__sync_bool_compare_and_swap(
-			&p_ReadOnlyDeviceEventBufferPtr,
-			p_ReadOnlyDeviceEventBufferPtr,
-			p_DeviceEventBuffer)){};
+			&i_ReadOnlyIndex,
+			i_ReadOnlyIndex,
+			i_ReadWriteIndex)){};
 	while(!__sync_bool_compare_and_swap(
-			&p_DeviceEventBuffer,
-			p_DeviceEventBuffer,
+			&i_ReadWriteIndex,
+			i_ReadWriteIndex,
 			tmp)){};
 
-#else
-  #error no atomic operations available!
-#endif
+//#else
+//  #error no atomic operations available!
+//#endif
 
 	if(_iNumEvents > i_RemainingCount)
 	{
@@ -118,8 +129,8 @@ void GpuWindowEventBuffer::Sync(int _iNumEvents, bool _bAsync)
 	{
 		// update readwrite copy with swapped readonly buffer
 		CUDA_CHECK_RETURN(cudaMemcpyAsync(
-				p_DeviceEventBuffer,
-				p_ReadOnlyDeviceEventBufferPtr,
+				p_DeviceBufferPtrs[i_ReadWriteIndex],
+				p_DeviceBufferPtrs[i_ReadOnlyIndex],
 				i_EventBufferSizeInBytes,
 				cudaMemcpyDeviceToDevice));
 	}
@@ -127,8 +138,8 @@ void GpuWindowEventBuffer::Sync(int _iNumEvents, bool _bAsync)
 	{
 		// update readwrite copy with swapped readonly buffer
 		CUDA_CHECK_RETURN(cudaMemcpy(
-				p_DeviceEventBuffer,
-				p_ReadOnlyDeviceEventBufferPtr,
+				p_DeviceBufferPtrs[i_ReadWriteIndex],
+				p_DeviceBufferPtrs[i_ReadOnlyIndex],
 				i_EventBufferSizeInBytes,
 				cudaMemcpyDeviceToDevice));
 	}

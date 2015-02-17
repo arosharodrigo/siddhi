@@ -42,6 +42,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             workers[i].setOutputEventBuffer(outputEventBuffer.asReadOnlyBuffer());
             workers[i].setBufferStartPosition(i * workSize * gpuMetaStreamEvent.getEventSizeInBytes());
             workers[i].setEventCount(workSize);
+            ((GpuJoinQuerySelectorWorker)workers[i]).setSegmentEventCount(segmentEventCount);
             ((GpuJoinQuerySelectorWorker)workers[i]).setWorkStartEvent(i * workSize);
             ((GpuJoinQuerySelectorWorker)workers[i]).setWorkEndEvent((i * workSize) + workSize);
             
@@ -220,7 +221,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
         
         for(int i=0; i<workerSize; ++i) {
             
-            this.workers[i] = new GpuJoinQuerySelectorWorker(streamEventPool.clone(), streamEventConverter,
+            this.workers[i] = new GpuJoinQuerySelectorWorker(i, streamEventPool.clone(), streamEventConverter,
                     attributeProcessorList); // TODO: attributeProcessorList should be cloned
             this.workers[i].setGpuMetaStreamEvent(gpuMetaStreamEvent);
         }

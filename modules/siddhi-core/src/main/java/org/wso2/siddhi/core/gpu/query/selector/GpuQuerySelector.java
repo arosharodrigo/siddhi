@@ -324,7 +324,7 @@ public class GpuQuerySelector extends QuerySelector {
 
             for(int i=0; i<workerSize; ++i) {
 
-                this.workers[i] = new GpuQuerySelectorWorker(streamEventPool.clone(), streamEventConverter,
+                this.workers[i] = new GpuQuerySelectorWorker(i, streamEventPool.clone(), streamEventConverter,
                         attributeProcessorList); // TODO: attributeProcessorList should be cloned
                 this.workers[i].setGpuMetaStreamEvent(gpuMetaStreamEvent);
             }

@@ -14,6 +14,8 @@ import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcesso
 
 public class GpuQuerySelectorWorker implements Runnable {
 
+    protected int workerIndex;
+    
     protected ByteBuffer outputEventBuffer;
     protected int bufferStartPosition;
     protected int eventCount;
@@ -32,8 +34,9 @@ public class GpuQuerySelectorWorker implements Runnable {
     protected GpuMetaStreamEvent gpuMetaStreamEvent;
     protected StreamEventConverter streamEventConverter;
     
-    public GpuQuerySelectorWorker(StreamEventPool streamEventPool, StreamEventConverter streamEventConverter,
+    public GpuQuerySelectorWorker(int index, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter,
             List<AttributeProcessor> attributeProcessorList) {
+        this.workerIndex = index;
         this.streamEventPool = streamEventPool;
         this.streamEventConverter = streamEventConverter;
         this.attributeProcessorList = attributeProcessorList;

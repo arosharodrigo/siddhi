@@ -139,6 +139,7 @@ CULIBS += GpuIntBuffer
 CULIBS += GpuRawByteBuffer 
 CULIBS += GpuProcessorContext 
 CULIBS += GpuStreamEventBuffer 
+CULIBS += GpuWindowEventBuffer
 CULIBS += GpuFilterKernel 
 CULIBS += GpuLengthSlidingWindowKernel
 CULIBS += GpuJoinKernel 

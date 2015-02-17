@@ -19,8 +19,9 @@ public:
 	GpuWindowEventBuffer(std::string _sName, int _iDeviceId, GpuMetaEvent * _pMetaEvent, FILE * _fpLog);
 	virtual ~GpuWindowEventBuffer();
 
-	char * GetReadOnlyDeviceEventBuffer() { return p_ReadOnlyDeviceEventBufferPtr; }
-	char * GetReadWriteDeviceEventBuffer() { return p_DeviceEventBuffer; }
+	char * GetReadOnlyDeviceEventBuffer() { return p_DeviceBufferPtrs[i_ReadOnlyIndex]; }
+	char * GetReadWriteDeviceEventBuffer() { return p_DeviceBufferPtrs[i_ReadWriteIndex]; }
+	char * GetDeviceEventBuffer() { return p_DeviceBufferPtrs[i_ReadWriteIndex]; }
 
 	virtual char * CreateEventBuffer(int _iEventCount);
 
@@ -29,7 +30,10 @@ public:
 private:
 
 	int i_RemainingCount;
-	char * p_ReadOnlyDeviceEventBufferPtr;
+
+	char * p_DeviceBufferPtrs[2];
+	int i_ReadOnlyIndex;
+	int i_ReadWriteIndex;
 };
 
 }

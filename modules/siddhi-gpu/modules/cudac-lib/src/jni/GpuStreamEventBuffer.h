@@ -26,7 +26,7 @@ public:
 
 	int GetMaxEventCount() { return i_EventCount; }
 	char * GetHostEventBuffer() { return p_HostEventBuffer; }
-	char * GetDeviceEventBuffer() { return p_DeviceEventBuffer; }
+	virtual char * GetDeviceEventBuffer() { return p_DeviceEventBuffer; }
 	int GetEventBufferSizeInBytes() { return i_EventBufferSizeInBytes; }
 
 	void CopyToDevice(bool _bAsync);

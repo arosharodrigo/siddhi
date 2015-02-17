@@ -1140,8 +1140,8 @@ GpuJoinKernel::GpuJoinKernel(GpuProcessor * _pProc, GpuProcessorContext * _pLeft
 	p_DeviceOnCompareFilter(NULL),
 	i_LeftStreamWindowSize(_iLeftWindowSize),
 	i_RightStreamWindowSize(_iRightWindowSize),
-	i_LeftRemainingCount(_iLeftWindowSize),
-	i_RightRemainingCount(_iRightWindowSize),
+//	i_LeftRemainingCount(_iLeftWindowSize),
+//	i_RightRemainingCount(_iRightWindowSize),
 	i_LeftNumEventPerSegment(0),
 	i_RightNumEventPerSegment(0),
 	b_LeftFirstKernel(true),
@@ -1218,7 +1218,7 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			pGpuEvent->i_Type = GpuEvent::NONE;
 		}
 		p_LeftWindowEventBuffer->CopyToDevice(false);
-		p_LeftWindowEventBuffer->Sync(false);
+		p_LeftWindowEventBuffer->Sync(0, false);
 
 		i_InitializedStreamCount++;
 
@@ -1260,7 +1260,7 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			pGpuEvent->i_Type = GpuEvent::NONE;
 		}
 		p_RightWindowEventBuffer->CopyToDevice(false);
-		p_RightWindowEventBuffer->Sync(false);
+		p_RightWindowEventBuffer->Sync(0, false);
 
 		i_InitializedStreamCount++;
 
