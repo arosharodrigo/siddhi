@@ -62,7 +62,7 @@ ifeq ($(dbg),1)
       NVCCFLAGS += -g -G --ptxas-options=-v -maxrregcount=${MAXREGCOUNT} -lineinfo
       TARGET := debug
 else
-      NVCCFLAGS += -po -maxrregcount=${MAXREGCOUNT} -O3  --ptxas-options=-v
+      NVCCFLAGS += -po -maxrregcount=${MAXREGCOUNT} -O3  --ptxas-options=-v -DNDEBUG
       CCFLAGS += -O3
       LDFLAGS += -O3
       TARGET := release

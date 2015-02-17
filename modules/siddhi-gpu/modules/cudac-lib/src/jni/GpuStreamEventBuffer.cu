@@ -48,6 +48,13 @@ GpuStreamEventBuffer::~GpuStreamEventBuffer()
 	if(p_DeviceMetaEvent)
 	{
 		CUDA_CHECK_RETURN(cudaFree(p_DeviceMetaEvent));
+		p_DeviceMetaEvent = NULL;
+	}
+
+	if(p_DeviceEventBuffer)
+	{
+		CUDA_CHECK_RETURN(cudaFree(p_DeviceEventBuffer));
+		p_DeviceEventBuffer = NULL;
 	}
 }
 

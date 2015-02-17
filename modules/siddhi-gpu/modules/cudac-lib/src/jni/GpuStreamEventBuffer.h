@@ -22,7 +22,7 @@ public:
 	virtual ~GpuStreamEventBuffer();
 
 	void SetEventBuffer(char * _pBuffer, int _iBufferSizeInBytes, int _iEventCount);
-	char * CreateEventBuffer(int _iEventCount);
+	virtual char * CreateEventBuffer(int _iEventCount);
 
 	int GetMaxEventCount() { return i_EventCount; }
 	char * GetHostEventBuffer() { return p_HostEventBuffer; }

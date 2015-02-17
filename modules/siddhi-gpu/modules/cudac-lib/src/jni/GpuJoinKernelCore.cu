@@ -1037,28 +1037,6 @@ __device__ const char * ExecuteStringExpression(ExpressionEvalParameters & _rPar
 	return NULL;
 }
 
-// ==================================================================================================
-
-__device__ bool AndCondition(ExpressionEvalParameters & _rParameters)
-{
-	return (Evaluate(_rParameters) && Evaluate(_rParameters));
-}
-
-__device__ bool OrCondition(ExpressionEvalParameters & _rParameters)
-{
-	return (Evaluate(_rParameters) || Evaluate(_rParameters));
-}
-
-__device__ bool NotCondition(ExpressionEvalParameters & _rParameters)
-{
-	return (!Evaluate(_rParameters));
-}
-
-__device__ bool BooleanCondition(ExpressionEvalParameters & _rParameters)
-{
-	return (Evaluate(_rParameters));
-}
-
 // =================================================================================================
 
 // set all the executor functions here
@@ -1180,6 +1158,34 @@ __device__ OnCompareFuncPointer mOnCompareExecutors[EXECUTOR_CONDITION_COUNT] = 
 
 		InvalidOperator,
 };
+
+// ==================================================================================================
+
+__device__ bool AndCondition(ExpressionEvalParameters & _rParameters)
+{
+//	return (Evaluate(_rParameters) & Evaluate(_rParameters));
+	return (*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
+			(*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+}
+
+__device__ bool OrCondition(ExpressionEvalParameters & _rParameters)
+{
+//	return (Evaluate(_rParameters) | Evaluate(_rParameters));
+	return (*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
+			(*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+}
+
+__device__ bool NotCondition(ExpressionEvalParameters & _rParameters)
+{
+//	return (!Evaluate(_rParameters));
+	return !((*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
+}
+
+__device__ bool BooleanCondition(ExpressionEvalParameters & _rParameters)
+{
+//	return (Evaluate(_rParameters));
+	return ((*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
+}
 
 // =========================================
 

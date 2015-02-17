@@ -90,4 +90,11 @@ public class StreamEventPool {
     public int getSize() {
         return size;
     }
+    
+    public StreamEventPool clone() {
+        StreamEventPool cloned = new StreamEventPool(eventFactory.getBeforeWindowDataSize(), 
+                eventFactory.getOnAfterWindowDataSize(), eventFactory.getOutputDataSize(), size);
+        
+        return cloned;
+    }
 }

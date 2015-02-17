@@ -19,6 +19,7 @@ namespace SiddhiGpu
 	if (_m_cudaStat != cudaSuccess) {										\
 		fprintf(stderr, "Error [%s] at line [%d] in file [%s]\n",			\
 				cudaGetErrorString(_m_cudaStat), __LINE__, __FILE__);		\
+		cudaDeviceReset();                                                  \
 		exit(1);															\
 	} }
 
@@ -29,6 +30,16 @@ namespace SiddhiGpu
 				cudaGetErrorString(_m_cudaStat), __LINE__, __FILE__);		\
 	} }
 
+#define CUDA_CHECK_SET_FLAG(value, flag) {											\
+	cudaError_t _m_cudaStat = value;										\
+	if (_m_cudaStat != cudaSuccess) {										\
+		fprintf(stderr, "Error [%s] at line [%d] in file [%s]\n",			\
+				cudaGetErrorString(_m_cudaStat), __LINE__, __FILE__);		\
+		flag = true;                                                        \
+	} else {                                                                \
+        flag = false;                                                       \
+	}}
+
 class GpuCudaHelper
 {
 public:
@@ -38,6 +49,7 @@ public:
 
 	static void AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, const char * _zTag, FILE * _fpLog);
 	static void FreeHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, const char * _zTag, FILE * _fpLog);
+
 };
 
 }

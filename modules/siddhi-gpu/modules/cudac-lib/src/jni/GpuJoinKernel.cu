@@ -7,6 +7,7 @@
 #include "GpuProcessor.h"
 #include "GpuProcessorContext.h"
 #include "GpuStreamEventBuffer.h"
+#include "GpuWindowEventBuffer.h"
 #include "GpuRawByteBuffer.h"
 #include "GpuIntBuffer.h"
 #include "GpuKernelDataTypes.h"
@@ -1195,7 +1196,7 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 
 		// left event window
 
-		p_LeftWindowEventBuffer = new GpuStreamEventBuffer("LeftWindowEventBuffer", p_LeftContext->GetDeviceId(), _pMetaEvent, fp_LeftLog);
+		p_LeftWindowEventBuffer = new GpuWindowEventBuffer("LeftWindowEventBuffer", p_LeftContext->GetDeviceId(), _pMetaEvent, fp_LeftLog);
 		p_LeftWindowEventBuffer->CreateEventBuffer(i_LeftStreamWindowSize);
 
 		fprintf(fp_LeftLog, "[GpuJoinKernel] Created device left window buffer : Length=%d Size=%d bytes\n", i_LeftStreamWindowSize,
@@ -1217,6 +1218,7 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			pGpuEvent->i_Type = GpuEvent::NONE;
 		}
 		p_LeftWindowEventBuffer->CopyToDevice(false);
+		p_LeftWindowEventBuffer->Sync(false);
 
 		i_InitializedStreamCount++;
 
@@ -1236,7 +1238,7 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 
 		// right event window
 
-		p_RightWindowEventBuffer = new GpuStreamEventBuffer("RightWindowEventBuffer", p_RightContext->GetDeviceId(), _pMetaEvent, fp_RightLog);
+		p_RightWindowEventBuffer = new GpuWindowEventBuffer("RightWindowEventBuffer", p_RightContext->GetDeviceId(), _pMetaEvent, fp_RightLog);
 		p_RightWindowEventBuffer->CreateEventBuffer(i_RightStreamWindowSize);
 
 		fprintf(fp_RightLog, "[GpuJoinKernel] Created device right window buffer : Length=%d Size=%d bytes\n", i_RightStreamWindowSize,
@@ -1258,6 +1260,7 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			pGpuEvent->i_Type = GpuEvent::NONE;
 		}
 		p_RightWindowEventBuffer->CopyToDevice(false);
+		p_RightWindowEventBuffer->Sync(false);
 
 		i_InitializedStreamCount++;
 
@@ -1472,8 +1475,8 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_LeftLog, "[GpuJoinKernel] ProcessLeftStream : Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fprintf(fp_LeftLog, "[GpuJoinKernel] ProcessLeftStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
-			_iNumEvents, i_LeftRemainingCount, i_LeftStreamWindowSize, i_RightRemainingCount, i_RightStreamWindowSize,
-			p_JoinProcessor->GetWithInTimeMilliSeconds());
+			_iNumEvents, p_LeftWindowEventBuffer->GetRemainingCount(), i_LeftStreamWindowSize, p_RightWindowEventBuffer->GetRemainingCount(),
+			i_RightStreamWindowSize, p_JoinProcessor->GetWithInTimeMilliSeconds());
 	fflush(fp_LeftLog);
 #endif
 
@@ -1482,11 +1485,11 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 			p_LeftInputEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftInputBuffer", fp_LeftLog);
 
 	p_LeftWindowEventBuffer->CopyToHost(false);
-	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - i_LeftRemainingCount),
+	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - p_LeftWindowEventBuffer->GetRemainingCount()),
 			p_LeftWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftWindowBuffer", fp_LeftLog);
 
 	p_RightWindowEventBuffer->CopyToHost(false);
-	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - i_RightRemainingCount),
+	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - p_RightWindowEventBuffer->GetRemainingCount()),
 			p_RightWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightWindowBuffer", fp_LeftLog);
 
 	fflush(fp_LeftLog);
@@ -1520,11 +1523,11 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 					_iNumEvents,
 					p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
 					i_LeftStreamWindowSize,
-					i_LeftRemainingCount,
+					p_LeftWindowEventBuffer->GetRemainingCount(),
 					p_RightInputEventBuffer->GetDeviceMetaEvent(),
-					p_RightWindowEventBuffer->GetDeviceEventBuffer(),
+					p_RightWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
 					i_RightStreamWindowSize,
-					i_RightRemainingCount,
+					p_RightWindowEventBuffer->GetRemainingCount(),
 					p_DeviceOnCompareFilter,
 					p_JoinProcessor->GetWithInTimeMilliSeconds(),
 					p_LeftResultEventBuffer->GetDeviceMetaEvent(),
@@ -1541,11 +1544,11 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 					_iNumEvents,
 					p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
 					i_LeftStreamWindowSize,
-					i_LeftRemainingCount,
+					p_LeftWindowEventBuffer->GetRemainingCount(),
 					p_RightInputEventBuffer->GetDeviceMetaEvent(),
-					p_RightWindowEventBuffer->GetDeviceEventBuffer(),
+					p_RightWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
 					i_RightStreamWindowSize,
-					i_RightRemainingCount,
+					p_RightWindowEventBuffer->GetRemainingCount(),
 					p_DeviceOnCompareFilter,
 					p_JoinProcessor->GetWithInTimeMilliSeconds(),
 					p_LeftResultEventBuffer->GetDeviceMetaEvent(),
@@ -1563,11 +1566,11 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 					_iNumEvents,
 					p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
 					i_LeftStreamWindowSize,
-					i_LeftRemainingCount,
+					p_LeftWindowEventBuffer->GetRemainingCount(),
 					p_RightInputEventBuffer->GetDeviceMetaEvent(),
-					p_RightWindowEventBuffer->GetDeviceEventBuffer(),
+					p_RightWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
 					i_RightStreamWindowSize,
-					i_RightRemainingCount,
+					p_RightWindowEventBuffer->GetRemainingCount(),
 					p_DeviceOnCompareFilter,
 					p_JoinProcessor->GetWithInTimeMilliSeconds(),
 					p_LeftResultEventBuffer->GetDeviceMetaEvent(),
@@ -1583,7 +1586,7 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 	numBlocks = dim3(numBlocksX, numBlocksY);
 
 	// we need to synchronize processing of JoinKernel as only one batch of events can be there at a time
-	pthread_mutex_lock(&mtx_Lock);
+//	pthread_mutex_lock(&mtx_Lock);
 
 //	char               * _pInputEventBuffer,     // original input events buffer
 //	int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
@@ -1599,7 +1602,7 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 			_iNumEvents,
 			p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
 			i_LeftStreamWindowSize,
-			i_LeftRemainingCount,
+			p_LeftWindowEventBuffer->GetRemainingCount(),
 			p_LeftInputEventBuffer->GetMaxEventCount(),
 			p_LeftInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
 			i_ThreadBlockSize
@@ -1616,6 +1619,8 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	p_LeftWindowEventBuffer->Sync(_iNumEvents, true);
 
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_LeftLog, "[GpuJoinKernel] Kernel complete \n");
@@ -1634,16 +1639,16 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 #endif
 
 
-	if(_iNumEvents > i_LeftRemainingCount)
-	{
-		i_LeftRemainingCount = 0;
-	}
-	else
-	{
-		i_LeftRemainingCount -= _iNumEvents;
-	}
+//	if(_iNumEvents > i_LeftRemainingCount)
+//	{
+//		i_LeftRemainingCount = 0;
+//	}
+//	else
+//	{
+//		i_LeftRemainingCount -= _iNumEvents;
+//	}
 
-	pthread_mutex_unlock(&mtx_Lock);
+//	pthread_mutex_unlock(&mtx_Lock);
 
 	if(!p_JoinProcessor->GetLeftTrigger())
 	{
@@ -1665,7 +1670,7 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 	p_LeftWindowEventBuffer->CopyToHost(true);
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - i_LeftRemainingCount),
+	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - p_LeftWindowEventBuffer->GetRemainingCount()),
 			p_LeftWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftWindowBuffer", fp_LeftLog);
 	fflush(fp_LeftLog);
 #endif
@@ -1703,8 +1708,8 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessRightStream : Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
 	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessLeftStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
-			_iNumEvents, i_LeftRemainingCount, i_LeftStreamWindowSize, i_RightRemainingCount, i_RightStreamWindowSize,
-			p_JoinProcessor->GetWithInTimeMilliSeconds());
+			_iNumEvents, p_LeftWindowEventBuffer->GetRemainingCount(), i_LeftStreamWindowSize, p_RightWindowEventBuffer->GetRemainingCount(),
+			i_RightStreamWindowSize, p_JoinProcessor->GetWithInTimeMilliSeconds());
 	fflush(fp_RightLog);
 #endif
 
@@ -1713,11 +1718,11 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 			p_RightInputEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightInputBuffer", fp_RightLog);
 
 	p_LeftWindowEventBuffer->CopyToHost(false);
-	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - i_LeftRemainingCount),
+	GpuUtils::PrintByteBuffer(p_LeftWindowEventBuffer->GetHostEventBuffer(), (i_LeftStreamWindowSize - p_LeftWindowEventBuffer->GetRemainingCount()),
 			p_LeftWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:LeftWindowBuffer", fp_RightLog);
 
 	p_RightWindowEventBuffer->CopyToHost(false);
-	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - i_RightRemainingCount),
+	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - p_RightWindowEventBuffer->GetRemainingCount()),
 			p_RightWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightWindowBuffer", fp_RightLog);
 
 	fflush(fp_RightLog);
@@ -1750,11 +1755,11 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 					_iNumEvents,
 					p_RightWindowEventBuffer->GetDeviceEventBuffer(),
 					i_RightStreamWindowSize,
-					i_RightRemainingCount,
+					p_RightWindowEventBuffer->GetRemainingCount(),
 					p_LeftInputEventBuffer->GetDeviceMetaEvent(),
-					p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
+					p_LeftWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
 					i_LeftStreamWindowSize,
-					i_LeftRemainingCount,
+					p_LeftWindowEventBuffer->GetRemainingCount(),
 					p_DeviceOnCompareFilter,
 					p_JoinProcessor->GetWithInTimeMilliSeconds(),
 					p_RightResultEventBuffer->GetDeviceMetaEvent(),
@@ -1771,11 +1776,11 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 					_iNumEvents,
 					p_RightWindowEventBuffer->GetDeviceEventBuffer(),
 					i_RightStreamWindowSize,
-					i_RightRemainingCount,
+					p_RightWindowEventBuffer->GetRemainingCount(),
 					p_LeftInputEventBuffer->GetDeviceMetaEvent(),
-					p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
+					p_LeftWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
 					i_LeftStreamWindowSize,
-					i_LeftRemainingCount,
+					p_LeftWindowEventBuffer->GetRemainingCount(),
 					p_DeviceOnCompareFilter,
 					p_JoinProcessor->GetWithInTimeMilliSeconds(),
 					p_RightResultEventBuffer->GetDeviceMetaEvent(),
@@ -1793,11 +1798,11 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 					_iNumEvents,
 					p_RightWindowEventBuffer->GetDeviceEventBuffer(),
 					i_RightStreamWindowSize,
-					i_RightRemainingCount,
+					p_RightWindowEventBuffer->GetRemainingCount(),
 					p_LeftInputEventBuffer->GetDeviceMetaEvent(),
-					p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
+					p_LeftWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
 					i_LeftStreamWindowSize,
-					i_LeftRemainingCount,
+					p_LeftWindowEventBuffer->GetRemainingCount(),
 					p_DeviceOnCompareFilter,
 					p_JoinProcessor->GetWithInTimeMilliSeconds(),
 					p_RightResultEventBuffer->GetDeviceMetaEvent(),
@@ -1813,7 +1818,7 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 	numBlocks = dim3(numBlocksX, numBlocksY);
 
 	// we need to synchronize processing of JoinKernel as only one batch of events can be there at a time
-	pthread_mutex_lock(&mtx_Lock);
+//	pthread_mutex_lock(&mtx_Lock);
 
 //	char               * _pInputEventBuffer,     // original input events buffer
 //	int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
@@ -1829,7 +1834,7 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 			_iNumEvents,
 			p_RightWindowEventBuffer->GetDeviceEventBuffer(),
 			i_RightStreamWindowSize,
-			i_RightRemainingCount,
+			p_RightWindowEventBuffer->GetRemainingCount(),
 			p_RightInputEventBuffer->GetMaxEventCount(),
 			p_RightInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
 			i_ThreadBlockSize
@@ -1846,6 +1851,8 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+	p_RightWindowEventBuffer->Sync(_iNumEvents, true);
 
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_RightLog, "[GpuJoinKernel] Kernel complete \n");
@@ -1864,16 +1871,16 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 #endif
 
 
-	if(_iNumEvents > i_RightRemainingCount)
-	{
-		i_RightRemainingCount = 0;
-	}
-	else
-	{
-		i_RightRemainingCount -= _iNumEvents;
-	}
+//	if(_iNumEvents > i_RightRemainingCount)
+//	{
+//		i_RightRemainingCount = 0;
+//	}
+//	else
+//	{
+//		i_RightRemainingCount -= _iNumEvents;
+//	}
 
-	pthread_mutex_unlock(&mtx_Lock);
+//	pthread_mutex_unlock(&mtx_Lock);
 
 	if(!p_JoinProcessor->GetRightTrigger())
 	{
@@ -1895,7 +1902,7 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 	p_RightWindowEventBuffer->CopyToHost(true);
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - i_RightRemainingCount),
+	GpuUtils::PrintByteBuffer(p_RightWindowEventBuffer->GetHostEventBuffer(), (i_RightStreamWindowSize - p_RightWindowEventBuffer->GetRemainingCount()),
 			p_RightWindowEventBuffer->GetHostMetaEvent(), "GpuJoinKernel:RightWindowBuffer", fp_RightLog);
 	fflush(fp_RightLog);
 #endif

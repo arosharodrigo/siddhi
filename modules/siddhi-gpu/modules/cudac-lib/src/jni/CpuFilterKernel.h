@@ -8,13 +8,14 @@
 #ifndef _CPUFILTERKERNEL_H_
 #define _CPUFILTERKERNEL_H_
 
+#include <stdint.h>
+#include <stdio.h>
 
+namespace SiddhiGpu { class GpuFilterProcessor; }
+namespace SiddhiGpu { class GpuMetaEvent; }
 
 namespace SiddhiCpu
 {
-
-class SiddhiGpu::GpuFilterProcessor;
-class SiddhiGpu::GpuMetaEvent;
 
 typedef struct FilterEvalParameters
 {

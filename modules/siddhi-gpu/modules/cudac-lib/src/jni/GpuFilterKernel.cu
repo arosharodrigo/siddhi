@@ -258,6 +258,9 @@ GpuFilterKernelStandalone::~GpuFilterKernelStandalone()
 
 bool GpuFilterKernelStandalone::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
 {
+	//TODO: remove
+	cudaDeviceSetLimit(cudaLimitPrintfFifoSize, 10 * 1024 * 1024);
+
 	fprintf(fp_Log, "[GpuFilterKernelStandalone] Initialize : StreamIndex=%d\n", _iStreamIndex);
 	fflush(fp_Log);
 
@@ -328,9 +331,9 @@ bool GpuFilterKernelStandalone::Initialize(int _iStreamIndex, GpuMetaEvent * _pM
 void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 {
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
-	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone", fp_Log);
+	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone::In", fp_Log);
 
-	EvaluateEvenetsInCpu(_iNumEvents);
+	//EvaluateEventsInCpu(_iNumEvents);
 #endif
 
 	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
@@ -353,7 +356,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 	dim3 numThreads = dim3(i_ThreadBlockSize, 1);
 
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
-	fprintf(fp_Log, "[GpuFilterKernelStandalone] Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
+	fprintf(fp_Log, "[GpuFilterKernelStandalone] Invoke kernel Blocks(%d,%d) Threads(%d,%d) Events=%d\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1, _iNumEvents);
 	fflush(fp_Log);
 #endif
 
@@ -368,8 +371,16 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 			p_ResultEventBuffer->GetDeviceEventBuffer()
 	);
 
-	CUDA_CHECK_RETURN(cudaPeekAtLastError());
-	CUDA_CHECK_RETURN(cudaThreadSynchronize());
+	//printf("Sync=%d\n",_iNumEvents);
+	// TODO: remove this
+	bool flag = false;
+	CUDA_CHECK_SET_FLAG(cudaDeviceSynchronize(), flag);
+	if(flag)
+	{
+		GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone::In", fp_Log);
+		cudaDeviceReset();
+		exit(1);
+	}
 
 	if(b_LastKernel)
 	{
@@ -379,7 +390,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-#if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
 	fprintf(fp_Log, "[GpuFilterKernelStandalone] ProcessEventsFilterKernelStandalone results\n");
 	int * pResults = p_ResultEventBuffer->GetHostEventBuffer();
 	for(int i=0; i<_iNumEvents; ++i)
@@ -415,7 +426,7 @@ int GpuFilterKernelStandalone::GetResultEventBufferSize()
 	return p_ResultEventBuffer->GetEventBufferSizeInBytes();
 }
 
-void GpuFilterKernelStandalone::EvaluateEvenetsInCpu(int _iNumEvents)
+void GpuFilterKernelStandalone::EvaluateEventsInCpu(int _iNumEvents)
 {
 	fprintf(fp_Log, "EvaluateEvenetsInCpu [NumEvents=%d] \n", _iNumEvents);
 

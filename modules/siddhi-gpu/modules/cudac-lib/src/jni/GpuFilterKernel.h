@@ -33,7 +33,7 @@ public:
 	int GetResultEventBufferSize();
 
 private:
-	void EvaluateEvenetsInCpu(int _iNumEvents);
+	void EvaluateEventsInCpu(int _iNumEvents);
 
 	GpuProcessorContext * p_Context;
 	GpuKernelFilter * p_DeviceFilter;

@@ -19,6 +19,7 @@ class GpuMetaEvent;
 class GpuProcessor;
 class GpuProcessorContext;
 class GpuStreamEventBuffer;
+class GpuWindowEventBuffer;
 class GpuIntBuffer;
 class GpuRawByteBuffer;
 class GpuJoinProcessor;
@@ -62,17 +63,19 @@ private:
 
 	GpuStreamEventBuffer * p_LeftInputEventBuffer;
 	GpuStreamEventBuffer * p_RightInputEventBuffer;
-	GpuStreamEventBuffer * p_LeftWindowEventBuffer;
-	GpuStreamEventBuffer * p_RightWindowEventBuffer;
+
+	GpuWindowEventBuffer * p_LeftWindowEventBuffer;
+	GpuWindowEventBuffer * p_RightWindowEventBuffer;
 
 	GpuStreamEventBuffer * p_LeftResultEventBuffer;
 	GpuStreamEventBuffer * p_RightResultEventBuffer;
+
 	GpuKernelFilter * p_DeviceOnCompareFilter;
 
 	int i_LeftStreamWindowSize;
 	int i_RightStreamWindowSize;
-	int i_LeftRemainingCount;
-	int i_RightRemainingCount;
+//	int i_LeftRemainingCount;
+//	int i_RightRemainingCount;
 
 	int i_LeftNumEventPerSegment;
 	int i_RightNumEventPerSegment;

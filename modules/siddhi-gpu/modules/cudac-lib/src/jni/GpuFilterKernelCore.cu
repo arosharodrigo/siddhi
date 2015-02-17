@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <float.h>
+#include <assert.h>
 
 namespace SiddhiGpu
 {
@@ -705,6 +706,8 @@ __device__ bool ContainsOperator(FilterEvalParameters & _rParameters)
 
 __device__ bool ExecuteBoolExpression(FilterEvalParameters & _rParameters)
 {
+//	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
+
 	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
 	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
@@ -745,6 +748,8 @@ __device__ bool ExecuteBoolExpression(FilterEvalParameters & _rParameters)
 
 __device__ int ExecuteIntExpression(FilterEvalParameters & _rParameters)
 {
+//	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
+
 	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
 	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
@@ -803,6 +808,9 @@ __device__ int ExecuteIntExpression(FilterEvalParameters & _rParameters)
 
 __device__ int64_t ExecuteLongExpression(FilterEvalParameters & _rParameters)
 {
+//	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
+//	printf("EL=%d.%d|%d\n", blockIdx.x, threadIdx.x, _rParameters.i_CurrentIndex);
+
 	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
 	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
@@ -813,6 +821,7 @@ __device__ int64_t ExecuteLongExpression(FilterEvalParameters & _rParameters)
 		{
 			if(mExecutorNode.m_ConstValue.e_Type == DataType::Long)
 			{
+//				printf("EC=%d.%d|%d\n", blockIdx.x, threadIdx.x, _rParameters.i_CurrentIndex);
 				_rParameters.i_CurrentIndex++;
 				return mExecutorNode.m_ConstValue.m_Value.l_LongVal;
 			}
@@ -825,6 +834,7 @@ __device__ int64_t ExecuteLongExpression(FilterEvalParameters & _rParameters)
 			{
 				int64_t i;
 				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 8);
+//				printf("EV=%d.%d|%d\n", blockIdx.x, threadIdx.x, _rParameters.i_CurrentIndex);
 				_rParameters.i_CurrentIndex++;
 				return i;
 			}
@@ -861,6 +871,8 @@ __device__ int64_t ExecuteLongExpression(FilterEvalParameters & _rParameters)
 
 __device__ float ExecuteFloatExpression(FilterEvalParameters & _rParameters)
 {
+//	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
+
 	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
 	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
@@ -919,6 +931,8 @@ __device__ float ExecuteFloatExpression(FilterEvalParameters & _rParameters)
 
 __device__ double ExecuteDoubleExpression(FilterEvalParameters & _rParameters)
 {
+//	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
+
 	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
 	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
@@ -977,6 +991,8 @@ __device__ double ExecuteDoubleExpression(FilterEvalParameters & _rParameters)
 
 __device__ const char * ExecuteStringExpression(FilterEvalParameters & _rParameters)
 {
+//	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
+
 	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
 	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
@@ -1018,28 +1034,6 @@ __device__ const char * ExecuteStringExpression(FilterEvalParameters & _rParamet
 
 	_rParameters.i_CurrentIndex++;
 	return NULL;
-}
-
-// ==================================================================================================
-
-__device__ bool AndCondition(FilterEvalParameters & _rParameters)
-{
-	return (Evaluate(_rParameters) && Evaluate(_rParameters));
-}
-
-__device__ bool OrCondition(FilterEvalParameters & _rParameters)
-{
-	return (Evaluate(_rParameters) || Evaluate(_rParameters));
-}
-
-__device__ bool NotCondition(FilterEvalParameters & _rParameters)
-{
-	return (!Evaluate(_rParameters));
-}
-
-__device__ bool BooleanCondition(FilterEvalParameters & _rParameters)
-{
-	return (Evaluate(_rParameters));
 }
 
 // =========================================
@@ -1161,14 +1155,49 @@ __device__ ExecutorFuncPointer mExecutors[EXECUTOR_CONDITION_COUNT] = {
 
 		ContainsOperator,
 
-		InvalidOperator,
+		InvalidOperator
 };
+
+
+// ==================================================================================================
+
+__device__ bool AndCondition(FilterEvalParameters & _rParameters)
+{
+//	return (Evaluate(_rParameters) & Evaluate(_rParameters));
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
+			(*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+}
+
+__device__ bool OrCondition(FilterEvalParameters & _rParameters)
+{
+	//return (Evaluate(_rParameters) | Evaluate(_rParameters));
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
+			(*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+}
+
+__device__ bool NotCondition(FilterEvalParameters & _rParameters)
+{
+	//return (!Evaluate(_rParameters));
+	return !((*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
+}
+
+__device__ bool BooleanCondition(FilterEvalParameters & _rParameters)
+{
+	//return (Evaluate(_rParameters));
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+}
+
 
 // =========================================
 
 // evaluate event with an executor tree
 __device__ bool Evaluate(FilterEvalParameters & _rParameters)
 {
+//	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
+//	assert(_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex].e_ConditionType < EXECUTOR_CONDITION_COUNT);
+
+	//printf("E=%d.%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex);
+
 	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 

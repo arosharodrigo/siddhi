@@ -278,258 +278,331 @@ bool NoopOperator(FilterEvalParameters & _rParameters)
 
 bool EqualCompareBoolBool(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareBoolBool [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareBoolBool [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+
+	return res;
 }
 
 bool EqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareIntInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareIntInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareIntLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareIntLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareIntFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareIntFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareIntDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareIntDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareLongInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareLongInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareLongLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareLongLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareLongFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareLongFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareLongDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareLongDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 
 bool EqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareFloatDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) == ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) == ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) == ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareDoubleDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) == ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool EqualCompareStringString(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ EqualCompareStringString [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ EqualCompareStringString [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (cuda_strcmp(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
+	bool res = (cuda_strcmp(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
-
 /// ============================================================================
 // NotEqual operator
 
 bool NotEqualCompareBoolBool(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareBoolBool [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareBoolBool [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareIntDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareLongDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareFloatDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) != ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) != ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) != ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareDoubleDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) != ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool NotEqualCompareStringString(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotEqualCompareStringString [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotEqualCompareStringString [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (!cuda_strcmp(ExecuteStringExpression(_rParameters),ExecuteStringExpression(_rParameters)));
+	bool res = (!cuda_strcmp(ExecuteStringExpression(_rParameters),ExecuteStringExpression(_rParameters)));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 /// ============================================================================
@@ -539,114 +612,146 @@ bool NotEqualCompareStringString(FilterEvalParameters & _rParameters)
 
 bool GreaterThanCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareIntDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareLongDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareFloatDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) > ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) > ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) > ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterThanCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterThanCompareDoubleDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) > ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 /// ============================================================================
@@ -655,114 +760,146 @@ bool GreaterThanCompareDoubleDouble(FilterEvalParameters & _rParameters)
 
 bool LessThanCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareIntDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareLongDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareFloatDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) < ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) < ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) < ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessThanCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessThanCompareDoubleDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) < ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 /// ============================================================================
@@ -770,114 +907,146 @@ bool LessThanCompareDoubleDouble(FilterEvalParameters & _rParameters)
 
 bool GreaterAndEqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareIntDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareLongDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareFloatDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) >= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) >= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) >= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool GreaterAndEqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ GreaterAndEqualCompareDoubleDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) >= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 /// ============================================================================
@@ -885,121 +1054,156 @@ bool GreaterAndEqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 
 bool LessAndEqualCompareIntInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareIntLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareIntFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareIntDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareIntDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteIntExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteIntExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareLongInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareLongLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareLongFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareLongDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareLongDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteLongExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteLongExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareFloatInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareFloatLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareFloatFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareFloatDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareFloatDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteFloatExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteFloatExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareDoubleInt(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleInt [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleInt [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) <= ExecuteIntExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareDoubleLong(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleLong [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleLong [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) <= ExecuteLongExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareDoubleFloat(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleFloat [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleFloat [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) <= ExecuteFloatExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 bool LessAndEqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleDouble [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ LessAndEqualCompareDoubleDouble [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (ExecuteDoubleExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	bool res = (ExecuteDoubleExpression(_rParameters) <= ExecuteDoubleExpression(_rParameters));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
+
 
 bool ContainsOperator(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ ContainsOperator [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ ContainsOperator [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (cuda_contains(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
+	bool res = (cuda_contains(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
+	fprintf(_rParameters.fp_Log, "Eval=%d } ", res);
+	return res;
 }
 
 
@@ -1410,30 +1614,38 @@ const char * ExecuteStringExpression(FilterEvalParameters & _rParameters)
 
 bool AndCondition(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ AndCondition [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ AndCondition [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (Evaluate(_rParameters) && Evaluate(_rParameters));
+	bool res = Evaluate(_rParameters) & Evaluate(_rParameters);
+	fprintf(_rParameters.fp_Log, " Eval=%d } ", res);
+	return (res);
 }
 
 bool OrCondition(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ OrCondition [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ OrCondition [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (Evaluate(_rParameters) || Evaluate(_rParameters));
+	bool res = Evaluate(_rParameters) | Evaluate(_rParameters);
+	fprintf(_rParameters.fp_Log, " Eval=%d } ", res);
+	return (res);
 }
 
 bool NotCondition(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ NotCondition [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ NotCondition [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (!Evaluate(_rParameters));
+	bool res = !Evaluate(_rParameters);
+	fprintf(_rParameters.fp_Log, " Eval=%d } ", res);
+	return (res);
 }
 
 bool BooleanCondition(FilterEvalParameters & _rParameters)
 {
-	fprintf(_rParameters.fp_Log, "{ BooleanCondition [Event=%p|Index=%d] } ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
+	fprintf(_rParameters.fp_Log, "{ BooleanCondition [Event=%p|Index=%d] ", _rParameters.p_Event, _rParameters.i_CurrentIndex);
 
-	return (Evaluate(_rParameters));
+	bool res = Evaluate(_rParameters);
+	fprintf(_rParameters.fp_Log, " Eval=%d } ", res);
+	return (res);
 }
 
 // =========================================

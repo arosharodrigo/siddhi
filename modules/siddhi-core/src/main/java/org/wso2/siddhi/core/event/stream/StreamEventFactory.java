@@ -41,6 +41,7 @@ public class StreamEventFactory implements EventFactory<StreamEvent> {
         this.outputDataSize = outputDataSize;
     }
 
+
     /**
      * Constructs new Events
      *
@@ -50,4 +51,15 @@ public class StreamEventFactory implements EventFactory<StreamEvent> {
         return new StreamEvent(beforeWindowDataSize, onAfterWindowDataSize, outputDataSize);
     }
 
+    public int getBeforeWindowDataSize() {
+        return beforeWindowDataSize;
+    }
+
+    public int getOnAfterWindowDataSize() {
+        return onAfterWindowDataSize;
+    }
+
+    public int getOutputDataSize() {
+        return outputDataSize;
+    }
 }

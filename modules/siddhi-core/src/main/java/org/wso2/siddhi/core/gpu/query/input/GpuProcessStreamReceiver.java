@@ -261,12 +261,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 bytePointer.position(0);
                 ByteBuffer eventByteBuffer = bytePointer.asBuffer();
 
-                //                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
-                //                
-                //                gpuQueryPostProcessor = new GpuFilterQueryPostProcessor(
-                //                        eventByteBuffer,
-                //                        gpuEventChunk);
-
                 StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
                 GpuMetaStreamEvent outputGpuMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
                         gpuQueryProcessor.getGpuQueryContext());
@@ -277,6 +271,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 selectProcessor.setStreamEventPool(streamEventPool);
                 selectProcessor.setMetaStreamEvent(metaStreamEvent);
                 selectProcessor.setGpuMetaStreamEvent(outputGpuMetaEvent);
+                selectProcessor.setWorkerSize(0);
 
             } else if (lastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
 
@@ -287,12 +282,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 bytePointer.position(0);
                 ByteBuffer eventByteBuffer = bytePointer.asBuffer();
 
-                //                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, gpuMetaEvent);
-                //
-                //                gpuQueryPostProcessor = new GpuLengthWindowQueryPostProcessor(
-                //                        eventByteBuffer,
-                //                        gpuEventChunk);
-
                 StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
                 GpuMetaStreamEvent outputGpuMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
                         gpuQueryProcessor.getGpuQueryContext());
@@ -303,17 +292,19 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 selectProcessor.setStreamEventPool(streamEventPool);
                 selectProcessor.setMetaStreamEvent(metaStreamEvent);
                 selectProcessor.setGpuMetaStreamEvent(outputGpuMetaEvent);
+                selectProcessor.setWorkerSize(5);
 
             } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
 
                 ByteBuffer eventByteBuffer = null;
                 int segmentEventCount  = 0;
                 int threadWorkSize = 0;
+                int bufferSize = 0;
 
                 if(streamIndex == 0) {
 
                     BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftResultEventBuffer();
-                    int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftResultEventBufferSize();
+                    bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftResultEventBufferSize();
                     segmentEventCount = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightStreamWindowSize();
                     bytePointer.capacity(bufferSize);
                     bytePointer.limit(bufferSize);
@@ -325,7 +316,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 } else if(streamIndex == 1) {
 
                     BytePointer bytePointer = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightResultEventBuffer();
-                    int bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightResultEventBufferSize();
+                    bufferSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetRightResultEventBufferSize();
                     segmentEventCount = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetLeftStreamWindowSize();
                     bytePointer.capacity(bufferSize);
                     bytePointer.limit(bufferSize);
@@ -340,14 +331,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                         gpuQueryProcessor.getGpuQueryContext());
                 outputGpuMetaEvent.setStreamIndex(0);
 
-                // TODO: this should be metastream event of output stream
-                //                gpuEventChunk = new ConversionGpuEventChunk(metaStreamEvent, streamEventPool, outputGpuMetaEvent);
-                //                
-                //                gpuQueryPostProcessor = new GpuJoinQueryPostProcessor(
-                //                        eventByteBuffer,
-                //                        gpuEventChunk,
-                //                        segmentEventCount);
-
                 GpuJoinQuerySelector gpuJoinQuerySelector = (GpuJoinQuerySelector) selectProcessor;
                 gpuJoinQuerySelector.setInputEventBuffer(eventBufferWriter.getByteBuffer());
                 gpuJoinQuerySelector.setOutputEventBuffer(eventByteBuffer);
@@ -356,6 +339,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 gpuJoinQuerySelector.setMetaStreamEvent(metaStreamEvent);
                 gpuJoinQuerySelector.setGpuMetaStreamEvent(outputGpuMetaEvent);
                 gpuJoinQuerySelector.setThreadWorkSize(threadWorkSize);
+                gpuJoinQuerySelector.setWorkerSize(7); // + 1 selector thread = 8 //TODO: set this from query
+                
+                int numerOfEventsInOutBuffer = bufferSize / outputGpuMetaEvent.getEventSizeInBytes();
+                int segmentCount = numerOfEventsInOutBuffer / segmentEventCount;
+                gpuJoinQuerySelector.setSegmentsPerWorker(segmentCount / 8);
             }
         }
     }
