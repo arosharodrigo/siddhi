@@ -326,6 +326,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     threadWorkSize = ((SiddhiGpu.GpuJoinProcessor)lastGpuProcessor).GetThreadWorkSize();
                 }
 
+                if(threadWorkSize >= segmentEventCount) {
+                    threadWorkSize = segmentEventCount;
+                }
+                
                 StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
                 GpuMetaStreamEvent outputGpuMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
                         gpuQueryProcessor.getGpuQueryContext());

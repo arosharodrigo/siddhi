@@ -263,8 +263,10 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
 		return;
 
-	if((blockIdx.x == _iInputNumberOfEvents / _iEventsPerBlock) && // last thread block
-			(threadIdx.x >= _iInputNumberOfEvents % _iEventsPerBlock)) // extra threads
+	int iWorkerCount = ceil((float)_iOtherWindowLength / _iWorkSize);
+
+	if((blockIdx.x == (_iInputNumberOfEvents * iWorkerCount) / _iEventsPerBlock) && // last thread block
+			(threadIdx.x >= (_iInputNumberOfEvents * iWorkerCount) % _iEventsPerBlock)) // extra threads
 	{
 		return;
 	}
@@ -273,7 +275,6 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 	int iGlobalThreadIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
 
 	// get in buffer index
-	int iWorkerCount = ceil((float)_iOtherWindowLength / _iWorkSize);
 	int iInEventIndex = iGlobalThreadIdx / iWorkerCount;
 	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _iWorkSize;
 
@@ -759,8 +760,10 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
 		return;
 
-	if((blockIdx.x == _iInputNumberOfEvents / _iEventsPerBlock) && // last thread block
-			(threadIdx.x >= _iInputNumberOfEvents % _iEventsPerBlock)) // extra threads
+	int iWorkerCount = ceil((float)_iOtherWindowLength / _iWorkSize);
+
+	if((blockIdx.x == (_iInputNumberOfEvents * iWorkerCount) / _iEventsPerBlock) && // last thread block
+			(threadIdx.x >= (_iInputNumberOfEvents * iWorkerCount) % _iEventsPerBlock)) // extra threads
 	{
 		return;
 	}
@@ -769,7 +772,6 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 	int iGlobalThreadIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
 
 	// get in buffer index
-	int iWorkerCount = ceil((float)_iOtherWindowLength / _iWorkSize);
 	int iInEventIndex = iGlobalThreadIdx / iWorkerCount;
 	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _iWorkSize;
 
@@ -1055,6 +1057,7 @@ void JoinSetWindowState(
 			// calculate start and end window buffer positions
 			int iStart = iEventIdx + iWindowPositionShift;
 			int iEnd = iStart;
+			int iPrevToEnd = iEnd;
 			while(iEnd >= 0)
 			{
 				char * pDestinationEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * iEnd);
@@ -1062,6 +1065,7 @@ void JoinSetWindowState(
 
 				if(pDestinationEvent->i_Type != GpuEvent::NONE) // there is an event in destination position
 				{
+					iPrevToEnd = iEnd;
 					iEnd -= iExitEventCount;
 				}
 				else
@@ -1070,6 +1074,8 @@ void JoinSetWindowState(
 				}
 
 			}
+
+			iEnd = (iEnd < 0 ? iPrevToEnd : iEnd);
 
 			// work back from end while copying events
 			while(iEnd < iStart)
@@ -1414,6 +1420,15 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			i_RightThreadWorkSize = p_JoinProcessor->GetThreadWorkSize();
 		}
 
+		if(i_LeftThreadWorkSize >= i_RightStreamWindowSize)
+		{
+			i_LeftThreadWorkSize = i_RightStreamWindowSize;
+		}
+		if(i_RightThreadWorkSize >= i_LeftStreamWindowSize)
+		{
+			i_RightThreadWorkSize = i_LeftStreamWindowSize;
+		}
+
 		i_LeftThreadWorkCount = ceil((float)i_RightStreamWindowSize / i_LeftThreadWorkSize);
 		i_RightThreadWorkCount = ceil((float)i_LeftStreamWindowSize / i_RightThreadWorkSize);
 
@@ -1707,7 +1722,7 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_INFO
 	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessRightStream : Invoke kernel Blocks(%d,%d) Threads(%d,%d)\n", numBlocksX, numBlocksY, i_ThreadBlockSize, 1);
-	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessLeftStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
+	fprintf(fp_RightLog, "[GpuJoinKernel] ProcessRightStream : NumEvents=%d LeftWindow=(%d/%d) RightWindow=(%d/%d) WithIn=%llu\n",
 			_iNumEvents, p_LeftWindowEventBuffer->GetRemainingCount(), i_LeftStreamWindowSize, p_RightWindowEventBuffer->GetRemainingCount(),
 			i_RightStreamWindowSize, p_JoinProcessor->GetWithInTimeMilliSeconds());
 	fflush(fp_RightLog);

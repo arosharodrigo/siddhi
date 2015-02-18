@@ -115,7 +115,9 @@ public class GpuQuerySelector extends QuerySelector {
         int remainWork = eventCount % workSize;
         
         for(int i=0; i<workerSize; ++i) {
-            workers[i].setOutputEventBuffer(outputEventBuffer.asReadOnlyBuffer());
+            ByteBuffer dup = outputEventBuffer.duplicate();
+            dup.order(outputEventBuffer.order());
+            workers[i].setOutputEventBuffer(dup);
             workers[i].setBufferStartPosition(i * workSize * gpuMetaStreamEvent.getEventSizeInBytes());
             workers[i].setEventCount(workSize);
             
@@ -324,7 +326,7 @@ public class GpuQuerySelector extends QuerySelector {
 
             for(int i=0; i<workerSize; ++i) {
 
-                this.workers[i] = new GpuQuerySelectorWorker(i, streamEventPool.clone(), streamEventConverter,
+                this.workers[i] = new GpuQuerySelectorWorker(id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter,
                         attributeProcessorList); // TODO: attributeProcessorList should be cloned
                 this.workers[i].setGpuMetaStreamEvent(gpuMetaStreamEvent);
             }
