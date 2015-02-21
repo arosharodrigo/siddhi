@@ -129,11 +129,19 @@ void ConstValue::Print(FILE * _fp)
 
 // ==========================================================================================================
 
-ExecutorNode::ExecutorNode()
+//ExecutorNode::ExecutorNode()
+//{
+//	e_NodeType = EXECUTOR_NODE_TYPE_COUNT;
+//	e_ConditionType = EXECUTOR_INVALID;
+//	e_ExpressionType = EXPRESSION_INVALID;
+//}
+
+ExecutorNode & ExecutorNode::Init()
 {
 	e_NodeType = EXECUTOR_NODE_TYPE_COUNT;
 	e_ConditionType = EXECUTOR_INVALID;
 	e_ExpressionType = EXPRESSION_INVALID;
+	return *this;
 }
 
 ExecutorNode & ExecutorNode::SetNodeType(ExecutorNodeType _eNodeType)

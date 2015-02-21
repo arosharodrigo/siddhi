@@ -1148,27 +1148,27 @@ __device__ ExecutorFuncPointer mExecutors[EXECUTOR_CONDITION_COUNT] = {
 __device__ bool AndCondition(FilterEvalParameters & _rParameters)
 {
 //	return (Evaluate(_rParameters) & Evaluate(_rParameters));
-	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
-			(*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
+			(*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 __device__ bool OrCondition(FilterEvalParameters & _rParameters)
 {
 	//return (Evaluate(_rParameters) | Evaluate(_rParameters));
-	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
-			(*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
+			(*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 __device__ bool NotCondition(FilterEvalParameters & _rParameters)
 {
 	//return (!Evaluate(_rParameters));
-	return !((*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
+	return !((*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
 }
 
 __device__ bool BooleanCondition(FilterEvalParameters & _rParameters)
 {
 	//return (Evaluate(_rParameters));
-	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 
@@ -1181,7 +1181,7 @@ __device__ bool Evaluate(FilterEvalParameters & _rParameters)
 //	assert(_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex].e_ConditionType < EXECUTOR_CONDITION_COUNT);
 
 	//printf("E=%d.%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex);
-	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 };

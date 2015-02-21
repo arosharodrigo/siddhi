@@ -537,7 +537,8 @@ public:
 	// if var - variable holder
 	VariableValue m_VarValue;
 
-	ExecutorNode();
+//	ExecutorNode();
+	ExecutorNode & Init();
 
 	ExecutorNode & SetNodeType(ExecutorNodeType _eNodeType);
 	ExecutorNode & SetConditionType(ConditionType _eCondType);

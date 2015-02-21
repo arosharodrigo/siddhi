@@ -659,10 +659,12 @@ public static final int
 	public native void Print();
 }
 
-@Namespace("SiddhiGpu") @NoOffset public static class ExecutorNode extends Pointer {
+@Namespace("SiddhiGpu") public static class ExecutorNode extends Pointer {
     static { Loader.load(); }
-    public ExecutorNode(Pointer p) { super(p); }
+    public ExecutorNode() { allocate(); }
     public ExecutorNode(int size) { allocateArray(size); }
+    public ExecutorNode(Pointer p) { super(p); }
+    private native void allocate();
     private native void allocateArray(int size);
     @Override public ExecutorNode position(int position) {
         return (ExecutorNode)super.position(position);
@@ -682,8 +684,8 @@ public static final int
 	// if var - variable holder
 	public native @ByRef VariableValue m_VarValue(); public native ExecutorNode m_VarValue(VariableValue m_VarValue);
 
-	public ExecutorNode() { allocate(); }
-	private native void allocate();
+//	ExecutorNode();
+	public native @ByRef ExecutorNode Init();
 
 	public native @ByRef ExecutorNode SetNodeType(@Cast("SiddhiGpu::ExecutorNodeType") int _eNodeType);
 	public native @ByRef ExecutorNode SetConditionType(@Cast("SiddhiGpu::ConditionType") int _eCondType);

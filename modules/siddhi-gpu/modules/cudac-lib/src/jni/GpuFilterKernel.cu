@@ -111,7 +111,7 @@ void ProcessEventsFilterKernelFirst(
 	char * pInEventBuffer = _pInByteBuffer + (_iSizeOfEvent * iEventIdx);
 
 	FilterEvalParameters mEvalParameters;
-	mEvalParameters.p_Filter = _apFilter;
+//	mEvalParameters.p_Filter = _apFilter;
 	mEvalParameters.p_Meta = _pMetaEvent;
 	mEvalParameters.p_Event = pInEventBuffer;
 	mEvalParameters.i_CurrentIndex = 0;
@@ -173,7 +173,7 @@ void ProcessEventsFilterKernelFirstV2(
 	char * pInEventBuffer = _pInByteBuffer + (_iSizeOfEvent * iEventIdx);
 
 	FilterEvalParameters mEvalParameters;
-	mEvalParameters.p_Filter = _apFilter;
+//	mEvalParameters.p_Filter = _apFilter;
 	mEvalParameters.p_Meta = _pMetaEvent;
 	mEvalParameters.p_Event = pInEventBuffer;
 	mEvalParameters.i_CurrentIndex = 0;

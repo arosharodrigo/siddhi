@@ -98,26 +98,26 @@ public class GpuExpressionParser
         log.debug("Expression = " + expression.toString());
 
         if (expression instanceof And) {
-            gpuFilterList.add(new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION).SetConditionType(SiddhiGpu.EXECUTOR_AND));
+            gpuFilterList.add(new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION).SetConditionType(SiddhiGpu.EXECUTOR_AND));
             parseExpressionTree(((And) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             parseExpressionTree(((And) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             return Attribute.Type.BOOL;
         }
         else if (expression instanceof Or) {
-            gpuFilterList.add(new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION).SetConditionType(SiddhiGpu.EXECUTOR_OR));
+            gpuFilterList.add(new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION).SetConditionType(SiddhiGpu.EXECUTOR_OR));
             parseExpressionTree(((Or) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             parseExpressionTree(((Or) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             return Attribute.Type.BOOL;
         }
         else if (expression instanceof Not) {
-            gpuFilterList.add(new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION).SetConditionType(SiddhiGpu.EXECUTOR_NOT));
+            gpuFilterList.add(new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION).SetConditionType(SiddhiGpu.EXECUTOR_NOT));
             parseExpressionTree(((Not) expression).getExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             return Attribute.Type.BOOL;
         }
         else if (expression instanceof Compare) {
             if (((Compare) expression).getOperator() == Compare.Operator.EQUAL)
             {
-                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
                 gpuFilterList.add(node);
                 Attribute.Type lhs = parseExpressionTree(((Compare) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
                 Attribute.Type rhs = parseExpressionTree(((Compare) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -126,7 +126,7 @@ public class GpuExpressionParser
             }
             else if (((Compare) expression).getOperator() == Compare.Operator.NOT_EQUAL)
             {
-                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
                 gpuFilterList.add(node);
                 Attribute.Type lhs = parseExpressionTree(((Compare) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
                 Attribute.Type rhs = parseExpressionTree(((Compare) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -135,7 +135,7 @@ public class GpuExpressionParser
             }
             else if (((Compare) expression).getOperator() == Compare.Operator.GREATER_THAN)
             {
-                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
                 gpuFilterList.add(node);
                 Attribute.Type lhs = parseExpressionTree(((Compare) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
                 Attribute.Type rhs = parseExpressionTree(((Compare) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -144,7 +144,7 @@ public class GpuExpressionParser
             }
             else if (((Compare) expression).getOperator() == Compare.Operator.GREATER_THAN_EQUAL)
             {
-                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
                 gpuFilterList.add(node);
                 Attribute.Type lhs = parseExpressionTree(((Compare) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
                 Attribute.Type rhs = parseExpressionTree(((Compare) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -153,7 +153,7 @@ public class GpuExpressionParser
             }
             else if (((Compare) expression).getOperator() == Compare.Operator.LESS_THAN)
             {
-                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
                 gpuFilterList.add(node);
                 Attribute.Type lhs = parseExpressionTree(((Compare) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
                 Attribute.Type rhs = parseExpressionTree(((Compare) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -162,7 +162,7 @@ public class GpuExpressionParser
             }
             else if (((Compare) expression).getOperator() == Compare.Operator.LESS_THAN_EQUAL)
             {
-                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
                 gpuFilterList.add(node);
                 Attribute.Type lhs = parseExpressionTree(((Compare) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
                 Attribute.Type rhs = parseExpressionTree(((Compare) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -171,7 +171,7 @@ public class GpuExpressionParser
             }
             else if (((Compare) expression).getOperator() == Compare.Operator.CONTAINS)
             {
-                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+                SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
                 gpuFilterList.add(node);
                 Attribute.Type lhs = parseExpressionTree(((Compare) expression).getLeftExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
                 Attribute.Type rhs = parseExpressionTree(((Compare) expression).getRightExpression(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -184,7 +184,7 @@ public class GpuExpressionParser
         {
             if (expression instanceof BoolConstant)
             {
-                gpuFilterList.add(new ExecutorNode()
+                gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
                 .SetConstValue(new ConstValue().SetBool(((BoolConstant) expression).getValue())));
@@ -193,7 +193,7 @@ public class GpuExpressionParser
             else if (expression instanceof StringConstant)
             {
                 String strVal = ((StringConstant) expression).getValue();
-                gpuFilterList.add(new ExecutorNode()
+                gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
                 .SetConstValue(new ConstValue().SetString(strVal, strVal.length())));
@@ -201,7 +201,7 @@ public class GpuExpressionParser
             }
             else if (expression instanceof IntConstant)
             {
-                gpuFilterList.add(new ExecutorNode()
+                gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
                 .SetConstValue(new ConstValue().SetInt(((IntConstant) expression).getValue())));
@@ -209,7 +209,7 @@ public class GpuExpressionParser
             }
             else if (expression instanceof LongConstant)
             {
-                gpuFilterList.add(new ExecutorNode()
+                gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
                 .SetConstValue(new ConstValue().SetLong(((LongConstant) expression).getValue())));
@@ -217,7 +217,7 @@ public class GpuExpressionParser
             }
             else if (expression instanceof FloatConstant)
             {
-                gpuFilterList.add(new ExecutorNode()
+                gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
                 .SetConstValue(new ConstValue().SetFloat(((FloatConstant) expression).getValue())));
@@ -225,7 +225,7 @@ public class GpuExpressionParser
             }
             else if (expression instanceof DoubleConstant)
             {
-                gpuFilterList.add(new ExecutorNode()
+                gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
                 .SetConstValue(new ConstValue().SetDouble(((DoubleConstant) expression).getValue())));
@@ -239,7 +239,7 @@ public class GpuExpressionParser
         }
         else if (expression instanceof Multiply)
         {
-            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
             gpuFilterList.add(node);
             Attribute.Type lhs = parseExpressionTree(((Multiply) expression).getLeftValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             Attribute.Type rhs = parseExpressionTree(((Multiply) expression).getRightValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -267,7 +267,7 @@ public class GpuExpressionParser
         }
         else if (expression instanceof Add)
         {
-            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
             gpuFilterList.add(node);
             Attribute.Type lhs = parseExpressionTree(((Add) expression).getLeftValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             Attribute.Type rhs = parseExpressionTree(((Add) expression).getRightValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -296,7 +296,7 @@ public class GpuExpressionParser
         }
         else if (expression instanceof Subtract)
         {
-            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
             gpuFilterList.add(node);
             Attribute.Type lhs = parseExpressionTree(((Subtract) expression).getLeftValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             Attribute.Type rhs = parseExpressionTree(((Subtract) expression).getRightValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -324,7 +324,7 @@ public class GpuExpressionParser
         }
         else if (expression instanceof Mod)
         {
-            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
             gpuFilterList.add(node);
             Attribute.Type lhs = parseExpressionTree(((Mod) expression).getLeftValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             Attribute.Type rhs = parseExpressionTree(((Mod) expression).getRightValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -352,7 +352,7 @@ public class GpuExpressionParser
         }
         else if (expression instanceof Divide)
         {
-            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
+            SiddhiGpu.ExecutorNode node = new SiddhiGpu.ExecutorNode().Init().SetNodeType(SiddhiGpu.EXECUTOR_NODE_CONDITION);
             gpuFilterList.add(node);
             Attribute.Type lhs = parseExpressionTree(((Divide) expression).getLeftValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
             Attribute.Type rhs = parseExpressionTree(((Divide) expression).getRightValue(), metaEvent, currentState, executionPlanContext, gpuFilterList);
@@ -1231,7 +1231,7 @@ public class GpuExpressionParser
                 break;
             }
 
-            gpuFilterList.add(new ExecutorNode()
+            gpuFilterList.add(new ExecutorNode().Init()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
             .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, attributeIndex)));
@@ -1348,7 +1348,7 @@ public class GpuExpressionParser
                 break;
             }
 
-            gpuFilterList.add(new ExecutorNode()
+            gpuFilterList.add(new ExecutorNode().Init()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
             .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, attributeIndex)));
