@@ -191,6 +191,10 @@ public class StreamJunction {
         if (disruptor != null) {
             disruptor.shutdown();
         }
+        
+        for (Receiver receiver : receivers) {
+            receiver.printStatistics();
+        }
     }
 
     public synchronized Publisher constructPublisher() {
@@ -224,6 +228,8 @@ public class StreamJunction {
         public void receive(long timeStamp, Object[] data);
 
         public void receive(Event[] events);
+        
+        public void printStatistics();
     }
 
     public class StreamHandler implements EventHandler<Event> {

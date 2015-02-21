@@ -28,12 +28,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class SiddhiContext {
 
     private int eventBufferSize;
+    private int threadPoolInitSize;
     private Map<String, Class> siddhiExtensions;
     private ThreadPoolExecutor executorService = null;
     private ScheduledExecutorService scheduledExecutorService = null;
 
     public SiddhiContext() {
         setSiddhiExtensions(SiddhiExtensionLoader.loadSiddhiExtensions());
+        threadPoolInitSize = 0;
     }
 
     public int getEventBufferSize() {
@@ -66,5 +68,13 @@ public class SiddhiContext {
 
     public ThreadPoolExecutor getExecutorService() {
         return executorService;
+    }
+
+    public int getThreadPoolInitSize() {
+        return threadPoolInitSize;
+    }
+
+    public void setThreadPoolInitSize(int threadPoolInitSize) {
+        this.threadPoolInitSize = threadPoolInitSize;
     }
 }

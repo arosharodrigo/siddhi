@@ -262,4 +262,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
         }
     }
 
+    public void printStatistics() {
+        
+    }
 }

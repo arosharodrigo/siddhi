@@ -16,7 +16,7 @@ namespace SiddhiGpu
 
 typedef struct FilterEvalParameters
 {
-	GpuKernelFilter      * p_Filter;
+//	GpuKernelFilter      * p_Filter;
 	GpuKernelMetaEvent   * p_Meta;
 	char                 * p_Event;
 	int                    i_CurrentIndex;

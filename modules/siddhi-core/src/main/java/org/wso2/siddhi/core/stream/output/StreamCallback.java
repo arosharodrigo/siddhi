@@ -139,6 +139,10 @@ public abstract class StreamCallback implements StreamJunction.Receiver {
             disruptor.shutdown();
         }
     }
+    
+    public void printStatistics() {
+        
+    }
 
     public class AsyncEventHandler implements EventHandler<EventHolder> {
 

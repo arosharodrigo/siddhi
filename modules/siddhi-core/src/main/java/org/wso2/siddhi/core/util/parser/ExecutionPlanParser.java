@@ -91,6 +91,11 @@ public class ExecutionPlanParser {
 
             if(siddhiContext.getExecutorService() != null) {
                 executionPlanContext.setExecutorService(siddhiContext.getExecutorService());
+            } else if (siddhiContext.getThreadPoolInitSize() != 0) {
+                executionPlanContext.setExecutorService(new ThreadPoolExecutor(siddhiContext.getThreadPoolInitSize(), 
+                        Integer.MAX_VALUE,
+                        60L, TimeUnit.SECONDS,
+                        new LinkedBlockingDeque<Runnable>()));
             } else {
                 executionPlanContext.setExecutorService(new ThreadPoolExecutor(5, Integer.MAX_VALUE,
                         60L, TimeUnit.SECONDS,

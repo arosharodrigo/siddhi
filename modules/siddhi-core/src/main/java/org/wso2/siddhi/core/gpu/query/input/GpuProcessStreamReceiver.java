@@ -5,22 +5,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 import org.bytedeco.javacpp.BytePointer;
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
-import org.wso2.siddhi.core.gpu.event.stream.GpuEvent;
-import org.wso2.siddhi.core.gpu.event.stream.GpuEventPool;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribute;
-import org.wso2.siddhi.core.gpu.event.stream.converter.ConversionGpuEventChunk;
-import org.wso2.siddhi.core.gpu.query.processor.GpuFilterQueryPostProcessor;
-import org.wso2.siddhi.core.gpu.query.processor.GpuJoinQueryPostProcessor;
-import org.wso2.siddhi.core.gpu.query.processor.GpuLengthWindowQueryPostProcessor;
-import org.wso2.siddhi.core.gpu.query.processor.GpuQueryPostProcessor;
 import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
 import org.wso2.siddhi.core.gpu.query.selector.GpuJoinQuerySelector;
 import org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelector;
@@ -53,7 +43,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private long serializeBeginTime = 0;
     private long serializeTime = 0;
     private long duration = 0;
-    private final List<Double> throughputList = new ArrayList<Double>();
+    private final DescriptiveStatistics throughputStatstics = new DescriptiveStatistics();
+    private final DescriptiveStatistics totalTimeStatstics = new DescriptiveStatistics();
+    private final DescriptiveStatistics serializationTimeStatstics = new DescriptiveStatistics();
+    private final DescriptiveStatistics gpuTimeStatstics = new DescriptiveStatistics();
+    private final DescriptiveStatistics selectTimeStatstics = new DescriptiveStatistics();
     private int perfromanceCalculateBatchCount;
     
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
@@ -84,7 +78,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         //log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
         
-//        serializeBeginTime = System.nanoTime();
+        serializeBeginTime = System.nanoTime();
         
         eventBufferWriter.writeShort((short)(!event.isExpired() ? 0 : 1));
         eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
@@ -118,7 +112,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             }
         }
         
-//        serializeTime += (System.nanoTime() - serializeBeginTime);
+        serializeTime += (System.nanoTime() - serializeBeginTime);
         
         currentEventCount++;
         
@@ -139,29 +133,33 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             duration = endTime - startTime; // + serializeTime
             double average = (currentEventCount * 1000000000 / (double)duration);
             
-            log.info("<" + queryName + " - " + streamId + "> Batch Times : " + currentEventCount + " [Total=" + (endTime - startTime) + 
-                    " Serialize=" + serializeTime +
-                    " Gpu=" + (gpuProcEndTime - startTime) + 
-                    " Select=" + (endTime - gpuProcEndTime) + "] iter=" + iteration);
+//            log.debug("<" + queryName + " - " + streamId + "> Batch Times : " + currentEventCount + " [Total=" + (endTime - startTime) + 
+//                    " Serialize=" + serializeTime +
+//                    " Gpu=" + (gpuProcEndTime - startTime) + 
+//                    " Select=" + (endTime - gpuProcEndTime) + "] iter=" + iteration);
             
-            throughputList.add(average);
+            throughputStatstics.addValue(average);
+            totalTimeStatstics.addValue(endTime - startTime);
+            serializationTimeStatstics.addValue(serializeTime);
+            gpuTimeStatstics.addValue(gpuProcEndTime - startTime);
+            selectTimeStatstics.addValue(endTime - gpuProcEndTime);
             
             currentEventCount = 0;
             serializeTime = 0;
-            iteration++;
+//            iteration++;
             
-            if(iteration % perfromanceCalculateBatchCount == 0)
-            {
-                double totalThroughput = 0;
-                
-                for (Double tp : throughputList) {
-                    totalThroughput += tp;
-                }
-                
-                double avgThroughput = totalThroughput / throughputList.size();
-                log.info("<" + queryName + " - " + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
-                throughputList.clear();
-            }
+//            if(iteration % perfromanceCalculateBatchCount == 0)
+//            {
+//                double totalThroughput = 0;
+//                
+//                for (Double tp : throughputList) {
+//                    totalThroughput += tp;
+//                }
+//                
+//                double avgThroughput = totalThroughput / throughputList.size();
+//                log.info("<" + queryName + " - " + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+//                throughputList.clear();
+//            }
         }
     }
   
@@ -350,5 +348,53 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 gpuJoinQuerySelector.setSegmentsPerWorker(segmentCount / 8);
             }
         }
+    }
+    
+    public void printStatistics() {
+        log.info(new StringBuilder()
+        .append("EventProcessTroughput ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("|length=").append(throughputStatstics.getValues().length)
+        .append("|Avg=").append(decimalFormat.format(throughputStatstics.getMean()))
+        .append("|Min=").append(decimalFormat.format(throughputStatstics.getMin()))
+        .append("|Max=").append(decimalFormat.format(throughputStatstics.getMax()))
+        .append("|10=").append(decimalFormat.format(throughputStatstics.getPercentile(10)))
+        .append("|90=").append(decimalFormat.format(throughputStatstics.getPercentile(90))).toString());
+        
+        log.info(new StringBuilder()
+        .append("EventProcessTotalTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("|length=").append(totalTimeStatstics.getValues().length)
+        .append("|Avg=").append(decimalFormat.format(totalTimeStatstics.getMean()))
+        .append("|Min=").append(decimalFormat.format(totalTimeStatstics.getMin()))
+        .append("|Max=").append(decimalFormat.format(totalTimeStatstics.getMax()))
+        .append("|10=").append(decimalFormat.format(totalTimeStatstics.getPercentile(10)))
+        .append("|90=").append(decimalFormat.format(totalTimeStatstics.getPercentile(90))).toString());
+        
+        log.info(new StringBuilder()
+        .append("EventProcessGpuTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("|length=").append(serializationTimeStatstics.getValues().length)
+        .append("|Avg=").append(decimalFormat.format(serializationTimeStatstics.getMean()))
+        .append("|Min=").append(decimalFormat.format(serializationTimeStatstics.getMin()))
+        .append("|Max=").append(decimalFormat.format(serializationTimeStatstics.getMax()))
+        .append("|10=").append(decimalFormat.format(serializationTimeStatstics.getPercentile(10)))
+        .append("|90=").append(decimalFormat.format(serializationTimeStatstics.getPercentile(90))).toString());
+        
+        log.info(new StringBuilder()
+        .append("EventProcessGpuTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("|length=").append(gpuTimeStatstics.getValues().length)
+        .append("|Avg=").append(decimalFormat.format(gpuTimeStatstics.getMean()))
+        .append("|Min=").append(decimalFormat.format(gpuTimeStatstics.getMin()))
+        .append("|Max=").append(decimalFormat.format(gpuTimeStatstics.getMax()))
+        .append("|10=").append(decimalFormat.format(gpuTimeStatstics.getPercentile(10)))
+        .append("|90=").append(decimalFormat.format(gpuTimeStatstics.getPercentile(90))).toString());
+        
+        log.info(new StringBuilder()
+        .append("EventProcessSelectTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("|length=").append(selectTimeStatstics.getValues().length)
+        .append("|Avg=").append(decimalFormat.format(selectTimeStatstics.getMean()))
+        .append("|Min=").append(decimalFormat.format(selectTimeStatstics.getMin()))
+        .append("|Max=").append(decimalFormat.format(selectTimeStatstics.getMax()))
+        .append("|10=").append(decimalFormat.format(selectTimeStatstics.getPercentile(10)))
+        .append("|90=").append(decimalFormat.format(selectTimeStatstics.getPercentile(90))).toString());
+        
     }
 }

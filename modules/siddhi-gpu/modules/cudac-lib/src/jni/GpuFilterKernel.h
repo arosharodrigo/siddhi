@@ -21,6 +21,16 @@ class GpuProcessorContext;
 class GpuIntBuffer;
 class GpuStreamEventBuffer;
 
+typedef struct KernelParametersFilterStandalone
+{
+	char               * p_InByteBuffer;      // Input ByteBuffer from java side
+//	GpuKernelFilter    * ap_Filter;           // Filters buffer - pre-copied at initialization
+	GpuKernelMetaEvent * p_MetaEvent;         // Meta event of input events
+	int                  i_SizeOfEvent;       // Size of an event
+	int                  i_EventsPerBlock;    // number of events allocated per block
+	int                * p_ResultBuffer;       // Result event index array
+}KernelParametersFilterStandalone;
+
 class GpuFilterKernelStandalone : public GpuKernel
 {
 public:
@@ -36,9 +46,10 @@ private:
 	void EvaluateEventsInCpu(int _iNumEvents);
 
 	GpuProcessorContext * p_Context;
-	GpuKernelFilter * p_DeviceFilter;
+//	GpuKernelFilter * p_DeviceFilter;
 	GpuStreamEventBuffer * p_InputEventBuffer;
 	GpuIntBuffer * p_ResultEventBuffer;
+	KernelParametersFilterStandalone * p_DeviceParameters;
 	bool b_DeviceSet;
 };
 
