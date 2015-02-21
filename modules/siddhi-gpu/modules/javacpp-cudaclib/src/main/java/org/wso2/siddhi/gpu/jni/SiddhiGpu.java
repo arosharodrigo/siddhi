@@ -610,10 +610,12 @@ public static final int
 
 @Namespace("SiddhiGpu") public static native @Cast("const char*") BytePointer GetNodeTypeName(@Cast("SiddhiGpu::ExecutorNodeType") int _eType);
 
-@Namespace("SiddhiGpu") @NoOffset public static class VariableValue extends Pointer {
+@Namespace("SiddhiGpu") public static class VariableValue extends Pointer {
     static { Loader.load(); }
-    public VariableValue(Pointer p) { super(p); }
+    public VariableValue() { allocate(); }
     public VariableValue(int size) { allocateArray(size); }
+    public VariableValue(Pointer p) { super(p); }
+    private native void allocate();
     private native void allocateArray(int size);
     @Override public VariableValue position(int position) {
         return (VariableValue)super.position(position);
@@ -623,19 +625,25 @@ public static final int
 	public native @Cast("SiddhiGpu::DataType::Value") int e_Type(); public native VariableValue e_Type(int e_Type);
 	public native int i_AttributePosition(); public native VariableValue i_AttributePosition(int i_AttributePosition);
 
-	public VariableValue() { allocate(); }
-	private native void allocate();
-	public VariableValue(int _iStreamIndex, @Cast("SiddhiGpu::DataType::Value") int _eType, int _iPos) { allocate(_iStreamIndex, _eType, _iPos); }
-	private native void allocate(int _iStreamIndex, @Cast("SiddhiGpu::DataType::Value") int _eType, int _iPos);
+//	VariableValue();
+//	VariableValue(int _iStreamIndex, DataType::Value _eType, int _iPos);
+
+	public native @ByRef VariableValue Init();
+
+	public native @ByRef VariableValue SetStreamIndex(int _iStreamIndex);
+	public native @ByRef VariableValue SetDataType(@Cast("SiddhiGpu::DataType::Value") int _eType);
+	public native @ByRef VariableValue SetPosition(int _iPos);
 
 	public native void Print(@Cast("FILE*") Pointer _fp/*=stdout*/);
 	public native void Print();
 }
 
-@Namespace("SiddhiGpu") @NoOffset public static class ConstValue extends Pointer {
+@Namespace("SiddhiGpu") public static class ConstValue extends Pointer {
     static { Loader.load(); }
-    public ConstValue(Pointer p) { super(p); }
+    public ConstValue() { allocate(); }
     public ConstValue(int size) { allocateArray(size); }
+    public ConstValue(Pointer p) { super(p); }
+    private native void allocate();
     private native void allocateArray(int size);
     @Override public ConstValue position(int position) {
         return (ConstValue)super.position(position);
@@ -644,8 +652,9 @@ public static final int
 	public native @Cast("SiddhiGpu::DataType::Value") int e_Type(); public native ConstValue e_Type(int e_Type);
 	public native @ByRef Values m_Value(); public native ConstValue m_Value(Values m_Value);
 
-	public ConstValue() { allocate(); }
-	private native void allocate();
+//	ConstValue();
+
+	public native @ByRef ConstValue Init();
 
 	public native @ByRef ConstValue SetBool(@Cast("bool") boolean _bVal);
 	public native @ByRef ConstValue SetInt(int _iVal);

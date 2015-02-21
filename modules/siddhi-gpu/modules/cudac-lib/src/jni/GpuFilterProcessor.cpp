@@ -16,18 +16,44 @@
 namespace SiddhiGpu
 {
 
-VariableValue::VariableValue()
+//VariableValue::VariableValue()
+//{
+//	i_StreamIndex = 0;
+//	e_Type = DataType::None;
+//	i_AttributePosition = -1;
+//}
+//
+//VariableValue::VariableValue(int _iStreamIndex, DataType::Value _eType, int _iPos)
+//{
+//	i_StreamIndex = _iStreamIndex;
+//	e_Type = _eType;
+//	i_AttributePosition = _iPos;
+//}
+
+VariableValue & VariableValue::Init()
 {
 	i_StreamIndex = 0;
 	e_Type = DataType::None;
 	i_AttributePosition = -1;
+	return *this;
 }
 
-VariableValue::VariableValue(int _iStreamIndex, DataType::Value _eType, int _iPos)
+VariableValue & VariableValue::SetStreamIndex(int _iStreamIndex)
 {
 	i_StreamIndex = _iStreamIndex;
+	return *this;
+}
+
+VariableValue & VariableValue::SetDataType(DataType::Value _eType)
+{
 	e_Type = _eType;
+	return *this;
+}
+
+VariableValue & VariableValue::SetPosition(int _iPos)
+{
 	i_AttributePosition = _iPos;
+	return *this;
 }
 
 void VariableValue::Print(FILE * _fp)
@@ -37,9 +63,15 @@ void VariableValue::Print(FILE * _fp)
 
 // ============================================================================================================
 
-ConstValue::ConstValue()
+//ConstValue::ConstValue()
+//{
+//	e_Type = DataType::None;
+//}
+
+ConstValue & ConstValue::Init()
 {
 	e_Type = DataType::None;
+	return *this;
 }
 
 ConstValue & ConstValue::SetBool(bool _bVal)

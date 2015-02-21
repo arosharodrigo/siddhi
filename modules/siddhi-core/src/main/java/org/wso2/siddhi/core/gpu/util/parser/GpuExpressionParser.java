@@ -187,7 +187,7 @@ public class GpuExpressionParser
                 gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
-                .SetConstValue(new ConstValue().SetBool(((BoolConstant) expression).getValue())));
+                .SetConstValue(new ConstValue().Init().SetBool(((BoolConstant) expression).getValue())));
                 return Attribute.Type.BOOL;
             }
             else if (expression instanceof StringConstant)
@@ -196,7 +196,7 @@ public class GpuExpressionParser
                 gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
-                .SetConstValue(new ConstValue().SetString(strVal, strVal.length())));
+                .SetConstValue(new ConstValue().Init().SetString(strVal, strVal.length())));
                 return Attribute.Type.STRING;
             }
             else if (expression instanceof IntConstant)
@@ -204,7 +204,7 @@ public class GpuExpressionParser
                 gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
-                .SetConstValue(new ConstValue().SetInt(((IntConstant) expression).getValue())));
+                .SetConstValue(new ConstValue().Init().SetInt(((IntConstant) expression).getValue())));
                 return Attribute.Type.INT;
             }
             else if (expression instanceof LongConstant)
@@ -212,7 +212,7 @@ public class GpuExpressionParser
                 gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
-                .SetConstValue(new ConstValue().SetLong(((LongConstant) expression).getValue())));
+                .SetConstValue(new ConstValue().Init().SetLong(((LongConstant) expression).getValue())));
                 return Attribute.Type.LONG;
             }
             else if (expression instanceof FloatConstant)
@@ -220,7 +220,7 @@ public class GpuExpressionParser
                 gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
-                .SetConstValue(new ConstValue().SetFloat(((FloatConstant) expression).getValue())));
+                .SetConstValue(new ConstValue().Init().SetFloat(((FloatConstant) expression).getValue())));
                 return Attribute.Type.FLOAT;
             }
             else if (expression instanceof DoubleConstant)
@@ -228,7 +228,7 @@ public class GpuExpressionParser
                 gpuFilterList.add(new ExecutorNode().Init()
                 .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
                 .SetExpressionType(SiddhiGpu.EXPRESSION_CONST)
-                .SetConstValue(new ConstValue().SetDouble(((DoubleConstant) expression).getValue())));
+                .SetConstValue(new ConstValue().Init().SetDouble(((DoubleConstant) expression).getValue())));
                 return Attribute.Type.DOUBLE;
             }
 
@@ -1234,7 +1234,10 @@ public class GpuExpressionParser
             gpuFilterList.add(new ExecutorNode().Init()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
-            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, attributeIndex)));
+            .SetVariableValue(new VariableValue().Init()
+                    .SetStreamIndex(eventPosition[STREAM_EVENT_CHAIN_INDEX])
+                    .SetDataType(gpuDataType)
+                    .SetPosition(attributeIndex)));
 
             return type;
             
@@ -1351,7 +1354,10 @@ public class GpuExpressionParser
             gpuFilterList.add(new ExecutorNode().Init()
             .SetNodeType(SiddhiGpu.EXECUTOR_NODE_EXPRESSION)
             .SetExpressionType(SiddhiGpu.EXPRESSION_VARIABLE)
-            .SetVariableValue(new VariableValue(eventPosition[STREAM_EVENT_CHAIN_INDEX], gpuDataType, attributeIndex)));
+            .SetVariableValue(new VariableValue().Init()
+                    .SetStreamIndex(eventPosition[STREAM_EVENT_CHAIN_INDEX])
+                    .SetDataType(gpuDataType)
+                    .SetPosition(attributeIndex)));
 
             return type;
         }

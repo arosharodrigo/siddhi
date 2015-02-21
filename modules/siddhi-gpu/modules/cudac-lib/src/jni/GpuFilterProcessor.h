@@ -496,8 +496,14 @@ public:
 	DataType::Value e_Type;
 	int i_AttributePosition;
 
-	VariableValue();
-	VariableValue(int _iStreamIndex, DataType::Value _eType, int _iPos);
+//	VariableValue();
+//	VariableValue(int _iStreamIndex, DataType::Value _eType, int _iPos);
+
+	VariableValue & Init();
+
+	VariableValue & SetStreamIndex(int _iStreamIndex);
+	VariableValue & SetDataType(DataType::Value _eType);
+	VariableValue & SetPosition(int _iPos);
 
 	void Print(FILE * _fp = stdout);
 };
@@ -508,7 +514,9 @@ public:
 	DataType::Value e_Type;
 	Values m_Value;
 
-	ConstValue();
+//	ConstValue();
+
+	ConstValue & Init();
 
 	ConstValue & SetBool(bool _bVal);
 	ConstValue & SetInt(int _iVal);
