@@ -353,7 +353,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     public void printStatistics() {
         log.info(new StringBuilder()
         .append("EventProcessTroughput ExecutionPlan=").append(queryName).append("_").append(streamId)
-        .append("|length=").append(throughputStatstics.getValues().length)
+        .append("|length=").append(throughputStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(throughputStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(throughputStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(throughputStatstics.getMax()))
@@ -362,7 +362,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         log.info(new StringBuilder()
         .append("EventProcessTotalTime ExecutionPlan=").append(queryName).append("_").append(streamId)
-        .append("|length=").append(totalTimeStatstics.getValues().length)
+        .append("|length=").append(totalTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(totalTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(totalTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(totalTimeStatstics.getMax()))
@@ -370,8 +370,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         .append("|90=").append(decimalFormat.format(totalTimeStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
-        .append("EventProcessGpuTime ExecutionPlan=").append(queryName).append("_").append(streamId)
-        .append("|length=").append(serializationTimeStatstics.getValues().length)
+        .append("EventProcessSerializationTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("|length=").append(serializationTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(serializationTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(serializationTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(serializationTimeStatstics.getMax()))
@@ -380,7 +380,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         log.info(new StringBuilder()
         .append("EventProcessGpuTime ExecutionPlan=").append(queryName).append("_").append(streamId)
-        .append("|length=").append(gpuTimeStatstics.getValues().length)
+        .append("|length=").append(gpuTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(gpuTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(gpuTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(gpuTimeStatstics.getMax()))
@@ -389,12 +389,16 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         
         log.info(new StringBuilder()
         .append("EventProcessSelectTime ExecutionPlan=").append(queryName).append("_").append(streamId)
-        .append("|length=").append(selectTimeStatstics.getValues().length)
+        .append("|length=").append(selectTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(selectTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(selectTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(selectTimeStatstics.getMax()))
         .append("|10=").append(decimalFormat.format(selectTimeStatstics.getPercentile(10)))
         .append("|90=").append(decimalFormat.format(selectTimeStatstics.getPercentile(90))).toString());
         
+    }
+    
+    public void getStatistics(List<DescriptiveStatistics> statList) {
+        statList.add(throughputStatstics);
     }
 }

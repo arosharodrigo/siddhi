@@ -243,11 +243,15 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     public void printStatistics() {
         log.info(new StringBuilder()
         .append("EventProcessTroughput ExecutionPlan=").append(queryName).append("_").append(streamId)
-        .append("|length=").append(throughputStatstics.getValues().length)
+        .append("|length=").append(throughputStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(throughputStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(throughputStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(throughputStatstics.getMax()))
         .append("|10=").append(decimalFormat.format(throughputStatstics.getPercentile(10)))
         .append("|90=").append(decimalFormat.format(throughputStatstics.getPercentile(90))).toString());
+    }
+    
+    public void getStatistics(List<DescriptiveStatistics> statList) {
+        statList.add(throughputStatstics);
     }
 }

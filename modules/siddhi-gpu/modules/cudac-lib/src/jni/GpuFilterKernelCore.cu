@@ -3,6 +3,7 @@
 
 #include "GpuFilterKernelCore.h"
 #include "GpuFilterProcessor.h"
+#include "GpuCudaHelper.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -14,6 +15,21 @@ namespace SiddhiGpu
 
 __constant__ ExecutorNode a_ConstFilterNodes[50];
 __constant__ int i_ConstFilterNodeCount;
+
+void UpdateExecutorNodes(GpuFilterProcessor * _pFilter)
+{
+	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(a_ConstFilterNodes,
+			_pFilter->ap_ExecutorNodes,
+			sizeof(ExecutorNode) * _pFilter->i_NodeCount,
+			0,
+			cudaMemcpyHostToDevice));
+
+	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(i_ConstFilterNodeCount,
+			&_pFilter->i_NodeCount,
+			sizeof(int),
+			0,
+			cudaMemcpyHostToDevice));
+}
 
 // ========================= INT ==============================================
 

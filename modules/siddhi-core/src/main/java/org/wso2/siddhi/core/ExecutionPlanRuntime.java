@@ -19,6 +19,7 @@
 
 package org.wso2.siddhi.core;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
@@ -39,6 +40,7 @@ import org.wso2.siddhi.core.util.parser.OutputParser;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -160,6 +162,12 @@ public class ExecutionPlanRuntime {
         inputManager.startProcessing();
         for (StreamJunction streamJunction : streamJunctionMap.values()) {
             streamJunction.startProcessing();
+        }
+    }
+    
+    public void getStatistics(List<DescriptiveStatistics> statList) {
+        for (StreamJunction streamJunction : streamJunctionMap.values()) {
+            streamJunction.getStatistics(statList);
         }
     }
 

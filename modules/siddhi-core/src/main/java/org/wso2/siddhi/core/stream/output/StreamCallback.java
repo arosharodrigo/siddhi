@@ -22,6 +22,8 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
@@ -141,6 +143,10 @@ public abstract class StreamCallback implements StreamJunction.Receiver {
     }
     
     public void printStatistics() {
+        
+    }
+    
+    public void getStatistics(List<DescriptiveStatistics> statList) {
         
     }
 

@@ -14,6 +14,8 @@
 namespace SiddhiGpu
 {
 
+class GpuFilterProcessor;
+
 typedef struct FilterEvalParameters
 {
 //	GpuKernelFilter      * p_Filter;
@@ -24,6 +26,8 @@ typedef struct FilterEvalParameters
 
 // executor function pointer type
 typedef bool (*ExecutorFuncPointer)(FilterEvalParameters &);
+
+void UpdateExecutorNodes(GpuFilterProcessor * _pFilter);
 
 extern __device__ bool NoopOperator(FilterEvalParameters &);
 

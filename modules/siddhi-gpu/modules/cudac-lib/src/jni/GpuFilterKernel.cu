@@ -17,11 +17,13 @@
 #include "GpuFilterKernelCore.h"
 #include "GpuFilterKernel.h"
 #include "CpuFilterKernel.h"
+#include "GpuCudaCommon.h"
 
 #include <cub/cub.cuh>
 
 namespace SiddhiGpu
 {
+
 
 // http://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#launch-bounds
 //#define THREADS_PER_BLOCK 256
@@ -315,21 +317,23 @@ bool GpuFilterKernelStandalone::Initialize(int _iStreamIndex, GpuMetaEvent * _pM
 //			sizeof(GpuKernelFilter),
 //			cudaMemcpyHostToDevice));
 
-	ExecutorNode * pDeviceNodes;
-	CUDA_CHECK_RETURN(cudaGetSymbolAddress((void**)&pDeviceNodes, "a_ConstFilterNodes"));
-	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(pDeviceNodes,
-			pFilter->ap_ExecutorNodes,
-			sizeof(ExecutorNode) * pFilter->i_NodeCount,
-			0,
-			cudaMemcpyHostToDevice));
+//	ExecutorNode * pDeviceNodes;
+//	CUDA_CHECK_RETURN(cudaGetSymbolAddress((void**)&pDeviceNodes, a_ConstFilterNodes));
+//	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(a_ConstFilterNodes,
+//			pFilter->ap_ExecutorNodes,
+//			sizeof(ExecutorNode) * pFilter->i_NodeCount,
+//			0,
+//			cudaMemcpyHostToDevice));
 
-	int * iDeviceFilterNodeCount;
-	CUDA_CHECK_RETURN(cudaGetSymbolAddress((void**)&iDeviceFilterNodeCount, "i_ConstFilterNodeCount"));
-	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(iDeviceFilterNodeCount,
-			&pFilter->i_NodeCount,
-			sizeof(int),
-			0,
-			cudaMemcpyHostToDevice));
+//	int * iDeviceFilterNodeCount;
+//	CUDA_CHECK_RETURN(cudaGetSymbolAddress((void**)&iDeviceFilterNodeCount, i_ConstFilterNodeCount));
+//	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(i_ConstFilterNodeCount,
+//			&pFilter->i_NodeCount,
+//			sizeof(int),
+//			0,
+//			cudaMemcpyHostToDevice));
+
+	UpdateExecutorNodes(pFilter);
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());

@@ -23,6 +23,8 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.config.StreamJunctionContext;
@@ -196,6 +198,12 @@ public class StreamJunction {
             receiver.printStatistics();
         }
     }
+    
+    public synchronized void getStatistics(List<DescriptiveStatistics> statList) {
+        for (Receiver receiver : receivers) {
+            receiver.getStatistics(statList);
+        }
+    }
 
     public synchronized Publisher constructPublisher() {
         Publisher publisher = new Publisher();
@@ -230,6 +238,8 @@ public class StreamJunction {
         public void receive(Event[] events);
         
         public void printStatistics();
+        
+        public void getStatistics(List<DescriptiveStatistics> statList);
     }
 
     public class StreamHandler implements EventHandler<Event> {
