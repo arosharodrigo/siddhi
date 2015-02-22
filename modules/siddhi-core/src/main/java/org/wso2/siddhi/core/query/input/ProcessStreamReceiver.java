@@ -20,6 +20,7 @@
 package org.wso2.siddhi.core.query.input;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -55,7 +56,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     private long endTime = 0;
     private long duration = 0;
     private long totalDuration = 0;
-    private final DescriptiveStatistics throughputStatstics = new DescriptiveStatistics();
+    private final SummaryStatistics throughputStatstics = new SummaryStatistics();
 
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
 
@@ -247,11 +248,13 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         .append("|Avg=").append(decimalFormat.format(throughputStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(throughputStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(throughputStatstics.getMax()))
-        .append("|10=").append(decimalFormat.format(throughputStatstics.getPercentile(10)))
-        .append("|90=").append(decimalFormat.format(throughputStatstics.getPercentile(90))).toString());
+        .append("|Var=").append(decimalFormat.format(throughputStatstics.getVariance()))
+        .append("|StdDev=").append(decimalFormat.format(throughputStatstics.getStandardDeviation())).toString());
+//        .append("|10=").append(decimalFormat.format(throughputStatstics.getPercentile(10)))
+//        .append("|90=").append(decimalFormat.format(throughputStatstics.getPercentile(90))).toString());
     }
     
-    public void getStatistics(List<DescriptiveStatistics> statList) {
+    public void getStatistics(List<SummaryStatistics> statList) {
         statList.add(throughputStatstics);
     }
 }

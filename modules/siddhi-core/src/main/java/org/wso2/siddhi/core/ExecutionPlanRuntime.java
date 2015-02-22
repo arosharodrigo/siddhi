@@ -20,6 +20,7 @@
 package org.wso2.siddhi.core;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
@@ -165,7 +166,7 @@ public class ExecutionPlanRuntime {
         }
     }
     
-    public void getStatistics(List<DescriptiveStatistics> statList) {
+    public void getStatistics(List<SummaryStatistics> statList) {
         for (StreamJunction streamJunction : streamJunctionMap.values()) {
             streamJunction.getStatistics(statList);
         }

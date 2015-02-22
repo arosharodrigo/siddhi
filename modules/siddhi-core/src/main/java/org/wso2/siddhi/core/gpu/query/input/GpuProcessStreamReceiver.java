@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 import org.bytedeco.javacpp.BytePointer;
 import org.wso2.siddhi.core.event.Event;
@@ -43,11 +44,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private long serializeBeginTime = 0;
     private long serializeTime = 0;
     private long duration = 0;
-    private final DescriptiveStatistics throughputStatstics = new DescriptiveStatistics();
-    private final DescriptiveStatistics totalTimeStatstics = new DescriptiveStatistics();
-    private final DescriptiveStatistics serializationTimeStatstics = new DescriptiveStatistics();
-    private final DescriptiveStatistics gpuTimeStatstics = new DescriptiveStatistics();
-    private final DescriptiveStatistics selectTimeStatstics = new DescriptiveStatistics();
+    private final SummaryStatistics throughputStatstics = new SummaryStatistics();
+    private final SummaryStatistics totalTimeStatstics = new SummaryStatistics();
+    private final SummaryStatistics serializationTimeStatstics = new SummaryStatistics();
+    private final SummaryStatistics gpuTimeStatstics = new SummaryStatistics();
+    private final SummaryStatistics selectTimeStatstics = new SummaryStatistics();
     private int perfromanceCalculateBatchCount;
     
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
@@ -357,8 +358,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         .append("|Avg=").append(decimalFormat.format(throughputStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(throughputStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(throughputStatstics.getMax()))
-        .append("|10=").append(decimalFormat.format(throughputStatstics.getPercentile(10)))
-        .append("|90=").append(decimalFormat.format(throughputStatstics.getPercentile(90))).toString());
+        .append("|Var=").append(decimalFormat.format(throughputStatstics.getVariance()))
+        .append("|StdDev=").append(decimalFormat.format(throughputStatstics.getStandardDeviation())).toString());
+//        .append("|10=").append(decimalFormat.format(throughputStatstics.getPercentile(10)))
+//        .append("|90=").append(decimalFormat.format(throughputStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
         .append("EventProcessTotalTime ExecutionPlan=").append(queryName).append("_").append(streamId)
@@ -366,8 +369,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         .append("|Avg=").append(decimalFormat.format(totalTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(totalTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(totalTimeStatstics.getMax()))
-        .append("|10=").append(decimalFormat.format(totalTimeStatstics.getPercentile(10)))
-        .append("|90=").append(decimalFormat.format(totalTimeStatstics.getPercentile(90))).toString());
+        .append("|Var=").append(decimalFormat.format(totalTimeStatstics.getVariance()))
+        .append("|StdDev=").append(decimalFormat.format(totalTimeStatstics.getStandardDeviation())).toString());
+//        .append("|10=").append(decimalFormat.format(totalTimeStatstics.getPercentile(10)))
+//        .append("|90=").append(decimalFormat.format(totalTimeStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
         .append("EventProcessSerializationTime ExecutionPlan=").append(queryName).append("_").append(streamId)
@@ -375,8 +380,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         .append("|Avg=").append(decimalFormat.format(serializationTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(serializationTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(serializationTimeStatstics.getMax()))
-        .append("|10=").append(decimalFormat.format(serializationTimeStatstics.getPercentile(10)))
-        .append("|90=").append(decimalFormat.format(serializationTimeStatstics.getPercentile(90))).toString());
+        .append("|Var=").append(decimalFormat.format(serializationTimeStatstics.getVariance()))
+        .append("|StdDev=").append(decimalFormat.format(serializationTimeStatstics.getStandardDeviation())).toString());
+//        .append("|10=").append(decimalFormat.format(serializationTimeStatstics.getPercentile(10)))
+//        .append("|90=").append(decimalFormat.format(serializationTimeStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
         .append("EventProcessGpuTime ExecutionPlan=").append(queryName).append("_").append(streamId)
@@ -384,8 +391,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         .append("|Avg=").append(decimalFormat.format(gpuTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(gpuTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(gpuTimeStatstics.getMax()))
-        .append("|10=").append(decimalFormat.format(gpuTimeStatstics.getPercentile(10)))
-        .append("|90=").append(decimalFormat.format(gpuTimeStatstics.getPercentile(90))).toString());
+        .append("|Var=").append(decimalFormat.format(gpuTimeStatstics.getVariance()))
+        .append("|StdDev=").append(decimalFormat.format(gpuTimeStatstics.getStandardDeviation())).toString());
+//        .append("|10=").append(decimalFormat.format(gpuTimeStatstics.getPercentile(10)))
+//        .append("|90=").append(decimalFormat.format(gpuTimeStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
         .append("EventProcessSelectTime ExecutionPlan=").append(queryName).append("_").append(streamId)
@@ -393,12 +402,14 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         .append("|Avg=").append(decimalFormat.format(selectTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(selectTimeStatstics.getMin()))
         .append("|Max=").append(decimalFormat.format(selectTimeStatstics.getMax()))
-        .append("|10=").append(decimalFormat.format(selectTimeStatstics.getPercentile(10)))
-        .append("|90=").append(decimalFormat.format(selectTimeStatstics.getPercentile(90))).toString());
+        .append("|Var=").append(decimalFormat.format(selectTimeStatstics.getVariance()))
+        .append("|StdDev=").append(decimalFormat.format(selectTimeStatstics.getStandardDeviation())).toString());
+//        .append("|10=").append(decimalFormat.format(selectTimeStatstics.getPercentile(10)))
+//        .append("|90=").append(decimalFormat.format(selectTimeStatstics.getPercentile(90))).toString());
         
     }
     
-    public void getStatistics(List<DescriptiveStatistics> statList) {
+    public void getStatistics(List<SummaryStatistics> statList) {
         statList.add(throughputStatstics);
     }
 }

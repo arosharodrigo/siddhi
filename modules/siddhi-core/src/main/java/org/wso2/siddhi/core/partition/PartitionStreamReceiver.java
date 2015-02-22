@@ -20,6 +20,7 @@
 package org.wso2.siddhi.core.partition;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -267,7 +268,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
         
     }
     
-    public void getStatistics(List<DescriptiveStatistics> statList) {
+    public void getStatistics(List<SummaryStatistics> statList) {
         
     }
 }

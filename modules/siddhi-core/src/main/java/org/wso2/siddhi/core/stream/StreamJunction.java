@@ -25,6 +25,7 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.config.StreamJunctionContext;
@@ -199,7 +200,7 @@ public class StreamJunction {
         }
     }
     
-    public synchronized void getStatistics(List<DescriptiveStatistics> statList) {
+    public synchronized void getStatistics(List<SummaryStatistics> statList) {
         for (Receiver receiver : receivers) {
             receiver.getStatistics(statList);
         }
@@ -239,7 +240,7 @@ public class StreamJunction {
         
         public void printStatistics();
         
-        public void getStatistics(List<DescriptiveStatistics> statList);
+        public void getStatistics(List<SummaryStatistics> statList);
     }
 
     public class StreamHandler implements EventHandler<Event> {
