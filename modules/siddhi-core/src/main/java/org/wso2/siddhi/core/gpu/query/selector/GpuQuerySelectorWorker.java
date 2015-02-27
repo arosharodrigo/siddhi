@@ -34,12 +34,11 @@ public class GpuQuerySelectorWorker implements Runnable {
     protected GpuMetaStreamEvent gpuMetaStreamEvent;
     protected StreamEventConverter streamEventConverter;
     
-    public GpuQuerySelectorWorker(String id, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter,
-            List<AttributeProcessor> attributeProcessorList) {
+    public GpuQuerySelectorWorker(String id, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter) {
         this.workerId = id;
         this.streamEventPool = streamEventPool;
         this.streamEventConverter = streamEventConverter;
-        this.attributeProcessorList = attributeProcessorList;
+        this.attributeProcessorList = null;
 
         this.gpuMetaEventAttributeList = null;
         this.gpuMetaStreamEvent = null;
@@ -54,6 +53,14 @@ public class GpuQuerySelectorWorker implements Runnable {
         this.preAllocatedByteArray = null;
         
         this.eventTypes = ComplexEvent.Type.values();
+    }
+
+    public List<AttributeProcessor> getAttributeProcessorList() {
+        return attributeProcessorList;
+    }
+
+    public void setAttributeProcessorList(List<AttributeProcessor> attributeProcessorList) {
+        this.attributeProcessorList = attributeProcessorList;
     }
 
     @Override

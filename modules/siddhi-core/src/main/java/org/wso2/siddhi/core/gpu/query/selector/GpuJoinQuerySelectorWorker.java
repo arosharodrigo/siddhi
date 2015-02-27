@@ -18,9 +18,8 @@ public class GpuJoinQuerySelectorWorker extends GpuQuerySelectorWorker {
     private int workStartEvent;
     private int workEndEvent;
     
-    public GpuJoinQuerySelectorWorker(String id, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter,
-            List<AttributeProcessor> attributeProcessorList) {
-        super(id, streamEventPool, streamEventConverter, attributeProcessorList);
+    public GpuJoinQuerySelectorWorker(String id, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter) {
+        super(id, streamEventPool, streamEventConverter);
         
         this.segmentEventCount = 0;
         this.setWorkStartEvent(0);

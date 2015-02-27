@@ -427,7 +427,14 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 	CUDA_CHECK_SET_FLAG(cudaDeviceSynchronize(), flag);
 	if(flag)
 	{
-		GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone::In", fp_Log);
+//		GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone::In", fp_Log);
+//		cudaDeviceReset();
+//		exit(1);
+
+		int iDevice = -1;
+		CUDA_CHECK_RETURN(cudaGetDevice(&iDevice));
+		fprintf(stderr, "[GpuFilterKernelStandalone] Failed CUDA device : %d\n", iDevice);
+
 		cudaDeviceReset();
 		exit(1);
 	}

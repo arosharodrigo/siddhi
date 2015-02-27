@@ -2,6 +2,7 @@ package org.wso2.siddhi.core.gpu.config;
 
 import java.util.List;
 
+import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
@@ -20,6 +21,7 @@ public class GpuQueryContext {
     private Integer perfromanceCalculateBatchCount;
     private boolean batchSoftScheduling;
     private Integer threadWorkSize;
+    private GpuMetaStreamEvent outputStreamMetaEvent;
     
     public GpuQueryContext(List<Annotation> annotationList) {
         threadsPerBlock = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
@@ -76,6 +78,7 @@ public class GpuQueryContext {
             threadWorkSize = 0;
         }
             
+        this.outputStreamMetaEvent = null;
     }
 
     public boolean isBatchSoftScheduling() {
@@ -204,5 +207,13 @@ public class GpuQueryContext {
 
     public void setThreadWorkSize(int threadWorkSize) {
         this.threadWorkSize = threadWorkSize;
+    }
+
+    public GpuMetaStreamEvent getOutputStreamMetaEvent() {
+        return outputStreamMetaEvent;
+    }
+
+    public void setOutputStreamMetaEvent(GpuMetaStreamEvent outputStreamMetaEvent) {
+        this.outputStreamMetaEvent = outputStreamMetaEvent;
     }
 }

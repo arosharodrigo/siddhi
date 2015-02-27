@@ -225,6 +225,7 @@ void SetWindowState(
 			// calculate start and end window buffer positions
 			int iStart = iEventIdx + iWindowPositionShift;
 			int iEnd = iStart;
+			int iPrevToEnd = iEnd;
 			while(iEnd >= 0)
 			{
 				char * pDestinationEventBuffer = _pEventWindowBuffer + (_iSizeOfEvent * iEnd);
@@ -232,6 +233,7 @@ void SetWindowState(
 
 				if(pDestinationEvent->i_Type != GpuEvent::NONE) // there is an event in destination position
 				{
+					iPrevToEnd = iEnd;
 					iEnd -= iExitEventCount;
 				}
 				else
@@ -240,6 +242,8 @@ void SetWindowState(
 				}
 
 			}
+
+			iEnd = (iEnd < 0 ? iPrevToEnd : iEnd);
 
 			// work back from end while copying events
 			while(iEnd < iStart)

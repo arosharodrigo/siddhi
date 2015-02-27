@@ -16,6 +16,7 @@ import org.wso2.siddhi.core.gpu.query.processor.GpuQueryProcessor;
 import org.wso2.siddhi.core.gpu.query.selector.GpuJoinQuerySelector;
 import org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelector;
 import org.wso2.siddhi.core.gpu.util.ByteBufferWriter;
+import org.wso2.siddhi.core.gpu.util.parser.GpuInputStreamParser;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.gpu.jni.SiddhiGpu;
@@ -68,29 +69,36 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     public GpuProcessStreamReceiver clone(String key) {
-        GpuProcessStreamReceiver clonedProcessStreamReceiver = new GpuProcessStreamReceiver(streamId + key, queryName);
+        GpuProcessStreamReceiver clonedProcessStreamReceiver = GpuInputStreamParser.getGpuProcessStreamReceiver(
+                this.gpuMetaEvent, streamId + key, queryName);
+        
+        if(clonedProcessStreamReceiver == null) {
+            clonedProcessStreamReceiver = new GpuProcessStreamReceiver(streamId + key, queryName);
+        }
+        
         clonedProcessStreamReceiver.setMetaStreamEvent(metaStreamEvent);
         clonedProcessStreamReceiver.setGpuQueryProcessor(gpuQueryProcessor.clone());
+        clonedProcessStreamReceiver.setGpuMetaEvent(this.gpuMetaEvent);
+        clonedProcessStreamReceiver.setPerfromanceCalculateBatchCount(this.perfromanceCalculateBatchCount);
+        clonedProcessStreamReceiver.setSoftBatchScheduling(this.softBatchScheduling);
+        clonedProcessStreamReceiver.setMaximumEventBatchSize(this.maximumEventBatchSize);
+        clonedProcessStreamReceiver.setMinimumEventBatchSize(this.minimumEventBatchSize);
+        
         return clonedProcessStreamReceiver;
     }
     
-    @Override
-    public void receive(Event event, boolean endOfBatch) {
-        
-        //log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
-        
-        serializeBeginTime = System.nanoTime();
+    public void serialize(Event event) {
         
         eventBufferWriter.writeShort((short)(!event.isExpired() ? 0 : 1));
         eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber());
         eventBufferWriter.writeLong(event.getTimestamp());
-        
+
         Object [] data = event.getData();
-        
+
         int index = 0;
         for (GpuEventAttribute attrib : gpuMetaEvent.getAttributes()) {
-//            log.debug("[receive] writing attribute index=" + index + " attrib=" + attrib.toString() + " val=" + data[index] + 
-//                    " BufferIndex=" + eventBufferWriter.getBufferIndex() + " BufferPosition=" + eventBufferWriter.getBufferPosition());
+            //          log.debug("[receive] writing attribute index=" + index + " attrib=" + attrib.toString() + " val=" + data[index] + 
+            //                  " BufferIndex=" + eventBufferWriter.getBufferIndex() + " BufferPosition=" + eventBufferWriter.getBufferPosition());
             switch(attrib.type) {
             case BOOL:
                 eventBufferWriter.writeBool(((Boolean) data[index++]).booleanValue());
@@ -112,6 +120,49 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 break;
             }
         }
+
+//        // ----- hardcoded logic -----------
+//        //        sid string
+//        eventBufferWriter.writeString((String) data[index++], 8);
+//        //        ts long
+//        eventBufferWriter.writeLong(((Long) data[index++]).longValue());
+//        //        x int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        y int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        z int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        v double
+//        eventBufferWriter.writeDouble(((Double) data[index++]).doubleValue());
+//        //        a double
+//        eventBufferWriter.writeDouble(((Double) data[index++]).doubleValue());
+//        //        vx int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        vy int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        vz int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        ax int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        ay int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        az int
+//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
+//        //        tsr long
+//        eventBufferWriter.writeLong(((Long) data[index++]).longValue());
+//        //        tsms long 
+//        eventBufferWriter.writeLong(((Long) data[index++]).longValue());
+//        // ---------------------------------
+    }
+    
+    @Override
+    public void receive(Event event, boolean endOfBatch) {
+        
+        //log.debug("<" + queryName + " - " + streamId + "> [receive] Event=" + event.toString() + " endOfBatch="+ endOfBatch);
+        
+        serializeBeginTime = System.nanoTime();
+        
+        serialize(event);
         
         serializeTime += (System.nanoTime() - serializeBeginTime);
         
