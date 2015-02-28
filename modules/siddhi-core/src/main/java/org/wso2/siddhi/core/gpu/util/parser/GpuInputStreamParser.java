@@ -7,10 +7,15 @@ import java.util.Map;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtMethod;
+import javassist.CtNewConstructor;
+import javassist.CtNewMethod;
+import javassist.Modifier;
 import javassist.NotFoundException;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
@@ -41,46 +46,65 @@ public class GpuInputStreamParser {
         
         GpuProcessStreamReceiver processStreamReceiver = null;
         try {
-            CtClass ctClass = ClassPool.getDefault().get("org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver");
-            CtMethod method = ctClass.getDeclaredMethod("serialize");
+            ClassPool pool = ClassPool.getDefault();
             
-            StringBuffer content = new StringBuffer();
-            content.append("{\n ");
-            content.append("eventBufferWriter.writeShort((short)(!event.isExpired() ? 0 : 1)); \n");
-            content.append("eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber()); \n");
-            content.append("eventBufferWriter.writeLong(event.getTimestamp()); \n");
-            content.append("Object [] data = event.getData(); \n");
+            String className = "GpuProcessStreamReceiver" + streamId + queryName;
+            String fqdn = "org.wso2.siddhi.core.gpu.query.input.gen." + className;
+            CtClass gpuProcStrmRecevrClass = pool.makeClass(fqdn);
+            final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver" );
+            gpuProcStrmRecevrClass.setSuperclass(superClass);
+            gpuProcStrmRecevrClass.setModifiers( Modifier.PUBLIC );
+            
+            StringBuffer constructor = new StringBuffer();
+            constructor.append("public ").append(className).append("(String streamId, String queryName) {");
+            constructor.append("   super(streamId, queryName); ");
+            constructor.append("}");
+            
+            CtConstructor ctConstructor = CtNewConstructor.make(constructor.toString(), gpuProcStrmRecevrClass);
+            gpuProcStrmRecevrClass.addConstructor(ctConstructor);
+            
+            // -- public void serialize(Event event) --
+            StringBuilder serializeBuffer = new StringBuilder();
+
+            serializeBuffer.append("public void serialize(org.wso2.siddhi.core.event.Event event) { ");
+
+            serializeBuffer.append("eventBufferWriter.writeShort((short)(!event.isExpired() ? 0 : 1)); \n");
+            serializeBuffer.append("eventBufferWriter.writeLong(gpuQueryProcessor.getNextSequenceNumber()); \n");
+            serializeBuffer.append("eventBufferWriter.writeLong(event.getTimestamp()); \n");
+            serializeBuffer.append("Object [] data = event.getData(); \n");
             int index = 0; 
             
             for (GpuEventAttribute attrib : gpuMetaEvent.getAttributes()) {
                 switch(attrib.type) {
                 case BOOL:
-                    content.append("eventBufferWriter.writeBool(((Boolean) data[").append(index++).append("]).booleanValue()); \n");
+                    serializeBuffer.append("eventBufferWriter.writeBool(((Boolean) data[").append(index++).append("]).booleanValue()); \n");
                     break;
                 case INT:
-                    content.append("eventBufferWriter.writeInt(((Integer) data[").append(index++).append("]).intValue()); \n");
+                    serializeBuffer.append("eventBufferWriter.writeInt(((Integer) data[").append(index++).append("]).intValue()); \n");
                     break;
                 case LONG:
-                    content.append("eventBufferWriter.writeLong(((Long) data[").append(index++).append("]).longValue()); \n");
+                    serializeBuffer.append("eventBufferWriter.writeLong(((Long) data[").append(index++).append("]).longValue()); \n");
                     break;
                 case FLOAT:
-                    content.append("eventBufferWriter.writeFloat(((Float) data[").append(index++).append("]).floatValue()); \n");
+                    serializeBuffer.append("eventBufferWriter.writeFloat(((Float) data[").append(index++).append("]).floatValue()); \n");
                     break;
                 case DOUBLE:
-                    content.append("eventBufferWriter.writeDouble(((Double) data[").append(index++).append("]).doubleValue()); \n");
+                    serializeBuffer.append("eventBufferWriter.writeDouble(((Double) data[").append(index++).append("]).doubleValue()); \n");
                     break;
                 case STRING: 
-                    content.append("eventBufferWriter.writeString((String) data[").append(index++).append("], attrib.length); \n");
+                    serializeBuffer.append("eventBufferWriter.writeString((String) data[").append(index++).append("], ").append(attrib.length).append("); \n");
                     break;
                 }
             }
             
-            content.append("} ");
+            serializeBuffer.append("}");
+
+            CtMethod serializeMethod = CtNewMethod.make(serializeBuffer.toString(), gpuProcStrmRecevrClass);
+            gpuProcStrmRecevrClass.addMethod(serializeMethod);
             
-            method.setBody(content.toString());
-//            ctClass.writeFile();
-            processStreamReceiver = (GpuProcessStreamReceiver)ctClass.toClass().getConstructor(String.class, String.class)
-                    .newInstance(streamId, queryName);
+            processStreamReceiver = (GpuProcessStreamReceiver)gpuProcStrmRecevrClass.toClass().getConstructor(String.class, String.class)
+                  .newInstance(streamId, queryName);
+            
         } catch (NotFoundException e) {
             e.printStackTrace();
         } catch (CannotCompileException e) {

@@ -14,8 +14,9 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
 
     private IntBuffer outputEventIndexBuffer;
     
-    public GpuFilterQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, ExecutionPlanContext executionPlanContext) {
-        super(id, selector, currentOn, expiredOn, executionPlanContext);
+    public GpuFilterQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, 
+            ExecutionPlanContext executionPlanContext, String queryName) {
+        super(id, selector, currentOn, expiredOn, executionPlanContext, queryName);
     }
     
     protected void deserialize(int eventCount) {

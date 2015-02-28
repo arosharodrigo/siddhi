@@ -26,10 +26,10 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
     private static final Logger log = Logger.getLogger(GpuProcessStreamReceiver.class);
-    private GpuQueryProcessor gpuQueryProcessor;
-    private GpuMetaStreamEvent gpuMetaEvent;
+    protected GpuQueryProcessor gpuQueryProcessor;
+    protected GpuMetaStreamEvent gpuMetaEvent;
     private int streamIndex;
-    private ByteBufferWriter eventBufferWriter;
+    protected ByteBufferWriter eventBufferWriter;
     private SiddhiGpu.GpuStreamProcessor gpuStreamProcessor;
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
     private GpuQuerySelector selectProcessor;
@@ -38,7 +38,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private boolean softBatchScheduling;
     
     private float currentEventCount = 0;
-    private long iteration = 0;
     private long startTime = 0;
     private long endTime = 0;
     private long gpuProcEndTime = 0;
@@ -198,20 +197,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             
             currentEventCount = 0;
             serializeTime = 0;
-//            iteration++;
-            
-//            if(iteration % perfromanceCalculateBatchCount == 0)
-//            {
-//                double totalThroughput = 0;
-//                
-//                for (Double tp : throughputList) {
-//                    totalThroughput += tp;
-//                }
-//                
-//                double avgThroughput = totalThroughput / throughputList.size();
-//                log.info("<" + queryName + " - " + streamId + "> Batch Throughput : " + decimalFormat.format(avgThroughput) + " eps");
-//                throughputList.clear();
-//            }
+
         }
     }
   

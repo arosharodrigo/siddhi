@@ -45,13 +45,13 @@ GpuProcessor * GpuLengthSlidingWindowProcessor::Clone()
 
 void GpuLengthSlidingWindowProcessor::Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog)
 {
-	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Configure : StreamIndex=%d PrevProcessor=%p Context=%p \n",
-			_iStreamIndex, _pPrevProcessor, _pContext);
-	fflush(fp_Log);
-
 	fp_Log = _fpLog;
 	p_Context = _pContext;
 	p_PrevProcessor = _pPrevProcessor;
+
+	fprintf(fp_Log, "[GpuLengthSlidingWindowProcessor] Configure : StreamIndex=%d PrevProcessor=%p Context=%p \n",
+			_iStreamIndex, _pPrevProcessor, _pContext);
+	fflush(fp_Log);
 }
 
 void GpuLengthSlidingWindowProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
