@@ -365,8 +365,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
         try {
             ClassPool pool = ClassPool.getDefault();
             
-            Random r = new Random(System.nanoTime());
-            String className = "GpuJoinQuerySelectorWorker" + queryName + Integer.toString(r.nextInt(1000));
+            String className = "GpuJoinQuerySelectorWorker" + queryName + GpuSelectorParser.atomicSelectorClassId.getAndIncrement();
             String fqdn = "org.wso2.siddhi.core.gpu.query.selector.gen." + className;
             CtClass gpuJoinQuerySelectorWorkerClass = pool.makeClass(fqdn);
             final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.selector.GpuJoinQuerySelectorWorker" );

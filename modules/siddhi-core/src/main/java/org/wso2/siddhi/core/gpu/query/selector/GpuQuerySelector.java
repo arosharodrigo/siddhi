@@ -401,8 +401,7 @@ public class GpuQuerySelector extends QuerySelector {
         try {
             ClassPool pool = ClassPool.getDefault();
             
-            Random r = new Random(System.nanoTime());
-            String className = "GpuQuerySelectorWorker" + queryName + Integer.toString(r.nextInt(1000));
+            String className = "GpuQuerySelectorWorker" + queryName + GpuSelectorParser.atomicSelectorClassId.getAndIncrement();
             String fqdn = "org.wso2.siddhi.core.gpu.query.selector.gen." + className;
             
             log.info("[getGpuQuerySelectorWorker] Class=" + className + " FQDN=" + fqdn);

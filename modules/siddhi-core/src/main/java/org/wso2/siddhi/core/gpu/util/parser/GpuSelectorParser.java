@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -54,6 +55,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
 public class GpuSelectorParser {
     
     private static final Logger log = Logger.getLogger(GpuSelectorParser.class);
+    public static AtomicInteger atomicSelectorClassId = new AtomicInteger(1);
     
     
     public static GpuJoinQuerySelector getGpuJoinQuerySelector(String classId, GpuMetaStreamEvent gpuMetaStreamEvent,
@@ -64,8 +66,7 @@ public class GpuSelectorParser {
         try {
             ClassPool pool = ClassPool.getDefault();
             
-            Random r = new Random(System.nanoTime());
-            String className = "GpuJoinQuerySelector" + classId + Integer.toString(r.nextInt(1000));
+            String className = "GpuJoinQuerySelector" + classId + atomicSelectorClassId.getAndIncrement();
             String fqdn = "org.wso2.siddhi.core.gpu.query.selector.gen." + className;
             CtClass gpuJoinQuerySelectorClass = pool.makeClass(fqdn);
             final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.selector.GpuJoinQuerySelector" );
@@ -206,8 +207,7 @@ public class GpuSelectorParser {
         try {
             ClassPool pool = ClassPool.getDefault();
             
-            Random r = new Random(System.nanoTime());
-            String className = "GpuFilterQuerySelector" + classId + Integer.toString(r.nextInt(1000));
+            String className = "GpuFilterQuerySelector" + classId + + atomicSelectorClassId.getAndIncrement();
             String fqdn = "org.wso2.siddhi.core.gpu.query.selector.gen." + className;
             CtClass gpuFilterQuerySelectorClass = pool.makeClass(fqdn);
             final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.selector.GpuFilterQuerySelector" );
@@ -343,8 +343,7 @@ public class GpuSelectorParser {
             
             ClassPool pool = ClassPool.getDefault();
             
-            Random r = new Random(System.nanoTime());
-            String className = "GpuQuerySelector" + classId + Integer.toString(r.nextInt(1000));
+            String className = "GpuQuerySelector" + classId + atomicSelectorClassId.getAndIncrement();
             String fqdn = "org.wso2.siddhi.core.gpu.query.selector.gen." + className;
             CtClass gpuQuerySelectorClass = pool.makeClass(fqdn);
             final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelector" );
