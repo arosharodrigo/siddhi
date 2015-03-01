@@ -405,7 +405,7 @@ public class GpuQuerySelector extends QuerySelector {
             String className = "GpuQuerySelectorWorker" + queryName + Integer.toString(r.nextInt(1000));
             String fqdn = "org.wso2.siddhi.core.gpu.query.selector.gen." + className;
             
-            System.out.println(className + " - " + fqdn);
+            log.info("[getGpuQuerySelectorWorker] Class=" + className + " FQDN=" + fqdn);
             
             CtClass gpuQuerySelectorWorkerClass = pool.makeClass(fqdn);
             final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelectorWorker" );
@@ -421,7 +421,7 @@ public class GpuQuerySelector extends QuerySelector {
             constructor.append("   super(id, streamEventPool, streamEventConverter); ");
             constructor.append("}");
             
-            System.out.println(constructor.toString());
+            log.debug("[getGpuQuerySelectorWorker] Constructor=" + constructor.toString());
             
             CtConstructor ctConstructor = CtNewConstructor.make(constructor.toString(), gpuQuerySelectorWorkerClass);
             gpuQuerySelectorWorkerClass.addConstructor(ctConstructor);
@@ -490,7 +490,7 @@ public class GpuQuerySelector extends QuerySelector {
 
             deserializeBuffer.append("}");
             
-            System.out.println(deserializeBuffer.toString());
+            log.debug("[getGpuQuerySelectorWorker] deserialize=" + deserializeBuffer.toString());
 
             CtMethod deserializeMethod = CtNewMethod.make(deserializeBuffer.toString(), gpuQuerySelectorWorkerClass);
             gpuQuerySelectorWorkerClass.addMethod(deserializeMethod);

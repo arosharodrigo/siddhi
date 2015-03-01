@@ -286,6 +286,7 @@ void GpuFilterProcessor::AddExecutorNode(int _iPos, ExecutorNode & _pNode)
 		ap_ExecutorNodes[_iPos].e_ExpressionType = _pNode.e_ExpressionType;
 		ap_ExecutorNodes[_iPos].m_ConstValue.e_Type = _pNode.m_ConstValue.e_Type;
 		ap_ExecutorNodes[_iPos].m_ConstValue.m_Value = _pNode.m_ConstValue.m_Value;
+		ap_ExecutorNodes[_iPos].m_VarValue.i_StreamIndex = _pNode.m_VarValue.i_StreamIndex;
 		ap_ExecutorNodes[_iPos].m_VarValue.e_Type = _pNode.m_VarValue.e_Type;
 		ap_ExecutorNodes[_iPos].m_VarValue.i_AttributePosition = _pNode.m_VarValue.i_AttributePosition;
 	}

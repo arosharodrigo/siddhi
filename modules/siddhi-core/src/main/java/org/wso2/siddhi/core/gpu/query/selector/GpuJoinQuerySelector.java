@@ -373,6 +373,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             gpuJoinQuerySelectorWorkerClass.setSuperclass(superClass);
             gpuJoinQuerySelectorWorkerClass.setModifiers( Modifier.PUBLIC );
             
+            log.info("[getGpuJoinQuerySelectorWorker] Class=" + className + " FQDN=" + fqdn);
             // public GpuJoinQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, ExecutionPlanContext executionPlanContext, String queryName)
             
             StringBuffer constructor = new StringBuffer();
@@ -381,6 +382,8 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
                 .append("org.wso2.siddhi.core.event.stream.converter.StreamEventConverter streamEventConverter) {");
             constructor.append("   super(id, streamEventPool, streamEventConverter); ");
             constructor.append("}");
+            
+            log.debug("[getGpuJoinQuerySelectorWorker] Constructor=" + constructor.toString());
             
             CtConstructor ctConstructor = CtNewConstructor.make(constructor.toString(), gpuJoinQuerySelectorWorkerClass);
             gpuJoinQuerySelectorWorkerClass.addConstructor(ctConstructor);
@@ -430,7 +433,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
                 }
             }
 
-            deserializeBuffer.append("        System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, index); \n");
+            deserializeBuffer.append("        System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, ").append(index).append("); \n");
 
             deserializeBuffer.append("        java.util.Iterator i = attributeProcessorList.iterator(); \n");
             deserializeBuffer.append("        while(i.hasNext()) { \n");
@@ -459,6 +462,8 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             deserializeBuffer.append("} \n");
 
             deserializeBuffer.append("}");
+            
+            log.debug("[getGpuJoinQuerySelectorWorker] deserialize=" + deserializeBuffer.toString());
 
             CtMethod deserializeMethod = CtNewMethod.make(deserializeBuffer.toString(), gpuJoinQuerySelectorWorkerClass);
             gpuJoinQuerySelectorWorkerClass.addMethod(deserializeMethod);

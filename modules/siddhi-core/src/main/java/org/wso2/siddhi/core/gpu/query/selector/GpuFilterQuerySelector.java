@@ -2,27 +2,34 @@ package org.wso2.siddhi.core.gpu.query.selector;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent;
 import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribute;
+import org.wso2.siddhi.core.gpu.util.parser.GpuSelectorParser;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 
 public class GpuFilterQuerySelector extends GpuQuerySelector {
 
     protected IntBuffer outputEventIndexBuffer;
+    protected List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings;
     
     public GpuFilterQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, 
             ExecutionPlanContext executionPlanContext, String queryName) {
         super(id, selector, currentOn, expiredOn, executionPlanContext, queryName);
+        deserializeMappings = null;
     }
     
     public void deserialize(int eventCount) {
         for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
             int matched = outputEventIndexBuffer.get();
-            if (matched >= 0) {
+            if (matched > 0) {
 
                 StreamEvent borrowedEvent = streamEventPool.borrowEvent();
 
@@ -166,9 +173,35 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
         outputComplexEventChunk.clear();
     }
     
+    public QuerySelector clone(String key) {
+        GpuFilterQuerySelector clonedQuerySelector = GpuSelectorParser.getGpuFilterQuerySelector(queryName, this.gpuMetaStreamEvent, 
+                id + key, selector, currentOn, expiredOn, executionPlanContext, deserializeMappings);
+        
+        if(clonedQuerySelector == null) {
+            clonedQuerySelector = new GpuFilterQuerySelector(id + key, selector, currentOn, expiredOn, executionPlanContext, queryName);
+        }
+        List<AttributeProcessor> clonedAttributeProcessorList = new ArrayList<AttributeProcessor>();
+        for (AttributeProcessor attributeProcessor : attributeProcessorList) {
+            clonedAttributeProcessorList.add(attributeProcessor.cloneProcessor());
+        }
+        clonedQuerySelector.attributeProcessorList = clonedAttributeProcessorList;
+        clonedQuerySelector.eventPopulator = eventPopulator;
+        clonedQuerySelector.outputRateLimiter = outputRateLimiter;
+        
+        return clonedQuerySelector;
+    }
+    
     @Override
     public void setOutputEventBuffer(ByteBuffer outputEventBuffer) {
         this.outputEventBuffer = outputEventBuffer;
         this.outputEventIndexBuffer = outputEventBuffer.asIntBuffer();
+    }
+    
+    public List<GpuMetaStreamEvent.GpuEventAttribute> getDeserializeMappings() {
+        return deserializeMappings;
+    }
+
+    public void setDeserializeMappings(List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings) {
+        this.deserializeMappings = deserializeMappings;
     }
 }

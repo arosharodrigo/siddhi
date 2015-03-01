@@ -14,9 +14,9 @@ import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcesso
 public class GpuJoinQuerySelectorWorker extends GpuQuerySelectorWorker {
     
     private static final Logger log = Logger.getLogger(GpuJoinQuerySelectorWorker.class);
-    private int segmentEventCount;
-    private int workStartEvent;
-    private int workEndEvent;
+    protected int segmentEventCount;
+    protected int workStartEvent;
+    protected int workEndEvent;
     
     public GpuJoinQuerySelectorWorker(String id, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter) {
         super(id, streamEventPool, streamEventConverter);

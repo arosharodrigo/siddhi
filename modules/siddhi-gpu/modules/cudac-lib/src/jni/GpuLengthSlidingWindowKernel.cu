@@ -315,6 +315,12 @@ GpuLengthSlidingWindowFirstKernel::~GpuLengthSlidingWindowFirstKernel()
 {
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] destroy\n");
 	fflush(fp_Log);
+
+	if(p_DeviceOutputAttributeMapping)
+	{
+		CUDA_CHECK_RETURN(cudaFree(p_DeviceOutputAttributeMapping));
+		p_DeviceOutputAttributeMapping = NULL;
+	}
 }
 
 bool GpuLengthSlidingWindowFirstKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
@@ -362,6 +368,53 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(int _iStreamIndex, GpuMetaEve
 	}
 
 	p_WindowEventBuffer->CopyToDevice(false);
+
+	// copy Output mappings
+	if(p_HostOutputAttributeMapping)
+	{
+		fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Copying AttributeMappings to device \n");
+		fflush(fp_Log);
+
+		fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] AttributeMapCount : %d \n", p_HostOutputAttributeMapping->i_MappingCount);
+		for(int c=0; c<p_HostOutputAttributeMapping->i_MappingCount; ++c)
+		{
+			fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Map : Form [Stream=%d, Attrib=%d] To [Attrib=%d] \n",
+					p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::STREAM_INDEX],
+					p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::ATTRIBUTE_INDEX],
+					p_HostOutputAttributeMapping->p_Mappings[c].to);
+
+		}
+
+		CUDA_CHECK_RETURN(cudaMalloc(
+				(void**) &p_DeviceOutputAttributeMapping,
+				sizeof(AttributeMappings)));
+
+		AttributeMappings * pHostMappings = (AttributeMappings*) malloc(sizeof(AttributeMappings));
+		pHostMappings->i_MappingCount = p_HostOutputAttributeMapping->i_MappingCount;
+		pHostMappings->p_Mappings = NULL;
+
+		CUDA_CHECK_RETURN(cudaMalloc(
+				(void**) &pHostMappings->p_Mappings,
+				sizeof(AttributeMapping) * p_HostOutputAttributeMapping->i_MappingCount));
+
+		CUDA_CHECK_RETURN(cudaMemcpy(
+				pHostMappings->p_Mappings,
+				p_HostOutputAttributeMapping->p_Mappings,
+				sizeof(AttributeMapping) * p_HostOutputAttributeMapping->i_MappingCount,
+				cudaMemcpyHostToDevice));
+
+		CUDA_CHECK_RETURN(cudaMemcpy(
+				p_DeviceOutputAttributeMapping,
+				pHostMappings,
+				sizeof(AttributeMappings),
+				cudaMemcpyHostToDevice));
+
+		CUDA_CHECK_RETURN(cudaPeekAtLastError());
+		CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+		free(pHostMappings);
+		pHostMappings = NULL;
+	}
 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFirstKernel] Initialization complete\n");
 	fflush(fp_Log);
@@ -502,6 +555,12 @@ GpuLengthSlidingWindowFilterKernel::~GpuLengthSlidingWindowFilterKernel()
 {
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] destroy\n");
 	fflush(fp_Log);
+
+	if(p_DeviceOutputAttributeMapping)
+	{
+		CUDA_CHECK_RETURN(cudaFree(p_DeviceOutputAttributeMapping));
+		p_DeviceOutputAttributeMapping = NULL;
+	}
 }
 
 bool GpuLengthSlidingWindowFilterKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)
@@ -546,6 +605,53 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(int _iStreamIndex, GpuMetaEv
 	}
 
 	p_WindowEventBuffer->CopyToDevice(false);
+
+	// copy Output mappings
+	if(p_HostOutputAttributeMapping)
+	{
+		fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Copying AttributeMappings to device \n");
+		fflush(fp_Log);
+
+		fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] AttributeMapCount : %d \n", p_HostOutputAttributeMapping->i_MappingCount);
+		for(int c=0; c<p_HostOutputAttributeMapping->i_MappingCount; ++c)
+		{
+			fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Map : Form [Stream=%d, Attrib=%d] To [Attrib=%d] \n",
+					p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::STREAM_INDEX],
+					p_HostOutputAttributeMapping->p_Mappings[c].from[AttributeMapping::ATTRIBUTE_INDEX],
+					p_HostOutputAttributeMapping->p_Mappings[c].to);
+
+		}
+
+		CUDA_CHECK_RETURN(cudaMalloc(
+				(void**) &p_DeviceOutputAttributeMapping,
+				sizeof(AttributeMappings)));
+
+		AttributeMappings * pHostMappings = (AttributeMappings*) malloc(sizeof(AttributeMappings));
+		pHostMappings->i_MappingCount = p_HostOutputAttributeMapping->i_MappingCount;
+		pHostMappings->p_Mappings = NULL;
+
+		CUDA_CHECK_RETURN(cudaMalloc(
+				(void**) &pHostMappings->p_Mappings,
+				sizeof(AttributeMapping) * p_HostOutputAttributeMapping->i_MappingCount));
+
+		CUDA_CHECK_RETURN(cudaMemcpy(
+				pHostMappings->p_Mappings,
+				p_HostOutputAttributeMapping->p_Mappings,
+				sizeof(AttributeMapping) * p_HostOutputAttributeMapping->i_MappingCount,
+				cudaMemcpyHostToDevice));
+
+		CUDA_CHECK_RETURN(cudaMemcpy(
+				p_DeviceOutputAttributeMapping,
+				pHostMappings,
+				sizeof(AttributeMappings),
+				cudaMemcpyHostToDevice));
+
+		CUDA_CHECK_RETURN(cudaPeekAtLastError());
+		CUDA_CHECK_RETURN(cudaThreadSynchronize());
+
+		free(pHostMappings);
+		pHostMappings = NULL;
+	}
 
 	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Initialization complete\n");
 	fflush(fp_Log);
