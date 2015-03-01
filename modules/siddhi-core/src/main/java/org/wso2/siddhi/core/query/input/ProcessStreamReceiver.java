@@ -57,17 +57,20 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     private long duration = 0;
     private long totalDuration = 0;
     private final SummaryStatistics throughputStatstics = new SummaryStatistics();
+    protected int perfromanceCalculateBatchCount;
 
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
 
     public ProcessStreamReceiver(String streamId) {
         this.streamId = streamId;
         this.queryName = streamId;
+        this.perfromanceCalculateBatchCount = 1000;
     }
     
     public ProcessStreamReceiver(String streamId, String queryName) {
         this.streamId = streamId;
         this.queryName = queryName;
+        this.perfromanceCalculateBatchCount = 1000;
     }
 
     @Override
@@ -93,10 +96,10 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         totalDuration += (endTime - startTime);
         currentEventCount++;
         
-        if(currentEventCount == 1000000) {
+        if(currentEventCount == perfromanceCalculateBatchCount) {
            
             double avgThroughput = currentEventCount * 1000000000 / totalDuration;
-            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            log.info("<" + queryName + "> " + perfromanceCalculateBatchCount + " Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
             
             throughputStatstics.addValue(avgThroughput);
             totalDuration = 0;
@@ -115,10 +118,10 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         totalDuration += (endTime - startTime);
         currentEventCount++;
         
-        if(currentEventCount == 1000000) {
+        if(currentEventCount == perfromanceCalculateBatchCount) {
           
             double avgThroughput = currentEventCount * 1000000000 / totalDuration;
-            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            log.info("<" + queryName + "> " + perfromanceCalculateBatchCount + " Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
             
             throughputStatstics.addValue(avgThroughput);
             
@@ -138,9 +141,9 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         totalDuration += (endTime - startTime);
         currentEventCount += events.length;
         
-        if(currentEventCount >= 1000000) {
+        if(currentEventCount >= perfromanceCalculateBatchCount) {
             double avgThroughput = currentEventCount * 1000000000 / totalDuration;
-            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            log.info("<" + queryName + "> " + currentEventCount + " Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
             
             throughputStatstics.addValue(avgThroughput);
             
@@ -195,10 +198,10 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         totalDuration += (endTime - startTime);
         currentEventCount++;
         
-        if(currentEventCount == 1000000) {
+        if(currentEventCount == perfromanceCalculateBatchCount) {
            
             double avgThroughput = currentEventCount * 1000000000 / totalDuration;
-            log.info("<" + queryName + "> 1M Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
+            log.info("<" + queryName + "> " + perfromanceCalculateBatchCount + " Events Throughput : " + decimalFormat.format(avgThroughput) + " eps");
             
             throughputStatstics.addValue(avgThroughput);
             
@@ -256,5 +259,13 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     
     public void getStatistics(List<SummaryStatistics> statList) {
         statList.add(throughputStatstics);
+    }
+    
+    public int getPerfromanceCalculateBatchCount() {
+        return perfromanceCalculateBatchCount;
+    }
+
+    public void setPerfromanceCalculateBatchCount(int perfromanceCalculateBatchCount) {
+        this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
     }
 }

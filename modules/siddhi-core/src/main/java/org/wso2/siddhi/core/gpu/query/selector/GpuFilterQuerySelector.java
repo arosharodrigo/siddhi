@@ -12,14 +12,14 @@ import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 
 public class GpuFilterQuerySelector extends GpuQuerySelector {
 
-    private IntBuffer outputEventIndexBuffer;
+    protected IntBuffer outputEventIndexBuffer;
     
     public GpuFilterQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, 
             ExecutionPlanContext executionPlanContext, String queryName) {
         super(id, selector, currentOn, expiredOn, executionPlanContext, queryName);
     }
     
-    protected void deserialize(int eventCount) {
+    public void deserialize(int eventCount) {
         for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
             int matched = outputEventIndexBuffer.get();
             if (matched >= 0) {

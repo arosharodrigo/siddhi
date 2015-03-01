@@ -102,6 +102,7 @@ public class GpuInputStreamParser {
             CtMethod serializeMethod = CtNewMethod.make(serializeBuffer.toString(), gpuProcStrmRecevrClass);
             gpuProcStrmRecevrClass.addMethod(serializeMethod);
             
+            gpuProcStrmRecevrClass.debugWriteFile("/home/prabodha/javassist");
             processStreamReceiver = (GpuProcessStreamReceiver)gpuProcStrmRecevrClass.toClass().getConstructor(String.class, String.class)
                   .newInstance(streamId, queryName);
             

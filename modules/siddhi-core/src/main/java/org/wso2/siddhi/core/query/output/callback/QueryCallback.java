@@ -24,12 +24,16 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.execution.query.Query;
+import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.ArrayList;
 import java.util.List;

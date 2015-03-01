@@ -189,4 +189,28 @@ public class GpuQuerySelectorWorker implements Runnable {
         
         preAllocatedByteArray = new byte[maxStringLength + 1];
     }
+    
+    public void setAttributeData(int index, int value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, long value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, float value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, double value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, short value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, String value) {
+        attributeData[index] = value;
+    }
 }

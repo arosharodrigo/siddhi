@@ -70,7 +70,7 @@ private:
 	GpuStreamEventBuffer * p_LeftResultEventBuffer;
 	GpuStreamEventBuffer * p_RightResultEventBuffer;
 
-	GpuKernelFilter * p_DeviceOnCompareFilter;
+//	GpuKernelFilter * p_DeviceOnCompareFilter;
 
 	int i_LeftStreamWindowSize;
 	int i_RightStreamWindowSize;

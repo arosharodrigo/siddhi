@@ -49,7 +49,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private final SummaryStatistics serializationTimeStatstics = new SummaryStatistics();
     private final SummaryStatistics gpuTimeStatstics = new SummaryStatistics();
     private final SummaryStatistics selectTimeStatstics = new SummaryStatistics();
-    private int perfromanceCalculateBatchCount;
     
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
     
@@ -64,7 +63,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         this.maximumEventBatchSize = 1024;
         this.minimumEventBatchSize = 1;
         this.softBatchScheduling = true;
-        this.perfromanceCalculateBatchCount = 1000;
     }
 
     public GpuProcessStreamReceiver clone(String key) {
@@ -254,14 +252,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     public List<SiddhiGpu.GpuProcessor> getGpuProcessors() {
         return gpuProcessors;
-    }
-    
-    public int getPerfromanceCalculateBatchCount() {
-        return perfromanceCalculateBatchCount;
-    }
-
-    public void setPerfromanceCalculateBatchCount(int perfromanceCalculateBatchCount) {
-        this.perfromanceCalculateBatchCount = perfromanceCalculateBatchCount;
     }
     
     public int getMaximumEventBatchSize() {

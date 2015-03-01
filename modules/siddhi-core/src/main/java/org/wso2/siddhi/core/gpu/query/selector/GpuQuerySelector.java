@@ -126,7 +126,7 @@ public class GpuQuerySelector extends QuerySelector {
         }
     }
     
-    protected void deserialize(int eventCount) {
+    public void deserialize(int eventCount) {
         for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
 
             ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()];
@@ -208,66 +208,6 @@ public class GpuQuerySelector extends QuerySelector {
         outputEventBuffer.position(workSize * workerSize * gpuMetaStreamEvent.getEventSizeInBytes());
         deserialize(remainWork);
         
-//        for (int resultsIndex = 0; resultsIndex < remainWork; ++resultsIndex) {
-//
-//            ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()];
-//            
-//            if(type != Type.NONE) {
-//                StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-//                
-//                long sequence = outputEventBuffer.getLong();
-//                long timestamp = outputEventBuffer.getLong();
-//
-//                int index = 0;
-//                for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
-//                    switch(attrib.type) {
-//                    case BOOL:
-//                        attributeData[index++] = outputEventBuffer.getShort();
-//                        break;
-//                    case INT:
-//                        attributeData[index++] = outputEventBuffer.getInt();
-//                        break;
-//                    case LONG:
-//                        attributeData[index++] = outputEventBuffer.getLong();
-//                        break;
-//                    case FLOAT:
-//                        attributeData[index++] = outputEventBuffer.getFloat();
-//                        break;
-//                    case DOUBLE:
-//                        attributeData[index++] = outputEventBuffer.getDouble();
-//                        break;
-//                    case STRING:
-//                        short length = outputEventBuffer.getShort();
-//                        outputEventBuffer.get(preAllocatedByteArray, 0, attrib.length);
-//                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
-//                        break;
-//                    }
-//                }
-//
-//                streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
-//                //log.debug("Converted event " + borrowedEvent.toString());
-//                
-//                // call actual select operations
-//                for (AttributeProcessor attributeProcessor : attributeProcessorList) {
-//                    attributeProcessor.process(borrowedEvent);
-//                }
-//                
-//                // add event to current list
-//                if (workerfirstEvent == null) {
-//                    workerfirstEvent = borrowedEvent;
-//                    workerLastEvent = workerfirstEvent;
-//                } else {
-//                    workerLastEvent.setNext(borrowedEvent);
-//                    workerLastEvent = borrowedEvent;
-//                }
-//                
-//            } else {
-//                outputEventBuffer.position(outputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes() - 2);
-//            }
-//            
-//        }
-
-
         for(int i=0; i<workerSize; ++i) {
             try {
                 while(futures[i].get() != null) { }
@@ -404,6 +344,30 @@ public class GpuQuerySelector extends QuerySelector {
         preAllocatedByteArray = new byte[maxStringLength + 1];
     }
     
+    public void setAttributeData(int index, int value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, long value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, float value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, double value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, short value) {
+        attributeData[index] = value;
+    }
+    
+    public void setAttributeData(int index, String value) {
+        attributeData[index] = value;
+    }
+    
     public void setWorkerSize(int workerSize) {
         if(workerSize > 0) {
             this.workerSize = workerSize;
@@ -413,8 +377,9 @@ public class GpuQuerySelector extends QuerySelector {
 
             for(int i=0; i<workerSize; ++i) {
 
-                this.workers[i] = getGpuQuerySelectorWorker(queryName, gpuMetaStreamEvent, 
-                        id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter);
+//                this.workers[i] = getGpuQuerySelectorWorker(queryName, gpuMetaStreamEvent, 
+//                        id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter);
+                this.workers[i] = null;
                 
                 if(this.workers[i] == null) {
                     this.workers[i] = new GpuQuerySelectorWorker(id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter); 
@@ -437,8 +402,11 @@ public class GpuQuerySelector extends QuerySelector {
             ClassPool pool = ClassPool.getDefault();
             
             Random r = new Random(System.nanoTime());
-            String className = "GpuQuerySelectorWorker" + queryName + Integer.toString(r.nextInt());
+            String className = "GpuQuerySelectorWorker" + queryName + Integer.toString(r.nextInt(1000));
             String fqdn = "org.wso2.siddhi.core.gpu.query.selector.gen." + className;
+            
+            System.out.println(className + " - " + fqdn);
+            
             CtClass gpuQuerySelectorWorkerClass = pool.makeClass(fqdn);
             final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.selector.GpuQuerySelectorWorker" );
             gpuQuerySelectorWorkerClass.setSuperclass(superClass);
@@ -452,6 +420,8 @@ public class GpuQuerySelector extends QuerySelector {
                 .append("org.wso2.siddhi.core.event.stream.converter.StreamEventConverter streamEventConverter) {");
             constructor.append("   super(id, streamEventPool, streamEventConverter); ");
             constructor.append("}");
+            
+            System.out.println(constructor.toString());
             
             CtConstructor ctConstructor = CtNewConstructor.make(constructor.toString(), gpuQuerySelectorWorkerClass);
             gpuQuerySelectorWorkerClass.addConstructor(ctConstructor);
@@ -467,37 +437,40 @@ public class GpuQuerySelector extends QuerySelector {
             deserializeBuffer.append("        org.wso2.siddhi.core.event.stream.StreamEvent borrowedEvent = streamEventPool.borrowEvent(); \n");
             deserializeBuffer.append("        long sequence = outputEventBuffer.getLong(); \n");
             deserializeBuffer.append("        long timestamp = outputEventBuffer.getLong(); \n");
-            
+                   
             int index = 0;
             for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
                 switch(attrib.type) {
                     case BOOL:
-                        deserializeBuffer.append("                attributeData[").append(index++).append("] = outputEventBuffer.getShort(); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getShort()); \n");
                         break;
                     case INT:
-                        deserializeBuffer.append("                attributeData[").append(index++).append("] = outputEventBuffer.getInt(); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getInt()); \n");
                         break;
                     case LONG:
-                        deserializeBuffer.append("                attributeData[").append(index++).append("] = outputEventBuffer.getLong(); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getLong()); \n");
                         break;
                     case FLOAT:
-                        deserializeBuffer.append("                attributeData[").append(index++).append("] = outputEventBuffer.getFloat(); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getFloat()); \n");
                         break;
                     case DOUBLE:
-                        deserializeBuffer.append("                attributeData[").append(index++).append("] = outputEventBuffer.getDouble(); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getDouble()); \n");
                         break;
                     case STRING:
-                        deserializeBuffer.append("                short length = outputEventBuffer.getShort(); \n");
-                        deserializeBuffer.append("                outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
-                        deserializeBuffer.append("                attributeData[").append(index++).append("] = new String(preAllocatedByteArray, 0, length); \n");
+                        deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
+                        deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length)); \n");
                         break;
+                     default:
+                         break;
                 }
             }
 
             deserializeBuffer.append("        streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent); \n");
             
-            deserializeBuffer.append("        for(java.util.Iterator<org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor> i = attributeProcessorList.iterator(); i.hasNext(); ) { \n");
-            deserializeBuffer.append("            org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor a = i.next(); \n");
+            deserializeBuffer.append("        java.util.Iterator i = attributeProcessorList.iterator(); \n");
+            deserializeBuffer.append("        while(i.hasNext()) { \n");
+            deserializeBuffer.append("            org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor a = (org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor)i.next(); \n");
             deserializeBuffer.append("            a.process(borrowedEvent); \n");
             deserializeBuffer.append("        } \n");
             
@@ -516,6 +489,8 @@ public class GpuQuerySelector extends QuerySelector {
             deserializeBuffer.append("} \n");
 
             deserializeBuffer.append("}");
+            
+            System.out.println(deserializeBuffer.toString());
 
             CtMethod deserializeMethod = CtNewMethod.make(deserializeBuffer.toString(), gpuQuerySelectorWorkerClass);
             gpuQuerySelectorWorkerClass.addMethod(deserializeMethod);
