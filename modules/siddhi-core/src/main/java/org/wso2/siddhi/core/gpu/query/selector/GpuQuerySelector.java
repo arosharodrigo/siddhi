@@ -245,7 +245,7 @@ public class GpuQuerySelector extends QuerySelector {
         
         // call output rate limiter
         if (firstEvent != null) {
-            outputComplexEventChunk.add(firstEvent);
+            outputComplexEventChunk.add(firstEvent, lastEvent);
             outputRateLimiter.process(outputComplexEventChunk);
         }
         firstEvent = null;

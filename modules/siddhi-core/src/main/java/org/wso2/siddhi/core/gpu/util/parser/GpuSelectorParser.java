@@ -268,7 +268,7 @@ public class GpuSelectorParser {
                         break;
                     case STRING:
                         deserializeBuffer.append("short length = inputEventBuffer.getShort(); \n");
-                        deserializeBuffer.append("System.out.println(\"seq=\" + sequence + \" time=\" + timestamp +  \" length=\" + length); \n");
+//                        deserializeBuffer.append("System.out.println(\"seq=\" + sequence + \" time=\" + timestamp +  \" length=\" + length); \n");
                         deserializeBuffer.append("inputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
                         deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length)); \n");
                         break;
@@ -712,6 +712,14 @@ public class GpuSelectorParser {
                }
                deserializeMappings.add(a);
             }
+        }
+        
+        if(prevAttribute != null) {
+            prevAttribute.length = skipLength;
+            prevAttribute.position = -1;
+            deserializeMappings.add(prevAttribute);
+            prevAttribute = null;
+            skipLength = 0;
         }
         
         return attributeProcessorList;

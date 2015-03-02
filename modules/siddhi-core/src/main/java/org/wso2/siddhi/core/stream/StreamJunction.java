@@ -186,7 +186,11 @@ public class StreamJunction {
 
                 ringBuffer = disruptor.start();
 
+                log.info("StreamJunction " + streamJunctionContext.getStreamDefinition().getId() + " parallel mode");
+            } else {
+                log.info("StreamJunction " + streamJunctionContext.getStreamDefinition().getId() + " single-thread mode");
             }
+            
         }
     }
 

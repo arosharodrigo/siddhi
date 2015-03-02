@@ -14,6 +14,9 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
+import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -184,7 +187,7 @@ public class JoinMultipleQueryPerformance {
         new TestQuery("from cseStockStream#window.length(1000) as a join twitterStream#window.length(200) as b " 
                 + " on a.symbol==b.company " 
                 + " select a.symbol as symbol, b.numoccur, a.bidPrice, a.qty " 
-                + " insert into twitterStockStream ; ", 0),
+                + " insert into twitterStockStream ; ", 1),
                 
         new TestQuery("from cseStockStream#window.length(100) as a join cseTradeStream#window.length(1000) as b " 
                 + " on a.bidPrice <= b.tradePrice and a.qty <= b.volume " 
@@ -199,7 +202,7 @@ public class JoinMultipleQueryPerformance {
         new TestQuery("from cseStockStream#window.length(100) as a join cseTradeStream#window.length(1000) as b " 
                 + " on a.bidPrice <= b.tradePrice and a.qty <= b.volume " 
                 + " select a.symbol as symbol, a.bidPrice, b.tradePrice " 
-                + " insert into stockTradeStream ; ", 0)
+                + " insert into stockTradeStream ; ", 1)
     };
     
     private static void Help() {
@@ -225,7 +228,7 @@ public class JoinMultipleQueryPerformance {
         
         CommandLineParser cliParser = new BasicParser();
         CommandLine cmd = null;
-//        final DecimalFormat decimalFormat = new DecimalFormat("###.##");
+        final DecimalFormat decimalFormat = new DecimalFormat("###.##");
         
         twitterPerformanceCalculator = new OutputPerfromanceCalculator("twitterStockStream");
         tradePerformanceCalculator = new OutputPerfromanceCalculator("stockTradeStream");        
@@ -361,11 +364,15 @@ public class JoinMultipleQueryPerformance {
 
         stockThread.start();
         twitterThread.start();
-        tradeThread.start();
+        if(queryCount > 1) {
+            tradeThread.start();
+        }
 
         stockThread.join();
         twitterThread.join();
-        tradeThread.join();
+        if(queryCount > 1) {
+            tradeThread.join();
+        }
               
         System.out.println("JoinMultipleQueryPerformance [EnableAsync=" + asyncEnabled +
                 " GPUEnabled=" + gpuEnabled +
@@ -382,7 +389,22 @@ public class JoinMultipleQueryPerformance {
         twitterPerformanceCalculator.printAverageThroughput();
         tradePerformanceCalculator.printAverageThroughput();
         
+        List<SummaryStatistics> statList  = new ArrayList<SummaryStatistics>();
+        executionPlanRuntime.getStatistics(statList);
+        
         executionPlanRuntime.shutdown();
+        
+        StatisticalSummaryValues totalStatistics = AggregateSummaryStatistics.aggregate(statList);
+        
+        System.out.println(new StringBuilder()
+        .append("EventProcessTroughputEPS ")
+        .append("DatasetCount=").append(statList.size())
+        .append("|length=").append(totalStatistics.getN())
+        .append("|Avg=").append(decimalFormat.format(totalStatistics.getMean()))
+        .append("|Min=").append(decimalFormat.format(totalStatistics.getMin()))
+        .append("|Max=").append(decimalFormat.format(totalStatistics.getMax()))
+        .append("|Var=").append(decimalFormat.format(totalStatistics.getVariance()))
+        .append("|StdDev=").append(decimalFormat.format(totalStatistics.getStandardDeviation())).toString());
         
         System.exit(0);
     }

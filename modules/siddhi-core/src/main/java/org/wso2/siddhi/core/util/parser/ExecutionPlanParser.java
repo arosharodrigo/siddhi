@@ -18,6 +18,7 @@
  */
 package org.wso2.siddhi.core.util.parser;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.config.SiddhiContext;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -89,17 +91,21 @@ public class ExecutionPlanParser {
                 executionPlanContext.setSharedLock(new ReentrantLock());
             }
 
+            ThreadFactory threadFactory = new BasicThreadFactory.Builder().namingPattern("excpln_" + executionPlanContext.getName() + "-%d").build();
             if(siddhiContext.getExecutorService() != null) {
                 executionPlanContext.setExecutorService(siddhiContext.getExecutorService());
             } else if (siddhiContext.getThreadPoolInitSize() != 0) {
+                
                 executionPlanContext.setExecutorService(new ThreadPoolExecutor(siddhiContext.getThreadPoolInitSize(), 
                         Integer.MAX_VALUE,
                         60L, TimeUnit.SECONDS,
-                        new LinkedBlockingDeque<Runnable>()));
+                        new LinkedBlockingDeque<Runnable>(),
+                        threadFactory));
             } else {
                 executionPlanContext.setExecutorService(new ThreadPoolExecutor(5, Integer.MAX_VALUE,
                         60L, TimeUnit.SECONDS,
-                        new LinkedBlockingDeque<Runnable>()));
+                        new LinkedBlockingDeque<Runnable>(),
+                        threadFactory));
             }
             
             if(siddhiContext.getScheduledExecutorService() != null) {

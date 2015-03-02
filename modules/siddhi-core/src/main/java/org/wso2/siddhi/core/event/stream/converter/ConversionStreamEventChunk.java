@@ -49,7 +49,6 @@ public class ConversionStreamEventChunk extends ComplexEventChunk<StreamEvent> {
         streamEventConverter.convertEvent(event, borrowedEvent);
         first = borrowedEvent;
         last = first;
-        currentEventCount = 1;
     }
 
     public void convertAndAssign(long timeStamp, Object[] data) {
@@ -57,12 +56,10 @@ public class ConversionStreamEventChunk extends ComplexEventChunk<StreamEvent> {
         streamEventConverter.convertData(timeStamp, data, borrowedEvent);
         first = borrowedEvent;
         last = first;
-        currentEventCount = 1;
     }
 
     public void convertAndAssign(ComplexEvent complexEvent) {
         first = streamEventPool.borrowEvent();
-        currentEventCount = 1;
         last = convertAllStreamEvents(complexEvent, first);
     }
 
@@ -86,7 +83,6 @@ public class ConversionStreamEventChunk extends ComplexEventChunk<StreamEvent> {
         }
         first = firstEvent;
         last = currentEvent;
-        currentEventCount = events.length;
     }
 
     public void convertAndAdd(Event event) {
@@ -96,11 +92,9 @@ public class ConversionStreamEventChunk extends ComplexEventChunk<StreamEvent> {
         if (first == null) {
             first = borrowedEvent;
             last = first;
-            currentEventCount = 1;
         } else {
             last.setNext(borrowedEvent);
             last = borrowedEvent;
-            currentEventCount++;
         }
 
     }
@@ -114,7 +108,6 @@ public class ConversionStreamEventChunk extends ComplexEventChunk<StreamEvent> {
             streamEventConverter.convertStreamEvent(complexEvents, nextEvent);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
-            currentEventCount++;
             complexEvents = complexEvents.getNext();
         }
         return currentEvent;
@@ -150,7 +143,6 @@ public class ConversionStreamEventChunk extends ComplexEventChunk<StreamEvent> {
         lastReturned.setNext(null);
         streamEventPool.returnEvents(lastReturned);
         lastReturned = null;
-        currentEventCount--;
     }
 
 }

@@ -112,6 +112,31 @@
                                     <outputDirectory>${project.basedir}/target/lib
                                     </outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.commons</groupId>
+                                    <artifactId>commons-math3</artifactId>
+                                    <version>3.2</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.basedir}/target/lib
+                                    </outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>javassist</groupId>
+                                    <artifactId>javassist</artifactId>
+                                    <version>3.12.1.GA</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.basedir}/target/lib
+                                    </outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.commons</groupId>
+                                    <artifactId>commons-lang3</artifactId>
+                                    <version>3.3.2</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.basedir}/target/lib
+                                    </outputDirectory>
+                                </artifactItem>
+                                
                             </artifactItems>
                         </configuration>
                     </execution>

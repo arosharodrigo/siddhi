@@ -333,7 +333,7 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 					pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
 					pResultInMatchingEvent->i_Timestamp = pInEvent->i_Timestamp;
 
-					//TODO: #pragma __unroll__ 5
+					#pragma __unroll__
 					for(int m=0; m < _pOutputAttribMappings->i_MappingCount; ++m)
 					{
 						int iFromStreamIndex = _pOutputAttribMappings->p_Mappings[m].from[AttributeMapping::STREAM_INDEX];

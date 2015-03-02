@@ -164,7 +164,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
         deserialize(eventCount);
         
         if (firstEvent != null) {
-            outputComplexEventChunk.add(firstEvent);
+            outputComplexEventChunk.add(firstEvent, lastEvent);
             outputRateLimiter.process(outputComplexEventChunk);
         }
         

@@ -112,11 +112,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                 if (first == null) {
                     first = borrowedEvent;
                     last = first;
-                    currentEventCount = 1;
                 } else {
                     last.setNext(borrowedEvent);
                     last = borrowedEvent;
-                    currentEventCount++;
                 }
                 
             } else {
@@ -178,11 +176,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                 if (first == null) {
                     first = borrowedEvent;
                     last = first;
-                    currentEventCount = 1;
                 } else {
                     last.setNext(borrowedEvent);
                     last = borrowedEvent;
-                    currentEventCount++;
                 }
                 
                 indexInsideSegment++;
@@ -253,11 +249,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                 if (first == null) {
                     first = borrowedEvent;
                     last = first;
-                    currentEventCount = 1;
                 } else {
                     last.setNext(borrowedEvent);
                     last = borrowedEvent;
-                    currentEventCount++;
                 }
             } else {
 //                log.debug("not matched event : index=" + resultsIndex + " bufferPosition=" + eventBuffer.position());
@@ -271,7 +265,6 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
         streamEventConverter.convertEvent(event, borrowedEvent);
         first = borrowedEvent;
         last = first;
-        currentEventCount = 1;
     }
 
     public void convertAndAssign(long timeStamp, Object[] data) {
@@ -279,12 +272,10 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
         streamEventConverter.convertData(timeStamp, data, borrowedEvent);
         first = borrowedEvent;
         last = first;
-        currentEventCount = 1;
     }
 
     public void convertAndAssign(ComplexEvent complexEvent) {
         first = streamEventPool.borrowEvent();
-        currentEventCount = 1;
         last = convertAllStreamEvents(complexEvent, first);
     }
 
@@ -300,7 +291,6 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
         }
         first = firstEvent;
         last = currentEvent;
-        currentEventCount = events.length;
     }
 
     public void convertAndAdd(Event event) {
@@ -310,11 +300,9 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
         if (first == null) {
             first = borrowedEvent;
             last = first;
-            currentEventCount = 1;
         } else {
             last.setNext(borrowedEvent);
             last = borrowedEvent;
-            currentEventCount++;
         }
 
     }
@@ -328,7 +316,6 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
             streamEventConverter.convertStreamEvent(complexEvents, nextEvent);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
-            currentEventCount++;
             complexEvents = complexEvents.getNext();
         }
         return currentEvent;
@@ -364,6 +351,5 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
         lastReturned.setNext(null);
         streamEventPool.returnEvents(lastReturned);
         lastReturned = null;
-        currentEventCount--;
     }
 }
