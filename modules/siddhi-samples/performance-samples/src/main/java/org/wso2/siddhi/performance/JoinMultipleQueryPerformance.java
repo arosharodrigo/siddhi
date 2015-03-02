@@ -294,12 +294,13 @@ public class JoinMultipleQueryPerformance {
                 "]");
         
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.getSiddhiContext().setEventBufferSize(defaultBufferSize); //.setDefaultEventBufferSize(defaultBufferSize);
-        siddhiManager.getSiddhiContext().setExecutorService(new ThreadPoolExecutor(threadPoolSize, Integer.MAX_VALUE,
-                60L, TimeUnit.SECONDS,
-                new LinkedBlockingDeque<Runnable>()));
+        siddhiManager.getSiddhiContext().setEventBufferSize(defaultBufferSize); 
+        siddhiManager.getSiddhiContext().setThreadPoolInitSize(threadPoolSize);
+//        siddhiManager.getSiddhiContext().setExecutorService(new ThreadPoolExecutor(threadPoolSize, Integer.MAX_VALUE,
+//                60L, TimeUnit.SECONDS,
+//                new LinkedBlockingDeque<Runnable>()));
 //                Executors.new newFixedThreadPool(threadPoolSize);
-        siddhiManager.getSiddhiContext().setScheduledExecutorService(Executors.newScheduledThreadPool(threadPoolSize));
+//        siddhiManager.getSiddhiContext().setScheduledExecutorService(Executors.newScheduledThreadPool(threadPoolSize));
         
         String cseEventStream = "@plan:name('JoinMultipleQuery') " + (asyncEnabled ? "@plan:parallel" : "" ) + " "
                 + "define stream cseStockStream (symbol string, bidPrice float, qty int); "

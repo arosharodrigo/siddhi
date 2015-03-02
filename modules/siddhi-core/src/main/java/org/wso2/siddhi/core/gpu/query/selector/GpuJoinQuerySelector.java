@@ -8,6 +8,10 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -19,6 +23,7 @@ import javassist.CtNewMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
@@ -333,7 +338,13 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
     
     public void setWorkerSize(int workerSize) {
         this.workerSize = workerSize;
-        this.executorService = Executors.newFixedThreadPool(workerSize);
+        
+        ThreadFactory threadFactory = new BasicThreadFactory.Builder().namingPattern("gpu_join_sel_wrk_" + queryName + "-%d").build();
+        this.executorService =  new ThreadPoolExecutor(workerSize, 
+                workerSize,
+                60L, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<Runnable>(),
+                threadFactory); 
         this.workers = new GpuJoinQuerySelectorWorker[workerSize];
         this.futures = new Future[workerSize];
         
