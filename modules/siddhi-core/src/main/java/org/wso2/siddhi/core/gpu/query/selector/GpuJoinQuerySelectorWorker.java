@@ -76,7 +76,7 @@ public class GpuJoinQuerySelectorWorker extends GpuQuerySelectorWorker {
                     case STRING:
                         short length = outputEventBuffer.getShort();
                         outputEventBuffer.get(preAllocatedByteArray, 0, attrib.length);
-                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
+                        attributeData[index++] = new String(preAllocatedByteArray, 0, length).intern(); // TODO: avoid allocation
                         break;
                     }
                 }

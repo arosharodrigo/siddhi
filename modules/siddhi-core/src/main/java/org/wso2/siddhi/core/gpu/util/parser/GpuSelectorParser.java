@@ -131,7 +131,7 @@ public class GpuSelectorParser {
                     case STRING:
                         deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
                         deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length)); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
                         break;
                      default:
                          break;
@@ -270,7 +270,7 @@ public class GpuSelectorParser {
                         deserializeBuffer.append("short length = inputEventBuffer.getShort(); \n");
 //                        deserializeBuffer.append("System.out.println(\"seq=\" + sequence + \" time=\" + timestamp +  \" length=\" + length); \n");
                         deserializeBuffer.append("inputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length)); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
                         break;
                     default:
                         break;
@@ -401,7 +401,7 @@ public class GpuSelectorParser {
                     case STRING:
                         deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
                         deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length)); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
                         break;
                      default:
                          break;

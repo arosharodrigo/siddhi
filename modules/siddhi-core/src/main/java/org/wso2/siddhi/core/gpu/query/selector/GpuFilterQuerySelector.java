@@ -60,7 +60,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
                     case STRING:
                         short length = inputEventBuffer.getShort();
                         inputEventBuffer.get(preAllocatedByteArray, 0, attrib.length);
-                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
+                        attributeData[index++] = new String(preAllocatedByteArray, 0, length).intern(); // TODO: avoid allocation
                         break;
                     }
                 }

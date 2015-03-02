@@ -163,7 +163,7 @@ public class GpuQuerySelector extends QuerySelector {
                     case STRING:
                         short length = outputEventBuffer.getShort();
                         outputEventBuffer.get(preAllocatedByteArray, 0, attrib.length);
-                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
+                        attributeData[index++] = new String(preAllocatedByteArray, 0, length).intern(); // TODO: avoid allocation
                         break;
                     }
                 }
@@ -470,7 +470,7 @@ public class GpuQuerySelector extends QuerySelector {
                     case STRING:
                         deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
                         deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length)); \n");
+                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
                         break;
                      default:
                          break;
