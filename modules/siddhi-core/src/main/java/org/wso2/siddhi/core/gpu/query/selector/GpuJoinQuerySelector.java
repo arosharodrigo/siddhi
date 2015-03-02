@@ -73,36 +73,38 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
                 
                 long sequence = outputEventBuffer.getLong(); // 2 -> 8 bytes
                 borrowedEvent.setTimestamp(outputEventBuffer.getLong()); // 3 -> 8bytes
+                
+                Object[] outputData = borrowedEvent.getOutputData();
 
                 int index = 0;
                 for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
                     switch(attrib.type) {
                     case BOOL:
-                        attributeData[index++] = outputEventBuffer.getShort();
+                        outputData[index++] = outputEventBuffer.getShort();
                         break;
                     case INT:
-                        attributeData[index++] = outputEventBuffer.getInt();
+                        outputData[index++] = outputEventBuffer.getInt();
                         break;
                     case LONG:
-                        attributeData[index++] = outputEventBuffer.getLong();
+                        outputData[index++] = outputEventBuffer.getLong();
                         break;
                     case FLOAT:
-                        attributeData[index++] = outputEventBuffer.getFloat();
+                        outputData[index++] = outputEventBuffer.getFloat();
                         break;
                     case DOUBLE:
-                        attributeData[index++] = outputEventBuffer.getDouble();
+                        outputData[index++] = outputEventBuffer.getDouble();
                         break;
                     case STRING:
                         short length = outputEventBuffer.getShort();
                         outputEventBuffer.get(preAllocatedByteArray, 0, attrib.length);
-                        attributeData[index++] = new String(preAllocatedByteArray, 0, length).intern(); // TODO: avoid allocation, check interns
+                        outputData[index++] = new String(preAllocatedByteArray, 0, length).intern(); // TODO: avoid allocation, check interns
                         break;
                     }
                 }
                 
                 //XXX: assume always ZeroStreamEventConvertor
                 //                streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent); 
-                System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, index);
+//                System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, index);
 
 //                log.debug("<" + id + " @ GpuJoinQuerySelector> Converted event " + resultsIndex + " : [" + sequence + "] " + borrowedEvent.toString());
 
@@ -414,36 +416,65 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             deserializeBuffer.append("        borrowedEvent.setType(type); \n");
             deserializeBuffer.append("        long sequence = outputEventBuffer.getLong(); // 2 -> 8 bytes \n");
             deserializeBuffer.append("        borrowedEvent.setTimestamp(outputEventBuffer.getLong()); // 3 -> 8bytes \n");
+            deserializeBuffer.append("        Object[] outputData = borrowedEvent.getOutputData(); \n");
             
             int index = 0;
             for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
                 switch(attrib.type) {
-                    case BOOL:
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getShort()); \n");
-                        break;
-                    case INT:
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getInt()); \n");
-                        break;
-                    case LONG:
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getLong()); \n");
-                        break;
-                    case FLOAT:
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getFloat()); \n");
-                        break;
-                    case DOUBLE:
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getDouble()); \n");
-                        break;
-                    case STRING:
-                        deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
-                        deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
-                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
-                        break;
-                     default:
-                         break;
+                case BOOL:
+                    deserializeBuffer.append("outputData[").append(index++).append("] = outputEventBuffer.getShort(); \n");
+                    break;
+                case INT:
+                    deserializeBuffer.append("outputData[").append(index++).append("] = outputEventBuffer.getInt(); \n");
+                    break;
+                case LONG:
+                    deserializeBuffer.append("outputData[").append(index++).append("] = outputEventBuffer.getLong(); \n");
+                    break;
+                case FLOAT:
+                    deserializeBuffer.append("outputData[").append(index++).append("] = outputEventBuffer.getFloat(); \n");
+                    break;
+                case DOUBLE:
+                    deserializeBuffer.append("outputData[").append(index++).append("] = outputEventBuffer.getDouble(); \n");
+                    break;
+                case STRING:
+                    deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
+                    deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
+                    deserializeBuffer.append("outputData[").append(index++).append("] = new String(preAllocatedByteArray, 0, length).intern(); \n");
+                    break;
+                default:
+                    break;
                 }
             }
+            
+//            int index = 0;
+//            for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
+//                switch(attrib.type) {
+//                    case BOOL:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getShort()); \n");
+//                        break;
+//                    case INT:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getInt()); \n");
+//                        break;
+//                    case LONG:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getLong()); \n");
+//                        break;
+//                    case FLOAT:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getFloat()); \n");
+//                        break;
+//                    case DOUBLE:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getDouble()); \n");
+//                        break;
+//                    case STRING:
+//                        deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
+//                        deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
+//                        break;
+//                     default:
+//                         break;
+//                }
+//            }
 
-            deserializeBuffer.append("        System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, ").append(index).append("); \n");
+//            deserializeBuffer.append("        System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, ").append(index).append("); \n");
 
             deserializeBuffer.append("        java.util.Iterator i = attributeProcessorList.iterator(); \n");
             deserializeBuffer.append("        while(i.hasNext()) { \n");
