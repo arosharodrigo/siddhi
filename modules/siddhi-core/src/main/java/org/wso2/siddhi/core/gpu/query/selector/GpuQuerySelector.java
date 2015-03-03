@@ -71,6 +71,7 @@ public class GpuQuerySelector extends QuerySelector {
     protected Future futures[];
     
     protected String queryName;
+    protected int processedEventCount;
     
     public GpuQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, 
             ExecutionPlanContext executionPlanContext, String queryName) {
@@ -99,6 +100,7 @@ public class GpuQuerySelector extends QuerySelector {
         this.workerLastEvent = null;
         
         this.queryName = queryName;
+        this.processedEventCount = 0;
     }
     
     @Override
@@ -185,6 +187,7 @@ public class GpuQuerySelector extends QuerySelector {
                     workerLastEvent = borrowedEvent;
                 }
                 
+                processedEventCount++;
             } else {
                 outputEventBuffer.position(outputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes() - 2);
             }
@@ -219,6 +222,7 @@ public class GpuQuerySelector extends QuerySelector {
 
                 StreamEvent workerResultsFirst = workers[i].getFirstEvent();
                 StreamEvent workerResultsLast = workers[i].getLastEvent();
+                processedEventCount += workers[i].getProcessedEventCount();
 
                 if(workerResultsFirst != null) {
                     if (firstEvent != null) {
@@ -247,6 +251,8 @@ public class GpuQuerySelector extends QuerySelector {
         }
         
         // all workers complete, 
+        
+        log.info("<" + queryName + "> processedEventCount=" + processedEventCount);
         
         // call output rate limiter
         if (firstEvent != null) {
@@ -492,6 +498,7 @@ public class GpuQuerySelector extends QuerySelector {
             deserializeBuffer.append("            lastEvent.setNext(borrowedEvent); \n");
             deserializeBuffer.append("            lastEvent = borrowedEvent; \n");
             deserializeBuffer.append("        } \n");
+            deserializeBuffer.append("        processedEventCount++; \n");
             
             deserializeBuffer.append("    } else { \n");
             deserializeBuffer.append("        outputEventBuffer.position(outputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes() - 2); \n");

@@ -34,6 +34,8 @@ public class GpuQuerySelectorWorker implements Runnable {
     protected GpuMetaStreamEvent gpuMetaStreamEvent;
     protected StreamEventConverter streamEventConverter;
     
+    protected int processedEventCount;
+    
     public GpuQuerySelectorWorker(String id, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter) {
         this.workerId = id;
         this.streamEventPool = streamEventPool;
@@ -53,6 +55,8 @@ public class GpuQuerySelectorWorker implements Runnable {
         this.preAllocatedByteArray = null;
         
         this.eventTypes = ComplexEvent.Type.values();
+        
+        this.processedEventCount = 0;
     }
 
     public List<AttributeProcessor> getAttributeProcessorList() {
@@ -117,6 +121,8 @@ public class GpuQuerySelectorWorker implements Runnable {
                     lastEvent.setNext(borrowedEvent);
                     lastEvent = borrowedEvent;
                 }
+                
+                processedEventCount++;
 
             } else {
                 outputEventBuffer.position(outputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes() - 2);
@@ -153,6 +159,10 @@ public class GpuQuerySelectorWorker implements Runnable {
     
     public StreamEvent getLastEvent() {
         return lastEvent;
+    }
+    
+    public int getProcessedEventCount() {
+        return processedEventCount;
     }
 
     public void setGpuMetaStreamEvent(GpuMetaStreamEvent gpuMetaStreamEvent) {

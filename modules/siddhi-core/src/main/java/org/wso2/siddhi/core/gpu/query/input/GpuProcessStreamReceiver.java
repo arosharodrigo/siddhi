@@ -318,7 +318,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 selectProcessor.setStreamEventPool(streamEventPool);
                 selectProcessor.setMetaStreamEvent(metaStreamEvent);
                 selectProcessor.setGpuMetaStreamEvent(outputGpuMetaEvent);
-                selectProcessor.setWorkerSize(5);
+                selectProcessor.setWorkerSize(0);
 
             } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
 
@@ -326,6 +326,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 int segmentEventCount  = 0;
                 int threadWorkSize = 0;
                 int bufferSize = 0;
+                int workerCount = 7;
 
                 if(streamIndex == 0) {
 
@@ -356,6 +357,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                     threadWorkSize = segmentEventCount;
                 }
                 
+                if(threadWorkSize == segmentEventCount) {
+                    workerCount = 0;
+                }
+                
                 StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
                 GpuMetaStreamEvent outputGpuMetaEvent = new GpuMetaStreamEvent(outputStreamDef.getId(), outputStreamDef, 
                         gpuQueryProcessor.getGpuQueryContext());
@@ -369,11 +374,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 gpuJoinQuerySelector.setMetaStreamEvent(metaStreamEvent);
                 gpuJoinQuerySelector.setGpuMetaStreamEvent(outputGpuMetaEvent);
                 gpuJoinQuerySelector.setThreadWorkSize(threadWorkSize);
-                gpuJoinQuerySelector.setWorkerSize(7); // + 1 selector thread = 8 //TODO: set this from query
+                gpuJoinQuerySelector.setWorkerSize(workerCount); // + 1 selector thread = 8 //TODO: set this from query
                 
                 int numerOfEventsInOutBuffer = bufferSize / outputGpuMetaEvent.getEventSizeInBytes();
                 int segmentCount = numerOfEventsInOutBuffer / segmentEventCount;
-                gpuJoinQuerySelector.setSegmentsPerWorker(segmentCount / 8);
+                gpuJoinQuerySelector.setSegmentsPerWorker(segmentCount / (workerCount + 1));
             }
         }
     }

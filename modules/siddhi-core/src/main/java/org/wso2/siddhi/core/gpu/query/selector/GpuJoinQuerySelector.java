@@ -122,6 +122,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
                     workerLastEvent = borrowedEvent;
                 }
 
+                processedEventCount++;
                 indexInsideSegment++;
                 indexInsideSegment = indexInsideSegment % segmentEventCount;
 
@@ -168,91 +169,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
 //        log.debug("<" + id + " @ GpuJoinQuerySelector> process remaining from=" + (workerSize * workSize) + " To=" + eventCount);
         // do remaining task
         outputEventBuffer.position(workerSize * workSize * gpuMetaStreamEvent.getEventSizeInBytes());
-        
-//        int indexInsideSegment = 0;
-//        int segIdx = 0;
-//        ComplexEvent.Type type;
-//        for (int resultsIndex = workerSize * workSize; resultsIndex < eventCount; ++resultsIndex) {
-//
-//            segIdx = resultsIndex / segmentEventCount;
-//
-//            type = eventTypes[outputEventBuffer.getShort()]; // 1 -> 2 bytes
-//
-////            log.debug("<" + id + " @ GpuJoinQuerySelector> process eventIndex=" + resultsIndex + " type=" + type 
-////                    + " segIdx=" + segIdx + " segInternalIdx=" + indexInsideSegment);
-//
-//            if(type != Type.NONE && type != Type.RESET) {
-//                StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-//                borrowedEvent.setType(type);
-//                
-//                long sequence = outputEventBuffer.getLong(); // 2 -> 8 bytes
-//                borrowedEvent.setTimestamp(outputEventBuffer.getLong()); // 3 -> 8bytes
-//
-//                int index = 0;
-//                for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
-//                    switch(attrib.type) {
-//                    case BOOL:
-//                        attributeData[index++] = outputEventBuffer.getShort();
-//                        break;
-//                    case INT:
-//                        attributeData[index++] = outputEventBuffer.getInt();
-//                        break;
-//                    case LONG:
-//                        attributeData[index++] = outputEventBuffer.getLong();
-//                        break;
-//                    case FLOAT:
-//                        attributeData[index++] = outputEventBuffer.getFloat();
-//                        break;
-//                    case DOUBLE:
-//                        attributeData[index++] = outputEventBuffer.getDouble();
-//                        break;
-//                    case STRING:
-//                        short length = outputEventBuffer.getShort();
-//                        outputEventBuffer.get(preAllocatedByteArray, 0, attrib.length);
-//                        attributeData[index++] = new String(preAllocatedByteArray, 0, length); // TODO: avoid allocation
-//                        break;
-//                    }
-//                }
-//                
-//                //XXX: assume always ZeroStreamEventConvertor
-//                //                streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent); 
-//                System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, index);
-//
-////                log.debug("<" + id + " @ GpuJoinQuerySelector> Converted event " + resultsIndex + " : [" + sequence + "] " + borrowedEvent.toString());
-//
-//                // call actual select operations
-//                for (AttributeProcessor attributeProcessor : attributeProcessorList) {
-//                    attributeProcessor.process(borrowedEvent);
-//                }
-//
-//                // add event to current list
-//                if (workerfirstEvent == null) {
-//                    workerfirstEvent = borrowedEvent;
-//                    workerLastEvent = workerfirstEvent;
-//                } else {
-//                    workerLastEvent.setNext(borrowedEvent);
-//                    workerLastEvent = borrowedEvent;
-//                }
-//
-//                indexInsideSegment++;
-//                indexInsideSegment = indexInsideSegment % segmentEventCount;
-//
-//            } else if (type == Type.RESET){
-//                // skip remaining bytes in segment
-////                log.debug("<" + id + " @ GpuJoinQuerySelector> Skip to next segment : CurrPos=" + 
-////                        outputEventBuffer.position() + " segInternalIdx=" + indexInsideSegment);
-//
-//                outputEventBuffer.position(
-//                        outputEventBuffer.position() + 
-//                        ((segmentEventCount - indexInsideSegment) * gpuMetaStreamEvent.getEventSizeInBytes()) 
-//                        - 2);
-//
-////                log.debug("<" + id + " @ GpuJoinQuerySelector> buffer new pos : " + outputEventBuffer.position());
-//                resultsIndex = ((segIdx + 1) * segmentEventCount) - 1;
-//                indexInsideSegment = 0;
-//            }
-//        }
-        
+               
         deserialize(eventCount);
         
         for(int i=0; i<workerSize; ++i) {
@@ -261,6 +178,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
 
                 StreamEvent workerResultsFirst = workers[i].getFirstEvent();
                 StreamEvent workerResultsLast = workers[i].getLastEvent();
+                processedEventCount += workers[i].getProcessedEventCount();
 
                 if(workerResultsFirst != null) {
                     if (firstEvent != null) {
@@ -289,6 +207,8 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
         }
 
         //        log.debug("<" + id + " @ GpuJoinQuerySelector> Call outputRateLimiter " + outputRateLimiter);
+        
+        log.info("<" + queryName + "> processedEventCount=" + processedEventCount);
 
         // call output rate limiter
         if (firstEvent != null) {
@@ -341,26 +261,28 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
     public void setWorkerSize(int workerSize) {
         this.workerSize = workerSize;
         
-        ThreadFactory threadFactory = new BasicThreadFactory.Builder().namingPattern("gpu_join_sel_wrk_" + queryName + "-%d").build();
-        this.executorService =  new ThreadPoolExecutor(workerSize, 
-                workerSize,
-                60L, TimeUnit.SECONDS,
-                new LinkedBlockingDeque<Runnable>(),
-                threadFactory); 
-        this.workers = new GpuJoinQuerySelectorWorker[workerSize];
-        this.futures = new Future[workerSize];
-        
-        for(int i=0; i<workerSize; ++i) {
-            
-            this.workers[i] = getGpuJoinQuerySelectorWorker(queryName, gpuMetaStreamEvent,
-                    id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter);
-            
-            if(this.workers[i] == null) {
-                this.workers[i] = new GpuJoinQuerySelectorWorker(id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter); 
+        if(this.workerSize > 0) {
+            ThreadFactory threadFactory = new BasicThreadFactory.Builder().namingPattern("gpu_join_sel_wrk_" + queryName + "-%d").build();
+            this.executorService =  new ThreadPoolExecutor(workerSize, 
+                    workerSize,
+                    60L, TimeUnit.SECONDS,
+                    new LinkedBlockingDeque<Runnable>(),
+                    threadFactory); 
+            this.workers = new GpuJoinQuerySelectorWorker[workerSize];
+            this.futures = new Future[workerSize];
+
+            for(int i=0; i<workerSize; ++i) {
+
+                this.workers[i] = getGpuJoinQuerySelectorWorker(queryName, gpuMetaStreamEvent,
+                        id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter);
+
+                if(this.workers[i] == null) {
+                    this.workers[i] = new GpuJoinQuerySelectorWorker(id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter); 
+                }
+
+                this.workers[i].setAttributeProcessorList(attributeProcessorList); // TODO: attributeProcessorList should be cloned
+                this.workers[i].setGpuMetaStreamEvent(gpuMetaStreamEvent);
             }
-            
-            this.workers[i].setAttributeProcessorList(attributeProcessorList); // TODO: attributeProcessorList should be cloned
-            this.workers[i].setGpuMetaStreamEvent(gpuMetaStreamEvent);
         }
             
     }
@@ -461,6 +383,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             deserializeBuffer.append("            lastEvent.setNext(borrowedEvent); \n");
             deserializeBuffer.append("            lastEvent = borrowedEvent; \n");
             deserializeBuffer.append("        } \n");
+            deserializeBuffer.append("        processedEventCount++; \n");
             deserializeBuffer.append("        indexInsideSegment++; \n");
             deserializeBuffer.append("        indexInsideSegment = indexInsideSegment % segmentEventCount; \n");
             

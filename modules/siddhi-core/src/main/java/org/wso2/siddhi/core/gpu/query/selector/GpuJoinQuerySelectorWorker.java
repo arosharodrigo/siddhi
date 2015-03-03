@@ -101,6 +101,7 @@ public class GpuJoinQuerySelectorWorker extends GpuQuerySelectorWorker {
                     lastEvent = borrowedEvent;
                 }
 
+                processedEventCount++;
                 indexInsideSegment++;
                 indexInsideSegment = indexInsideSegment % segmentEventCount;
 
