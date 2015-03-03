@@ -147,6 +147,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
     public void process(int eventCount) {
         outputEventBuffer.position(0);
         inputEventBuffer.position(0);
+        processedEventCount = 0;
 
 //        log.debug("<" + id + " @ GpuJoinQuerySelector> process eventCount=" + eventCount + " eventSegmentSize=" + segmentEventCount
 //                + " workerSize=" + workerSize + " segmentsPerWorker=" + segmentsPerWorker);
@@ -326,7 +327,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             StringBuilder deserializeBuffer = new StringBuilder();
 
             deserializeBuffer.append("public void run() { ");
-
+            deserializeBuffer.append("processedEventCount = 0; \n");
             deserializeBuffer.append("int indexInsideSegment = 0; \n");
             deserializeBuffer.append("int segIdx = 0; \n");
             deserializeBuffer.append("org.wso2.siddhi.core.event.ComplexEvent.Type type; \n");

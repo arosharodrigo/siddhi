@@ -98,6 +98,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
     public void process(int eventCount) {
         outputEventIndexBuffer.position(0);
         inputEventBuffer.position(0);
+        processedEventCount = 0;
                 
         deserialize(eventCount);
         

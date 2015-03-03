@@ -198,6 +198,7 @@ public class GpuQuerySelector extends QuerySelector {
     public void process(int eventCount) {
         outputEventBuffer.position(0);
         inputEventBuffer.position(0);
+        processedEventCount = 0;
         
         int workSize = eventCount / workerSize;
         int remainWork = eventCount % workSize;
@@ -447,7 +448,7 @@ public class GpuQuerySelector extends QuerySelector {
             StringBuilder deserializeBuffer = new StringBuilder();
 
             deserializeBuffer.append("public void run() { ");
-
+            deserializeBuffer.append("processedEventCount = 0; \n");
             deserializeBuffer.append("for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) { \n");
             deserializeBuffer.append("    org.wso2.siddhi.core.event.ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()]; \n");
             deserializeBuffer.append("    if(type != org.wso2.siddhi.core.event.ComplexEvent.Type.NONE) { \n");

@@ -69,6 +69,7 @@ public class GpuQuerySelectorWorker implements Runnable {
 
     @Override
     public void run() {
+        processedEventCount = 0;
         for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) {
 
             ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()];

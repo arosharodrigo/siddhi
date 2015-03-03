@@ -28,7 +28,7 @@ public class GpuJoinQuerySelectorWorker extends GpuQuerySelectorWorker {
     
     @Override
     public void run() {
-        
+        processedEventCount = 0;
         int indexInsideSegment = 0;
         int segIdx = 0;
         ComplexEvent.Type type;
