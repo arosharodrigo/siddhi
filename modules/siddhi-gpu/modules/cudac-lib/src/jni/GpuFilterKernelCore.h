@@ -28,6 +28,7 @@ typedef struct FilterEvalParameters
 typedef bool (*ExecutorFuncPointer)(FilterEvalParameters &);
 
 void UpdateExecutorNodes(GpuFilterProcessor * _pFilter);
+__device__ void PrintExecutorNodes();
 
 extern __device__ bool NoopOperator(FilterEvalParameters &);
 

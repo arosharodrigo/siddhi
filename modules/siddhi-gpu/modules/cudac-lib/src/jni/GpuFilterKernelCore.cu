@@ -31,6 +31,76 @@ void UpdateExecutorNodes(GpuFilterProcessor * _pFilter)
 			cudaMemcpyHostToDevice));
 }
 
+__device__ void PrintExecutorNodes()
+{
+	printf("UpdateExecutorNodes : Count=%d ", i_ConstFilterNodeCount);
+	for(int i=0; i<i_ConstFilterNodeCount; ++i)
+	{
+		printf("|N=%d ", a_ConstFilterNodes[i].e_NodeType);
+		switch(a_ConstFilterNodes[i].e_NodeType)
+		{
+		case EXECUTOR_NODE_CONDITION:
+		{
+			printf("C=%d ", a_ConstFilterNodes[i].e_ConditionType);
+		}
+		break;
+		case EXECUTOR_NODE_EXPRESSION:
+		{
+			printf("E=%d ", a_ConstFilterNodes[i].e_ExpressionType);
+
+			switch(a_ConstFilterNodes[i].e_ExpressionType)
+			{
+			case EXPRESSION_CONST:
+			{
+				printf("C(%d-", a_ConstFilterNodes[i].m_ConstValue.e_Type);
+				switch(a_ConstFilterNodes[i].m_ConstValue.e_Type)
+				{
+				case DataType::Int: //     = 0,
+					printf("%d)", a_ConstFilterNodes[i].m_ConstValue.m_Value.i_IntVal);
+					break;
+				case DataType::Long: //    = 1,
+					printf("%ll)", a_ConstFilterNodes[i].m_ConstValue.m_Value.l_LongVal);
+					break;
+				case DataType::Boolean: //    = 1,
+					printf("%d)", a_ConstFilterNodes[i].m_ConstValue.m_Value.b_BoolVal);
+					break;
+				case DataType::Float: //   = 2,
+					printf("%f)", a_ConstFilterNodes[i].m_ConstValue.m_Value.f_FloatVal);
+					break;
+				case DataType::Double://  = 3,
+					printf("%f)", a_ConstFilterNodes[i].m_ConstValue.m_Value.d_DoubleVal);
+					break;
+				case DataType::StringIn: //  = 4,
+					printf("%s)", a_ConstFilterNodes[i].m_ConstValue.m_Value.z_StringVal);
+					break;
+				case DataType::StringExt: //  = 4,
+					printf("%s)", a_ConstFilterNodes[i].m_ConstValue.m_Value.z_ExtString);
+					break;
+				case DataType::None: //    = 5
+					printf("NONE)");
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+			case EXPRESSION_VARIABLE:
+			{
+				printf("V(%d-POS-%d:%d)", a_ConstFilterNodes[i].m_VarValue.e_Type, a_ConstFilterNodes[i].m_VarValue.i_StreamIndex, a_ConstFilterNodes[i].m_VarValue.i_AttributePosition);
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		break;
+		default:
+			break;
+		}
+	}
+	printf("\n");
+}
+
 // ========================= INT ==============================================
 
 __device__ int AddExpressionInt(FilterEvalParameters & _rParameters)
@@ -284,6 +354,7 @@ __device__ bool EqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 
 __device__ bool EqualCompareStringString(FilterEvalParameters & _rParameters)
 {
+	printf("EQSS=%d.%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex);
 	return (cuda_strcmp(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
 }
 
@@ -1163,6 +1234,7 @@ __device__ ExecutorFuncPointer mExecutors[EXECUTOR_CONDITION_COUNT] = {
 
 __device__ bool AndCondition(FilterEvalParameters & _rParameters)
 {
+	printf("A=%d.%d|%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex, a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ConditionType);
 //	return (Evaluate(_rParameters) & Evaluate(_rParameters));
 	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
 			(*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
@@ -1170,6 +1242,7 @@ __device__ bool AndCondition(FilterEvalParameters & _rParameters)
 
 __device__ bool OrCondition(FilterEvalParameters & _rParameters)
 {
+	printf("O=%d.%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex);
 	//return (Evaluate(_rParameters) | Evaluate(_rParameters));
 	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
 			(*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
@@ -1196,7 +1269,7 @@ __device__ bool Evaluate(FilterEvalParameters & _rParameters)
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 //	assert(_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex].e_ConditionType < EXECUTOR_CONDITION_COUNT);
 
-	//printf("E=%d.%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex);
+	printf("E=%d.%d|%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex, a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ConditionType);
 	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 

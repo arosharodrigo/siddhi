@@ -56,10 +56,15 @@ void ProcessEventsFilterKernelStandalone(
 	// get assigned event
 	int iEventIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
+	if(iEventIdx == 0)
+	{
+		PrintExecutorNodes();
+	}
+	__syncthreads();
+
 	char * pEvent = _pParameters->p_InByteBuffer + (_pParameters->i_SizeOfEvent * iEventIdx);
 
 	FilterEvalParameters mEvalParameters;
-//	mEvalParameters.p_Filter = _pParameters->ap_Filter;
 	mEvalParameters.p_Meta = _pParameters->p_MetaEvent;
 	mEvalParameters.p_Event = pEvent;
 	mEvalParameters.i_CurrentIndex = 0;
@@ -427,7 +432,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 #if GPU_DEBUG >= GPU_DEBUG_LEVEL_TRACE
 	GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone::In", fp_Log);
 
-	//EvaluateEventsInCpu(_iNumEvents);
+//	EvaluateEventsInCpu(_iNumEvents);
 #endif
 
 	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
