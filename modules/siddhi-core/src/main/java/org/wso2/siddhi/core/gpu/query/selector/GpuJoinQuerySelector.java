@@ -209,7 +209,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
 
         //        log.debug("<" + id + " @ GpuJoinQuerySelector> Call outputRateLimiter " + outputRateLimiter);
         
-        log.info("<" + queryName + "> processedEventCount=" + processedEventCount);
+//        log.info("<" + queryName + "> processedEventCount=" + processedEventCount);
 
         // call output rate limiter
         if (firstEvent != null) {

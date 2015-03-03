@@ -238,88 +238,96 @@ void ProcessEventsJoinLeftTriggerAllOn(
 
 }
 
+//__global__
+//void ProcessEventsJoinLeftTriggerCurrentOn(
+//		char               * _pInputEventBuffer,         // input events buffer
+//		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
+//		int                  _iInputNumberOfEvents,      // Number of events in input buffer
+//		char               * _pEventWindowBuffer,        // Event window buffer of this stream
+//		int                  _iWindowLength,             // Length of current events window
+//		int                  _iRemainingCount,           // Remaining free slots in Window buffer
+//		GpuKernelMetaEvent * _pOtherStreamMetaEvent,     // Meta event for other stream
+//		char               * _pOtherEventWindowBuffer,   // Event window buffer of other stream
+//		int                  _iOtherWindowLength,        // Length of current events window of other stream
+//		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
+//		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
+//		uint64_t             _iWithInTime,               // WithIn time in milliseconds
+//		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
+//		char               * _pResultsBuffer,            // Resulting events buffer for this stream
+//		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
+//		int                  _iEventsPerBlock,           // number of events allocated per block
+//		int                  _iWorkSize                  // Number of events in window process by this kernel
+//)
+
 __global__
 void ProcessEventsJoinLeftTriggerCurrentOn(
-		char               * _pInputEventBuffer,         // input events buffer
-		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
-		int                  _iInputNumberOfEvents,      // Number of events in input buffer
-		char               * _pEventWindowBuffer,        // Event window buffer of this stream
-		int                  _iWindowLength,             // Length of current events window
-		int                  _iRemainingCount,           // Remaining free slots in Window buffer
-		GpuKernelMetaEvent * _pOtherStreamMetaEvent,     // Meta event for other stream
-		char               * _pOtherEventWindowBuffer,   // Event window buffer of other stream
-		int                  _iOtherWindowLength,        // Length of current events window of other stream
-		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
-		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		uint64_t             _iWithInTime,               // WithIn time in milliseconds
-		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
-		char               * _pResultsBuffer,            // Resulting events buffer for this stream
-		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
-		int                  _iEventsPerBlock,           // number of events allocated per block
-		int                  _iWorkSize                  // Number of events in window process by this kernel
+		JoinKernelParameters * _pParameters,
+		int                   _iInputNumberOfEvents,      // Number of events in input buffer
+		int                   _iRemainingCount,           // Remaining free slots in Window buffer
+		int                   _iOtherRemainingCount      // Remaining free slots in Window buffer of other stream
 )
 {
 	// avoid out of bound threads
-	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
+	if(threadIdx.x >= _pParameters->i_EventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
 		return;
 
-	int iWorkerCount = ceil((float)_iOtherWindowLength / _iWorkSize);
+	int iWorkerCount = ceil((float)_pParameters->i_OtherWindowLength / _pParameters->i_WorkSize);
 
-	if((blockIdx.x == (_iInputNumberOfEvents * iWorkerCount) / _iEventsPerBlock) && // last thread block
-			(threadIdx.x >= (_iInputNumberOfEvents * iWorkerCount) % _iEventsPerBlock)) // extra threads
+	if((blockIdx.x == (_iInputNumberOfEvents * iWorkerCount) / _pParameters->i_EventsPerBlock) && // last thread block
+			(threadIdx.x >= (_iInputNumberOfEvents * iWorkerCount) % _pParameters->i_EventsPerBlock)) // extra threads
 	{
 		return;
 	}
 
 	// get assigned event
-	int iGlobalThreadIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
+	int iGlobalThreadIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
 	// get in buffer index
 	int iInEventIndex = iGlobalThreadIdx / iWorkerCount;
-	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _iWorkSize;
+	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _pParameters->i_WorkSize;
 
 	// get in event starting position
-	char * pInEventBuffer = _pInputEventBuffer + (_pInputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
 
 	// output to results buffer [in event, expired event]
 	// {other stream event size * other window size} * 2 (for in/exp)
 //	int iOutputSegmentSize = _pOutputStreamMetaEvent->i_SizeOfEventInBytes * _iOtherWindowLength;
 
-	char * pResultsInEventBufferSegment = _pResultsBuffer + (iGlobalThreadIdx * _iWorkSize * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
+	char * pResultsInEventBufferSegment = _pParameters->p_ResultsBuffer + (iGlobalThreadIdx * _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 //			+ (iWindowStartEventIndex * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
 
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
-	memset(pResultsInEventBufferSegment, 0, _iWorkSize * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
+	memset(pResultsInEventBufferSegment, 0, _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
 
 	// for each events in other window
-	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+	int iOtherWindowFillCount  = _pParameters->i_OtherWindowLength - _iOtherRemainingCount;
 
 	if(iWindowStartEventIndex < iOtherWindowFillCount)
 	{
-		int iWindowEndEventIndex = min(iWindowStartEventIndex + _iWorkSize, iOtherWindowFillCount);
+		int iWindowEndEventIndex = min(iWindowStartEventIndex + _pParameters->i_WorkSize, iOtherWindowFillCount);
 
 		int iMatchedCount = 0;
 		for(int i=iWindowStartEventIndex; i<iWindowEndEventIndex; ++i)
 		{
 			// get other window event
-			char * pOtherWindowEventBuffer = _pOtherEventWindowBuffer + (_pOtherStreamMetaEvent->i_SizeOfEventInBytes * i);
+			char * pOtherWindowEventBuffer = _pParameters->p_OtherEventWindowBuffer + (_pParameters->p_OtherStreamMetaEvent->i_SizeOfEventInBytes * i);
 			GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 			// get buffer position for in event matching results
-			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 
 			if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
-					(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _iWithInTime)
+					(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _pParameters->i_WithInTime)
 			{
 				ExpressionEvalParameters mExpressionParam;
-				mExpressionParam.p_OnCompare = _pOnCompareFilter;
-				mExpressionParam.a_Meta[0] = _pInputMetaEvent;
+				mExpressionParam.p_OnCompare = _pParameters->p_OnCompareFilter;
+				mExpressionParam.a_Meta[0] = _pParameters->p_InputMetaEvent;
 				mExpressionParam.a_Event[0] = pInEventBuffer;
-				mExpressionParam.a_Meta[1] = _pOtherStreamMetaEvent;
+				mExpressionParam.a_Meta[1] = _pParameters->p_OtherStreamMetaEvent;
 				mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
 
@@ -334,14 +342,14 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 					pResultInMatchingEvent->i_Timestamp = pInEvent->i_Timestamp;
 
 					#pragma __unroll__
-					for(int m=0; m < _pOutputAttribMappings->i_MappingCount; ++m)
+					for(int m=0; m < _pParameters->p_OutputAttribMappings->i_MappingCount; ++m)
 					{
-						int iFromStreamIndex = _pOutputAttribMappings->p_Mappings[m].from[AttributeMapping::STREAM_INDEX];
-						int iFromAttrib = _pOutputAttribMappings->p_Mappings[m].from[AttributeMapping::ATTRIBUTE_INDEX];
-						int iTo = _pOutputAttribMappings->p_Mappings[m].to;
+						int iFromStreamIndex = _pParameters->p_OutputAttribMappings->p_Mappings[m].from[AttributeMapping::STREAM_INDEX];
+						int iFromAttrib = _pParameters->p_OutputAttribMappings->p_Mappings[m].from[AttributeMapping::ATTRIBUTE_INDEX];
+						int iTo = _pParameters->p_OutputAttribMappings->p_Mappings[m].to;
 
 						memcpy(
-								pResultInMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
+								pResultInMatchingEventBuffer + _pParameters->p_OutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
 								mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
 								mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 						);
@@ -360,7 +368,7 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 
 		if(iMatchedCount < (iWindowEndEventIndex - iWindowStartEventIndex))
 		{
-			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 			pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 		}
@@ -735,89 +743,97 @@ void ProcessEventsJoinRightTriggerAllOn(
 
 }
 
+//__global__
+//void ProcessEventsJoinRightTriggerCurrentOn(
+//		char               * _pInputEventBuffer,         // input events buffer
+//		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
+//		int                  _iInputNumberOfEvents,      // Number of events in input buffer
+//		char               * _pEventWindowBuffer,        // Event window buffer of this stream
+//		int                  _iWindowLength,             // Length of current events window
+//		int                  _iRemainingCount,           // Remaining free slots in Window buffer
+//		GpuKernelMetaEvent * _pOtherStreamMetaEvent,     // Meta event for other stream
+//		char               * _pOtherEventWindowBuffer,   // Event window buffer of other stream
+//		int                  _iOtherWindowLength,        // Length of current events window of other stream
+//		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
+//		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
+//		uint64_t             _iWithInTime,               // WithIn time in milliseconds
+//		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
+//		char               * _pResultsBuffer,            // Resulting events buffer for this stream
+//		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
+//		int                  _iEventsPerBlock,           // number of events allocated per block
+//		int                  _iWorkSize                  // Number of events in window process by this kernel
+//)
+
 __global__
 void ProcessEventsJoinRightTriggerCurrentOn(
-		char               * _pInputEventBuffer,         // input events buffer
-		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
-		int                  _iInputNumberOfEvents,      // Number of events in input buffer
-		char               * _pEventWindowBuffer,        // Event window buffer of this stream
-		int                  _iWindowLength,             // Length of current events window
-		int                  _iRemainingCount,           // Remaining free slots in Window buffer
-		GpuKernelMetaEvent * _pOtherStreamMetaEvent,     // Meta event for other stream
-		char               * _pOtherEventWindowBuffer,   // Event window buffer of other stream
-		int                  _iOtherWindowLength,        // Length of current events window of other stream
-		int                  _iOtherRemainingCount,      // Remaining free slots in Window buffer of other stream
-		GpuKernelFilter    * _pOnCompareFilter,          // OnCompare filter buffer - pre-copied at initialization
-		uint64_t             _iWithInTime,               // WithIn time in milliseconds
-		GpuKernelMetaEvent * _pOutputStreamMetaEvent,    // Meta event for output stream
-		char               * _pResultsBuffer,            // Resulting events buffer for this stream
-		AttributeMappings  * _pOutputAttribMappings,     // Output event attribute mappings
-		int                  _iEventsPerBlock,           // number of events allocated per block
-		int                  _iWorkSize                  // Number of events in window process by this kernel
+		JoinKernelParameters * _pParameters,
+		int                   _iInputNumberOfEvents,      // Number of events in input buffer
+		int                   _iRemainingCount,           // Remaining free slots in Window buffer
+		int                   _iOtherRemainingCount      // Remaining free slots in Window buffer of other stream
 )
 {
 	// avoid out of bound threads
-	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
+	if(threadIdx.x >= _pParameters->i_EventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
 		return;
 
-	int iWorkerCount = ceil((float)_iOtherWindowLength / _iWorkSize);
+	int iWorkerCount = ceil((float)_pParameters->i_OtherWindowLength / _pParameters->i_WorkSize);
 
-	if((blockIdx.x == (_iInputNumberOfEvents * iWorkerCount) / _iEventsPerBlock) && // last thread block
-			(threadIdx.x >= (_iInputNumberOfEvents * iWorkerCount) % _iEventsPerBlock)) // extra threads
+	if((blockIdx.x == (_iInputNumberOfEvents * iWorkerCount) / _pParameters->i_EventsPerBlock) && // last thread block
+			(threadIdx.x >= (_iInputNumberOfEvents * iWorkerCount) % _pParameters->i_EventsPerBlock)) // extra threads
 	{
 		return;
 	}
 
 	// get assigned event
-	int iGlobalThreadIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
+	int iGlobalThreadIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
 	// get in buffer index
 	int iInEventIndex = iGlobalThreadIdx / iWorkerCount;
-	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _iWorkSize;
+	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _pParameters->i_WorkSize;
 
 	// get in event starting position
-	char * pInEventBuffer = _pInputEventBuffer + (_pInputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
 
 	// output to results buffer [in event, expired event]
 	// {other stream event size * other window size} * 2 (for in/exp)
 //	int iOutputSegmentSizePerEvent = _pOutputStreamMetaEvent->i_SizeOfEventInBytes * _iOtherWindowLength;
 
-	char * pResultsInEventBufferSegment = _pResultsBuffer + (iGlobalThreadIdx * _iWorkSize * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
+	char * pResultsInEventBufferSegment = _pParameters->p_ResultsBuffer + (iGlobalThreadIdx * _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 //			+ (iWindowStartEventIndex * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
 
 	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
 
-	memset(pResultsInEventBufferSegment, 0, _iWorkSize * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
+	memset(pResultsInEventBufferSegment, 0, _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 
 	// get all matching event for in event from other window buffer and copy them to output event buffer
 
 	// for each events in other window
-	int iOtherWindowFillCount  = _iOtherWindowLength - _iOtherRemainingCount;
+	int iOtherWindowFillCount  = _pParameters->i_OtherWindowLength - _iOtherRemainingCount;
 
 	if(iWindowStartEventIndex < iOtherWindowFillCount)
 	{
-		int iWindowEndEventIndex = min(iWindowStartEventIndex + _iWorkSize, iOtherWindowFillCount);
+		int iWindowEndEventIndex = min(iWindowStartEventIndex + _pParameters->i_WorkSize, iOtherWindowFillCount);
 
 		int iMatchedCount = 0;
 		for(int i=iWindowStartEventIndex; i<iWindowEndEventIndex; ++i)
 		{
 			// get other window event
-			char * pOtherWindowEventBuffer = _pOtherEventWindowBuffer + (_pOtherStreamMetaEvent->i_SizeOfEventInBytes * i);
+			char * pOtherWindowEventBuffer = _pParameters->p_OtherEventWindowBuffer + (_pParameters->p_OtherStreamMetaEvent->i_SizeOfEventInBytes * i);
 			GpuEvent * pOtherWindowEvent = (GpuEvent*) pOtherWindowEventBuffer;
 
 			// get buffer position for in event matching results
-			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 
 			if(pInEvent->i_Sequence > pOtherWindowEvent->i_Sequence &&
-					(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _iWithInTime)
+					(pInEvent->i_Timestamp - pOtherWindowEvent->i_Timestamp) <= _pParameters->i_WithInTime)
 			{
 
 				ExpressionEvalParameters mExpressionParam;
-				mExpressionParam.p_OnCompare = _pOnCompareFilter;
-				mExpressionParam.a_Meta[0] = _pOtherStreamMetaEvent;
+				mExpressionParam.p_OnCompare = _pParameters->p_OnCompareFilter;
+				mExpressionParam.a_Meta[0] = _pParameters->p_OtherStreamMetaEvent;
 				mExpressionParam.a_Event[0] = pOtherWindowEventBuffer;
-				mExpressionParam.a_Meta[1] = _pInputMetaEvent;
+				mExpressionParam.a_Meta[1] = _pParameters->p_InputMetaEvent;
 				mExpressionParam.a_Event[1] = pInEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
 
@@ -829,14 +845,14 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 					pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
 					pResultInMatchingEvent->i_Timestamp = pInEvent->i_Timestamp;
 
-					for(int m=0; m < _pOutputAttribMappings->i_MappingCount; ++m)
+					for(int m=0; m < _pParameters->p_OutputAttribMappings->i_MappingCount; ++m)
 					{
-						int iFromStreamIndex = _pOutputAttribMappings->p_Mappings[m].from[AttributeMapping::STREAM_INDEX];
-						int iFromAttrib = _pOutputAttribMappings->p_Mappings[m].from[AttributeMapping::ATTRIBUTE_INDEX];
-						int iTo = _pOutputAttribMappings->p_Mappings[m].to;
+						int iFromStreamIndex = _pParameters->p_OutputAttribMappings->p_Mappings[m].from[AttributeMapping::STREAM_INDEX];
+						int iFromAttrib = _pParameters->p_OutputAttribMappings->p_Mappings[m].from[AttributeMapping::ATTRIBUTE_INDEX];
+						int iTo = _pParameters->p_OutputAttribMappings->p_Mappings[m].to;
 
 						memcpy(
-								pResultInMatchingEventBuffer + _pOutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
+								pResultInMatchingEventBuffer + _pParameters->p_OutputStreamMetaEvent->p_Attributes[iTo].i_Position, // to
 								mExpressionParam.a_Event[iFromStreamIndex] + mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Position, // from
 								mExpressionParam.a_Meta[iFromStreamIndex]->p_Attributes[iFromAttrib].i_Length // size
 						);
@@ -855,7 +871,7 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 
 		if(iMatchedCount < (iWindowEndEventIndex - iWindowStartEventIndex))
 		{
-			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pOutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
+			char * pResultInMatchingEventBuffer = pResultsInEventBufferSegment + (_pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes * iMatchedCount);
 			GpuEvent * pResultInMatchingEvent = (GpuEvent*) pResultInMatchingEventBuffer;
 			pResultInMatchingEvent->i_Type = GpuEvent::RESET;
 		}
@@ -1144,6 +1160,8 @@ GpuJoinKernel::GpuJoinKernel(GpuProcessor * _pProc, GpuProcessorContext * _pLeft
 	p_LeftResultEventBuffer(NULL),
 	p_RightResultEventBuffer(NULL),
 	p_DeviceOnCompareFilter(NULL),
+	p_DeviceParametersLeft(NULL),
+	p_DeviceParametersRight(NULL),
 	i_LeftStreamWindowSize(_iLeftWindowSize),
 	i_RightStreamWindowSize(_iRightWindowSize),
 //	i_LeftRemainingCount(_iLeftWindowSize),
@@ -1180,6 +1198,18 @@ GpuJoinKernel::~GpuJoinKernel()
 	{
 		CUDA_CHECK_RETURN(cudaFree(p_DeviceOutputAttributeMapping));
 		p_DeviceOutputAttributeMapping = NULL;
+	}
+
+	if(p_DeviceParametersLeft)
+	{
+		CUDA_CHECK_RETURN(cudaFree(p_DeviceParametersLeft));
+		p_DeviceParametersLeft = NULL;
+	}
+
+	if(p_DeviceParametersRight)
+	{
+		CUDA_CHECK_RETURN(cudaFree(p_DeviceParametersRight));
+		p_DeviceParametersRight = NULL;
 	}
 
 	pthread_mutex_destroy(&mtx_Lock);
@@ -1413,6 +1443,62 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			pHostMappings = NULL;
 		}
 
+
+		CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceParametersLeft, sizeof(JoinKernelParameters)));
+		JoinKernelParameters * pHostParameters = (JoinKernelParameters*) malloc(sizeof(JoinKernelParameters));
+
+		pHostParameters->p_InputEventBuffer = p_LeftInputEventBuffer->GetDeviceEventBuffer();
+		pHostParameters->p_InputMetaEvent = p_LeftInputEventBuffer->GetDeviceMetaEvent();
+		pHostParameters->p_EventWindowBuffer = p_LeftWindowEventBuffer->GetDeviceEventBuffer();
+		pHostParameters->i_WindowLength = i_LeftStreamWindowSize;
+		pHostParameters->p_OtherStreamMetaEvent = p_RightInputEventBuffer->GetDeviceMetaEvent();
+		pHostParameters->p_OtherEventWindowBuffer = p_RightWindowEventBuffer->GetReadOnlyDeviceEventBuffer();
+		pHostParameters->i_OtherWindowLength = i_RightStreamWindowSize;
+		pHostParameters->p_OnCompareFilter = p_DeviceOnCompareFilter;
+		pHostParameters->i_WithInTime = p_JoinProcessor->GetWithInTimeMilliSeconds();
+		pHostParameters->p_OutputStreamMetaEvent = p_LeftResultEventBuffer->GetDeviceMetaEvent();
+		pHostParameters->p_ResultsBuffer = p_LeftResultEventBuffer->GetDeviceEventBuffer();
+		pHostParameters->p_OutputAttribMappings = p_DeviceOutputAttributeMapping;
+		pHostParameters->i_EventsPerBlock = i_ThreadBlockSize;
+		pHostParameters->i_WorkSize = i_LeftThreadWorkSize;
+
+		CUDA_CHECK_RETURN(cudaMemcpy(
+				p_DeviceParametersLeft,
+				pHostParameters,
+				sizeof(JoinKernelParameters),
+				cudaMemcpyHostToDevice));
+
+		free(pHostParameters);
+		pHostParameters = NULL;
+
+		CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceParametersRight, sizeof(JoinKernelParameters)));
+		JoinKernelParameters * pHostParameters = (JoinKernelParameters*) malloc(sizeof(JoinKernelParameters));
+
+		pHostParameters->p_InputEventBuffer = p_RightInputEventBuffer->GetDeviceEventBuffer();
+		pHostParameters->p_InputMetaEvent = p_RightInputEventBuffer->GetDeviceMetaEvent();
+		pHostParameters->p_EventWindowBuffer = p_RightWindowEventBuffer->GetDeviceEventBuffer();
+		pHostParameters->i_WindowLength = i_RightStreamWindowSize;
+		pHostParameters->p_OtherStreamMetaEvent = p_LeftInputEventBuffer->GetDeviceMetaEvent();
+		pHostParameters->p_OtherEventWindowBuffer = p_LeftWindowEventBuffer->GetReadOnlyDeviceEventBuffer();
+		pHostParameters->i_OtherWindowLength = i_LeftStreamWindowSize;
+		pHostParameters->p_OnCompareFilter = p_DeviceOnCompareFilter;
+		pHostParameters->i_WithInTime = p_JoinProcessor->GetWithInTimeMilliSeconds();
+		pHostParameters->p_OutputStreamMetaEvent = p_RightResultEventBuffer->GetDeviceMetaEvent();
+		pHostParameters->p_ResultsBuffer = p_RightResultEventBuffer->GetDeviceEventBuffer();
+		pHostParameters->p_OutputAttribMappings = p_DeviceOutputAttributeMapping;
+		pHostParameters->i_EventsPerBlock = i_ThreadBlockSize;
+		pHostParameters->i_WorkSize = i_RightThreadWorkSize;
+
+		CUDA_CHECK_RETURN(cudaMemcpy(
+				p_DeviceParametersRight,
+				pHostParameters,
+				sizeof(JoinKernelParameters),
+				cudaMemcpyHostToDevice));
+
+		free(pHostParameters);
+		pHostParameters = NULL;
+
+
 		if(p_JoinProcessor->GetThreadWorkSize() != 0)
 		{
 			i_LeftThreadWorkSize = p_JoinProcessor->GetThreadWorkSize();
@@ -1553,23 +1639,10 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 		else if(p_JoinProcessor->GetCurrentOn())
 		{
 			ProcessEventsJoinLeftTriggerCurrentOn<<<numBlocks, numThreads>>>(
-					p_LeftInputEventBuffer->GetDeviceEventBuffer(),
-					p_LeftInputEventBuffer->GetDeviceMetaEvent(),
+					p_DeviceParametersLeft,
 					_iNumEvents,
-					p_LeftWindowEventBuffer->GetDeviceEventBuffer(),
-					i_LeftStreamWindowSize,
 					p_LeftWindowEventBuffer->GetRemainingCount(),
-					p_RightInputEventBuffer->GetDeviceMetaEvent(),
-					p_RightWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
-					i_RightStreamWindowSize,
-					p_RightWindowEventBuffer->GetRemainingCount(),
-					p_DeviceOnCompareFilter,
-					p_JoinProcessor->GetWithInTimeMilliSeconds(),
-					p_LeftResultEventBuffer->GetDeviceMetaEvent(),
-					p_LeftResultEventBuffer->GetDeviceEventBuffer(),
-					p_DeviceOutputAttributeMapping,
-					i_ThreadBlockSize,
-					i_LeftThreadWorkSize
+					p_RightWindowEventBuffer->GetRemainingCount()
 			);
 		}
 		else if(p_JoinProcessor->GetExpiredOn())
@@ -1785,23 +1858,10 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 		else if(p_JoinProcessor->GetCurrentOn())
 		{
 			ProcessEventsJoinRightTriggerCurrentOn<<<numBlocks, numThreads>>>(
-					p_RightInputEventBuffer->GetDeviceEventBuffer(),
-					p_RightInputEventBuffer->GetDeviceMetaEvent(),
+					p_DeviceParametersRight,
 					_iNumEvents,
-					p_RightWindowEventBuffer->GetDeviceEventBuffer(),
-					i_RightStreamWindowSize,
 					p_RightWindowEventBuffer->GetRemainingCount(),
-					p_LeftInputEventBuffer->GetDeviceMetaEvent(),
-					p_LeftWindowEventBuffer->GetReadOnlyDeviceEventBuffer(),
-					i_LeftStreamWindowSize,
-					p_LeftWindowEventBuffer->GetRemainingCount(),
-					p_DeviceOnCompareFilter,
-					p_JoinProcessor->GetWithInTimeMilliSeconds(),
-					p_RightResultEventBuffer->GetDeviceMetaEvent(),
-					p_RightResultEventBuffer->GetDeviceEventBuffer(),
-					p_DeviceOutputAttributeMapping,
-					i_ThreadBlockSize,
-					i_RightThreadWorkSize
+					p_LeftWindowEventBuffer->GetRemainingCount()
 			);
 		}
 		else if(p_JoinProcessor->GetExpiredOn())

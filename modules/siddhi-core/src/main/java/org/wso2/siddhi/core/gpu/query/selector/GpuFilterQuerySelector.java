@@ -102,7 +102,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
                 
         deserialize(eventCount);
         
-        log.info("<" + queryName + "> processedEventCount=" + processedEventCount);
+//        log.info("<" + queryName + "> processedEventCount=" + processedEventCount);
         
         if (firstEvent != null) {
             outputComplexEventChunk.add(firstEvent, lastEvent);

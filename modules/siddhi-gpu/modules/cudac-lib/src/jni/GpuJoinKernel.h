@@ -28,14 +28,14 @@ typedef struct JoinKernelParameters
 {
 	char               * p_InputEventBuffer;         // input events buffer
 	GpuKernelMetaEvent * p_InputMetaEvent;           // Meta event for input events
-	int                  i_InputNumberOfEvents;      // Number of events in input buffer
+//	int                  i_InputNumberOfEvents;      // Number of events in input buffer
 	char               * p_EventWindowBuffer;        // Event window buffer of this stream
 	int                  i_WindowLength;             // Length of current events window
-	int                  i_RemainingCount;           // Remaining free slots in Window buffer
+//	int                  i_RemainingCount;           // Remaining free slots in Window buffer
 	GpuKernelMetaEvent * p_OtherStreamMetaEvent;     // Meta event for other stream
 	char               * p_OtherEventWindowBuffer;   // Event window buffer of other stream
 	int                  i_OtherWindowLength;        // Length of current events window of other stream
-	int                  i_OtherRemainingCount;      // Remaining free slots in Window buffer of other stream
+//	int                  i_OtherRemainingCount;      // Remaining free slots in Window buffer of other stream
 	GpuKernelFilter    * p_OnCompareFilter;          // OnCompare filter buffer - pre-copied at initialization
 	uint64_t             i_WithInTime;               // WithIn time in milliseconds
 	GpuKernelMetaEvent * p_OutputStreamMetaEvent;    // Meta event for output stream
@@ -92,6 +92,9 @@ private:
 	GpuStreamEventBuffer * p_RightResultEventBuffer;
 
 	GpuKernelFilter * p_DeviceOnCompareFilter;
+
+	JoinKernelParameters * p_DeviceParametersLeft;
+	JoinKernelParameters * p_DeviceParametersRight;
 
 	int i_LeftStreamWindowSize;
 	int i_RightStreamWindowSize;

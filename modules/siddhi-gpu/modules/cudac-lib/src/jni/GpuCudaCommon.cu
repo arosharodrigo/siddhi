@@ -10,7 +10,6 @@ __device__ bool cuda_strcmp(const char *s1, const char *s2)
 {
 //	if(!s1 || !s2) return false; TODO: uncomment
 
-	printf("SC=%d.%d|%s|%s\n",blockIdx.x, threadIdx.x, s1, s2);
 	for ( ; *s1==*s2; ++s1, ++s2) {
 		if (*s1=='\0') return true;
 	}
