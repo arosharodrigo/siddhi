@@ -148,7 +148,7 @@ public class GpuQuerySelector extends QuerySelector {
                 for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
                     switch(attrib.type) {
                     case BOOL:
-                        attributeData[index++] = outputEventBuffer.getShort();
+                        attributeData[index++] = Short.valueOf(outputEventBuffer.getShort());
                         break;
                     case INT:
                         attributeData[index++] = outputEventBuffer.getInt();
