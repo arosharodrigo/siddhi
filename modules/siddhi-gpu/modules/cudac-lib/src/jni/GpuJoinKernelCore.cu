@@ -14,25 +14,6 @@
 namespace SiddhiGpu
 {
 
-__constant__ ExecutorNode a_ConstOnCompareNodes[50];
-__constant__ int i_ConstOnCompareNodeCount;
-
-void UpdateOnCompareNodes(GpuJoinProcessor * _pJoin)
-{
-	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(a_ConstOnCompareNodes,
-			_pJoin->ap_ExecutorNodes,
-			sizeof(ExecutorNode) * _pJoin->i_NodeCount,
-			0,
-			cudaMemcpyHostToDevice));
-
-	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(i_ConstOnCompareNodeCount,
-			&_pJoin->i_NodeCount,
-			sizeof(int),
-			0,
-			cudaMemcpyHostToDevice));
-}
-
-
 __device__ int AddExpressionInt(ExpressionEvalParameters & _rParameters)
 {
 	_rParameters.i_CurrentIndex++;
@@ -729,30 +710,32 @@ __device__ bool ContainsOperator(ExpressionEvalParameters & _rParameters)
 
 __device__ bool ExecuteBoolExpression(ExpressionEvalParameters & _rParameters)
 {
+	ExecutorNode & mExecutorNode = _rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
-	if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Boolean)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Boolean)
 			{
-				return a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.b_BoolVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.b_BoolVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
 			// if filter data type matches event attribute data type, return attribute value
-			int iStreamIndex = a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_StreamIndex;
+			int iStreamIndex = mExecutorNode.m_VarValue.i_StreamIndex;
 
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Boolean &&
-					_rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Boolean &&
+					_rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
 			{
 				// get attribute value
 				int16_t i;
-				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 2);
+				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 2);
 				_rParameters.i_CurrentIndex++;
 				return i;
 			}
@@ -769,27 +752,30 @@ __device__ bool ExecuteBoolExpression(ExpressionEvalParameters & _rParameters)
 
 __device__ int ExecuteIntExpression(ExpressionEvalParameters & _rParameters)
 {
-	if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Int)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Int)
 			{
-				return a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.i_IntVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.i_IntVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			int iStreamIndex = a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_StreamIndex;
+			int iStreamIndex = mExecutorNode.m_VarValue.i_StreamIndex;
 
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Int &&
-					_rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Int)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Int &&
+					_rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Int)
 			{
 				int32_t i;
-				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 4);
 				_rParameters.i_CurrentIndex++;
 				return i;
 			}
@@ -827,28 +813,30 @@ __device__ int ExecuteIntExpression(ExpressionEvalParameters & _rParameters)
 
 __device__ int64_t ExecuteLongExpression(ExpressionEvalParameters & _rParameters)
 {
+	ExecutorNode & mExecutorNode = _rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
-	if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Long)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Long)
 			{
-				return a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.l_LongVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.l_LongVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			int iStreamIndex = a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_StreamIndex;
+			int iStreamIndex = mExecutorNode.m_VarValue.i_StreamIndex;
 
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Long &&
-					_rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Long)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Long &&
+					_rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Long)
 			{
 				int64_t i;
-				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 8);
 				_rParameters.i_CurrentIndex++;
 				return i;
 			}
@@ -886,28 +874,30 @@ __device__ int64_t ExecuteLongExpression(ExpressionEvalParameters & _rParameters
 
 __device__ float ExecuteFloatExpression(ExpressionEvalParameters & _rParameters)
 {
+	ExecutorNode & mExecutorNode = _rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
 
-	if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Float)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Float)
 			{
-				return a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.f_FloatVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.f_FloatVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			int iStreamIndex = a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_StreamIndex;
+			int iStreamIndex = mExecutorNode.m_VarValue.i_StreamIndex;
 
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Float &&
-					_rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Float)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Float &&
+					_rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Float)
 			{
 				float f;
-				memcpy(&f, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				memcpy(&f, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 4);
 				_rParameters.i_CurrentIndex++;
 				return f;
 			}
@@ -945,27 +935,30 @@ __device__ float ExecuteFloatExpression(ExpressionEvalParameters & _rParameters)
 
 __device__ double ExecuteDoubleExpression(ExpressionEvalParameters & _rParameters)
 {
-	if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Double)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Double)
 			{
-				return a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.d_DoubleVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.d_DoubleVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			int iStreamIndex = a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_StreamIndex;
+			int iStreamIndex = mExecutorNode.m_VarValue.i_StreamIndex;
 
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Double &&
-					_rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Double)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Double &&
+					_rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Double)
 			{
 				double f;
-				memcpy(&f, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				memcpy(&f, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 8);
 				_rParameters.i_CurrentIndex++;
 				return f;
 			}
@@ -1002,32 +995,36 @@ __device__ double ExecuteDoubleExpression(ExpressionEvalParameters & _rParameter
 
 __device__ const char * ExecuteStringExpression(ExpressionEvalParameters & _rParameters)
 {
-	if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::StringIn)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::StringIn)
 			{
-				return a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.z_StringVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.z_StringVal;
 			}
-			else if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::StringExt)
+			else if(mExecutorNode.m_ConstValue.e_Type == DataType::StringExt)
 			{
-				return a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.z_ExtString;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.z_ExtString;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			int iStreamIndex = a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_StreamIndex;
+			int iStreamIndex = mExecutorNode.m_VarValue.i_StreamIndex;
 
-			if(a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::StringIn &&
-					_rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::StringIn &&
+					_rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
 			{
 				int16_t i;
-				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-				char * z = _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position + 2;
+				memcpy(&i, _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 2);
+				char * z = _rParameters.a_Event[iStreamIndex] + _rParameters.a_Meta[iStreamIndex]->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position + 2;
 				z[i] = 0;
 				_rParameters.i_CurrentIndex++;
 				return z;
@@ -1170,27 +1167,27 @@ __device__ OnCompareFuncPointer mOnCompareExecutors[EXECUTOR_CONDITION_COUNT] = 
 __device__ bool AndCondition(ExpressionEvalParameters & _rParameters)
 {
 //	return (Evaluate(_rParameters) & Evaluate(_rParameters));
-	return (*mOnCompareExecutors[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
-			(*mOnCompareExecutors[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
+			(*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 __device__ bool OrCondition(ExpressionEvalParameters & _rParameters)
 {
 //	return (Evaluate(_rParameters) | Evaluate(_rParameters));
-	return (*mOnCompareExecutors[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
-			(*mOnCompareExecutors[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
+			(*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 __device__ bool NotCondition(ExpressionEvalParameters & _rParameters)
 {
 //	return (!Evaluate(_rParameters));
-	return !((*mOnCompareExecutors[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
+	return !((*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
 }
 
 __device__ bool BooleanCondition(ExpressionEvalParameters & _rParameters)
 {
 //	return (Evaluate(_rParameters));
-	return ((*mOnCompareExecutors[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
+	return ((*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
 }
 
 // =========================================
@@ -1198,7 +1195,7 @@ __device__ bool BooleanCondition(ExpressionEvalParameters & _rParameters)
 // evaluate event with an executor tree
 __device__ bool Evaluate(ExpressionEvalParameters & _rParameters)
 {
-	return (*mOnCompareExecutors[a_ConstOnCompareNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mOnCompareExecutors[_rParameters.p_OnCompare->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 }

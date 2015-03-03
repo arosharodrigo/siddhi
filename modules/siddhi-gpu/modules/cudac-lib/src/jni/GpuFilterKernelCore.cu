@@ -13,94 +13,6 @@
 namespace SiddhiGpu
 {
 
-__constant__ ExecutorNode a_ConstFilterNodes[50];
-__constant__ int i_ConstFilterNodeCount;
-
-void UpdateExecutorNodes(GpuFilterProcessor * _pFilter)
-{
-	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(a_ConstFilterNodes,
-			_pFilter->ap_ExecutorNodes,
-			sizeof(ExecutorNode) * _pFilter->i_NodeCount,
-			0,
-			cudaMemcpyHostToDevice));
-
-	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(i_ConstFilterNodeCount,
-			&_pFilter->i_NodeCount,
-			sizeof(int),
-			0,
-			cudaMemcpyHostToDevice));
-}
-
-__device__ void PrintExecutorNodes()
-{
-	printf("UpdateExecutorNodes : Count=%d ", i_ConstFilterNodeCount);
-	for(int i=0; i<i_ConstFilterNodeCount; ++i)
-	{
-		printf("|N=%d ", a_ConstFilterNodes[i].e_NodeType);
-		switch(a_ConstFilterNodes[i].e_NodeType)
-		{
-		case EXECUTOR_NODE_CONDITION:
-		{
-			printf("C=%d ", a_ConstFilterNodes[i].e_ConditionType);
-		}
-		break;
-		case EXECUTOR_NODE_EXPRESSION:
-		{
-			printf("E=%d ", a_ConstFilterNodes[i].e_ExpressionType);
-
-			switch(a_ConstFilterNodes[i].e_ExpressionType)
-			{
-			case EXPRESSION_CONST:
-			{
-				printf("C(%d-", a_ConstFilterNodes[i].m_ConstValue.e_Type);
-				switch(a_ConstFilterNodes[i].m_ConstValue.e_Type)
-				{
-				case DataType::Int: //     = 0,
-					printf("%d)", a_ConstFilterNodes[i].m_ConstValue.m_Value.i_IntVal);
-					break;
-				case DataType::Long: //    = 1,
-					printf("%ll)", a_ConstFilterNodes[i].m_ConstValue.m_Value.l_LongVal);
-					break;
-				case DataType::Boolean: //    = 1,
-					printf("%d)", a_ConstFilterNodes[i].m_ConstValue.m_Value.b_BoolVal);
-					break;
-				case DataType::Float: //   = 2,
-					printf("%f)", a_ConstFilterNodes[i].m_ConstValue.m_Value.f_FloatVal);
-					break;
-				case DataType::Double://  = 3,
-					printf("%f)", a_ConstFilterNodes[i].m_ConstValue.m_Value.d_DoubleVal);
-					break;
-				case DataType::StringIn: //  = 4,
-					printf("%s)", a_ConstFilterNodes[i].m_ConstValue.m_Value.z_StringVal);
-					break;
-				case DataType::StringExt: //  = 4,
-					printf("%s)", a_ConstFilterNodes[i].m_ConstValue.m_Value.z_ExtString);
-					break;
-				case DataType::None: //    = 5
-					printf("NONE)");
-					break;
-				default:
-					break;
-				}
-			}
-			break;
-			case EXPRESSION_VARIABLE:
-			{
-				printf("V(%d-POS-%d:%d)", a_ConstFilterNodes[i].m_VarValue.e_Type, a_ConstFilterNodes[i].m_VarValue.i_StreamIndex, a_ConstFilterNodes[i].m_VarValue.i_AttributePosition);
-			}
-			break;
-			default:
-				break;
-			}
-		}
-		break;
-		default:
-			break;
-		}
-	}
-	printf("\n");
-}
-
 // ========================= INT ==============================================
 
 __device__ int AddExpressionInt(FilterEvalParameters & _rParameters)
@@ -354,7 +266,6 @@ __device__ bool EqualCompareDoubleDouble(FilterEvalParameters & _rParameters)
 
 __device__ bool EqualCompareStringString(FilterEvalParameters & _rParameters)
 {
-	printf("EQSS=%d.%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex);
 	return (cuda_strcmp(ExecuteStringExpression(_rParameters), ExecuteStringExpression(_rParameters)));
 }
 
@@ -798,27 +709,30 @@ __device__ bool ExecuteBoolExpression(FilterEvalParameters & _rParameters)
 {
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 
-	if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Boolean)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Boolean)
 			{
-				return a_ConstFilterNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.b_BoolVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.b_BoolVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
 			// if filter data type matches event attribute data type, return attribute value
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Boolean &&
-					_rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Boolean &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Boolean)
 			{
 				// get attribute value
 				int16_t i;
-				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 2);
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 2);
 				_rParameters.i_CurrentIndex++;
 				return i;
 			}
@@ -837,25 +751,28 @@ __device__ int ExecuteIntExpression(FilterEvalParameters & _rParameters)
 {
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 
-	if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Int)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Int)
 			{
-				return a_ConstFilterNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.i_IntVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.i_IntVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Int &&
-					_rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Int)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Int &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Int)
 			{
 				int32_t i;
-				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 4);
 				_rParameters.i_CurrentIndex++;
 				return i;
 			}
@@ -895,26 +812,29 @@ __device__ int64_t ExecuteLongExpression(FilterEvalParameters & _rParameters)
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 //	printf("EL=%d.%d|%d\n", blockIdx.x, threadIdx.x, _rParameters.i_CurrentIndex);
 
-	if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Long)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Long)
 			{
 //				printf("EC=%d.%d|%d\n", blockIdx.x, threadIdx.x, _rParameters.i_CurrentIndex);
-				return a_ConstFilterNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.l_LongVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.l_LongVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Long &&
-					_rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Long)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Long &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Long)
 			{
-				int64_t i = 0;
-				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				int64_t i;
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 8);
 //				printf("EV=%d.%d|%d\n", blockIdx.x, threadIdx.x, _rParameters.i_CurrentIndex);
 				_rParameters.i_CurrentIndex++;
 				return i;
@@ -954,25 +874,28 @@ __device__ float ExecuteFloatExpression(FilterEvalParameters & _rParameters)
 {
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 
-	if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Float)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Float)
 			{
-				return a_ConstFilterNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.f_FloatVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.f_FloatVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Float &&
-					_rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Float)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Float &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Float)
 			{
 				float f;
-				memcpy(&f, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 4);
+				memcpy(&f, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 4);
 				_rParameters.i_CurrentIndex++;
 				return f;
 			}
@@ -1011,25 +934,28 @@ __device__ double ExecuteDoubleExpression(FilterEvalParameters & _rParameters)
 {
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 
-	if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::Double)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::Double)
 			{
-				return a_ConstFilterNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.d_DoubleVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.d_DoubleVal;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::Double &&
-					_rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::Double)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::Double &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::Double)
 			{
 				double f;
-				memcpy(&f, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 8);
+				memcpy(&f, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 8);
 				_rParameters.i_CurrentIndex++;
 				return f;
 			}
@@ -1068,30 +994,34 @@ __device__ const char * ExecuteStringExpression(FilterEvalParameters & _rParamet
 {
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 
-	if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_NodeType == EXECUTOR_NODE_EXPRESSION)
+	ExecutorNode & mExecutorNode = _rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex];
+
+	if(mExecutorNode.e_NodeType == EXECUTOR_NODE_EXPRESSION)
 	{
-		switch(a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ExpressionType)
+		switch(mExecutorNode.e_ExpressionType)
 		{
 		case EXPRESSION_CONST:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::StringIn)
+			if(mExecutorNode.m_ConstValue.e_Type == DataType::StringIn)
 			{
-				return a_ConstFilterNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.z_StringVal;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.z_StringVal;
 			}
-			else if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_ConstValue.e_Type == DataType::StringExt)
+			else if(mExecutorNode.m_ConstValue.e_Type == DataType::StringExt)
 			{
-				return a_ConstFilterNodes[_rParameters.i_CurrentIndex++].m_ConstValue.m_Value.z_ExtString;
+				_rParameters.i_CurrentIndex++;
+				return mExecutorNode.m_ConstValue.m_Value.z_ExtString;
 			}
 		}
 		break;
 		case EXPRESSION_VARIABLE:
 		{
-			if(a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.e_Type == DataType::StringIn &&
-					_rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
+			if(mExecutorNode.m_VarValue.e_Type == DataType::StringIn &&
+					_rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Type == DataType::StringIn)
 			{
 				int16_t i;
-				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position, 2);
-				char * z = _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[a_ConstFilterNodes[_rParameters.i_CurrentIndex].m_VarValue.i_AttributePosition].i_Position + 2;
+				memcpy(&i, _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position, 2);
+				char * z = _rParameters.p_Event + _rParameters.p_Meta->p_Attributes[mExecutorNode.m_VarValue.i_AttributePosition].i_Position + 2;
 				z[i] = 0;
 				_rParameters.i_CurrentIndex++;
 				return z;
@@ -1234,30 +1164,28 @@ __device__ ExecutorFuncPointer mExecutors[EXECUTOR_CONDITION_COUNT] = {
 
 __device__ bool AndCondition(FilterEvalParameters & _rParameters)
 {
-	printf("A=%d.%d|%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex, a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ConditionType);
 //	return (Evaluate(_rParameters) & Evaluate(_rParameters));
-	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
-			(*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) &
+			(*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 __device__ bool OrCondition(FilterEvalParameters & _rParameters)
 {
-	printf("O=%d.%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex);
 	//return (Evaluate(_rParameters) | Evaluate(_rParameters));
-	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
-			(*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters) |
+			(*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 __device__ bool NotCondition(FilterEvalParameters & _rParameters)
 {
 	//return (!Evaluate(_rParameters));
-	return !((*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
+	return !((*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters));
 }
 
 __device__ bool BooleanCondition(FilterEvalParameters & _rParameters)
 {
 	//return (Evaluate(_rParameters));
-	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 
@@ -1269,8 +1197,9 @@ __device__ bool Evaluate(FilterEvalParameters & _rParameters)
 //	assert(_rParameters.i_CurrentIndex < _rParameters.p_Filter->i_NodeCount);
 //	assert(_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex].e_ConditionType < EXECUTOR_CONDITION_COUNT);
 
-	printf("E=%d.%d|%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex, a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ConditionType);
-	return (*mExecutors[a_ConstFilterNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	//printf("E=%d.%d|%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex, a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ConditionType);
+
+	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
 }
 
 };

@@ -24,6 +24,27 @@ class GpuIntBuffer;
 class GpuRawByteBuffer;
 class GpuJoinProcessor;
 
+typedef struct JoinKernelParameters
+{
+	char               * p_InputEventBuffer;         // input events buffer
+	GpuKernelMetaEvent * p_InputMetaEvent;           // Meta event for input events
+	int                  i_InputNumberOfEvents;      // Number of events in input buffer
+	char               * p_EventWindowBuffer;        // Event window buffer of this stream
+	int                  i_WindowLength;             // Length of current events window
+	int                  i_RemainingCount;           // Remaining free slots in Window buffer
+	GpuKernelMetaEvent * p_OtherStreamMetaEvent;     // Meta event for other stream
+	char               * p_OtherEventWindowBuffer;   // Event window buffer of other stream
+	int                  i_OtherWindowLength;        // Length of current events window of other stream
+	int                  i_OtherRemainingCount;      // Remaining free slots in Window buffer of other stream
+	GpuKernelFilter    * p_OnCompareFilter;          // OnCompare filter buffer - pre-copied at initialization
+	uint64_t             i_WithInTime;               // WithIn time in milliseconds
+	GpuKernelMetaEvent * p_OutputStreamMetaEvent;    // Meta event for output stream
+	char               * p_ResultsBuffer;            // Resulting events buffer for this stream
+	AttributeMappings  * p_OutputAttribMappings;     // Output event attribute mappings
+	int                  i_EventsPerBlock;           // number of events allocated per block
+	int                  i_WorkSize;                  // Number of events in window process by this kernel
+} JoinKernelParameters;
+
 class GpuJoinKernel : public GpuKernel
 {
 public:
@@ -70,7 +91,7 @@ private:
 	GpuStreamEventBuffer * p_LeftResultEventBuffer;
 	GpuStreamEventBuffer * p_RightResultEventBuffer;
 
-//	GpuKernelFilter * p_DeviceOnCompareFilter;
+	GpuKernelFilter * p_DeviceOnCompareFilter;
 
 	int i_LeftStreamWindowSize;
 	int i_RightStreamWindowSize;

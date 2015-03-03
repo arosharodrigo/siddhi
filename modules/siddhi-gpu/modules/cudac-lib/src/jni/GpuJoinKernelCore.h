@@ -18,13 +18,11 @@ class GpuJoinProcessor;
 
 typedef struct ExpressionEvalParameters
 {
-//	GpuKernelFilter      * p_OnCompare;
+	GpuKernelFilter      * p_OnCompare;
 	GpuKernelMetaEvent   * a_Meta[2];
 	char                 * a_Event[2];
 	int                    i_CurrentIndex;
 } ExpressionEvalParameters;
-
-void UpdateOnCompareNodes(GpuJoinProcessor * _pJoin);
 
 // executor function pointer type
 typedef bool (*OnCompareFuncPointer)(ExpressionEvalParameters &);

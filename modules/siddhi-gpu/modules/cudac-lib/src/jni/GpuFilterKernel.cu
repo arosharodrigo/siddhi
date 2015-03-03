@@ -56,16 +56,11 @@ void ProcessEventsFilterKernelStandalone(
 	// get assigned event
 	int iEventIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
-	if(iEventIdx == 0)
-	{
-		PrintExecutorNodes();
-	}
-	__syncthreads();
-
 	char * pEvent = _pParameters->p_InByteBuffer + (_pParameters->i_SizeOfEvent * iEventIdx);
 
 	FilterEvalParameters mEvalParameters;
 	mEvalParameters.p_Meta = _pParameters->p_MetaEvent;
+	mEvalParameters.p_Filter = _pParameters->ap_Filter;
 	mEvalParameters.p_Event = pEvent;
 	mEvalParameters.i_CurrentIndex = 0;
 
@@ -81,119 +76,42 @@ void ProcessEventsFilterKernelStandalone(
 	}
 }
 
-//__global__
-////__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
-//void ProcessEventsFilterKernelFirst(
-//		char               * _pInByteBuffer,      // Input ByteBuffer from java side
-//		GpuKernelMetaEvent * _pMetaEvent,         // Meta event of input events
-//		GpuKernelFilter    * _apFilter,           // Filters buffer - pre-copied at initialization
-//		int                  _iEventCount,        // Num events in this batch
-//		int                  _iMaxEventCount,     // used for setting results array
-//		int                  _iSizeOfEvent,       // Size of an event
-//		int                  _iEventsPerBlock,    // number of events allocated per block
-//		int                * _pMatchedIndexBuffer,// Matched event index buffer
-//		int                * _iMatchedCount       // matched event count
-//)
-//{
-//	__shared__ int iSharedCounter;
-//
-//	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
-//		return;
-//
-//	if((blockIdx.x == _iEventCount / _iEventsPerBlock) && // last thread block
-//			(threadIdx.x >= _iEventCount % _iEventsPerBlock))
-//	{
-//		return;
-//	}
-//
-//	if (threadIdx.x == 0)
-//	{
-//		iSharedCounter = 0;
-//	}
-//	__syncthreads();
-//
-//	// get assigned event
-//	int iEventIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
-//
-//	char * pInEventBuffer = _pInByteBuffer + (_iSizeOfEvent * iEventIdx);
-//
-//	FilterEvalParameters mEvalParameters;
-////	mEvalParameters.p_Filter = _apFilter;
-//	mEvalParameters.p_Meta = _pMetaEvent;
-//	mEvalParameters.p_Event = pInEventBuffer;
-//	mEvalParameters.i_CurrentIndex = 0;
-//
-//	bool bMatched = Evaluate(mEvalParameters);
-//
-//	int iPositionInBlock;
-//
-//	if(bMatched)
-//	{
-//		iPositionInBlock = atomicAdd(&iSharedCounter, 1);
-//	}
-//	__syncthreads();
-//
-//	if(threadIdx.x == 0)
-//	{
-//		iSharedCounter = atomicAdd(_iMatchedCount, iSharedCounter);
-//	}
-//	__syncthreads();
-//
-//	if(bMatched)
-//	{
-//		iPositionInBlock += iSharedCounter; // increment local pos by global counter
-//		_pMatchedIndexBuffer[iPositionInBlock] = iEventIdx;
-////		_pResultBuffer[iEventIdx] = iEventIdx;
-////		_pResultBuffer[atomicAdd(_iMatchedCount, 1)] = iEventIdx;
-//	}
-////	else // ~ possible way to avoid cudaMemset from host
-////	{
-////		_pResultBuffer[iEventIdx] = -1 * iEventIdx;
-////	}
-//}
-
 __global__
 //__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
 void ProcessEventsFilterKernelFirstV2(
-		char               * _pInByteBuffer,      // Input ByteBuffer from java side
-		GpuKernelMetaEvent * _pMetaEvent,         // Meta event of input events
-		GpuKernelFilter    * _apFilter,           // Filters buffer - pre-copied at initialization
-		int                  _iEventCount,        // Num events in this batch
-		int                  _iMaxEventCount,     // used for setting results array
-		int                  _iSizeOfEvent,       // Size of an event
-		int                  _iEventsPerBlock,    // number of events allocated per block
-		int                * _pMatchedIndexBuffer // Matched event index buffer
+		KernelParametersFilterStandalone  * _pParameters,
+		int                                 _iEventCount        // Num events in this batch
 )
 {
-	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
+	if(threadIdx.x >= _pParameters->i_EventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
 		return;
 
-	if((blockIdx.x == _iEventCount / _iEventsPerBlock) && // last thread block
-			(threadIdx.x >= _iEventCount % _iEventsPerBlock))
+	if((blockIdx.x == _iEventCount / _pParameters->i_EventsPerBlock) && // last thread block
+			(threadIdx.x >= _iEventCount % _pParameters->i_EventsPerBlock))
 	{
 		return;
 	}
 
 	// get assigned event
-	int iEventIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
+	int iEventIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
-	char * pInEventBuffer = _pInByteBuffer + (_iSizeOfEvent * iEventIdx);
+	char * pInEvent = _pParameters->p_InByteBuffer + (_pParameters->i_SizeOfEvent * iEventIdx);
 
 	FilterEvalParameters mEvalParameters;
-//	mEvalParameters.p_Filter = _apFilter;
-	mEvalParameters.p_Meta = _pMetaEvent;
-	mEvalParameters.p_Event = pInEventBuffer;
+	mEvalParameters.p_Filter = _pParameters->ap_Filter;
+	mEvalParameters.p_Meta = _pParameters->p_MetaEvent;
+	mEvalParameters.p_Event = pInEvent;
 	mEvalParameters.i_CurrentIndex = 0;
 
 	bool bMatched = Evaluate(mEvalParameters);
 
 	if(bMatched)
 	{
-		_pMatchedIndexBuffer[iEventIdx] = 1;
+		_pParameters->p_ResultBuffer[iEventIdx] = 1;
 	}
 	else // ~ possible way to avoid cudaMemset from host
 	{
-		_pMatchedIndexBuffer[iEventIdx] = 0;
+		_pParameters->p_ResultBuffer[iEventIdx] = 0;
 	}
 }
 
@@ -238,7 +156,7 @@ void ResultSorter(
 GpuFilterKernelStandalone::GpuFilterKernelStandalone(GpuProcessor * _pProc, GpuProcessorContext * _pContext, int _iThreadBlockSize, FILE * _fPLog) :
 	GpuKernel(_pProc, _pContext->GetDeviceId(), _iThreadBlockSize, _fPLog),
 	p_Context(_pContext),
-//	p_DeviceFilter(NULL),
+	p_DeviceFilter(NULL),
 	p_InputEventBuffer(NULL),
 	p_ResultEventBuffer(NULL),
 	p_DeviceParameters(NULL),
@@ -252,8 +170,8 @@ GpuFilterKernelStandalone::~GpuFilterKernelStandalone()
 	fprintf(fp_Log, "[GpuFilterKernelStandalone] destroy\n");
 	fflush(fp_Log);
 
-//	CUDA_CHECK_RETURN(cudaFree(p_DeviceFilter));
-//	p_DeviceFilter = NULL;
+	CUDA_CHECK_RETURN(cudaFree(p_DeviceFilter));
+	p_DeviceFilter = NULL;
 
 	CUDA_CHECK_RETURN(cudaFree(p_DeviceParameters));
 	p_DeviceParameters = NULL;
@@ -302,61 +220,43 @@ bool GpuFilterKernelStandalone::Initialize(int _iStreamIndex, GpuMetaEvent * _pM
 
 	GpuFilterProcessor * pFilter = (GpuFilterProcessor*)p_Processor;
 
-//	CUDA_CHECK_RETURN(cudaMalloc(
-//			(void**) &p_DeviceFilter,
-//			sizeof(GpuKernelFilter)));
-//
-//	GpuKernelFilter * apHostFilters = (GpuKernelFilter *) malloc(sizeof(GpuKernelFilter));
-//
-//
-//	apHostFilters->i_NodeCount = pFilter->i_NodeCount;
-//	apHostFilters->ap_ExecutorNodes = NULL;
-//
-//	CUDA_CHECK_RETURN(cudaMalloc(
-//			(void**) &apHostFilters->ap_ExecutorNodes,
-//			sizeof(ExecutorNode) * pFilter->i_NodeCount));
-//
-//	CUDA_CHECK_RETURN(cudaMemcpy(
-//			apHostFilters->ap_ExecutorNodes,
-//			pFilter->ap_ExecutorNodes,
-//			sizeof(ExecutorNode) * pFilter->i_NodeCount,
-//			cudaMemcpyHostToDevice));
-//
-//	CUDA_CHECK_RETURN(cudaMemcpy(
-//			p_DeviceFilter,
-//			apHostFilters,
-//			sizeof(GpuKernelFilter),
-//			cudaMemcpyHostToDevice));
+	CUDA_CHECK_RETURN(cudaMalloc(
+			(void**) &p_DeviceFilter,
+			sizeof(GpuKernelFilter)));
 
-//	ExecutorNode * pDeviceNodes;
-//	CUDA_CHECK_RETURN(cudaGetSymbolAddress((void**)&pDeviceNodes, a_ConstFilterNodes));
-//	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(a_ConstFilterNodes,
-//			pFilter->ap_ExecutorNodes,
-//			sizeof(ExecutorNode) * pFilter->i_NodeCount,
-//			0,
-//			cudaMemcpyHostToDevice));
+	GpuKernelFilter * apHostFilters = (GpuKernelFilter *) malloc(sizeof(GpuKernelFilter));
 
-//	int * iDeviceFilterNodeCount;
-//	CUDA_CHECK_RETURN(cudaGetSymbolAddress((void**)&iDeviceFilterNodeCount, i_ConstFilterNodeCount));
-//	CUDA_CHECK_RETURN(cudaMemcpyToSymbol(i_ConstFilterNodeCount,
-//			&pFilter->i_NodeCount,
-//			sizeof(int),
-//			0,
-//			cudaMemcpyHostToDevice));
 
-	UpdateExecutorNodes(pFilter);
+	apHostFilters->i_NodeCount = pFilter->i_NodeCount;
+	apHostFilters->ap_ExecutorNodes = NULL;
+
+	CUDA_CHECK_RETURN(cudaMalloc(
+			(void**) &apHostFilters->ap_ExecutorNodes,
+			sizeof(ExecutorNode) * pFilter->i_NodeCount));
+
+	CUDA_CHECK_RETURN(cudaMemcpy(
+			apHostFilters->ap_ExecutorNodes,
+			pFilter->ap_ExecutorNodes,
+			sizeof(ExecutorNode) * pFilter->i_NodeCount,
+			cudaMemcpyHostToDevice));
+
+	CUDA_CHECK_RETURN(cudaMemcpy(
+			p_DeviceFilter,
+			apHostFilters,
+			sizeof(GpuKernelFilter),
+			cudaMemcpyHostToDevice));
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
 
-//	free(apHostFilters);
-//	apHostFilters = NULL;
+	free(apHostFilters);
+	apHostFilters = NULL;
 
 	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceParameters, sizeof(KernelParametersFilterStandalone)));
 	KernelParametersFilterStandalone * pHostParameters = (KernelParametersFilterStandalone*) malloc(sizeof(KernelParametersFilterStandalone));
 
 	pHostParameters->p_InByteBuffer = p_InputEventBuffer->GetDeviceEventBuffer();
-//	pHostParameters->ap_Filter = p_DeviceFilter;
+	pHostParameters->ap_Filter = p_DeviceFilter;
 	pHostParameters->p_MetaEvent = p_InputEventBuffer->GetDeviceMetaEvent();
 	pHostParameters->p_ResultBuffer = p_ResultEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->i_SizeOfEvent = p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes;
@@ -435,7 +335,7 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 //	EvaluateEventsInCpu(_iNumEvents);
 #endif
 
-	if(!b_DeviceSet) // TODO: check if this works in every conditions. How Java thread pool works with disrupter?
+	if(!b_DeviceSet)
 	{
 		GpuCudaHelper::SelectDevice(i_DeviceId, "GpuFilterKernelStandalone", fp_Log);
 		b_DeviceSet = true;
@@ -461,43 +361,10 @@ void GpuFilterKernelStandalone::Process(int _iStreamIndex, int & _iNumEvents)
 	fflush(fp_Log);
 #endif
 
-//	ProcessEventsFilterKernelStandalone<<<numBlocks, numThreads>>>(
-//			p_InputEventBuffer->GetDeviceEventBuffer(),
-//			p_DeviceFilter,
-//			p_InputEventBuffer->GetDeviceMetaEvent(),
-//			p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
-//			i_ThreadBlockSize,
-//			_iNumEvents,
-//			p_ResultEventBuffer->GetDeviceEventBuffer()
-//	);
-
 	ProcessEventsFilterKernelStandalone<<<numBlocks, numThreads>>>(
 			p_DeviceParameters,
 			_iNumEvents
 	);
-
-//	TestKernel<<<numBlocks, numThreads>>>(
-//			p_DeviceParameters,
-//			_iNumEvents
-//	);
-
-	//printf("Sync=%d\n",_iNumEvents);
-	// TODO: remove this
-	bool flag = false;
-	CUDA_CHECK_SET_FLAG(cudaDeviceSynchronize(), flag);
-	if(flag)
-	{
-//		GpuUtils::PrintByteBuffer(p_InputEventBuffer->GetHostEventBuffer(), _iNumEvents, p_InputEventBuffer->GetHostMetaEvent(), "GpuFilterKernelStandalone::In", fp_Log);
-//		cudaDeviceReset();
-//		exit(1);
-
-		int iDevice = -1;
-		CUDA_CHECK_RETURN(cudaGetDevice(&iDevice));
-		fprintf(stderr, "[GpuFilterKernelStandalone] Failed CUDA device : %d\n", iDevice);
-
-		cudaDeviceReset();
-		exit(1);
-	}
 
 	if(b_LastKernel)
 	{
@@ -679,6 +546,7 @@ GpuFilterKernelFirst::GpuFilterKernelFirst(GpuProcessor * _pProc, GpuProcessorCo
 	i_MatchedEvenBufferIndex(-1),
 	p_TempStorageForPrefixSum(NULL),
 	i_SizeOfTempStorageForPrefixSum(0),
+	p_DeviceParameters(NULL),
 	b_DeviceSet(false)
 {
 
@@ -709,6 +577,9 @@ GpuFilterKernelFirst::~GpuFilterKernelFirst()
 		CUDA_CHECK_RETURN(cudaFree(p_DeviceOutputAttributeMapping));
 		p_DeviceOutputAttributeMapping = NULL;
 	}
+
+	CUDA_CHECK_RETURN(cudaFree(p_DeviceParameters));
+	p_DeviceParameters = NULL;
 
 //	sdkDeleteTimer(&p_StopWatch);
 //	p_StopWatch = NULL;
@@ -791,6 +662,25 @@ bool GpuFilterKernelFirst::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEv
 
 	free(apHostFilters);
 	apHostFilters = NULL;
+
+	CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceParameters, sizeof(KernelParametersFilterStandalone)));
+	KernelParametersFilterStandalone * pHostParameters = (KernelParametersFilterStandalone*) malloc(sizeof(KernelParametersFilterStandalone));
+
+	pHostParameters->p_InByteBuffer = p_InputEventBuffer->GetDeviceEventBuffer();
+	pHostParameters->ap_Filter = p_DeviceFilter;
+	pHostParameters->p_MetaEvent = p_InputEventBuffer->GetDeviceMetaEvent();
+	pHostParameters->p_ResultBuffer = p_MatchedIndexEventBuffer->GetDeviceEventBuffer();
+	pHostParameters->i_SizeOfEvent = p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes;
+	pHostParameters->i_EventsPerBlock = i_ThreadBlockSize;
+
+	CUDA_CHECK_RETURN(cudaMemcpy(
+			p_DeviceParameters,
+			pHostParameters,
+			sizeof(KernelParametersFilterStandalone),
+			cudaMemcpyHostToDevice));
+
+	free(pHostParameters);
+	pHostParameters = NULL;
 
 
 	// copy Output mappings
@@ -877,24 +767,9 @@ void GpuFilterKernelFirst::Process(int _iStreamIndex, int & _iNumEvents)
 	fflush(fp_Log);
 #endif
 
-//	char               * _pInByteBuffer,      // Input ByteBuffer from java side
-//	GpuKernelMetaEvent * _pMetaEvent,         // Meta event of input events
-//	GpuKernelFilter    * _apFilter,           // Filters buffer - pre-copied at initialization
-//	int                  _iEventCount,        // Num events in this batch
-//	int                  _iMaxEventCount,     // used for setting results array
-//	int                  _iSizeOfEvent,       // Size of an event
-//	int                  _iEventsPerBlock,    // number of events allocated per block
-//	int                * _pMatchedIndexBuffer // Matched event index buffer
-
 	ProcessEventsFilterKernelFirstV2<<<numBlocks, numThreads>>>(
-			p_InputEventBuffer->GetDeviceEventBuffer(),
-			p_InputEventBuffer->GetDeviceMetaEvent(),
-			p_DeviceFilter,
-			_iNumEvents,
-			p_InputEventBuffer->GetMaxEventCount(),
-			p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
-			i_ThreadBlockSize,
-			p_MatchedIndexEventBuffer->GetDeviceEventBuffer()
+			p_DeviceParameters,
+			_iNumEvents
 	);
 
 	CUDA_CHECK_RETURN(cub::DeviceScan::ExclusiveSum(

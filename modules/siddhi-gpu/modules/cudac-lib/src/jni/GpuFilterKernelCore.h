@@ -18,7 +18,7 @@ class GpuFilterProcessor;
 
 typedef struct FilterEvalParameters
 {
-//	GpuKernelFilter      * p_Filter;
+	GpuKernelFilter      * p_Filter;
 	GpuKernelMetaEvent   * p_Meta;
 	char                 * p_Event;
 	int                    i_CurrentIndex;
@@ -26,9 +26,6 @@ typedef struct FilterEvalParameters
 
 // executor function pointer type
 typedef bool (*ExecutorFuncPointer)(FilterEvalParameters &);
-
-void UpdateExecutorNodes(GpuFilterProcessor * _pFilter);
-__device__ void PrintExecutorNodes();
 
 extern __device__ bool NoopOperator(FilterEvalParameters &);
 
