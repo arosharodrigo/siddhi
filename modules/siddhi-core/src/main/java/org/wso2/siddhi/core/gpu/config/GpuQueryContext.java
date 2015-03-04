@@ -21,6 +21,7 @@ public class GpuQueryContext {
     private Integer perfromanceCalculateBatchCount;
     private boolean batchSoftScheduling;
     private Integer threadWorkSize;
+    private GpuMetaStreamEvent inputStreamMetaEvent;
     private GpuMetaStreamEvent outputStreamMetaEvent;
     
     public GpuQueryContext(List<Annotation> annotationList) {
@@ -79,6 +80,7 @@ public class GpuQueryContext {
         }
             
         this.outputStreamMetaEvent = null;
+        this.inputStreamMetaEvent = null;
     }
 
     public boolean isBatchSoftScheduling() {
@@ -215,5 +217,13 @@ public class GpuQueryContext {
 
     public void setOutputStreamMetaEvent(GpuMetaStreamEvent outputStreamMetaEvent) {
         this.outputStreamMetaEvent = outputStreamMetaEvent;
+    }
+
+    public GpuMetaStreamEvent getInputStreamMetaEvent() {
+        return inputStreamMetaEvent;
+    }
+
+    public void setInputStreamMetaEvent(GpuMetaStreamEvent inputStreamMetaEvent) {
+        this.inputStreamMetaEvent = inputStreamMetaEvent;
     }
 }

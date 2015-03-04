@@ -541,11 +541,10 @@ public class GpuSelectorParser {
 
         id = outStream.getId();
         List<GpuMetaStreamEvent.GpuEventAttribute> selectorDeserializeMappings = new ArrayList<GpuMetaStreamEvent.GpuEventAttribute>(); 
-        GpuMetaStreamEvent inputMetaStreamEvent = null;
         
         List<AttributeProcessor> attributeProcessorList = getAttributeProcessors(selector, id, executionPlanContext, 
                 metaComplexEvent, executors, streamRuntime, gpuQueryContext, currentOn, expiredOn, 
-                selectorDeserializeMappings, inputMetaStreamEvent);
+                selectorDeserializeMappings);
         
         GpuQuerySelector querySelector = null;
         
@@ -575,7 +574,7 @@ public class GpuSelectorParser {
                     }
                 } else {
                     querySelector = getGpuQuerySelector(gpuQueryContext.getQueryName(), gpuQueryContext.getOutputStreamMetaEvent(), 
-                            id, selector, currentOn, expiredOn, executionPlanContext, selectorDeserializeMappings, inputMetaStreamEvent);
+                            id, selector, currentOn, expiredOn, executionPlanContext, selectorDeserializeMappings, gpuQueryContext.getInputStreamMetaEvent());
                     
                     if(querySelector == null) {
                         querySelector = new GpuQuerySelector(id, selector, currentOn, expiredOn, executionPlanContext, gpuQueryContext.getQueryName());
@@ -583,7 +582,7 @@ public class GpuSelectorParser {
                 }
             } else {
                 querySelector = getGpuQuerySelector(gpuQueryContext.getQueryName(), gpuQueryContext.getOutputStreamMetaEvent(), 
-                        id, selector, currentOn, expiredOn, executionPlanContext, selectorDeserializeMappings, inputMetaStreamEvent);
+                        id, selector, currentOn, expiredOn, executionPlanContext, selectorDeserializeMappings, gpuQueryContext.getInputStreamMetaEvent());
                 
                 if(querySelector == null) {
                     querySelector = new GpuQuerySelector(id, selector, currentOn, expiredOn, executionPlanContext, gpuQueryContext.getQueryName());
@@ -624,8 +623,7 @@ public class GpuSelectorParser {
                                                                    GpuQueryContext gpuQueryContext,
                                                                    boolean currentOn,
                                                                    boolean expiredOn,
-                                                                   List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings,
-                                                                   GpuMetaStreamEvent inputMetaStreamEvent) {
+                                                                   List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings) {
 
         AbstractDefinition inputDef = null;
         if (metaComplexEvent instanceof MetaStateEvent) {
@@ -644,8 +642,9 @@ public class GpuSelectorParser {
                 deserializeMappingsLocal.add(attrib);
             }
             
-            inputMetaStreamEvent = new GpuMetaStreamEvent(id, inputDef, gpuQueryContext);
+            GpuMetaStreamEvent inputMetaStreamEvent = new GpuMetaStreamEvent(id, inputDef, gpuQueryContext);
             inputMetaStreamEvent.setStreamIndex(0);
+            gpuQueryContext.setInputStreamMetaEvent(inputMetaStreamEvent);
         }
         
         List<AttributeProcessor> attributeProcessorList = new ArrayList<AttributeProcessor>();
