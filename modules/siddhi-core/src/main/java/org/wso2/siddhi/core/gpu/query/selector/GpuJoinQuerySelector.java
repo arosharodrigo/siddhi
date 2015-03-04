@@ -116,7 +116,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
                 // add event to current list
                 if (workerfirstEvent == null) {
                     workerfirstEvent = borrowedEvent;
-                    workerLastEvent = workerfirstEvent;
+                    workerLastEvent = borrowedEvent;
                 } else {
                     workerLastEvent.setNext(borrowedEvent);
                     workerLastEvent = borrowedEvent;
@@ -190,6 +190,9 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
                         lastEvent = workerResultsLast;
                     }
                 }
+                
+                workers[i].resetEvents();
+                
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -216,8 +219,11 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             outputComplexEventChunk.add(firstEvent, lastEvent);
             outputRateLimiter.process(outputComplexEventChunk);
         }
+        
         firstEvent = null;
         lastEvent = null;
+        workerfirstEvent = null;
+        workerLastEvent = null;
         outputComplexEventChunk.clear();
     }
 
@@ -379,7 +385,7 @@ public class GpuJoinQuerySelector extends GpuQuerySelector {
             
             deserializeBuffer.append("        if (firstEvent == null) { \n");
             deserializeBuffer.append("            firstEvent = borrowedEvent; \n");
-            deserializeBuffer.append("            lastEvent = firstEvent; \n");
+            deserializeBuffer.append("            lastEvent = borrowedEvent; \n");
             deserializeBuffer.append("        } else { \n");
             deserializeBuffer.append("            lastEvent.setNext(borrowedEvent); \n");
             deserializeBuffer.append("            lastEvent = borrowedEvent; \n");

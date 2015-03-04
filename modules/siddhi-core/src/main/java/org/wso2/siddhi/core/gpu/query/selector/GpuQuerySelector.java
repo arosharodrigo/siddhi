@@ -145,7 +145,7 @@ public class GpuQuerySelector extends QuerySelector {
 
             ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()];
             
-            log.debug("<" + queryName + "> [deserialize] idx=" + resultsIndex + " type=" + type + " attrSize=" + gpuMetaEventAttributeList.size());
+//            log.debug("<" + queryName + "> [deserialize] idx=" + resultsIndex + " type=" + type + " attrSize=" + gpuMetaEventAttributeList.size());
             
             if(type != Type.NONE) {
                 StreamEvent borrowedEvent = streamEventPool.borrowEvent();
@@ -180,7 +180,7 @@ public class GpuQuerySelector extends QuerySelector {
                 }
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
-                log.debug("<" + queryName + "> [deserialize] Converted event " + borrowedEvent.toString());
+//                log.debug("<" + queryName + "> [deserialize] Converted event " + borrowedEvent.toString());
                 
                 // call actual select operations
                 for (AttributeProcessor attributeProcessor : attributeProcessorList) {
@@ -190,7 +190,7 @@ public class GpuQuerySelector extends QuerySelector {
                 // add event to current list
                 if (workerfirstEvent == null) {
                     workerfirstEvent = borrowedEvent;
-                    workerLastEvent = workerfirstEvent;
+                    workerLastEvent = borrowedEvent;
                 } else {
                     workerLastEvent.setNext(borrowedEvent);
                     workerLastEvent = borrowedEvent;
@@ -243,6 +243,9 @@ public class GpuQuerySelector extends QuerySelector {
                         lastEvent = workerResultsLast;
                     }
                 }
+                
+                workers[i].resetEvents();
+                
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -262,15 +265,18 @@ public class GpuQuerySelector extends QuerySelector {
         
         // all workers complete, 
         
-//        log.info("<" + queryName + "> processedEventCount=" + processedEventCount);
+        log.info("<" + queryName + "> inputEvents=" + eventCount + " processedEventCount=" + processedEventCount);
         
         // call output rate limiter
         if (firstEvent != null) {
             outputComplexEventChunk.add(firstEvent, lastEvent);
             outputRateLimiter.process(outputComplexEventChunk);
         }
+        
         firstEvent = null;
         lastEvent = null;
+        workerfirstEvent = null;
+        workerLastEvent = null;
         outputComplexEventChunk.clear();
     }
      
@@ -514,7 +520,7 @@ public class GpuQuerySelector extends QuerySelector {
             
             deserializeBuffer.append("        if (firstEvent == null) { \n");
             deserializeBuffer.append("            firstEvent = borrowedEvent; \n");
-            deserializeBuffer.append("            lastEvent = firstEvent; \n");
+            deserializeBuffer.append("            lastEvent = borrowedEvent; \n");
             deserializeBuffer.append("        } else { \n");
             deserializeBuffer.append("            lastEvent.setNext(borrowedEvent); \n");
             deserializeBuffer.append("            lastEvent = borrowedEvent; \n");

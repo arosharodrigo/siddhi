@@ -162,6 +162,11 @@ public class GpuQuerySelectorWorker implements Runnable {
         return lastEvent;
     }
     
+    public void resetEvents() {
+        firstEvent = null;
+        lastEvent = null;
+    }
+    
     public int getProcessedEventCount() {
         return processedEventCount;
     }

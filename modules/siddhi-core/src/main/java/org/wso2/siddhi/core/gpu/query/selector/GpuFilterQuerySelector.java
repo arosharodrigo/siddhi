@@ -78,7 +78,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
                 // add event to current list
                 if (firstEvent == null) {
                     firstEvent = borrowedEvent;
-                    lastEvent = firstEvent;
+                    lastEvent = borrowedEvent;
                 } else {
                     lastEvent.setNext(borrowedEvent);
                     lastEvent = borrowedEvent;
