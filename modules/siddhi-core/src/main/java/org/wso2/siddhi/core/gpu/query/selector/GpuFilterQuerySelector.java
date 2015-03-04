@@ -87,7 +87,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
 
             } else {
                 //                log.debug("not matched event : index=" + resultsIndex + " bufferPosition=" + inputEventBuffer.position());
-                inputEventBuffer.position(inputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes());
+                inputEventBuffer.position(inputEventBuffer.position() + gpuOutputMetaStreamEvent.getEventSizeInBytes());
             }
         }
     }
@@ -113,7 +113,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
     }
     
     public QuerySelector clone(String key) {
-        GpuFilterQuerySelector clonedQuerySelector = GpuSelectorParser.getGpuFilterQuerySelector(queryName, this.gpuMetaStreamEvent, 
+        GpuFilterQuerySelector clonedQuerySelector = GpuSelectorParser.getGpuFilterQuerySelector(queryName, this.gpuOutputMetaStreamEvent, 
                 id + key, selector, currentOn, expiredOn, executionPlanContext, deserializeMappings);
         
         if(clonedQuerySelector == null) {

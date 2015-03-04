@@ -50,7 +50,8 @@ public class GpuQuerySelector extends QuerySelector {
     protected ByteBuffer inputEventBuffer; 
     protected StreamEventPool streamEventPool;
     protected MetaStreamEvent metaStreamEvent;
-    protected GpuMetaStreamEvent gpuMetaStreamEvent;
+    protected GpuMetaStreamEvent gpuOutputMetaStreamEvent;
+    protected GpuMetaStreamEvent gpuInputMetaStreamEvent;
     protected StreamEventConverter streamEventConverter;
     protected ComplexEventChunk outputComplexEventChunk;
     protected List<GpuEventAttribute> gpuMetaEventAttributeList;
@@ -88,7 +89,8 @@ public class GpuQuerySelector extends QuerySelector {
         this.inputEventBuffer = null;
         this.streamEventPool = null;
         this.metaStreamEvent = null;
-        this.gpuMetaStreamEvent = null;
+        this.gpuOutputMetaStreamEvent = null;
+        this.gpuInputMetaStreamEvent = null;
         this.streamEventConverter = null;
         this.attributeData = null;
         this.preAllocatedByteArray = null;
@@ -194,7 +196,7 @@ public class GpuQuerySelector extends QuerySelector {
                 
                 processedEventCount++;
             } else {
-                outputEventBuffer.position(outputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes() - 2);
+                outputEventBuffer.position(outputEventBuffer.position() + gpuOutputMetaStreamEvent.getEventSizeInBytes() - 2);
             }
             
         }
@@ -212,14 +214,14 @@ public class GpuQuerySelector extends QuerySelector {
             ByteBuffer dup = outputEventBuffer.duplicate();
             dup.order(outputEventBuffer.order());
             workers[i].setOutputEventBuffer(dup);
-            workers[i].setBufferStartPosition(i * workSize * gpuMetaStreamEvent.getEventSizeInBytes());
+            workers[i].setBufferStartPosition(i * workSize * gpuOutputMetaStreamEvent.getEventSizeInBytes());
             workers[i].setEventCount(workSize);
             
             futures[i] = executorService.submit(workers[i]);
         }
         
         // do remaining task
-        outputEventBuffer.position(workSize * workerSize * gpuMetaStreamEvent.getEventSizeInBytes());
+        outputEventBuffer.position(workSize * workerSize * gpuOutputMetaStreamEvent.getEventSizeInBytes());
         deserialize(remainWork);
         
         for(int i=0; i<workerSize; ++i) {
@@ -271,8 +273,8 @@ public class GpuQuerySelector extends QuerySelector {
     }
      
     public QuerySelector clone(String key) {
-        GpuQuerySelector clonedQuerySelector = GpuSelectorParser.getGpuQuerySelector(queryName, this.gpuMetaStreamEvent, 
-                id + key, selector, currentOn, expiredOn, executionPlanContext, deserializeMappings);
+        GpuQuerySelector clonedQuerySelector = GpuSelectorParser.getGpuQuerySelector(queryName, this.gpuOutputMetaStreamEvent, 
+                id + key, selector, currentOn, expiredOn, executionPlanContext, deserializeMappings, gpuInputMetaStreamEvent);
         
         if(clonedQuerySelector == null) {
             clonedQuerySelector = new GpuQuerySelector(id + key, selector, currentOn, expiredOn, executionPlanContext, queryName);
@@ -321,13 +323,17 @@ public class GpuQuerySelector extends QuerySelector {
         
         streamEventConverter = StreamEventConverterFactory.constructEventConverter(metaStreamEvent);
     }
-
-    public GpuMetaStreamEvent getGpuMetaStreamEvent() {
-        return gpuMetaStreamEvent;
+    
+    public void setGpuInputMetaStreamEvent(GpuMetaStreamEvent gpuInputMetaStreamEvent) {
+        this.gpuInputMetaStreamEvent = gpuInputMetaStreamEvent;
     }
 
-    public void setGpuMetaStreamEvent(GpuMetaStreamEvent gpuMetaStreamEvent) {
-        this.gpuMetaStreamEvent = gpuMetaStreamEvent;
+    public GpuMetaStreamEvent getGpuOutputMetaStreamEvent() {
+        return gpuOutputMetaStreamEvent;
+    }
+
+    public void setGpuOutputMetaStreamEvent(GpuMetaStreamEvent gpuMetaStreamEvent) {
+        this.gpuOutputMetaStreamEvent = gpuMetaStreamEvent;
         this.gpuMetaEventAttributeList = gpuMetaStreamEvent.getAttributes();
         
         log.info("<" + queryName + "> [setGpuMetaStreamEvent] OutputMetaStream : AttributeCount=" + gpuMetaStreamEvent.getAttributes().size() + 
@@ -413,7 +419,7 @@ public class GpuQuerySelector extends QuerySelector {
                 }
                 
                 this.workers[i].setAttributeProcessorList(attributeProcessorList);// TODO: attributeProcessorList should be cloned
-                this.workers[i].setGpuMetaStreamEvent(gpuMetaStreamEvent);
+                this.workers[i].setGpuMetaStreamEvent(gpuOutputMetaStreamEvent);
             }
         }
     }

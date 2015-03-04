@@ -491,6 +491,7 @@ public class GpuSelectorParser {
                     .newInstance(id, selector, currentOn, expiredOn, executionPlanContext, classId);
             
             gpuQuerySelector.setDeserializeMappings(deserializeMappings);
+            gpuQuerySelector.setGpuInputMetaStreamEvent(inputMetaStreamEvent);
                        
         } catch (NotFoundException e) {
             e.printStackTrace();
@@ -592,7 +593,7 @@ public class GpuSelectorParser {
         
         
         querySelector.setAttributeProcessorList(attributeProcessorList);
-        querySelector.setGpuMetaStreamEvent(gpuQueryContext.getOutputStreamMetaEvent());
+        querySelector.setGpuOutputMetaStreamEvent(gpuQueryContext.getOutputStreamMetaEvent());
 
         ConditionExpressionExecutor havingCondition = generateHavingExecutor(selector.getHavingExpression(),
                 metaComplexEvent, executionPlanContext, executors);

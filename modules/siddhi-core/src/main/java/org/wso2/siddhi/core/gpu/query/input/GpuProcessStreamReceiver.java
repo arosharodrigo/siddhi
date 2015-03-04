@@ -296,7 +296,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 selectProcessor.setOutputEventBuffer(eventByteBuffer);
                 selectProcessor.setStreamEventPool(streamEventPool);
                 selectProcessor.setMetaStreamEvent(metaStreamEvent);
-                selectProcessor.setGpuMetaStreamEvent(outputGpuMetaEvent);
+                selectProcessor.setGpuOutputMetaStreamEvent(outputGpuMetaEvent);
                 selectProcessor.setWorkerSize(0);
 
             } else if (lastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
@@ -317,7 +317,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 selectProcessor.setOutputEventBuffer(eventByteBuffer);
                 selectProcessor.setStreamEventPool(streamEventPool);
                 selectProcessor.setMetaStreamEvent(metaStreamEvent);
-                selectProcessor.setGpuMetaStreamEvent(outputGpuMetaEvent);
+                selectProcessor.setGpuOutputMetaStreamEvent(outputGpuMetaEvent);
                 selectProcessor.setWorkerSize(0);
 
             } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
@@ -372,7 +372,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 gpuJoinQuerySelector.setSegmentEventCount(segmentEventCount);
                 gpuJoinQuerySelector.setStreamEventPool(streamEventPool);
                 gpuJoinQuerySelector.setMetaStreamEvent(metaStreamEvent);
-                gpuJoinQuerySelector.setGpuMetaStreamEvent(outputGpuMetaEvent);
+                gpuJoinQuerySelector.setGpuOutputMetaStreamEvent(outputGpuMetaEvent);
                 gpuJoinQuerySelector.setThreadWorkSize(threadWorkSize);
                 gpuJoinQuerySelector.setWorkerSize(workerCount); // + 1 selector thread = 8 //TODO: set this from query
                 
