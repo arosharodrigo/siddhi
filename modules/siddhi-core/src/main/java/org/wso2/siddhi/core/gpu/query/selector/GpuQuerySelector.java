@@ -265,7 +265,7 @@ public class GpuQuerySelector extends QuerySelector {
         
         // all workers complete, 
         
-        log.info("<" + queryName + "> inputEvents=" + eventCount + " processedEventCount=" + processedEventCount);
+//        log.info("<" + queryName + "> inputEvents=" + eventCount + " processedEventCount=" + processedEventCount);
         
         // call output rate limiter
         if (firstEvent != null) {
