@@ -845,6 +845,7 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 					pResultInMatchingEvent->i_Sequence = pInEvent->i_Sequence;
 					pResultInMatchingEvent->i_Timestamp = pInEvent->i_Timestamp;
 
+					#pragma __unroll__
 					for(int m=0; m < _pParameters->p_OutputAttribMappings->i_MappingCount; ++m)
 					{
 						int iFromStreamIndex = _pParameters->p_OutputAttribMappings->p_Mappings[m].from[AttributeMapping::STREAM_INDEX];
@@ -1443,6 +1444,28 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 			pHostMappings = NULL;
 		}
 
+		if(p_JoinProcessor->GetThreadWorkSize() != 0)
+		{
+			i_LeftThreadWorkSize = p_JoinProcessor->GetThreadWorkSize();
+			i_RightThreadWorkSize = p_JoinProcessor->GetThreadWorkSize();
+		}
+
+		if(i_LeftThreadWorkSize >= i_RightStreamWindowSize)
+		{
+			i_LeftThreadWorkSize = i_RightStreamWindowSize;
+		}
+		if(i_RightThreadWorkSize >= i_LeftStreamWindowSize)
+		{
+			i_RightThreadWorkSize = i_LeftStreamWindowSize;
+		}
+
+		i_LeftThreadWorkCount = ceil((float)i_RightStreamWindowSize / i_LeftThreadWorkSize);
+		i_RightThreadWorkCount = ceil((float)i_LeftStreamWindowSize / i_RightThreadWorkSize);
+
+		fprintf(fp_LeftLog, "[GpuJoinKernel] LeftThreadWorkCount=%d RightThreadWorkCount=%d\n", i_LeftThreadWorkCount, i_RightThreadWorkCount);
+		fflush(fp_LeftLog);
+		fprintf(fp_RightLog, "[GpuJoinKernel] LeftThreadWorkCount=%d RightThreadWorkCount=%d\n", i_LeftThreadWorkCount, i_RightThreadWorkCount);
+		fflush(fp_RightLog);
 
 		CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceParametersLeft, sizeof(JoinKernelParameters)));
 		JoinKernelParameters * pHostParameters = (JoinKernelParameters*) malloc(sizeof(JoinKernelParameters));
@@ -1472,7 +1495,7 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 		pHostParameters = NULL;
 
 		CUDA_CHECK_RETURN(cudaMalloc((void**) &p_DeviceParametersRight, sizeof(JoinKernelParameters)));
-		JoinKernelParameters * pHostParameters = (JoinKernelParameters*) malloc(sizeof(JoinKernelParameters));
+		pHostParameters = (JoinKernelParameters*) malloc(sizeof(JoinKernelParameters));
 
 		pHostParameters->p_InputEventBuffer = p_RightInputEventBuffer->GetDeviceEventBuffer();
 		pHostParameters->p_InputMetaEvent = p_RightInputEventBuffer->GetDeviceMetaEvent();
@@ -1497,30 +1520,6 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 
 		free(pHostParameters);
 		pHostParameters = NULL;
-
-
-		if(p_JoinProcessor->GetThreadWorkSize() != 0)
-		{
-			i_LeftThreadWorkSize = p_JoinProcessor->GetThreadWorkSize();
-			i_RightThreadWorkSize = p_JoinProcessor->GetThreadWorkSize();
-		}
-
-		if(i_LeftThreadWorkSize >= i_RightStreamWindowSize)
-		{
-			i_LeftThreadWorkSize = i_RightStreamWindowSize;
-		}
-		if(i_RightThreadWorkSize >= i_LeftStreamWindowSize)
-		{
-			i_RightThreadWorkSize = i_LeftStreamWindowSize;
-		}
-
-		i_LeftThreadWorkCount = ceil((float)i_RightStreamWindowSize / i_LeftThreadWorkSize);
-		i_RightThreadWorkCount = ceil((float)i_LeftStreamWindowSize / i_RightThreadWorkSize);
-
-		fprintf(fp_LeftLog, "[GpuJoinKernel] LeftThreadWorkCount=%d RightThreadWorkCount=%d\n", i_LeftThreadWorkCount, i_RightThreadWorkCount);
-		fflush(fp_LeftLog);
-		fprintf(fp_RightLog, "[GpuJoinKernel] LeftThreadWorkCount=%d RightThreadWorkCount=%d\n", i_LeftThreadWorkCount, i_RightThreadWorkCount);
-		fflush(fp_RightLog);
 
 		fprintf(fp_LeftLog, "[GpuJoinKernel] Initialization complete\n");
 		fflush(fp_LeftLog);

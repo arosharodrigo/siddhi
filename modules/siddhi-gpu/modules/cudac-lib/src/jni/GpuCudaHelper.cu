@@ -60,7 +60,7 @@ void GpuCudaHelper::DeviceReset()
 	CUDA_CHECK_RETURN(cudaDeviceReset());
 }
 
-void GpuCudaHelper::AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, const char * _zTag, FILE * _fpLog)
+void GpuCudaHelper::AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, unsigned int _iAllocSize, const char * _zTag, FILE * _fpLog)
 {
 #if CUDART_VERSION >= 4000
 
@@ -88,7 +88,7 @@ void GpuCudaHelper::AllocateHostMemory(bool _bPinGenericMemory, char ** _ppAlloc
     }
 }
 
-void GpuCudaHelper::FreeHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, int _iAllocSize, const char * _zTag, FILE * _fpLog)
+void GpuCudaHelper::FreeHostMemory(bool _bPinGenericMemory, char ** _ppAlloc, char ** _ppAlignedAlloc, unsigned int _iAllocSize, const char * _zTag, FILE * _fpLog)
 {
 #if CUDART_VERSION >= 4000
 

@@ -101,6 +101,7 @@ public class GpuQuerySelector extends QuerySelector {
         
         this.queryName = queryName;
         this.processedEventCount = 0;
+        this.workerSize = 0;
     }
     
     @Override
@@ -200,8 +201,8 @@ public class GpuQuerySelector extends QuerySelector {
         inputEventBuffer.position(0);
         processedEventCount = 0;
         
-        int workSize = eventCount / workerSize;
-        int remainWork = eventCount % workSize;
+        int workSize = (workerSize > 0 ? (eventCount / workerSize) : eventCount);
+        int remainWork = (workerSize > 0 ? (eventCount % workSize) : eventCount);
         
         for(int i=0; i<workerSize; ++i) {
             ByteBuffer dup = outputEventBuffer.duplicate();

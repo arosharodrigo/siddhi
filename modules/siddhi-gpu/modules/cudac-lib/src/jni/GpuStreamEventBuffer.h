@@ -27,7 +27,7 @@ public:
 	int GetMaxEventCount() { return i_EventCount; }
 	char * GetHostEventBuffer() { return p_HostEventBuffer; }
 	virtual char * GetDeviceEventBuffer() { return p_DeviceEventBuffer; }
-	int GetEventBufferSizeInBytes() { return i_EventBufferSizeInBytes; }
+	unsigned int GetEventBufferSizeInBytes() { return i_EventBufferSizeInBytes; }
 
 	void CopyToDevice(bool _bAsync);
 	void CopyToHost(bool _bAsync);
@@ -40,7 +40,7 @@ protected:
 	char * p_UnalignedBuffer;
 	char * p_DeviceEventBuffer;
 
-	int i_EventBufferSizeInBytes;
+	unsigned int i_EventBufferSizeInBytes;
 	int i_EventCount;
 };
 
