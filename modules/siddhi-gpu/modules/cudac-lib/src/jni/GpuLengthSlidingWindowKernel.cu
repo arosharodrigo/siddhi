@@ -54,6 +54,8 @@ void ProcessEventsLengthSlidingWindow(
 	GpuEvent * pExpiredEvent = (GpuEvent *)pResultsExpiredEventBuffer;
 	// calculate in/expired event pair for this event
 
+	memcpy(pResultsInEventBuffer, pInEventBuffer, _iSizeOfEvent);
+
 	if(iEventIdx >= _iRemainingCount)
 	{
 		if(iEventIdx < _iWindowLength)
@@ -89,102 +91,102 @@ void ProcessEventsLengthSlidingWindow(
 		pExpiredEvent->i_Type = GpuEvent::NONE;
 
 	}
-
-	memcpy(pResultsInEventBuffer, pInEventBuffer, _iSizeOfEvent);
 
 }
 
  // not used
-__global__
-void ProcessEventsLengthSlidingWindowFilter(
-		char               * _pInputEventBuffer,     // original input events buffer
-		GpuKernelMetaEvent * _pMetaEvent,            // Meta event for original input events
-		int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
-		int                * _pFilterdEventsIndexes, // Matched event indexes from filter kernel
-		char               * _pEventWindowBuffer,    // Event window buffer
-		int                  _iWindowLength,         // Length of current events window
-		int                  _iRemainingCount,       // Remaining free slots in Window buffer
-		char               * _pResultsBuffer,        // Resulting events buffer
-		int                  _iMaxEventCount,        // used for setting results array
-		int                  _iSizeOfEvent,          // Size of an event
-		int                  _iEventsPerBlock        // number of events allocated per block
-)
-{
-	// avoid out of bound threads
-	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
-		return;
-
-	if((blockIdx.x == _iNumberOfEvents / _iEventsPerBlock) && // last thread block
-			(threadIdx.x >= _iNumberOfEvents % _iEventsPerBlock)) // extra threads
-	{
-		return;
-	}
-
-	// get assigned event
-	int iEventIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
-
-	// get in event starting position
-	char * pInEventBuffer = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
-
-	// output to results buffer [expired event, in event]
-	char * pResultsExpiredEventBuffer = _pResultsBuffer + (_iSizeOfEvent * iEventIdx * 2);
-	char * pResultsInEventBuffer = pResultsExpiredEventBuffer + _iSizeOfEvent;
-
-	GpuEvent * pExpiredEvent = (GpuEvent *)pResultsExpiredEventBuffer;
-
-	// check if event in my index is a matched event
-	if(_pFilterdEventsIndexes[iEventIdx] < 0)
-	{
-		memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-		pExpiredEvent->i_Type = GpuEvent::NONE;
-
-		memset(pResultsInEventBuffer, 0, _iSizeOfEvent);
-		GpuEvent * pResultsInEvent = (GpuEvent *)pResultsInEventBuffer;
-		pResultsInEvent->i_Type = GpuEvent::NONE;
-
-		return; // not matched
-	}
-
-	// calculate in/expired event pair for this event
-
-	if(iEventIdx >= _iRemainingCount)
-	{
-		if(iEventIdx < _iWindowLength)
-		{
-			// in window buffer
-			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx - _iRemainingCount));
-
-			GpuEvent * pWindowEvent = (GpuEvent*) pExpiredOutEventInWindowBuffer;
-			if(pWindowEvent->i_Type != GpuEvent::NONE) // if window event is filled
-			{
-				memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInWindowBuffer, _iSizeOfEvent);
-				pExpiredEvent->i_Type = GpuEvent::EXPIRED;
-			}
-			else
-			{
-				memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-				pExpiredEvent->i_Type = GpuEvent::NONE;
-			}
-		}
-		else
-		{
-			// in input event buffer
-			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * (iEventIdx - _iWindowLength));
-
-			memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInInputBuffer, _iSizeOfEvent);
-			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
-		}
-	}
-	else
-	{
-		// [NULL,inEvent]
-		memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
-		pExpiredEvent->i_Type = GpuEvent::NONE;
-
-	}
-
-	memcpy(pResultsInEventBuffer, pInEventBuffer, _iSizeOfEvent);
-}
+//__global__
+//void ProcessEventsLengthSlidingWindowFilter(
+//		char               * _pInputEventBuffer,     // original input events buffer
+//		GpuKernelMetaEvent * _pMetaEvent,            // Meta event for original input events
+//		int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
+//		int                * _pFilterdEventsIndexes, // Matched event indexes from filter kernel
+//		char               * _pEventWindowBuffer,    // Event window buffer
+//		int                  _iWindowLength,         // Length of current events window
+//		int                  _iRemainingCount,       // Remaining free slots in Window buffer
+//		char               * _pResultsBuffer,        // Resulting events buffer
+//		int                  _iMaxEventCount,        // used for setting results array
+//		int                  _iSizeOfEvent,          // Size of an event
+//		int                  _iEventsPerBlock        // number of events allocated per block
+//)
+//{
+//	// avoid out of bound threads
+//	if(threadIdx.x >= _iEventsPerBlock || threadIdx.y > 0 || blockIdx.y > 0)
+//		return;
+//
+//	if((blockIdx.x == _iNumberOfEvents / _iEventsPerBlock) && // last thread block
+//			(threadIdx.x >= _iNumberOfEvents % _iEventsPerBlock)) // extra threads
+//	{
+//		return;
+//	}
+//
+//	// get assigned event
+//	int iEventIdx = (blockIdx.x * _iEventsPerBlock) + threadIdx.x;
+//
+//	// get in event starting position
+//	char * pInEventBuffer = _pInputEventBuffer + (_iSizeOfEvent * iEventIdx);
+//
+//	// output to results buffer [expired event, in event]
+//	char * pResultsExpiredEventBuffer = _pResultsBuffer + (_iSizeOfEvent * iEventIdx * 2);
+//	char * pResultsInEventBuffer = pResultsExpiredEventBuffer + _iSizeOfEvent;
+//
+//	GpuEvent * pExpiredEvent = (GpuEvent *)pResultsExpiredEventBuffer;
+//
+//	// check if event in my index is a matched event
+//	if(_pFilterdEventsIndexes[iEventIdx] < 0)
+//	{
+//		memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
+//		pExpiredEvent->i_Type = GpuEvent::NONE;
+//
+//		memset(pResultsInEventBuffer, 0, _iSizeOfEvent);
+//		GpuEvent * pResultsInEvent = (GpuEvent *)pResultsInEventBuffer;
+//		pResultsInEvent->i_Type = GpuEvent::NONE;
+//
+//		return; // not matched
+//	}
+//
+//	// calculate in/expired event pair for this event
+//
+//
+//	memcpy(pResultsInEventBuffer, pInEventBuffer, _iSizeOfEvent);
+//
+//	if(iEventIdx >= _iRemainingCount)
+//	{
+//		if(iEventIdx < _iWindowLength)
+//		{
+//			// in window buffer
+//			char * pExpiredOutEventInWindowBuffer = _pEventWindowBuffer + (_iSizeOfEvent * (iEventIdx - _iRemainingCount));
+//
+//			GpuEvent * pWindowEvent = (GpuEvent*) pExpiredOutEventInWindowBuffer;
+//			if(pWindowEvent->i_Type != GpuEvent::NONE) // if window event is filled
+//			{
+//				memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInWindowBuffer, _iSizeOfEvent);
+//				pExpiredEvent->i_Type = GpuEvent::EXPIRED;
+//			}
+//			else
+//			{
+//				memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
+//				pExpiredEvent->i_Type = GpuEvent::NONE;
+//			}
+//		}
+//		else
+//		{
+//			// in input event buffer
+//			char * pExpiredOutEventInInputBuffer = _pInputEventBuffer + (_iSizeOfEvent * (iEventIdx - _iWindowLength));
+//
+//			memcpy(pResultsExpiredEventBuffer, pExpiredOutEventInInputBuffer, _iSizeOfEvent);
+//			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
+//		}
+//	}
+//	else
+//	{
+//		// [NULL,inEvent]
+//		memset(pResultsExpiredEventBuffer, 0, _iSizeOfEvent);
+//		pExpiredEvent->i_Type = GpuEvent::NONE;
+//
+//	}
+//
+//}
 
 __global__
 void SetWindowState(

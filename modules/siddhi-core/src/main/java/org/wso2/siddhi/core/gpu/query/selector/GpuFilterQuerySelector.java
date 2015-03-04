@@ -20,12 +20,10 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
 
     private static final Logger log = Logger.getLogger(GpuFilterQuerySelector.class);
     protected IntBuffer outputEventIndexBuffer;
-    protected List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings;
     
     public GpuFilterQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, 
             ExecutionPlanContext executionPlanContext, String queryName) {
         super(id, selector, currentOn, expiredOn, executionPlanContext, queryName);
-        deserializeMappings = null;
     }
     
     public void deserialize(int eventCount) {
@@ -140,9 +138,5 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
     
     public List<GpuMetaStreamEvent.GpuEventAttribute> getDeserializeMappings() {
         return deserializeMappings;
-    }
-
-    public void setDeserializeMappings(List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings) {
-        this.deserializeMappings = deserializeMappings;
     }
 }

@@ -73,6 +73,8 @@ public class GpuQuerySelector extends QuerySelector {
     protected String queryName;
     protected int processedEventCount;
     
+    protected List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings;
+    
     public GpuQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, 
             ExecutionPlanContext executionPlanContext, String queryName) {
         super(id, selector, currentOn, expiredOn, executionPlanContext);
@@ -102,6 +104,8 @@ public class GpuQuerySelector extends QuerySelector {
         this.queryName = queryName;
         this.processedEventCount = 0;
         this.workerSize = 0;
+        
+        this.deserializeMappings = null;
     }
     
     @Override
@@ -268,7 +272,7 @@ public class GpuQuerySelector extends QuerySelector {
      
     public QuerySelector clone(String key) {
         GpuQuerySelector clonedQuerySelector = GpuSelectorParser.getGpuQuerySelector(queryName, this.gpuMetaStreamEvent, 
-                id + key, selector, currentOn, expiredOn, executionPlanContext);
+                id + key, selector, currentOn, expiredOn, executionPlanContext, deserializeMappings);
         
         if(clonedQuerySelector == null) {
             clonedQuerySelector = new GpuQuerySelector(id + key, selector, currentOn, expiredOn, executionPlanContext, queryName);
@@ -325,6 +329,9 @@ public class GpuQuerySelector extends QuerySelector {
     public void setGpuMetaStreamEvent(GpuMetaStreamEvent gpuMetaStreamEvent) {
         this.gpuMetaStreamEvent = gpuMetaStreamEvent;
         this.gpuMetaEventAttributeList = gpuMetaStreamEvent.getAttributes();
+        
+        log.info("<" + queryName + "> [setGpuMetaStreamEvent] OutputMetaStream : AttributeCount=" + gpuMetaStreamEvent.getAttributes().size() + 
+                " EventSizeInBytes=" + gpuMetaStreamEvent.getEventSizeInBytes());
         
         int maxStringLength = 0;
         
@@ -409,6 +416,10 @@ public class GpuQuerySelector extends QuerySelector {
                 this.workers[i].setGpuMetaStreamEvent(gpuMetaStreamEvent);
             }
         }
+    }
+    
+    public void setDeserializeMappings(List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings) {
+        this.deserializeMappings = deserializeMappings;
     }
     
     private GpuQuerySelectorWorker getGpuQuerySelectorWorker(
