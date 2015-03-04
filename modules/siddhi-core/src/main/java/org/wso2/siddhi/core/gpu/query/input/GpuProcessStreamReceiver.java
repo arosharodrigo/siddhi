@@ -118,38 +118,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
             }
         }
 
-//        // ----- hardcoded logic -----------
-//        //        sid string
-//        eventBufferWriter.writeString((String) data[index++], 8);
-//        //        ts long
-//        eventBufferWriter.writeLong(((Long) data[index++]).longValue());
-//        //        x int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        y int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        z int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        v double
-//        eventBufferWriter.writeDouble(((Double) data[index++]).doubleValue());
-//        //        a double
-//        eventBufferWriter.writeDouble(((Double) data[index++]).doubleValue());
-//        //        vx int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        vy int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        vz int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        ax int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        ay int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        az int
-//        eventBufferWriter.writeInt(((Integer) data[index++]).intValue());
-//        //        tsr long
-//        eventBufferWriter.writeLong(((Long) data[index++]).longValue());
-//        //        tsms long 
-//        eventBufferWriter.writeLong(((Long) data[index++]).longValue());
-//        // ---------------------------------
     }
     
     @Override

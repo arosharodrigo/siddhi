@@ -11,6 +11,7 @@ import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.CtNewMethod;
@@ -370,6 +371,10 @@ public class GpuSelectorParser {
             
             // public GpuQuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, ExecutionPlanContext executionPlanContext, String queryName)
             
+            CtField mLoggerField = CtField.make("private static final Logger log = Logger.getLogger(" +
+                    fqdn + ".class); ", gpuQuerySelectorClass);
+            gpuQuerySelectorClass.addField(mLoggerField);
+            
             StringBuffer constructor = new StringBuffer();
             constructor.append("public ").append(className).append("(String id, ")
                 .append("org.wso2.siddhi.query.api.execution.query.selection.Selector selector, ")
@@ -392,6 +397,9 @@ public class GpuSelectorParser {
 
             deserializeBuffer.append("for (int resultsIndex = 0; resultsIndex < eventCount; ++resultsIndex) { \n");
             deserializeBuffer.append("    org.wso2.siddhi.core.event.ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()];  \n");
+            
+            deserializeBuffer.append("    log.debug(\"<\" + queryName + \"> [deserialize] idx=\" + resultsIndex + \" type=\" + type); \n");
+            
             deserializeBuffer.append("    if(type != org.wso2.siddhi.core.event.ComplexEvent.Type.NONE) { \n");
             deserializeBuffer.append("        org.wso2.siddhi.core.event.stream.StreamEvent borrowedEvent = streamEventPool.borrowEvent(); \n");
             deserializeBuffer.append("        long sequence = outputEventBuffer.getLong(); \n");
@@ -458,6 +466,7 @@ public class GpuSelectorParser {
             }
             
             deserializeBuffer.append("        streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent); \n");
+            deserializeBuffer.append("        log.debug(\"<\" + queryName + \"> [deserialize] Converted event \" + borrowedEvent.toString()); \n");
             
             deserializeBuffer.append("        java.util.Iterator i = attributeProcessorList.iterator(); \n");
             deserializeBuffer.append("        while(i.hasNext()) { \n");

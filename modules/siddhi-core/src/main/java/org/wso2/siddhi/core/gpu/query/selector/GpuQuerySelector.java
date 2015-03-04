@@ -145,6 +145,8 @@ public class GpuQuerySelector extends QuerySelector {
 
             ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()];
             
+            log.debug("<" + queryName + "> [deserialize] idx=" + resultsIndex + " type=" + type + " attrSize=" + gpuMetaEventAttributeList.size());
+            
             if(type != Type.NONE) {
                 StreamEvent borrowedEvent = streamEventPool.borrowEvent();
                 
@@ -155,7 +157,7 @@ public class GpuQuerySelector extends QuerySelector {
                 for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
                     switch(attrib.type) {
                     case BOOL:
-                        attributeData[index++] = Short.valueOf(outputEventBuffer.getShort());
+                        attributeData[index++] = outputEventBuffer.getShort();
                         break;
                     case INT:
                         attributeData[index++] = outputEventBuffer.getInt();
@@ -178,7 +180,7 @@ public class GpuQuerySelector extends QuerySelector {
                 }
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
-                //log.debug("Converted event " + borrowedEvent.toString());
+                log.debug("<" + queryName + "> [deserialize] Converted event " + borrowedEvent.toString());
                 
                 // call actual select operations
                 for (AttributeProcessor attributeProcessor : attributeProcessorList) {
