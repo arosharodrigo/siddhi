@@ -164,7 +164,7 @@ public class GpuSelectorParser {
             deserializeBuffer.append("    } else if (type == org.wso2.siddhi.core.event.ComplexEvent.Type.RESET) { \n");
             deserializeBuffer.append("        outputEventBuffer.position( \n");
             deserializeBuffer.append("                outputEventBuffer.position() +  \n");
-            deserializeBuffer.append("                ((segmentEventCount - indexInsideSegment) * gpuMetaStreamEvent.getEventSizeInBytes())  \n");
+            deserializeBuffer.append("                ((segmentEventCount - indexInsideSegment) * gpuOutputMetaStreamEvent.getEventSizeInBytes())  \n");
             deserializeBuffer.append("                - 2); \n");
             deserializeBuffer.append("        resultsIndex = ((segIdx + 1) * segmentEventCount) - 1; \n");
             deserializeBuffer.append("        indexInsideSegment = 0; \n");
@@ -306,7 +306,7 @@ public class GpuSelectorParser {
             deserializeBuffer.append("        } \n");
             deserializeBuffer.append("        processedEventCount++; \n");
             deserializeBuffer.append("    } else { \n");
-            deserializeBuffer.append("        inputEventBuffer.position(inputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes()); \n");
+            deserializeBuffer.append("        inputEventBuffer.position(inputEventBuffer.position() + gpuOutputMetaStreamEvent.getEventSizeInBytes()); \n");
             deserializeBuffer.append("    } \n");
             deserializeBuffer.append("} \n");
 
