@@ -68,18 +68,20 @@ public class InputStreamParser {
                 leftProcessStreamReceiver = rightProcessStreamReceiver;
             }
             MetaStateEvent metaStateEvent = new MetaStateEvent(2);
-            metaStateEvent.addEvent(new MetaStreamEvent());
-            metaStateEvent.addEvent(new MetaStreamEvent());
+//            metaStateEvent.addEvent(new MetaStreamEvent());
+//            metaStateEvent.addEvent(new MetaStreamEvent());
 
             SingleStreamRuntime leftStreamRuntime = SingleInputStreamParser.parseInputStream(
                     (SingleInputStream) ((JoinInputStream) inputStream).getLeftInputStream(),
                     executionPlanContext, executors, definitionMap,
-                    metaStateEvent.getMetaStreamEvent(0), leftProcessStreamReceiver);
+                    metaStateEvent, leftProcessStreamReceiver);
+//                    metaStateEvent.getMetaStreamEvent(0), leftProcessStreamReceiver);
 
             SingleStreamRuntime rightStreamRuntime = SingleInputStreamParser.parseInputStream(
                     (SingleInputStream) ((JoinInputStream) inputStream).getRightInputStream(),
                     executionPlanContext, executors, definitionMap,
-                    metaStateEvent.getMetaStreamEvent(1), rightProcessStreamReceiver);
+                    metaStateEvent, rightProcessStreamReceiver);
+//                    metaStateEvent.getMetaStreamEvent(1), rightProcessStreamReceiver);
 
             return JoinInputStreamParser.parseInputStream(leftStreamRuntime, rightStreamRuntime,
                     (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors);

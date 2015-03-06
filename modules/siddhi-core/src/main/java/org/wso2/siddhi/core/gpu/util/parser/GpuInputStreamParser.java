@@ -211,18 +211,16 @@ public class GpuInputStreamParser {
             rightGpuProcessStreamReceiver.setMinimumEventBatchSize(gpuQueryContext.getEventBatchMinimumSize());
             
             MetaStateEvent metaStateEvent = new MetaStateEvent(2);
-            metaStateEvent.addEvent(new MetaStreamEvent());
-            metaStateEvent.addEvent(new MetaStreamEvent());
             
             SingleStreamRuntime leftStreamRuntime = SingleInputStreamParser.parseInputStream(
                     (SingleInputStream) ((JoinInputStream) inputStream).getLeftInputStream(),
                     executionPlanContext, executors, definitionMap,
-                    metaStateEvent.getMetaStreamEvent(0), leftGpuProcessStreamReceiver, gpuQueryContext);
+                    metaStateEvent, leftGpuProcessStreamReceiver, gpuQueryContext);
             
             SingleStreamRuntime rightStreamRuntime = SingleInputStreamParser.parseInputStream(
                     (SingleInputStream) ((JoinInputStream) inputStream).getRightInputStream(),
                     executionPlanContext, executors, definitionMap,
-                    metaStateEvent.getMetaStreamEvent(1), rightGpuProcessStreamReceiver, gpuQueryContext);
+                    metaStateEvent, rightGpuProcessStreamReceiver, gpuQueryContext);
             
             return JoinInputStreamParser.parseInputStream(leftStreamRuntime, rightStreamRuntime,
                     (JoinInputStream) inputStream, executionPlanContext, metaStateEvent, executors, 
