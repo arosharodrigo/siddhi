@@ -169,28 +169,31 @@ public class GpuInputStreamParser {
 
             GpuQueryProcessor gpuQueryProcessor = new GpuQueryProcessor(gpuQueryContext, gpuQueryContext.getQueryName());
             
+            String leftStreamId = leftInputStream.getStreamId() + (leftInputStream.getStreamReferenceId() != null ? "_" + leftInputStream.getStreamId() : "");
             GpuProcessStreamReceiver leftGpuProcessStreamReceiver = getGpuProcessStreamReceiver(
                     gpuMetaStateEvent.getMetaStreamEvent(0), 
-                    leftInputStream.getStreamId(), 
+                    leftStreamId, 
                     gpuQueryContext.getQueryName() + "_left");
                     
             if(leftGpuProcessStreamReceiver == null) {
-                leftGpuProcessStreamReceiver = new GpuProcessStreamReceiver(leftInputStream.getStreamId(), 
+                leftGpuProcessStreamReceiver = new GpuProcessStreamReceiver(leftStreamId, 
                         gpuQueryContext.getQueryName() + "_left");
             }
             
+            
+            String rightStreamId = rightInputStream.getStreamId() + (rightInputStream.getStreamReferenceId() != null ? "_" + rightInputStream.getStreamId() : "");
             GpuProcessStreamReceiver rightGpuProcessStreamReceiver = getGpuProcessStreamReceiver(
                     gpuMetaStateEvent.getMetaStreamEvent(1), 
-                    rightInputStream.getStreamId(), 
+                    rightStreamId, 
                     gpuQueryContext.getQueryName() + "_right");
 
             if(rightGpuProcessStreamReceiver == null) {
-                rightGpuProcessStreamReceiver = new GpuProcessStreamReceiver(rightInputStream.getStreamId(), 
+                rightGpuProcessStreamReceiver = new GpuProcessStreamReceiver(rightStreamId, 
                         gpuQueryContext.getQueryName() + "_right");
             }
             
-            gpuQueryProcessor.addStream(leftInputStream.getStreamId(), gpuMetaStateEvent.getMetaStreamEvent(0));
-            gpuQueryProcessor.addStream(rightInputStream.getStreamId(), gpuMetaStateEvent.getMetaStreamEvent(1));
+            gpuQueryProcessor.addStream(leftStreamId, gpuMetaStateEvent.getMetaStreamEvent(0));
+            gpuQueryProcessor.addStream(rightStreamId, gpuMetaStateEvent.getMetaStreamEvent(1));
             
             leftGpuProcessStreamReceiver.setGpuMetaEvent(gpuMetaStateEvent.getMetaStreamEvent(0));
             rightGpuProcessStreamReceiver.setGpuMetaEvent(gpuMetaStateEvent.getMetaStreamEvent(1));
