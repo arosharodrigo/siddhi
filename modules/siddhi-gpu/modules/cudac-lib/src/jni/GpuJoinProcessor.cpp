@@ -114,7 +114,7 @@ void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _
 		}
 	}
 
-	if(p_LeftPrevProcessor)
+	if(_iStreamIndex == 0 && p_LeftPrevProcessor)
 	{
 		switch(p_LeftPrevProcessor->GetType())
 		{
@@ -129,7 +129,7 @@ void GpuJoinProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _
 		}
 	}
 
-	if(p_RightPrevProcessor)
+	if(_iStreamIndex == 1 && p_RightPrevProcessor)
 	{
 		switch(p_RightPrevProcessor->GetType())
 		{

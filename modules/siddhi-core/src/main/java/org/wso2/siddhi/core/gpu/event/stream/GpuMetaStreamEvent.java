@@ -62,6 +62,8 @@ public class GpuMetaStreamEvent implements GpuMetaEvent {
                 throw new DefinitionNotExistException("Stream definition with stream ID '" + singleInputStream.getStreamId() + "' has not been defined");
             }
             
+            streamId = streamId + (singleInputStream.getStreamReferenceId() != null ? "_" + singleInputStream.getStreamReferenceId() : "");
+            
             processGpuQueryContext(gpuQueryContext);
             processAbastractDefinition();            
             

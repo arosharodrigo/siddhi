@@ -169,7 +169,7 @@ public class GpuInputStreamParser {
 
             GpuQueryProcessor gpuQueryProcessor = new GpuQueryProcessor(gpuQueryContext, gpuQueryContext.getQueryName());
             
-            String leftStreamId = leftInputStream.getStreamId() + (leftInputStream.getStreamReferenceId() != null ? "_" + leftInputStream.getStreamId() : "");
+            String leftStreamId = leftInputStream.getStreamId() + (leftInputStream.getStreamReferenceId() != null ? "_" + leftInputStream.getStreamReferenceId() : "");
             GpuProcessStreamReceiver leftGpuProcessStreamReceiver = getGpuProcessStreamReceiver(
                     gpuMetaStateEvent.getMetaStreamEvent(0), 
                     leftStreamId, 
@@ -181,7 +181,7 @@ public class GpuInputStreamParser {
             }
             
             
-            String rightStreamId = rightInputStream.getStreamId() + (rightInputStream.getStreamReferenceId() != null ? "_" + rightInputStream.getStreamId() : "");
+            String rightStreamId = rightInputStream.getStreamId() + (rightInputStream.getStreamReferenceId() != null ? "_" + rightInputStream.getStreamReferenceId() : "");
             GpuProcessStreamReceiver rightGpuProcessStreamReceiver = getGpuProcessStreamReceiver(
                     gpuMetaStateEvent.getMetaStreamEvent(1), 
                     rightStreamId, 
