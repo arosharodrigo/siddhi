@@ -42,13 +42,13 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 public class GpuInputStreamParser {
 
     public static GpuProcessStreamReceiver getGpuProcessStreamReceiver(GpuMetaStreamEvent gpuMetaEvent, 
-            String streamId, String queryName) {
+            String streamId, String referenceId, String queryName) {
         
         GpuProcessStreamReceiver processStreamReceiver = null;
         try {
             ClassPool pool = ClassPool.getDefault();
             
-            String className = "GpuProcessStreamReceiver" + streamId + queryName;
+            String className = "GpuProcessStreamReceiver" + streamId + (referenceId != null ? referenceId : "") + queryName;
             String fqdn = "org.wso2.siddhi.core.gpu.query.input.gen." + className;
             CtClass gpuProcStrmRecevrClass = pool.makeClass(fqdn);
             final CtClass superClass = pool.get( "org.wso2.siddhi.core.gpu.query.input.GpuProcessStreamReceiver" );
@@ -56,8 +56,8 @@ public class GpuInputStreamParser {
             gpuProcStrmRecevrClass.setModifiers( Modifier.PUBLIC );
             
             StringBuffer constructor = new StringBuffer();
-            constructor.append("public ").append(className).append("(String streamId, String queryName) {");
-            constructor.append("   super(streamId, queryName); ");
+            constructor.append("public ").append(className).append("(String streamId, String referenceId, String queryName) {");
+            constructor.append("   super(streamId, referenceId, queryName); ");
             constructor.append("}");
             
             CtConstructor ctConstructor = CtNewConstructor.make(constructor.toString(), gpuProcStrmRecevrClass);
@@ -102,9 +102,9 @@ public class GpuInputStreamParser {
             CtMethod serializeMethod = CtNewMethod.make(serializeBuffer.toString(), gpuProcStrmRecevrClass);
             gpuProcStrmRecevrClass.addMethod(serializeMethod);
             
-            gpuProcStrmRecevrClass.debugWriteFile("/home/prabodha/javassist");
-            processStreamReceiver = (GpuProcessStreamReceiver)gpuProcStrmRecevrClass.toClass().getConstructor(String.class, String.class)
-                  .newInstance(streamId, queryName);
+//            gpuProcStrmRecevrClass.debugWriteFile("/home/prabodha/javassist");
+            processStreamReceiver = (GpuProcessStreamReceiver)gpuProcStrmRecevrClass.toClass().getConstructor(String.class, String.class, String.class)
+                  .newInstance(streamId, referenceId, queryName);
             
         } catch (NotFoundException e) {
             e.printStackTrace();
@@ -140,10 +140,12 @@ public class GpuInputStreamParser {
             
             GpuProcessStreamReceiver processStreamReceiver = getGpuProcessStreamReceiver(gpuMetaEvent, 
                     ((SingleInputStream) inputStream).getStreamId(), 
+                    ((SingleInputStream) inputStream).getStreamReferenceId(),
                     gpuQueryContext.getQueryName());
 
             if(processStreamReceiver == null) {
                 processStreamReceiver = new GpuProcessStreamReceiver(((SingleInputStream) inputStream).getStreamId(), 
+                        ((SingleInputStream) inputStream).getStreamReferenceId(),
                         gpuQueryContext.getQueryName());
             }
             gpuQueryProcessor.addStream(((SingleInputStream) inputStream).getStreamId(), gpuMetaEvent);
@@ -172,11 +174,13 @@ public class GpuInputStreamParser {
             String leftStreamId = leftInputStream.getStreamId() + (leftInputStream.getStreamReferenceId() != null ? "_" + leftInputStream.getStreamReferenceId() : "");
             GpuProcessStreamReceiver leftGpuProcessStreamReceiver = getGpuProcessStreamReceiver(
                     gpuMetaStateEvent.getMetaStreamEvent(0), 
-                    leftStreamId, 
+                    leftInputStream.getStreamId(), 
+                    leftInputStream.getStreamReferenceId(),
                     gpuQueryContext.getQueryName() + "_left");
                     
             if(leftGpuProcessStreamReceiver == null) {
-                leftGpuProcessStreamReceiver = new GpuProcessStreamReceiver(leftStreamId, 
+                leftGpuProcessStreamReceiver = new GpuProcessStreamReceiver(leftInputStream.getStreamId(), 
+                        leftInputStream.getStreamReferenceId(),
                         gpuQueryContext.getQueryName() + "_left");
             }
             
@@ -184,11 +188,13 @@ public class GpuInputStreamParser {
             String rightStreamId = rightInputStream.getStreamId() + (rightInputStream.getStreamReferenceId() != null ? "_" + rightInputStream.getStreamReferenceId() : "");
             GpuProcessStreamReceiver rightGpuProcessStreamReceiver = getGpuProcessStreamReceiver(
                     gpuMetaStateEvent.getMetaStreamEvent(1), 
-                    rightStreamId, 
+                    rightInputStream.getStreamId(),
+                    rightInputStream.getStreamReferenceId(),
                     gpuQueryContext.getQueryName() + "_right");
 
             if(rightGpuProcessStreamReceiver == null) {
-                rightGpuProcessStreamReceiver = new GpuProcessStreamReceiver(rightStreamId, 
+                rightGpuProcessStreamReceiver = new GpuProcessStreamReceiver(rightInputStream.getStreamId(), 
+                        rightInputStream.getStreamReferenceId(),
                         gpuQueryContext.getQueryName() + "_right");
             }
             

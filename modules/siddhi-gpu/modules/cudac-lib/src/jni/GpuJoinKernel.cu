@@ -1462,6 +1462,11 @@ bool GpuJoinKernel::Initialize(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, in
 		i_LeftThreadWorkCount = ceil((float)i_RightStreamWindowSize / i_LeftThreadWorkSize);
 		i_RightThreadWorkCount = ceil((float)i_LeftStreamWindowSize / i_RightThreadWorkSize);
 
+		fprintf(fp_LeftLog, "[GpuJoinKernel] LeftThreadWorkSize=%d RightThreadWorkSize=%d\n", i_LeftThreadWorkSize, i_RightThreadWorkSize);
+		fflush(fp_LeftLog);
+		fprintf(fp_RightLog, "[GpuJoinKernel] LeftThreadWorkSize=%d RightThreadWorkSize=%d\n", i_LeftThreadWorkSize, i_RightThreadWorkSize);
+		fflush(fp_RightLog);
+
 		fprintf(fp_LeftLog, "[GpuJoinKernel] LeftThreadWorkCount=%d RightThreadWorkCount=%d\n", i_LeftThreadWorkCount, i_RightThreadWorkCount);
 		fflush(fp_LeftLog);
 		fprintf(fp_RightLog, "[GpuJoinKernel] LeftThreadWorkCount=%d RightThreadWorkCount=%d\n", i_LeftThreadWorkCount, i_RightThreadWorkCount);

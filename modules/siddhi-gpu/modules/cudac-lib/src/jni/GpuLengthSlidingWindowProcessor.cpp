@@ -98,7 +98,7 @@ int GpuLengthSlidingWindowProcessor::Process(int _iStreamIndex, int _iNumEvents)
 
 	p_WindowKernel->Process(_iStreamIndex, _iNumEvents);
 
-	if(p_Next)
+	if(p_Next && _iNumEvents > 0)
 	{
 		_iNumEvents = p_Next->Process(_iStreamIndex, _iNumEvents);
 	}

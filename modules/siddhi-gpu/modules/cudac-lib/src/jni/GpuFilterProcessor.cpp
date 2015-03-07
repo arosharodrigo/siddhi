@@ -355,7 +355,7 @@ int GpuFilterProcessor::Process(int _iStreamIndex, int _iNumEvents)
 	// get result meta data (resulting events count)
 	p_FilterKernel->Process(_iStreamIndex, _iNumEvents);
 
-	if(p_Next)
+	if(p_Next && _iNumEvents > 0)
 	{
 		_iNumEvents = p_Next->Process(_iStreamIndex, _iNumEvents);
 	}

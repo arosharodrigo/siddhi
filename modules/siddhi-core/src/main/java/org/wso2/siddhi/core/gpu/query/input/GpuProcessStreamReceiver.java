@@ -29,6 +29,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     protected GpuQueryProcessor gpuQueryProcessor;
     protected GpuMetaStreamEvent gpuMetaEvent;
     private int streamIndex;
+    private String streamReferenceId;
+    private String streamFullId;
     protected ByteBufferWriter eventBufferWriter;
     private SiddhiGpu.GpuStreamProcessor gpuStreamProcessor;
     private List<SiddhiGpu.GpuProcessor> gpuProcessors = new ArrayList<SiddhiGpu.GpuProcessor>();
@@ -52,8 +54,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     private final DecimalFormat decimalFormat = new DecimalFormat("###.##");
     
-    public GpuProcessStreamReceiver(String streamId, String queryName) {
+    public GpuProcessStreamReceiver(String streamId, String referenceId, String queryName) {
         super(streamId, queryName);
+        this.streamReferenceId = referenceId;
+        this.streamFullId = streamId + (referenceId != null ? "_" + referenceId : "");
         this.gpuQueryProcessor = null;
         this.gpuMetaEvent = null;
         this.eventBufferWriter = null;
@@ -67,10 +71,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 
     public GpuProcessStreamReceiver clone(String key) {
         GpuProcessStreamReceiver clonedProcessStreamReceiver = GpuInputStreamParser.getGpuProcessStreamReceiver(
-                this.gpuMetaEvent, streamId + key, queryName);
+                this.gpuMetaEvent, streamId + key, this.streamReferenceId, queryName);
         
         if(clonedProcessStreamReceiver == null) {
-            clonedProcessStreamReceiver = new GpuProcessStreamReceiver(streamId + key, queryName);
+            clonedProcessStreamReceiver = new GpuProcessStreamReceiver(streamId + key, this.streamReferenceId, queryName);
         }
         
         clonedProcessStreamReceiver.setMetaStreamEvent(metaStreamEvent);
@@ -169,10 +173,10 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
   
     public void init() {
         
-        log.info("<" + queryName + "> [GpuProcessStreamReceiver] Initializing " + streamId );
+        log.info("<" + queryName + "> [GpuProcessStreamReceiver] Initializing " + streamFullId );
         
         for(SiddhiGpu.GpuProcessor gpuProcessor: gpuProcessors) {
-            gpuQueryProcessor.addGpuProcessor(streamId, gpuProcessor);
+            gpuQueryProcessor.addGpuProcessor(streamFullId, gpuProcessor);
         }
 
         gpuQueryProcessor.configure(this);     
@@ -180,8 +184,8 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     }
     
     public void configure(ByteBufferWriter eventBufferWriter, GpuStreamProcessor gpuStreamProcessor) {
-        streamIndex = gpuQueryProcessor.getStreamIndex(getStreamId());
-        log.info("<" + queryName + "> [GpuProcessStreamReceiver] configure : StreamId=" + getStreamId() + " StreamIndex=" + streamIndex);
+        streamIndex = gpuQueryProcessor.getStreamIndex(streamFullId);
+        log.info("<" + queryName + "> [GpuProcessStreamReceiver] configure : StreamId=" + streamFullId + " StreamIndex=" + streamIndex);
         log.info("<" + queryName + "> [GpuProcessStreamReceiver] configure : metaStreamEvent : " + metaStreamEvent.toString());
 
         this.eventBufferWriter = eventBufferWriter;
@@ -241,6 +245,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     public void setMinimumEventBatchSize(int minimumEventBatchSize) {
         this.minimumEventBatchSize = minimumEventBatchSize;
     }
+    
+    public String getStreamFullId() {
+        return streamFullId;
+    }
+
     
     private void configureSelectorProcessor() {
         // create QueryPostProcessor - should done after GpuStreamProcessors configured
@@ -353,7 +362,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     
     public void printStatistics() {
         log.info(new StringBuilder()
-        .append("EventProcessTroughput ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("EventProcessTroughput ExecutionPlan=").append(queryName).append("_").append(streamFullId)
         .append("|length=").append(throughputStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(throughputStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(throughputStatstics.getMin()))
@@ -364,7 +373,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 //        .append("|90=").append(decimalFormat.format(throughputStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
-        .append("EventProcessTotalTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("EventProcessTotalTime ExecutionPlan=").append(queryName).append("_").append(streamFullId)
         .append("|length=").append(totalTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(totalTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(totalTimeStatstics.getMin()))
@@ -375,7 +384,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 //        .append("|90=").append(decimalFormat.format(totalTimeStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
-        .append("EventProcessSerializationTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("EventProcessSerializationTime ExecutionPlan=").append(queryName).append("_").append(streamFullId)
         .append("|length=").append(serializationTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(serializationTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(serializationTimeStatstics.getMin()))
@@ -386,7 +395,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 //        .append("|90=").append(decimalFormat.format(serializationTimeStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
-        .append("EventProcessGpuTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("EventProcessGpuTime ExecutionPlan=").append(queryName).append("_").append(streamFullId)
         .append("|length=").append(gpuTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(gpuTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(gpuTimeStatstics.getMin()))
@@ -397,7 +406,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 //        .append("|90=").append(decimalFormat.format(gpuTimeStatstics.getPercentile(90))).toString());
         
         log.info(new StringBuilder()
-        .append("EventProcessSelectTime ExecutionPlan=").append(queryName).append("_").append(streamId)
+        .append("EventProcessSelectTime ExecutionPlan=").append(queryName).append("_").append(streamFullId)
         .append("|length=").append(selectTimeStatstics.getN())
         .append("|Avg=").append(decimalFormat.format(selectTimeStatstics.getMean()))
         .append("|Min=").append(decimalFormat.format(selectTimeStatstics.getMin()))

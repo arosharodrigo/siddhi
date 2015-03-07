@@ -126,9 +126,9 @@ public class GpuQueryProcessor {
     
     public void configure(GpuProcessStreamReceiver processStreamReceiver) {
         
-        log.info("<" + queryName + "> configure " + processStreamReceiver.getStreamId() + " : MetaStream count " + metaStreams.size());
+        log.info("<" + queryName + "> configure " + processStreamReceiver.getStreamFullId() + " : MetaStream count " + metaStreams.size());
         
-        processStreamReceivers.put(processStreamReceiver.getStreamId(), processStreamReceiver);
+        processStreamReceivers.put(processStreamReceiver.getStreamFullId(), processStreamReceiver);
         
         if(processStreamReceivers.size() == metaStreams.size()) {
             log.info("All streams added to GpuQueryRuntime. Configure GpuQueryRuntime.");
