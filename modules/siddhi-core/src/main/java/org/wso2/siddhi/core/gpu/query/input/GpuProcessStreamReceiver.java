@@ -38,6 +38,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     private int maximumEventBatchSize;
     private int minimumEventBatchSize;
     private boolean softBatchScheduling;
+    private int selectorWorkerCount;
     
     private float currentEventCount = 0;
     private long startTime = 0;
@@ -67,6 +68,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         this.maximumEventBatchSize = 1024;
         this.minimumEventBatchSize = 1;
         this.softBatchScheduling = true;
+        this.selectorWorkerCount = 0;
     }
 
     public GpuProcessStreamReceiver clone(String key) {
@@ -250,6 +252,13 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
         return streamFullId;
     }
 
+    public int getSelectorWorkerCount() {
+        return selectorWorkerCount;
+    }
+
+    public void setSelectorWorkerCount(int selectorWorkerCount) {
+        this.selectorWorkerCount = selectorWorkerCount;
+    }
     
     private void configureSelectorProcessor() {
         // create QueryPostProcessor - should done after GpuStreamProcessors configured
@@ -274,7 +283,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 selectProcessor.setStreamEventPool(streamEventPool);
                 selectProcessor.setMetaStreamEvent(metaStreamEvent);
                 selectProcessor.setGpuOutputMetaStreamEvent(outputGpuMetaEvent);
-                selectProcessor.setWorkerSize(0);
+                selectProcessor.setWorkerSize(selectorWorkerCount);
 
             } else if (lastGpuProcessor instanceof SiddhiGpu.GpuLengthSlidingWindowProcessor) {
 
@@ -295,7 +304,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 selectProcessor.setStreamEventPool(streamEventPool);
                 selectProcessor.setMetaStreamEvent(metaStreamEvent);
                 selectProcessor.setGpuOutputMetaStreamEvent(outputGpuMetaEvent);
-                selectProcessor.setWorkerSize(0);
+                selectProcessor.setWorkerSize(selectorWorkerCount);
 
             } else if(lastGpuProcessor instanceof SiddhiGpu.GpuJoinProcessor) {
 
@@ -303,7 +312,6 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 int segmentEventCount  = 0;
                 int threadWorkSize = 0;
                 int bufferSize = 0;
-                int workerCount = 7;
 
                 if(streamIndex == 0) {
 
@@ -335,7 +343,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 }
                 
                 if(threadWorkSize == segmentEventCount) {
-                    workerCount = 0;
+                    selectorWorkerCount = 0;
                 }
                 
                 StreamDefinition outputStreamDef = (StreamDefinition) metaStreamEvent.getInputDefinition();
@@ -351,11 +359,11 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
                 gpuJoinQuerySelector.setMetaStreamEvent(metaStreamEvent);
                 gpuJoinQuerySelector.setGpuOutputMetaStreamEvent(outputGpuMetaEvent);
                 gpuJoinQuerySelector.setThreadWorkSize(threadWorkSize);
-                gpuJoinQuerySelector.setWorkerSize(workerCount); // + 1 selector thread = 8 //TODO: set this from query
+                gpuJoinQuerySelector.setWorkerSize(selectorWorkerCount); // + 1 selector thread = 8 //TODO: set this from query
                 
                 int numerOfEventsInOutBuffer = bufferSize / outputGpuMetaEvent.getEventSizeInBytes();
                 int segmentCount = numerOfEventsInOutBuffer / segmentEventCount;
-                gpuJoinQuerySelector.setSegmentsPerWorker(segmentCount / (workerCount + 1));
+                gpuJoinQuerySelector.setSegmentsPerWorker(segmentCount / (selectorWorkerCount + 1));
             }
         }
     }
@@ -421,4 +429,5 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
     public void getStatistics(List<SummaryStatistics> statList) {
         statList.add(throughputStatstics);
     }
+
 }

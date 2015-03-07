@@ -21,6 +21,7 @@ public class GpuQueryContext {
     private Integer perfromanceCalculateBatchCount;
     private boolean batchSoftScheduling;
     private Integer threadWorkSize;
+    private Integer selectorWorkerCount;
     private GpuMetaStreamEvent inputStreamMetaEvent;
     private GpuMetaStreamEvent outputStreamMetaEvent;
     
@@ -51,6 +52,9 @@ public class GpuQueryContext {
         
         String gpuBatchScheludeString = getAnnotationStringValue(SiddhiConstants.ANNOTATION_GPU, 
                 SiddhiConstants.ANNOTATION_ELEMENT_GPU_BATCH_SCHEDULE, annotationList);
+        
+        selectorWorkerCount = getAnnotationIntegerValue(SiddhiConstants.ANNOTATION_GPU, 
+                SiddhiConstants.ANNOTATION_ELEMENT_GPU_SELECTOR_WORKERS, annotationList);
 
         if(threadsPerBlock == null) {
             threadsPerBlock = new Integer(128);
@@ -77,6 +81,10 @@ public class GpuQueryContext {
         
         if(threadWorkSize == null) {
             threadWorkSize = 0;
+        }
+        
+        if(selectorWorkerCount == null) {
+            selectorWorkerCount = 0;
         }
             
         this.outputStreamMetaEvent = null;
@@ -225,5 +233,13 @@ public class GpuQueryContext {
 
     public void setInputStreamMetaEvent(GpuMetaStreamEvent inputStreamMetaEvent) {
         this.inputStreamMetaEvent = inputStreamMetaEvent;
+    }
+
+    public Integer getSelectorWorkerCount() {
+        return selectorWorkerCount;
+    }
+
+    public void setSelectorWorkerCount(Integer selectorWorkerCount) {
+        this.selectorWorkerCount = selectorWorkerCount;
     }
 }
