@@ -1199,7 +1199,9 @@ __device__ bool Evaluate(FilterEvalParameters & _rParameters)
 
 	//printf("E=%d.%d|%d|%d\n",blockIdx.x, threadIdx.x,_rParameters.i_CurrentIndex, a_ConstFilterNodes[_rParameters.i_CurrentIndex].e_ConditionType);
 
-	return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+	//return (*mExecutors[_rParameters.p_Filter->ap_ExecutorNodes[_rParameters.i_CurrentIndex++].e_ConditionType])(_rParameters);
+
+	return true;
 }
 
 };
