@@ -486,7 +486,7 @@ public class GpuSelectorParser {
             deserializeBuffer.append("        } \n");
             deserializeBuffer.append("        processedEventCount++; \n");
             deserializeBuffer.append("    } else { \n");
-            deserializeBuffer.append("        outputEventBuffer.position(outputEventBuffer.position() + ").append(inputMetaStreamEvent.getEventSizeInBytes()).append(" - 2); \n");
+            deserializeBuffer.append("        outputEventBuffer.position(outputEventBuffer.position() + ").append(gpuOutputMetaStreamEvent.getEventSizeInBytes()).append(" - 2); \n");
             deserializeBuffer.append("    }    \n");
             deserializeBuffer.append("} \n");
 
