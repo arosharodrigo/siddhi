@@ -480,7 +480,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(int _iStreamIndex, GpuMetaEve
 
 	pHostParameters->p_InputEventBuffer = p_InputEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->p_InputEventMeta = p_InputEventBuffer->GetDeviceMetaEvent();
-	pHostParameters->i_SizeOfInputEvent = p_InputEventBuffer->GetDeviceMetaEvent()->i_SizeOfEventInBytes;
+	pHostParameters->i_SizeOfInputEvent = p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes;
 	pHostParameters->p_EventWindowBuffer = p_WindowEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->i_WindowLength = i_WindowSize;
 	pHostParameters->p_ResultsBuffer = p_ResultEventBuffer->GetDeviceEventBuffer();
@@ -734,7 +734,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(int _iStreamIndex, GpuMetaEv
 
 	pHostParameters->p_InputEventBuffer = p_InputEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->p_InputEventMeta = p_InputEventBuffer->GetDeviceMetaEvent();
-	pHostParameters->i_SizeOfInputEvent = p_InputEventBuffer->GetDeviceMetaEvent()->i_SizeOfEventInBytes;
+	pHostParameters->i_SizeOfInputEvent = p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes;
 	pHostParameters->p_EventWindowBuffer = p_WindowEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->i_WindowLength = i_WindowSize;
 	pHostParameters->p_ResultsBuffer = p_ResultEventBuffer->GetDeviceEventBuffer();
