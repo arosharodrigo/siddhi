@@ -26,20 +26,15 @@ namespace SiddhiGpu
 
 
 // http://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#launch-bounds
-//#define THREADS_PER_BLOCK 256
-//
-//#if __CUDA_ARCH__ >= 200
-//#define MY_KERNEL_MAX_THREADS (2 * THREADS_PER_BLOCK)
-//#define MY_KERNEL_MIN_BLOCKS 3
-//#else
-//#define MY_KERNEL_MAX_THREADS THREADS_PER_BLOCK
-//#define MY_KERNEL_MIN_BLOCKS 2
-//#endif
-//__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+#define THREADS_PER_BLOCK 128
+#define MY_KERNEL_MAX_THREADS THREADS_PER_BLOCK
+#define MY_KERNEL_MIN_BLOCKS 8
 
 
 __global__
-void ProcessEventsFilterKernelStandalone(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsFilterKernelStandalone(
 		KernelParametersFilterStandalone  * _pParameters,
 		int                                 _iEventCount        // Num events in this batch
 )
@@ -77,8 +72,9 @@ void ProcessEventsFilterKernelStandalone(
 }
 
 __global__
-//__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
-void ProcessEventsFilterKernelFirstV2(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsFilterKernelFirstV2(
 		KernelParametersFilterStandalone  * _pParameters,
 		int                                 _iEventCount        // Num events in this batch
 )
@@ -116,8 +112,9 @@ void ProcessEventsFilterKernelFirstV2(
 }
 
 __global__
-//__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
-void ResultSorter(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ResultSorter(
 		char               * _pInByteBuffer,      // Input ByteBuffer from java side
 		int                * _pMatchedIndexBuffer,// Matched event index buffer
 		int                * _pPrefixSumBuffer,   // prefix sum buffer

@@ -17,8 +17,14 @@
 namespace SiddhiGpu
 {
 
+#define THREADS_PER_BLOCK 128
+#define MY_KERNEL_MAX_THREADS THREADS_PER_BLOCK
+#define MY_KERNEL_MIN_BLOCKS 8
+
 __global__
-void ProcessEventsLengthSlidingWindow(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsLengthSlidingWindow(
 		char               * _pInputEventBuffer,     // original input events buffer
 		GpuKernelMetaEvent * _pMetaEvent,            // Meta event for original input events
 		int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
@@ -189,7 +195,9 @@ void ProcessEventsLengthSlidingWindow(
 //}
 
 __global__
-void SetWindowState(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+SetWindowState(
 		char               * _pInputEventBuffer,     // original input events buffer
 		int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
 		char               * _pEventWindowBuffer,    // Event window buffer

@@ -21,9 +21,15 @@
 namespace SiddhiGpu
 {
 
+#define THREADS_PER_BLOCK 128
+#define MY_KERNEL_MAX_THREADS THREADS_PER_BLOCK
+#define MY_KERNEL_MIN_BLOCKS 8
+
 // process batch of events in one stream of join processor
 __global__
-void ProcessEventsJoinLeftTriggerAllOn(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsJoinLeftTriggerAllOn(
 		char               * _pInputEventBuffer,         // input events buffer
 		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
 		int                  _iInputNumberOfEvents,      // Number of events in input buffer
@@ -260,7 +266,9 @@ void ProcessEventsJoinLeftTriggerAllOn(
 //)
 
 __global__
-void ProcessEventsJoinLeftTriggerCurrentOn(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsJoinLeftTriggerCurrentOn(
 		JoinKernelParameters * _pParameters,
 		int                   _iInputNumberOfEvents,      // Number of events in input buffer
 		int                   _iRemainingCount,           // Remaining free slots in Window buffer
@@ -389,7 +397,9 @@ void ProcessEventsJoinLeftTriggerCurrentOn(
 }
 
 __global__
-void ProcessEventsJoinLeftTriggerExpiredOn(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsJoinLeftTriggerExpiredOn(
 		char               * _pInputEventBuffer,         // input events buffer
 		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
 		int                  _iInputNumberOfEvents,      // Number of events in input buffer
@@ -536,7 +546,9 @@ void ProcessEventsJoinLeftTriggerExpiredOn(
 }
 
 __global__
-void ProcessEventsJoinRightTriggerAllOn(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsJoinRightTriggerAllOn(
 		char               * _pInputEventBuffer,         // input events buffer
 		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
 		int                  _iInputNumberOfEvents,      // Number of events in input buffer
@@ -772,7 +784,9 @@ void ProcessEventsJoinRightTriggerAllOn(
 //)
 
 __global__
-void ProcessEventsJoinRightTriggerCurrentOn(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsJoinRightTriggerCurrentOn(
 		JoinKernelParameters * _pParameters,
 		int                   _iInputNumberOfEvents,      // Number of events in input buffer
 		int                   _iRemainingCount,           // Remaining free slots in Window buffer
@@ -900,7 +914,9 @@ void ProcessEventsJoinRightTriggerCurrentOn(
 }
 
 __global__
-void ProcessEventsJoinRightTriggerExpireOn(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+ProcessEventsJoinRightTriggerExpireOn(
 		char               * _pInputEventBuffer,         // input events buffer
 		GpuKernelMetaEvent * _pInputMetaEvent,           // Meta event for input events
 		int                  _iInputNumberOfEvents,      // Number of events in input buffer
@@ -1050,7 +1066,9 @@ void ProcessEventsJoinRightTriggerExpireOn(
 }
 
 __global__
-void JoinSetWindowState(
+void
+__launch_bounds__(MY_KERNEL_MAX_THREADS, MY_KERNEL_MIN_BLOCKS)
+JoinSetWindowState(
 		char               * _pInputEventBuffer,     // original input events buffer
 		int                  _iNumberOfEvents,       // Number of events in input buffer (matched + not matched)
 		char               * _pEventWindowBuffer,    // Event window buffer
