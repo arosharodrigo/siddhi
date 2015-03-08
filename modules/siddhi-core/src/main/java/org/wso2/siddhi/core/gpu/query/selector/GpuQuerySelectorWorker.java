@@ -76,7 +76,7 @@ public class GpuQuerySelectorWorker implements Runnable {
 
             if(type != Type.NONE) {
                 StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-
+                borrowedEvent.setType(type);
                 long sequence = outputEventBuffer.getLong();
                 long timestamp = outputEventBuffer.getLong();
 

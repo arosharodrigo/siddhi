@@ -418,9 +418,8 @@ public class GpuQuerySelector extends QuerySelector {
 
             for(int i=0; i<workerSize; ++i) {
 
-//                this.workers[i] = getGpuQuerySelectorWorker(queryName, gpuMetaStreamEvent, 
-//                        id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter);
-                this.workers[i] = null;
+                this.workers[i] = getGpuQuerySelectorWorker(queryName, gpuOutputMetaStreamEvent, 
+                        id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter);
                 
                 if(this.workers[i] == null) {
                     this.workers[i] = new GpuQuerySelectorWorker(id + "_" + Integer.toString(i), streamEventPool.clone(), streamEventConverter); 
@@ -479,8 +478,10 @@ public class GpuQuerySelector extends QuerySelector {
             deserializeBuffer.append("    org.wso2.siddhi.core.event.ComplexEvent.Type type = eventTypes[outputEventBuffer.getShort()]; \n");
             deserializeBuffer.append("    if(type != org.wso2.siddhi.core.event.ComplexEvent.Type.NONE) { \n");
             deserializeBuffer.append("        org.wso2.siddhi.core.event.stream.StreamEvent borrowedEvent = streamEventPool.borrowEvent(); \n");
+            deserializeBuffer.append("        borrowedEvent.setType(type);      \n");
             deserializeBuffer.append("        long sequence = outputEventBuffer.getLong(); \n");
-            deserializeBuffer.append("        long timestamp = outputEventBuffer.getLong(); \n");
+            deserializeBuffer.append("        borrowedEvent.setTimestamp(outputEventBuffer.getLong()); \n");
+            deserializeBuffer.append("        attributeData = borrowedEvent.getOutputData(); \n");
                    
             int index = 0;
             for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
@@ -510,7 +511,7 @@ public class GpuQuerySelector extends QuerySelector {
                 }
             }
 
-            deserializeBuffer.append("        streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent); \n");
+//            deserializeBuffer.append("        streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent); \n");
             
             deserializeBuffer.append("        java.util.Iterator i = attributeProcessorList.iterator(); \n");
             deserializeBuffer.append("        while(i.hasNext()) { \n");
