@@ -555,7 +555,6 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 			p_WindowEventBuffer->GetDeviceEventBuffer(),
 			i_WindowSize,
 			i_RemainingCount,
-			p_InputEventBuffer->GetMaxEventCount(),
 			p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
 			i_ThreadBlockSize
 	);
@@ -816,7 +815,6 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 			p_WindowEventBuffer->GetDeviceEventBuffer(),
 			i_WindowSize,
 			i_RemainingCount,
-			p_InputEventBuffer->GetMaxEventCount(),
 			p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
 			i_ThreadBlockSize
 	);
