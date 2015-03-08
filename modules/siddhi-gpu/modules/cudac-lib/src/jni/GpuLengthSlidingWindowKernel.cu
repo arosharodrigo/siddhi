@@ -261,11 +261,6 @@ SetWindowState(
 	// get in event starting position
 	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->i_SizeOfInputEvent * iEventIdx);
 
-	memcpy(pInEventBuffer,
-			_pParameters->p_InputEventBuffer + (_pParameters->i_SizeOfInputEvent * iEventIdx),
-			_pParameters->i_SizeOfInputEvent);
-	__syncthreads();
-
 	if(_iNumberOfEvents < _pParameters->i_WindowLength)
 	{
 		int iWindowPositionShift = _pParameters->i_WindowLength - _iNumberOfEvents;
