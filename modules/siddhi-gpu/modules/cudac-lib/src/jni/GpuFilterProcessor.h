@@ -528,6 +528,180 @@ public:
 	void Print(FILE * _fp = stdout);
 };
 
+typedef struct ElementryNode
+{
+	int i_StreamIndex;
+	DataType::Value e_Type;
+	int i_AttributePosition;
+	int i_OutputPosition;
+}ElementryNode;
+
+typedef struct ExpressionNode
+{
+	enum Operator
+	{
+		OP_ADD_INT = 0,
+		OP_ADD_LONG,
+		OP_ADD_FLOAT,
+		OP_ADD_DOUBLE,
+
+		OP_SUB_INT,
+		OP_SUB_LONG,
+		OP_SUB_FLOAT,
+		OP_SUB_DOUBLE,
+
+		OP_MUL_INT,
+		OP_MUL_LONG,
+		OP_MUL_FLOAT,
+		OP_MUL_DOUBLE,
+
+		OP_DIV_INT,
+		OP_DIV_LONG,
+		OP_DIV_FLOAT,
+		OP_DIV_DOUBLE,
+
+		OP_MOD_INT,
+		OP_MOD_LONG,
+		OP_MOD_FLOAT,
+		OP_MOD_DOUBLE
+	};
+
+	Operator e_Operator;
+	int i_LeftValuePos;
+	int i_RightValuePos;
+	int i_OutputPosition;
+}ExpressionNode;
+
+typedef struct ConditionNode
+{
+	enum Condition
+	{
+		COND_AND = 0,
+		COND_OR,
+		COND_NOT,
+		COND_BOOL,
+
+		COND_EQ_BOOL_BOOL,
+		COND_EQ_INT_INT,
+		COND_EQ_INT_LONG,
+		COND_EQ_INT_FLOAT,
+		COND_EQ_INT_DOUBLE,
+		COND_EQ_LONG_INT,
+		COND_EQ_LONG_LONG,
+		COND_EQ_LONG_FLOAT,
+		COND_EQ_LONG_DOUBLE,
+		COND_EQ_FLOAT_INT,
+		COND_EQ_FLOAT_LONG,
+		COND_EQ_FLOAT_FLOAT,
+		COND_EQ_FLOAT_DOUBLE,
+		COND_EQ_DOUBLE_INT,
+		COND_EQ_DOUBLE_LONG,
+		COND_EQ_DOUBLE_FLOAT,
+		COND_EQ_DOUBLE_DOUBLE,
+		COND_EQ_STRING_STRING,
+
+		COND_NE_BOOL_BOOL,
+		COND_NE_INT_INT,
+		COND_NE_INT_LONG,
+		COND_NE_INT_FLOAT,
+		COND_NE_INT_DOUBLE,
+		COND_NE_LONG_INT,
+		COND_NE_LONG_LONG,
+		COND_NE_LONG_FLOAT,
+		COND_NE_LONG_DOUBLE,
+		COND_NE_FLOAT_INT,
+		COND_NE_FLOAT_LONG,
+		COND_NE_FLOAT_FLOAT,
+		COND_NE_FLOAT_DOUBLE,
+		COND_NE_DOUBLE_INT,
+		COND_NE_DOUBLE_LONG,
+		COND_NE_DOUBLE_FLOAT,
+		COND_NE_DOUBLE_DOUBLE,
+		COND_NE_STRING_STRING,
+
+		COND_GT_INT_INT,
+		COND_GT_INT_LONG,
+		COND_GT_INT_FLOAT,
+		COND_GT_INT_DOUBLE,
+		COND_GT_LONG_INT,
+		COND_GT_LONG_LONG,
+		COND_GT_LONG_FLOAT,
+		COND_GT_LONG_DOUBLE,
+		COND_GT_FLOAT_INT,
+		COND_GT_FLOAT_LONG,
+		COND_GT_FLOAT_FLOAT,
+		COND_GT_FLOAT_DOUBLE,
+		COND_GT_DOUBLE_INT,
+		COND_GT_DOUBLE_LONG,
+		COND_GT_DOUBLE_FLOAT,
+		COND_GT_DOUBLE_DOUBLE,
+
+		COND_LT_INT_INT,
+		COND_LT_INT_LONG,
+		COND_LT_INT_FLOAT,
+		COND_LT_INT_DOUBLE,
+		COND_LT_LONG_INT,
+		COND_LT_LONG_LONG,
+		COND_LT_LONG_FLOAT,
+		COND_LT_LONG_DOUBLE,
+		COND_LT_FLOAT_INT,
+		COND_LT_FLOAT_LONG,
+		COND_LT_FLOAT_FLOAT,
+		COND_LT_FLOAT_DOUBLE,
+		COND_LT_DOUBLE_INT,
+		COND_LT_DOUBLE_LONG,
+		COND_LT_DOUBLE_FLOAT,
+		COND_LT_DOUBLE_DOUBLE,
+
+		COND_GE_INT_INT,
+		COND_GE_INT_LONG,
+		COND_GE_INT_FLOAT,
+		COND_GE_INT_DOUBLE,
+		COND_GE_LONG_INT,
+		COND_GE_LONG_LONG,
+		COND_GE_LONG_FLOAT,
+		COND_GE_LONG_DOUBLE,
+		COND_GE_FLOAT_INT,
+		COND_GE_FLOAT_LONG,
+		COND_GE_FLOAT_FLOAT,
+		COND_GE_FLOAT_DOUBLE,
+		COND_GE_DOUBLE_INT,
+		COND_GE_DOUBLE_LONG,
+		COND_GE_DOUBLE_FLOAT,
+		COND_GE_DOUBLE_DOUBLE,
+
+		COND_LE_INT_INT,
+		COND_LE_INT_LONG,
+		COND_LE_INT_FLOAT,
+		COND_LE_INT_DOUBLE,
+		COND_LE_LONG_INT,
+		COND_LE_LONG_LONG,
+		COND_LE_LONG_FLOAT,
+		COND_LE_LONG_DOUBLE,
+		COND_LE_FLOAT_INT,
+		COND_LE_FLOAT_LONG,
+		COND_LE_FLOAT_FLOAT,
+		COND_LE_FLOAT_DOUBLE,
+		COND_LE_DOUBLE_INT,
+		COND_LE_DOUBLE_LONG,
+		COND_LE_DOUBLE_FLOAT,
+		COND_LE_DOUBLE_DOUBLE,
+
+		COND_CONTAINS,
+	};
+
+	Condition e_Condition;
+	int i_LeftValuePos;
+	int i_RightValuePos;
+	int i_OutputPosition;
+}ConditionNode;
+
+typedef struct ValueNode
+{
+	DataType::Value e_Type;
+	Values m_Value;
+}ValueNode;
+
 class ExecutorNode
 {
 public:
@@ -545,6 +719,9 @@ public:
 	// if var - variable holder
 	VariableValue m_VarValue;
 
+	int i_ParentNodeIndex;
+	bool b_Processed;
+
 //	ExecutorNode();
 	ExecutorNode & Init();
 
@@ -553,6 +730,8 @@ public:
 	ExecutorNode & SetExpressionType(ExpressionType _eExprType);
 	ExecutorNode & SetConstValue(ConstValue _mConstVal);
 	ExecutorNode & SetVariableValue(VariableValue _mVarValue);
+
+	ExecutorNode & SetParentNode(int _iParentIndex);
 
 	void Print() { Print(stdout); }
 	void Print(FILE * _fp);

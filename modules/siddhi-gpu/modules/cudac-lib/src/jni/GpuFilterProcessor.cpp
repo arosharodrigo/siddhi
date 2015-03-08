@@ -173,6 +173,7 @@ ExecutorNode & ExecutorNode::Init()
 	e_NodeType = EXECUTOR_NODE_TYPE_COUNT;
 	e_ConditionType = EXECUTOR_INVALID;
 	e_ExpressionType = EXPRESSION_INVALID;
+	i_ParentNodeIndex = -1;
 	return *this;
 }
 
@@ -206,6 +207,12 @@ ExecutorNode & ExecutorNode::SetVariableValue(VariableValue _mVarValue)
 	m_VarValue.e_Type = _mVarValue.e_Type;
 	m_VarValue.i_AttributePosition = _mVarValue.i_AttributePosition;
 	m_VarValue.i_StreamIndex = _mVarValue.i_StreamIndex;
+	return *this;
+}
+
+ExecutorNode & ExecutorNode::SetParentNode(int _iParentIndex)
+{
+	i_ParentNodeIndex = _iParentIndex;
 	return *this;
 }
 
@@ -289,6 +296,8 @@ void GpuFilterProcessor::AddExecutorNode(int _iPos, ExecutorNode & _pNode)
 		ap_ExecutorNodes[_iPos].m_VarValue.i_StreamIndex = _pNode.m_VarValue.i_StreamIndex;
 		ap_ExecutorNodes[_iPos].m_VarValue.e_Type = _pNode.m_VarValue.e_Type;
 		ap_ExecutorNodes[_iPos].m_VarValue.i_AttributePosition = _pNode.m_VarValue.i_AttributePosition;
+		ap_ExecutorNodes[_iPos].i_ParentNodeIndex = _pNode.i_ParentNodeIndex;
+		ap_ExecutorNodes[_iPos].b_Processed = false;
 	}
 	else
 	{
@@ -305,6 +314,126 @@ GpuProcessor * GpuFilterProcessor::Clone()
 	return f;
 }
 
+//ExpressionNode * GpuFilterProcessor::GetExpressionNode(ExecutorNode & _mExecutorNode)
+//{
+//	switch(_mExecutorNode.e_NodeType)
+//	{
+//	case EXECUTOR_NODE_EXPRESSION:
+//	{
+//		switch(_mExecutorNode.e_ExpressionType)
+//		{
+//		case EXPRESSION_ADD_INT:
+//		{
+//			ExpressionNode * pExpNode = new ExpressionNode;
+//			pExpNode->e_Operator = ExpressionNode::OP_ADD_INT;
+//			return pExpNode;
+//		}
+//		break;
+//		case EXPRESSION_ADD_LONG:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_ADD_FLOAT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_ADD_DOUBLE:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_SUB_INT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_SUB_LONG:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_SUB_FLOAT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_SUB_DOUBLE:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MUL_INT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MUL_LONG:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MUL_FLOAT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MUL_DOUBLE:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_DIV_INT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_DIV_LONG:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_DIV_FLOAT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_DIV_DOUBLE:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MOD_INT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MOD_LONG:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MOD_FLOAT:
+//		{
+//
+//		}
+//		break;
+//		case EXPRESSION_MOD_DOUBLE:
+//		{
+//
+//		}
+//		break;
+//		default:
+//			break;
+//		}
+//	}
+//	break;
+//	default:
+//		break;
+//	}
+//}
+
 void GpuFilterProcessor::Configure(int _iStreamIndex, GpuProcessor * _pPrevProcessor, GpuProcessorContext * _pContext, FILE * _fpLog)
 {
 	fp_Log = _fpLog;
@@ -312,6 +441,76 @@ void GpuFilterProcessor::Configure(int _iStreamIndex, GpuProcessor * _pPrevProce
 
 	fprintf(fp_Log, "[GpuFilterProcessor] Configure : StreamIndex=%d PrevProcessor=%p Context=%p \n", _iStreamIndex, _pPrevProcessor, p_Context);
 	fflush(fp_Log);
+
+//	int iValueNodeCount = 0;
+//	std::list<ValueNode*> lstValueNodes;
+//	std::list<ElementryNode*> lstElementryNodes;
+//	std::list<ExpressionNode*> lstExpressionNodes;
+//	std::list<ConditionNode*> lstConditionNodes;
+//
+//
+//	for(int i=0; i<i_NodeCount; ++i)
+//	{
+//		switch(ap_ExecutorNodes[i].e_NodeType)
+//		{
+//			case EXECUTOR_NODE_EXPRESSION:
+//			{
+//				switch(ap_ExecutorNodes[i].e_ExpressionType)
+//				{
+//				case EXPRESSION_CONST:
+//				{
+//					ValueNode * pValNode = new ValueNode;
+//					pValNode->e_Type = ap_ExecutorNodes[i].m_ConstValue.e_Type;
+//					pValNode->m_Value = ap_ExecutorNodes[i].m_ConstValue.m_Value;
+//
+//					lstValueNodes.push_back(pValNode);
+//
+//					if(ap_ExecutorNodes[i].i_ParentNodeIndex >= 0)
+//					{
+//						ExecutorNode & mParentNode = ap_ExecutorNodes[ap_ExecutorNodes[i].i_ParentNodeIndex];
+//
+//						ExpressionNode * pExpNode = new ExpressionNode;
+//						pExpNode->e_Operator = ExpressionNode::OP_ADD_INT;
+//						//				pExpNode->i_LeftValuePos =  i_AttributePosition = ap_ExecutorNodes[i].m_VarValue.i_AttributePosition;
+//						//				pExpNode->i_StreamIndex = ap_ExecutorNodes[i].m_VarValue.i_StreamIndex;
+//						pExpNode->i_OutputPosition = lstValueNodes.size();
+//
+//						lstExpressionNodes.push_back(pExpNode);
+////						switch(mParentNode.e_NodeType)
+//
+//
+//					}
+//				}
+//				break;
+//				case EXPRESSION_VARIABLE:
+//				{
+//
+//					ElementryNode * pElemNode = new ElementryNode;
+//					pElemNode->e_Type = ap_ExecutorNodes[i].m_VarValue.e_Type;
+//					pElemNode->i_AttributePosition = ap_ExecutorNodes[i].m_VarValue.i_AttributePosition;
+//					pElemNode->i_StreamIndex = ap_ExecutorNodes[i].m_VarValue.i_StreamIndex;
+//					pElemNode->i_OutputPosition = lstValueNodes.size();
+//
+//					lstElementryNodes.push_back(pElemNode);
+//
+//					ValueNode * pValNode = new ValueNode;
+//					pValNode->e_Type = DataType::None;
+//					memset(&pValNode->m_Value.z_StringVal, 0, 8);
+//
+//					lstValueNodes.push_back(pValNode);
+//
+//				}
+//				break;
+//				default:
+//					break;
+//				}
+//			}
+//			break;
+//			default:
+//				break;
+//		}
+//	}
+
 }
 
 void GpuFilterProcessor::Init(int _iStreamIndex, GpuMetaEvent * _pMetaEvent, int _iInputEventBufferSize)

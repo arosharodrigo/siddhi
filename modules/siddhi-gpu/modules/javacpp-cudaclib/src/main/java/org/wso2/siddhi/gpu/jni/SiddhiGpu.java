@@ -668,6 +668,214 @@ public static final int
 	public native void Print();
 }
 
+@Namespace("SiddhiGpu") public static class ElementryNode extends Pointer {
+    static { Loader.load(); }
+    public ElementryNode() { allocate(); }
+    public ElementryNode(int size) { allocateArray(size); }
+    public ElementryNode(Pointer p) { super(p); }
+    private native void allocate();
+    private native void allocateArray(int size);
+    @Override public ElementryNode position(int position) {
+        return (ElementryNode)super.position(position);
+    }
+
+	public native int i_StreamIndex(); public native ElementryNode i_StreamIndex(int i_StreamIndex);
+	public native @Cast("SiddhiGpu::DataType::Value") int e_Type(); public native ElementryNode e_Type(int e_Type);
+	public native int i_AttributePosition(); public native ElementryNode i_AttributePosition(int i_AttributePosition);
+	public native int i_OutputPosition(); public native ElementryNode i_OutputPosition(int i_OutputPosition);
+}
+
+@Namespace("SiddhiGpu") public static class ExpressionNode extends Pointer {
+    static { Loader.load(); }
+    public ExpressionNode() { allocate(); }
+    public ExpressionNode(int size) { allocateArray(size); }
+    public ExpressionNode(Pointer p) { super(p); }
+    private native void allocate();
+    private native void allocateArray(int size);
+    @Override public ExpressionNode position(int position) {
+        return (ExpressionNode)super.position(position);
+    }
+
+	/** enum SiddhiGpu::ExpressionNode::Operator */
+	public static final int
+		OP_ADD_INT = 0,
+		OP_ADD_LONG = 1,
+		OP_ADD_FLOAT = 2,
+		OP_ADD_DOUBLE = 3,
+
+		OP_SUB_INT = 4,
+		OP_SUB_LONG = 5,
+		OP_SUB_FLOAT = 6,
+		OP_SUB_DOUBLE = 7,
+
+		OP_MUL_INT = 8,
+		OP_MUL_LONG = 9,
+		OP_MUL_FLOAT = 10,
+		OP_MUL_DOUBLE = 11,
+
+		OP_DIV_INT = 12,
+		OP_DIV_LONG = 13,
+		OP_DIV_FLOAT = 14,
+		OP_DIV_DOUBLE = 15,
+
+		OP_MOD_INT = 16,
+		OP_MOD_LONG = 17,
+		OP_MOD_FLOAT = 18,
+		OP_MOD_DOUBLE = 19;
+
+	public native @Cast("SiddhiGpu::ExpressionNode::Operator") int e_Operator(); public native ExpressionNode e_Operator(int e_Operator);
+	public native int i_LeftValuePos(); public native ExpressionNode i_LeftValuePos(int i_LeftValuePos);
+	public native int i_RightValuePos(); public native ExpressionNode i_RightValuePos(int i_RightValuePos);
+	public native int i_OutputPosition(); public native ExpressionNode i_OutputPosition(int i_OutputPosition);
+}
+
+@Namespace("SiddhiGpu") public static class ConditionNode extends Pointer {
+    static { Loader.load(); }
+    public ConditionNode() { allocate(); }
+    public ConditionNode(int size) { allocateArray(size); }
+    public ConditionNode(Pointer p) { super(p); }
+    private native void allocate();
+    private native void allocateArray(int size);
+    @Override public ConditionNode position(int position) {
+        return (ConditionNode)super.position(position);
+    }
+
+	/** enum SiddhiGpu::ConditionNode::Condition */
+	public static final int
+		COND_AND = 0,
+		COND_OR = 1,
+		COND_NOT = 2,
+		COND_BOOL = 3,
+
+		COND_EQ_BOOL_BOOL = 4,
+		COND_EQ_INT_INT = 5,
+		COND_EQ_INT_LONG = 6,
+		COND_EQ_INT_FLOAT = 7,
+		COND_EQ_INT_DOUBLE = 8,
+		COND_EQ_LONG_INT = 9,
+		COND_EQ_LONG_LONG = 10,
+		COND_EQ_LONG_FLOAT = 11,
+		COND_EQ_LONG_DOUBLE = 12,
+		COND_EQ_FLOAT_INT = 13,
+		COND_EQ_FLOAT_LONG = 14,
+		COND_EQ_FLOAT_FLOAT = 15,
+		COND_EQ_FLOAT_DOUBLE = 16,
+		COND_EQ_DOUBLE_INT = 17,
+		COND_EQ_DOUBLE_LONG = 18,
+		COND_EQ_DOUBLE_FLOAT = 19,
+		COND_EQ_DOUBLE_DOUBLE = 20,
+		COND_EQ_STRING_STRING = 21,
+
+		COND_NE_BOOL_BOOL = 22,
+		COND_NE_INT_INT = 23,
+		COND_NE_INT_LONG = 24,
+		COND_NE_INT_FLOAT = 25,
+		COND_NE_INT_DOUBLE = 26,
+		COND_NE_LONG_INT = 27,
+		COND_NE_LONG_LONG = 28,
+		COND_NE_LONG_FLOAT = 29,
+		COND_NE_LONG_DOUBLE = 30,
+		COND_NE_FLOAT_INT = 31,
+		COND_NE_FLOAT_LONG = 32,
+		COND_NE_FLOAT_FLOAT = 33,
+		COND_NE_FLOAT_DOUBLE = 34,
+		COND_NE_DOUBLE_INT = 35,
+		COND_NE_DOUBLE_LONG = 36,
+		COND_NE_DOUBLE_FLOAT = 37,
+		COND_NE_DOUBLE_DOUBLE = 38,
+		COND_NE_STRING_STRING = 39,
+
+		COND_GT_INT_INT = 40,
+		COND_GT_INT_LONG = 41,
+		COND_GT_INT_FLOAT = 42,
+		COND_GT_INT_DOUBLE = 43,
+		COND_GT_LONG_INT = 44,
+		COND_GT_LONG_LONG = 45,
+		COND_GT_LONG_FLOAT = 46,
+		COND_GT_LONG_DOUBLE = 47,
+		COND_GT_FLOAT_INT = 48,
+		COND_GT_FLOAT_LONG = 49,
+		COND_GT_FLOAT_FLOAT = 50,
+		COND_GT_FLOAT_DOUBLE = 51,
+		COND_GT_DOUBLE_INT = 52,
+		COND_GT_DOUBLE_LONG = 53,
+		COND_GT_DOUBLE_FLOAT = 54,
+		COND_GT_DOUBLE_DOUBLE = 55,
+
+		COND_LT_INT_INT = 56,
+		COND_LT_INT_LONG = 57,
+		COND_LT_INT_FLOAT = 58,
+		COND_LT_INT_DOUBLE = 59,
+		COND_LT_LONG_INT = 60,
+		COND_LT_LONG_LONG = 61,
+		COND_LT_LONG_FLOAT = 62,
+		COND_LT_LONG_DOUBLE = 63,
+		COND_LT_FLOAT_INT = 64,
+		COND_LT_FLOAT_LONG = 65,
+		COND_LT_FLOAT_FLOAT = 66,
+		COND_LT_FLOAT_DOUBLE = 67,
+		COND_LT_DOUBLE_INT = 68,
+		COND_LT_DOUBLE_LONG = 69,
+		COND_LT_DOUBLE_FLOAT = 70,
+		COND_LT_DOUBLE_DOUBLE = 71,
+
+		COND_GE_INT_INT = 72,
+		COND_GE_INT_LONG = 73,
+		COND_GE_INT_FLOAT = 74,
+		COND_GE_INT_DOUBLE = 75,
+		COND_GE_LONG_INT = 76,
+		COND_GE_LONG_LONG = 77,
+		COND_GE_LONG_FLOAT = 78,
+		COND_GE_LONG_DOUBLE = 79,
+		COND_GE_FLOAT_INT = 80,
+		COND_GE_FLOAT_LONG = 81,
+		COND_GE_FLOAT_FLOAT = 82,
+		COND_GE_FLOAT_DOUBLE = 83,
+		COND_GE_DOUBLE_INT = 84,
+		COND_GE_DOUBLE_LONG = 85,
+		COND_GE_DOUBLE_FLOAT = 86,
+		COND_GE_DOUBLE_DOUBLE = 87,
+
+		COND_LE_INT_INT = 88,
+		COND_LE_INT_LONG = 89,
+		COND_LE_INT_FLOAT = 90,
+		COND_LE_INT_DOUBLE = 91,
+		COND_LE_LONG_INT = 92,
+		COND_LE_LONG_LONG = 93,
+		COND_LE_LONG_FLOAT = 94,
+		COND_LE_LONG_DOUBLE = 95,
+		COND_LE_FLOAT_INT = 96,
+		COND_LE_FLOAT_LONG = 97,
+		COND_LE_FLOAT_FLOAT = 98,
+		COND_LE_FLOAT_DOUBLE = 99,
+		COND_LE_DOUBLE_INT = 100,
+		COND_LE_DOUBLE_LONG = 101,
+		COND_LE_DOUBLE_FLOAT = 102,
+		COND_LE_DOUBLE_DOUBLE = 103,
+
+		COND_CONTAINS = 104;
+
+	public native @Cast("SiddhiGpu::ConditionNode::Condition") int e_Condition(); public native ConditionNode e_Condition(int e_Condition);
+	public native int i_LeftValuePos(); public native ConditionNode i_LeftValuePos(int i_LeftValuePos);
+	public native int i_RightValuePos(); public native ConditionNode i_RightValuePos(int i_RightValuePos);
+	public native int i_OutputPosition(); public native ConditionNode i_OutputPosition(int i_OutputPosition);
+}
+
+@Namespace("SiddhiGpu") public static class ValueNode extends Pointer {
+    static { Loader.load(); }
+    public ValueNode() { allocate(); }
+    public ValueNode(int size) { allocateArray(size); }
+    public ValueNode(Pointer p) { super(p); }
+    private native void allocate();
+    private native void allocateArray(int size);
+    @Override public ValueNode position(int position) {
+        return (ValueNode)super.position(position);
+    }
+
+	public native @Cast("SiddhiGpu::DataType::Value") int e_Type(); public native ValueNode e_Type(int e_Type);
+	public native @ByRef Values m_Value(); public native ValueNode m_Value(Values m_Value);
+}
+
 @Namespace("SiddhiGpu") public static class ExecutorNode extends Pointer {
     static { Loader.load(); }
     public ExecutorNode() { allocate(); }
@@ -693,6 +901,9 @@ public static final int
 	// if var - variable holder
 	public native @ByRef VariableValue m_VarValue(); public native ExecutorNode m_VarValue(VariableValue m_VarValue);
 
+	public native int i_ParentNodeIndex(); public native ExecutorNode i_ParentNodeIndex(int i_ParentNodeIndex);
+	public native @Cast("bool") boolean b_Processed(); public native ExecutorNode b_Processed(boolean b_Processed);
+
 //	ExecutorNode();
 	public native @ByRef ExecutorNode Init();
 
@@ -701,6 +912,8 @@ public static final int
 	public native @ByRef ExecutorNode SetExpressionType(@Cast("SiddhiGpu::ExpressionType") int _eExprType);
 	public native @ByRef ExecutorNode SetConstValue(@ByVal ConstValue _mConstVal);
 	public native @ByRef ExecutorNode SetVariableValue(@ByVal VariableValue _mVarValue);
+
+	public native @ByRef ExecutorNode SetParentNode(int _iParentIndex);
 
 	public native void Print();
 	public native void Print(@Cast("FILE*") Pointer _fp);

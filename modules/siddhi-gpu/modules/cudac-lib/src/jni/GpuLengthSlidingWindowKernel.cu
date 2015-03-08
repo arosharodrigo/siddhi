@@ -470,6 +470,15 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 			i_ThreadBlockSize
 	);
 
+	if(b_LastKernel)
+	{
+		p_ResultEventBuffer->CopyToHost(true);
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
+	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
+	fflush(fp_Log);
+#endif
+	}
+
 	SetWindowState<<<numBlocks, numThreads>>>(
 			p_InputEventBuffer->GetDeviceEventBuffer(),
 			_iNumEvents,
@@ -480,15 +489,6 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 			p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
 			i_ThreadBlockSize
 	);
-
-	if(b_LastKernel)
-	{
-		p_ResultEventBuffer->CopyToHost(true);
-#if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
-	fflush(fp_Log);
-#endif
-	}
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
@@ -709,6 +709,16 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 			i_ThreadBlockSize
 	);
 
+	if(b_LastKernel)
+	{
+		p_ResultEventBuffer->CopyToHost(true);
+
+#if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
+	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
+	fflush(fp_Log);
+#endif
+	}
+
 	SetWindowState<<<numBlocks, numThreads>>>(
 			p_InputEventBuffer->GetDeviceEventBuffer(),
 			_iNumEvents,
@@ -719,16 +729,6 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 			p_InputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes,
 			i_ThreadBlockSize
 	);
-
-	if(b_LastKernel)
-	{
-		p_ResultEventBuffer->CopyToHost(true);
-
-#if GPU_DEBUG >= GPU_DEBUG_LEVEL_DEBUG
-	fprintf(fp_Log, "[GpuLengthSlidingWindowFilterKernel] Results copied \n");
-	fflush(fp_Log);
-#endif
-	}
 
 	CUDA_CHECK_RETURN(cudaPeekAtLastError());
 	CUDA_CHECK_RETURN(cudaThreadSynchronize());
