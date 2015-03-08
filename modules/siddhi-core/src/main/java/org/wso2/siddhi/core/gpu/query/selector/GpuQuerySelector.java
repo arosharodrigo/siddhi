@@ -531,7 +531,7 @@ public class GpuQuerySelector extends QuerySelector {
             deserializeBuffer.append("        processedEventCount++; \n");
             
             deserializeBuffer.append("    } else { \n");
-            deserializeBuffer.append("        outputEventBuffer.position(outputEventBuffer.position() + gpuMetaStreamEvent.getEventSizeInBytes() - 2); \n");
+            deserializeBuffer.append("        outputEventBuffer.position(outputEventBuffer.position() + ").append(gpuOutputMetaStreamEvent.getEventSizeInBytes()).append(" - 2); \n");
             deserializeBuffer.append("    } \n");
             
             deserializeBuffer.append("} \n");
