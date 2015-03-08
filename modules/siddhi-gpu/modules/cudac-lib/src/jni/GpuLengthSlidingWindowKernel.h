@@ -23,7 +23,8 @@ class GpuIntBuffer;
 typedef struct LengthSlidingWindowKernelParameters
 {
 	char               * p_InputEventBuffer;     // original input events buffer
-	GpuKernelMetaEvent * p_InputEventMeta;       // Input event meta
+	GpuKernelMetaEvent * p_InputEventMeta;      // Input event meta
+	int                  i_SizeOfInputEvent;     // Input event meta
 	char               * p_EventWindowBuffer;    // Event window buffer
 	int                  i_WindowLength;         // Length of current events window
 	char               * p_ResultsBuffer;        // Resulting events buffer

@@ -44,7 +44,7 @@ ProcessEventsLengthSlidingWindow(
 	int iEventIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
 	// get in event starting position
-	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * iEventIdx);
+	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->i_SizeOfInputEvent * iEventIdx);
 
 	// output to results buffer [expired event, in event]
 	char * pResultsExpiredEventBuffer = _pParameters->p_ResultsBuffer + (_pParameters->p_OutputEventMeta->i_SizeOfEventInBytes * iEventIdx * 2);
@@ -80,7 +80,7 @@ ProcessEventsLengthSlidingWindow(
 		if(iEventIdx < _pParameters->i_WindowLength)
 		{
 			// in window buffer
-			char * pExpiredOutEventInWindowBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * (iEventIdx - _iRemainingCount));
+			char * pExpiredOutEventInWindowBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->i_SizeOfInputEvent * (iEventIdx - _iRemainingCount));
 			GpuEvent * pWindowEvent = (GpuEvent*) pExpiredOutEventInWindowBuffer;
 
 			if(pWindowEvent->i_Type != GpuEvent::NONE) // if window event is filled
@@ -111,7 +111,7 @@ ProcessEventsLengthSlidingWindow(
 		else
 		{
 			// in input event buffer
-			char * pExpiredOutEventInInputBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * (iEventIdx - _pParameters->i_WindowLength));
+			char * pExpiredOutEventInInputBuffer = _pParameters->p_InputEventBuffer + (_pParameters->i_SizeOfInputEvent * (iEventIdx - _pParameters->i_WindowLength));
 			GpuEvent * pInExpiredEvent = (GpuEvent*) pExpiredOutEventInInputBuffer;
 
 			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
@@ -255,18 +255,15 @@ SetWindowState(
 		return;
 	}
 
-	extern __shared__ char sharedInputEventBuffer[];
-
 	// get assigned event
 	int iEventIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
 	// get in event starting position
-//	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * iEventIdx);
-	char * pSharedInEventBuffer = sharedInputEventBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * iEventIdx);
+	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->i_SizeOfInputEvent * iEventIdx);
 
-	memcpy(pSharedInEventBuffer,
-			_pParameters->p_InputEventBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * iEventIdx),
-			_pParameters->p_InputEventMeta->i_SizeOfEventInBytes);
+	memcpy(pInEventBuffer,
+			_pParameters->p_InputEventBuffer + (_pParameters->i_SizeOfInputEvent * iEventIdx),
+			_pParameters->i_SizeOfInputEvent);
 	__syncthreads();
 
 	if(_iNumberOfEvents < _pParameters->i_WindowLength)
@@ -283,7 +280,7 @@ SetWindowState(
 			int iPrevToEnd = iEnd;
 			while(iEnd >= 0)
 			{
-				char * pDestinationEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * iEnd);
+				char * pDestinationEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->i_SizeOfInputEvent * iEnd);
 				GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
 
 				if(pDestinationEvent->i_Type != GpuEvent::NONE) // there is an event in destination position
@@ -303,12 +300,12 @@ SetWindowState(
 			// work back from end while copying events
 			while(iEnd < iStart)
 			{
-				char * pDestinationEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * iEnd);
+				char * pDestinationEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->i_SizeOfInputEvent * iEnd);
 				GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
 
-				char * pSourceEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * (iEnd + iExitEventCount));
+				char * pSourceEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->i_SizeOfInputEvent * (iEnd + iExitEventCount));
 
-				memcpy(pDestinationEventBuffer, pSourceEventBuffer, _pParameters->p_InputEventMeta->i_SizeOfEventInBytes);
+				memcpy(pDestinationEventBuffer, pSourceEventBuffer, _pParameters->i_SizeOfInputEvent);
 				pDestinationEvent->i_Type = GpuEvent::EXPIRED;
 
 				iEnd += iExitEventCount;
@@ -317,9 +314,9 @@ SetWindowState(
 			// iEnd == iStart
 			if(iStart >= 0)
 			{
-				char * pDestinationEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * iStart);
+				char * pDestinationEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->i_SizeOfInputEvent * iStart);
 				GpuEvent * pDestinationEvent = (GpuEvent*) pDestinationEventBuffer;
-				memcpy(pDestinationEventBuffer, pSharedInEventBuffer, _pParameters->p_InputEventMeta->i_SizeOfEventInBytes);
+				memcpy(pDestinationEventBuffer, pInEventBuffer, _pParameters->i_SizeOfInputEvent);
 				pDestinationEvent->i_Type = GpuEvent::EXPIRED;
 			}
 		}
@@ -328,9 +325,9 @@ SetWindowState(
 			// just copy event to window
 			iWindowPositionShift -= (_iRemainingCount - _iNumberOfEvents);
 
-			char * pWindowEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * (iEventIdx + iWindowPositionShift));
+			char * pWindowEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->i_SizeOfInputEvent * (iEventIdx + iWindowPositionShift));
 
-			memcpy(pWindowEventBuffer, pSharedInEventBuffer, _pParameters->p_InputEventMeta->i_SizeOfEventInBytes);
+			memcpy(pWindowEventBuffer, pInEventBuffer, _pParameters->i_SizeOfInputEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
 			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
@@ -341,9 +338,9 @@ SetWindowState(
 
 		if(iEventIdx >= iWindowPositionShift)
 		{
-			char * pWindowEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->p_InputEventMeta->i_SizeOfEventInBytes * (iEventIdx - iWindowPositionShift));
+			char * pWindowEventBuffer = _pParameters->p_EventWindowBuffer + (_pParameters->i_SizeOfInputEvent * (iEventIdx - iWindowPositionShift));
 
-			memcpy(pWindowEventBuffer, pSharedInEventBuffer, _pParameters->p_InputEventMeta->i_SizeOfEventInBytes);
+			memcpy(pWindowEventBuffer, pInEventBuffer, _pParameters->i_SizeOfInputEvent);
 			GpuEvent * pExpiredEvent = (GpuEvent*) pWindowEventBuffer;
 			pExpiredEvent->i_Type = GpuEvent::EXPIRED;
 		}
@@ -483,6 +480,7 @@ bool GpuLengthSlidingWindowFirstKernel::Initialize(int _iStreamIndex, GpuMetaEve
 
 	pHostParameters->p_InputEventBuffer = p_InputEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->p_InputEventMeta = p_InputEventBuffer->GetDeviceMetaEvent();
+	pHostParameters->i_SizeOfInputEvent = p_InputEventBuffer->GetDeviceMetaEvent()->i_SizeOfEventInBytes;
 	pHostParameters->p_EventWindowBuffer = p_WindowEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->i_WindowLength = i_WindowSize;
 	pHostParameters->p_ResultsBuffer = p_ResultEventBuffer->GetDeviceEventBuffer();
@@ -553,7 +551,7 @@ void GpuLengthSlidingWindowFirstKernel::Process(int _iStreamIndex, int & _iNumEv
 #endif
 	}
 
-	SetWindowState<<<numBlocks, numThreads, p_InputEventBuffer->GetEventBufferSizeInBytes()>>>(
+	SetWindowState<<<numBlocks, numThreads>>>(
 			p_DeviceParameters,
 			_iNumEvents,
 			i_RemainingCount
@@ -736,6 +734,7 @@ bool GpuLengthSlidingWindowFilterKernel::Initialize(int _iStreamIndex, GpuMetaEv
 
 	pHostParameters->p_InputEventBuffer = p_InputEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->p_InputEventMeta = p_InputEventBuffer->GetDeviceMetaEvent();
+	pHostParameters->i_SizeOfInputEvent = p_InputEventBuffer->GetDeviceMetaEvent()->i_SizeOfEventInBytes;
 	pHostParameters->p_EventWindowBuffer = p_WindowEventBuffer->GetDeviceEventBuffer();
 	pHostParameters->i_WindowLength = i_WindowSize;
 	pHostParameters->p_ResultsBuffer = p_ResultEventBuffer->GetDeviceEventBuffer();
@@ -809,7 +808,7 @@ void GpuLengthSlidingWindowFilterKernel::Process(int _iStreamIndex, int & _iNumE
 #endif
 	}
 
-	SetWindowState<<<numBlocks, numThreads, p_InputEventBuffer->GetEventBufferSizeInBytes()>>>(
+	SetWindowState<<<numBlocks, numThreads>>>(
 			p_DeviceParameters,
 			_iNumEvents,
 			i_RemainingCount
