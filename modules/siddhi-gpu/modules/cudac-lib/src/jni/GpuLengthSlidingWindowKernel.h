@@ -20,6 +20,18 @@ class GpuMetaEvent;
 class GpuStreamEventBuffer;
 class GpuIntBuffer;
 
+typedef struct LengthSlidingWindowKernelParameters
+{
+	char               * p_InputEventBuffer;     // original input events buffer
+	GpuKernelMetaEvent * p_InputEventMeta;       // Input event meta
+	char               * p_EventWindowBuffer;    // Event window buffer
+	int                  i_WindowLength;         // Length of current events window
+	char               * p_ResultsBuffer;        // Resulting events buffer
+	GpuKernelMetaEvent * p_OutputEventMeta;      // Output event meta
+	AttributeMappings  * p_AttributeMapping;     // Attribute mapping
+	int                  i_EventsPerBlock;       // number of events allocated per block
+}LengthSlidingWindowKernelParameters;
+
 class GpuLengthSlidingWindowFirstKernel : public GpuKernel
 {
 public:
@@ -38,6 +50,8 @@ private:
 	GpuStreamEventBuffer * p_InputEventBuffer;
 	GpuStreamEventBuffer * p_ResultEventBuffer;
 	GpuStreamEventBuffer * p_WindowEventBuffer;
+
+	LengthSlidingWindowKernelParameters * p_DeviceParameters;
 
 	bool b_DeviceSet;
 	int i_WindowSize;
@@ -62,6 +76,8 @@ private:
 	GpuStreamEventBuffer * p_InputEventBuffer;
 	GpuStreamEventBuffer * p_ResultEventBuffer;
 	GpuStreamEventBuffer * p_WindowEventBuffer;
+
+	LengthSlidingWindowKernelParameters * p_DeviceParameters;
 
 	bool b_DeviceSet;
 	int i_WindowSize;

@@ -404,42 +404,12 @@ public class GpuSelectorParser {
             deserializeBuffer.append("        org.wso2.siddhi.core.event.stream.StreamEvent borrowedEvent = streamEventPool.borrowEvent(); \n");
             deserializeBuffer.append("        borrowedEvent.setType(type);      \n");
             deserializeBuffer.append("        long sequence = outputEventBuffer.getLong(); \n");
-//            deserializeBuffer.append("        long timestamp = outputEventBuffer.getLong(); \n");
             deserializeBuffer.append("        borrowedEvent.setTimestamp(outputEventBuffer.getLong()); \n");
             deserializeBuffer.append("        attributeData = borrowedEvent.getOutputData(); \n");
             
-//            int index = 0;
-//            for (GpuEventAttribute attrib : gpuMetaStreamEvent.getAttributes()) {
-//                switch(attrib.type) {
-//                    case BOOL:
-//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getShort()); \n");
-//                        break;
-//                    case INT:
-//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getInt()); \n");
-//                        break;
-//                    case LONG:
-//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getLong()); \n");
-//                        break;
-//                    case FLOAT:
-//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getFloat()); \n");
-//                        break;
-//                    case DOUBLE:
-//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getDouble()); \n");
-//                        break;
-//                    case STRING:
-//                        deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
-//                        deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
-//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
-//                        break;
-//                     default:
-//                         break;
-//                }
-//            }
-            
             int index = 0;
-            for (GpuEventAttribute attrib : deserializeMappings) {
-                if(attrib.position > 0) {
-                    switch(attrib.type) {
+            for (GpuEventAttribute attrib : gpuOutputMetaStreamEvent.getAttributes()) {
+                switch(attrib.type) {
                     case BOOL:
                         deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getShort()); \n");
                         break;
@@ -460,13 +430,42 @@ public class GpuSelectorParser {
                         deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
                         deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
                         break;
-                    default:
-                        break;
-                    }
-                } else {
-                    deserializeBuffer.append("outputEventBuffer.position(outputEventBuffer.position() + ").append(attrib.length).append("); \n");
+                     default:
+                         break;
                 }
             }
+            
+//            int index = 0;
+//            for (GpuEventAttribute attrib : deserializeMappings) {
+//                if(attrib.position > 0) {
+//                    switch(attrib.type) {
+//                    case BOOL:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getShort()); \n");
+//                        break;
+//                    case INT:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getInt()); \n");
+//                        break;
+//                    case LONG:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getLong()); \n");
+//                        break;
+//                    case FLOAT:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getFloat()); \n");
+//                        break;
+//                    case DOUBLE:
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", outputEventBuffer.getDouble()); \n");
+//                        break;
+//                    case STRING:
+//                        deserializeBuffer.append("short length = outputEventBuffer.getShort(); \n");
+//                        deserializeBuffer.append("outputEventBuffer.get(preAllocatedByteArray, 0, ").append(attrib.length).append("); \n");
+//                        deserializeBuffer.append("setAttributeData(").append(index++).append(", new String(preAllocatedByteArray, 0, length).intern()); \n");
+//                        break;
+//                    default:
+//                        break;
+//                    }
+//                } else {
+//                    deserializeBuffer.append("outputEventBuffer.position(outputEventBuffer.position() + ").append(attrib.length).append("); \n");
+//                }
+//            }
             
 //            deserializeBuffer.append("        streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent); \n");
 //            deserializeBuffer.append("        System.arraycopy(attributeData, 0, borrowedEvent.getOutputData(), 0, ").append(index).append("); \n");
