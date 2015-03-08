@@ -341,41 +341,43 @@ public class GpuQuerySelector extends QuerySelector {
     }
 
     public void setGpuOutputMetaStreamEvent(GpuMetaStreamEvent gpuMetaStreamEvent) {
-        this.gpuOutputMetaStreamEvent = gpuMetaStreamEvent;
-        this.gpuMetaEventAttributeList = gpuMetaStreamEvent.getAttributes();
-        
-        log.info("<" + queryName + "> [setGpuMetaStreamEvent] OutputMetaStream : AttributeCount=" + gpuMetaStreamEvent.getAttributes().size() + 
-                " EventSizeInBytes=" + gpuMetaStreamEvent.getEventSizeInBytes());
-        
-        int maxStringLength = 0;
-        
-        attributeData = new Object[gpuMetaEventAttributeList.size()];
-        int index = 0;
-        for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
-            switch(attrib.type) {
-            case BOOL:
-                attributeData[index++] = new Boolean(false);
-                break;
-            case INT:
-                attributeData[index++] = new Integer(0);
-                break;
-            case LONG:
-                attributeData[index++] = new Long(0);
-                break;
-            case FLOAT:
-                attributeData[index++] = new Float(0);
-                break;
-            case DOUBLE:
-                attributeData[index++] = new Double(0);
-                break;
-            case STRING:
-                attributeData[index++] = new String();
-                maxStringLength = (attrib.length > maxStringLength ? attrib.length : maxStringLength);
-                break;
+        if(this.gpuOutputMetaStreamEvent == null) {
+            this.gpuOutputMetaStreamEvent = gpuMetaStreamEvent;
+            this.gpuMetaEventAttributeList = gpuMetaStreamEvent.getAttributes();
+
+            log.info("<" + queryName + "> [setGpuMetaStreamEvent] OutputMetaStream : AttributeCount=" + gpuMetaStreamEvent.getAttributes().size() + 
+                    " EventSizeInBytes=" + gpuMetaStreamEvent.getEventSizeInBytes());
+
+            int maxStringLength = 0;
+
+            attributeData = new Object[gpuMetaEventAttributeList.size()];
+            int index = 0;
+            for (GpuEventAttribute attrib : gpuMetaEventAttributeList) {
+                switch(attrib.type) {
+                case BOOL:
+                    attributeData[index++] = new Boolean(false);
+                    break;
+                case INT:
+                    attributeData[index++] = new Integer(0);
+                    break;
+                case LONG:
+                    attributeData[index++] = new Long(0);
+                    break;
+                case FLOAT:
+                    attributeData[index++] = new Float(0);
+                    break;
+                case DOUBLE:
+                    attributeData[index++] = new Double(0);
+                    break;
+                case STRING:
+                    attributeData[index++] = new String();
+                    maxStringLength = (attrib.length > maxStringLength ? attrib.length : maxStringLength);
+                    break;
+                }
             }
+
+            preAllocatedByteArray = new byte[maxStringLength + 1];
         }
-        
-        preAllocatedByteArray = new byte[maxStringLength + 1];
     }
     
     public void setAttributeData(int index, int value) {
