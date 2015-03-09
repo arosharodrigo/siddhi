@@ -1686,7 +1686,9 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 		}
 		else if(p_JoinProcessor->GetCurrentOn())
 		{
-			ProcessEventsJoinLeftTriggerCurrentOn<<<numBlocks, numThreads>>>(
+			int iSharedSize = (i_ThreadBlockSize * p_LeftInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes);
+
+			ProcessEventsJoinLeftTriggerCurrentOn<<<numBlocks, numThreads, iSharedSize>>>(
 					p_DeviceParametersLeft,
 					_iNumEvents,
 					p_LeftWindowEventBuffer->GetRemainingCount(),
@@ -1905,7 +1907,9 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 		}
 		else if(p_JoinProcessor->GetCurrentOn())
 		{
-			ProcessEventsJoinRightTriggerCurrentOn<<<numBlocks, numThreads>>>(
+			int iSharedSize = (i_ThreadBlockSize * p_RightInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes);
+
+			ProcessEventsJoinRightTriggerCurrentOn<<<numBlocks, numThreads, iSharedSize>>>(
 					p_DeviceParametersRight,
 					_iNumEvents,
 					p_RightWindowEventBuffer->GetRemainingCount(),
