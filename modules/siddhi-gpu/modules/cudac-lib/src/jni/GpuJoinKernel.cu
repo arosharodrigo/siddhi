@@ -298,10 +298,9 @@ ProcessEventsJoinLeftTriggerCurrentOn(
 
 	// get in event starting position
 //	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
-	char * pSharedInEventBuffer = NULL;
+	char * pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * (threadIdx.x / iWorkerCount));
 	if(threadIdx.x % iWorkerCount == 0)
 	{
-		pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * (threadIdx.x / iWorkerCount));
 		memcpy(pSharedInEventBuffer,
 			_pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex),
 			_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes);
@@ -827,10 +826,9 @@ ProcessEventsJoinRightTriggerCurrentOn(
 
 	// get in event starting position
 //	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
-	char * pSharedInEventBuffer = NULL;
+	char * pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * (threadIdx.x / iWorkerCount));
 	if(threadIdx.x % iWorkerCount == 0)
 	{
-		pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * (threadIdx.x / iWorkerCount));
 		memcpy(pSharedInEventBuffer,
 			_pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex),
 			_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes);
