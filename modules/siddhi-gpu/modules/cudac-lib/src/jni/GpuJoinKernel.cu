@@ -287,6 +287,8 @@ ProcessEventsJoinLeftTriggerCurrentOn(
 		return;
 	}
 
+	extern __shared__ char p_SharedInputEventBuffer[];
+
 	// get assigned event
 	int iGlobalThreadIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
@@ -295,7 +297,11 @@ ProcessEventsJoinLeftTriggerCurrentOn(
 	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _pParameters->i_WorkSize;
 
 	// get in event starting position
-	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+//	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+	char * pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+	memcpy(pSharedInEventBuffer,
+			_pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex),
+			_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes);
 
 	// output to results buffer [in event, expired event]
 	// {other stream event size * other window size} * 2 (for in/exp)
@@ -304,7 +310,7 @@ ProcessEventsJoinLeftTriggerCurrentOn(
 	char * pResultsInEventBufferSegment = _pParameters->p_ResultsBuffer + (iGlobalThreadIdx * _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 //			+ (iWindowStartEventIndex * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
 
-	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
+	GpuEvent * pInEvent = (GpuEvent*) pSharedInEventBuffer;
 
 //	memset(pResultsInEventBufferSegment, 0, _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 
@@ -335,7 +341,7 @@ ProcessEventsJoinLeftTriggerCurrentOn(
 				ExpressionEvalParameters mExpressionParam;
 				mExpressionParam.p_OnCompare = _pParameters->p_OnCompareFilter;
 				mExpressionParam.a_Meta[0] = _pParameters->p_InputMetaEvent;
-				mExpressionParam.a_Event[0] = pInEventBuffer;
+				mExpressionParam.a_Event[0] = pSharedInEventBuffer;
 				mExpressionParam.a_Meta[1] = _pParameters->p_OtherStreamMetaEvent;
 				mExpressionParam.a_Event[1] = pOtherWindowEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
@@ -805,6 +811,8 @@ ProcessEventsJoinRightTriggerCurrentOn(
 		return;
 	}
 
+	extern __shared__ char p_SharedInputEventBuffer[];
+
 	// get assigned event
 	int iGlobalThreadIdx = (blockIdx.x * _pParameters->i_EventsPerBlock) + threadIdx.x;
 
@@ -813,7 +821,11 @@ ProcessEventsJoinRightTriggerCurrentOn(
 	int iWindowStartEventIndex = (iGlobalThreadIdx % iWorkerCount) * _pParameters->i_WorkSize;
 
 	// get in event starting position
-	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+//	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+	char * pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
+	memcpy(pSharedInEventBuffer,
+			_pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex),
+			_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes);
 
 	// output to results buffer [in event, expired event]
 	// {other stream event size * other window size} * 2 (for in/exp)
@@ -822,7 +834,7 @@ ProcessEventsJoinRightTriggerCurrentOn(
 	char * pResultsInEventBufferSegment = _pParameters->p_ResultsBuffer + (iGlobalThreadIdx * _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 //			+ (iWindowStartEventIndex * _pOutputStreamMetaEvent->i_SizeOfEventInBytes);
 
-	GpuEvent * pInEvent = (GpuEvent*) pInEventBuffer;
+	GpuEvent * pInEvent = (GpuEvent*) pSharedInEventBuffer;
 
 //	memset(pResultsInEventBufferSegment, 0, _pParameters->i_WorkSize * _pParameters->p_OutputStreamMetaEvent->i_SizeOfEventInBytes);
 
@@ -856,7 +868,7 @@ ProcessEventsJoinRightTriggerCurrentOn(
 				mExpressionParam.a_Meta[0] = _pParameters->p_OtherStreamMetaEvent;
 				mExpressionParam.a_Event[0] = pOtherWindowEventBuffer;
 				mExpressionParam.a_Meta[1] = _pParameters->p_InputMetaEvent;
-				mExpressionParam.a_Event[1] = pInEventBuffer;
+				mExpressionParam.a_Event[1] = pSharedInEventBuffer;
 				mExpressionParam.i_CurrentIndex = 0;
 
 				bool bOnCompareMatched = Evaluate(mExpressionParam);
