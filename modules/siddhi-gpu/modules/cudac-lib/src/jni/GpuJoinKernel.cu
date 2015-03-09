@@ -298,10 +298,15 @@ ProcessEventsJoinLeftTriggerCurrentOn(
 
 	// get in event starting position
 //	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
-	char * pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
-	memcpy(pSharedInEventBuffer,
+	char * pSharedInEventBuffer = NULL;
+	if(threadIdx.x % iWorkerCount == 0)
+	{
+		pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * (threadIdx.x / iWorkerCount));
+		memcpy(pSharedInEventBuffer,
 			_pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex),
 			_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes);
+	}
+	__syncthreads();
 
 	// output to results buffer [in event, expired event]
 	// {other stream event size * other window size} * 2 (for in/exp)
@@ -822,10 +827,15 @@ ProcessEventsJoinRightTriggerCurrentOn(
 
 	// get in event starting position
 //	char * pInEventBuffer = _pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
-	char * pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex);
-	memcpy(pSharedInEventBuffer,
+	char * pSharedInEventBuffer = NULL;
+	if(threadIdx.x % iWorkerCount == 0)
+	{
+		pSharedInEventBuffer = p_SharedInputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * (threadIdx.x / iWorkerCount));
+		memcpy(pSharedInEventBuffer,
 			_pParameters->p_InputEventBuffer + (_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes * iInEventIndex),
 			_pParameters->p_InputMetaEvent->i_SizeOfEventInBytes);
+	}
+	__syncthreads();
 
 	// output to results buffer [in event, expired event]
 	// {other stream event size * other window size} * 2 (for in/exp)
@@ -1686,7 +1696,7 @@ void GpuJoinKernel::ProcessLeftStream(int _iStreamIndex, int & _iNumEvents)
 		}
 		else if(p_JoinProcessor->GetCurrentOn())
 		{
-			int iSharedSize = (i_ThreadBlockSize * p_LeftInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes);
+			int iSharedSize = (i_ThreadBlockSize * p_LeftInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes / i_LeftThreadWorkerCount);
 
 			ProcessEventsJoinLeftTriggerCurrentOn<<<numBlocks, numThreads, iSharedSize>>>(
 					p_DeviceParametersLeft,
@@ -1907,7 +1917,7 @@ void GpuJoinKernel::ProcessRightStream(int _iStreamIndex, int & _iNumEvents)
 		}
 		else if(p_JoinProcessor->GetCurrentOn())
 		{
-			int iSharedSize = (i_ThreadBlockSize * p_RightInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes);
+			int iSharedSize = (i_ThreadBlockSize * p_RightInputEventBuffer->GetHostMetaEvent()->i_SizeOfEventInBytes / i_RightThreadWorkerCount);
 
 			ProcessEventsJoinRightTriggerCurrentOn<<<numBlocks, numThreads, iSharedSize>>>(
 					p_DeviceParametersRight,
