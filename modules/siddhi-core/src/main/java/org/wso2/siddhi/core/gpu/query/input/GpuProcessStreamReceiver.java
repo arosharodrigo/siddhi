@@ -162,7 +162,7 @@ public class GpuProcessStreamReceiver extends ProcessStreamReceiver {
 //                    " Select=" + (endTime - gpuProcEndTime) + "] iter=" + iteration);
             
             throughputStatstics.addValue(average);
-            totalTimeStatstics.addValue(endTime - startTime);
+            totalTimeStatstics.addValue(duration + serializeTime);
             serializationTimeStatstics.addValue(serializeTime);
             gpuTimeStatstics.addValue(gpuProcEndTime - startTime);
             selectTimeStatstics.addValue(endTime - gpuProcEndTime);

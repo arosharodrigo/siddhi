@@ -114,7 +114,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
     
     public QuerySelector clone(String key) {
         GpuFilterQuerySelector clonedQuerySelector = GpuSelectorParser.getGpuFilterQuerySelector(queryName, this.gpuOutputMetaStreamEvent, 
-                id + key, selector, currentOn, expiredOn, executionPlanContext, deserializeMappings);
+                id + key, selector, currentOn, expiredOn, executionPlanContext, deserializeMappings, gpuInputMetaStreamEvent);
         
         if(clonedQuerySelector == null) {
             clonedQuerySelector = new GpuFilterQuerySelector(id + key, selector, currentOn, expiredOn, executionPlanContext, queryName);

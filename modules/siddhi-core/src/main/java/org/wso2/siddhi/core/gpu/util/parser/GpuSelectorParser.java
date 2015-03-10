@@ -205,14 +205,17 @@ public class GpuSelectorParser {
         
     }
     
-    public static GpuFilterQuerySelector getGpuFilterQuerySelector(String classId, GpuMetaStreamEvent gpuMetaStreamEvent,
+    public static GpuFilterQuerySelector getGpuFilterQuerySelector(String classId, GpuMetaStreamEvent gpuOutputMetaStreamEvent,
             String id, Selector selector, boolean currentOn, boolean expiredOn, 
-            ExecutionPlanContext executionPlanContext, List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings) {
+            ExecutionPlanContext executionPlanContext, List<GpuMetaStreamEvent.GpuEventAttribute> deserializeMappings,
+            GpuMetaStreamEvent inputMetaStreamEvent) {
         
         GpuFilterQuerySelector gpuQuerySelector = null;
         try {
-            log.info("[getGpuFilterQuerySelector] OutputMetaStream : AttributeCount=" + gpuMetaStreamEvent.getAttributes().size() + 
-                    " EventSizeInBytes=" + gpuMetaStreamEvent.getEventSizeInBytes());
+            log.info("[getGpuFilterQuerySelector] InputMetaStream : AttributeCount=" + inputMetaStreamEvent.getAttributes().size() + 
+                    " EventSizeInBytes=" + inputMetaStreamEvent.getEventSizeInBytes());
+            log.info("[getGpuFilterQuerySelector] OutputMetaStream : AttributeCount=" + gpuOutputMetaStreamEvent.getAttributes().size() + 
+                " EventSizeInBytes=" + gpuOutputMetaStreamEvent.getEventSizeInBytes());
             
             ClassPool pool = ClassPool.getDefault();
             
@@ -306,7 +309,7 @@ public class GpuSelectorParser {
             deserializeBuffer.append("        } \n");
             deserializeBuffer.append("        processedEventCount++; \n");
             deserializeBuffer.append("    } else { \n");
-            deserializeBuffer.append("        inputEventBuffer.position(inputEventBuffer.position() + gpuOutputMetaStreamEvent.getEventSizeInBytes()); \n");
+            deserializeBuffer.append("        inputEventBuffer.position(inputEventBuffer.position() + ").append(inputMetaStreamEvent.getEventSizeInBytes()).append("); \n");
             deserializeBuffer.append("    } \n");
             deserializeBuffer.append("} \n");
 
@@ -322,6 +325,7 @@ public class GpuSelectorParser {
                     .newInstance(id, selector, currentOn, expiredOn, executionPlanContext, classId);
               
             gpuQuerySelector.setDeserializeMappings(deserializeMappings);
+            gpuQuerySelector.setGpuInputMetaStreamEvent(inputMetaStreamEvent);
             
         } catch (NotFoundException e) {
             e.printStackTrace();
@@ -579,7 +583,7 @@ public class GpuSelectorParser {
                 if(lastGpuProcessor instanceof SiddhiGpu.GpuFilterProcessor) {
                     
                     querySelector = getGpuFilterQuerySelector(gpuQueryContext.getQueryName(), gpuQueryContext.getOutputStreamMetaEvent(), 
-                            id, selector, currentOn, expiredOn, executionPlanContext, selectorDeserializeMappings);
+                            id, selector, currentOn, expiredOn, executionPlanContext, selectorDeserializeMappings, gpuQueryContext.getInputStreamMetaEvent());
                     
                     if(querySelector == null) {
                         querySelector = new GpuFilterQuerySelector(id, selector, currentOn, expiredOn, executionPlanContext, gpuQueryContext.getQueryName());
