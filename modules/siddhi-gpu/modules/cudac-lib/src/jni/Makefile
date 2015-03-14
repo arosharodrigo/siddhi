@@ -15,7 +15,7 @@ ifndef PLATFORM
 $(error PLATFORM not defined!!)
 endif
 
-MAXREGCOUNT=40
+MAXREGCOUNT=32
 
 # internal flags
 NVCCFLAGS   := -m${OS_SIZE}
