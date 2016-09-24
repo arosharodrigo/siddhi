@@ -3,15 +3,15 @@ include ./findcudalib.mk
 # Location of the CUDA Toolkit
 CUDA_PATH ?= /usr/local/cuda
 
+CPPBUILD=/home/arosha/projects/Siddhi/projects/siddhi/modules/siddhi-gpu/modules/javacpp-cudaclib/cppbuild
 ifndef CPPBUILD
-#CPPBUILD=/home/prabodha/project/siddhi-on-gpu/cppbuild
 $(error CPPBUILD not defined!!)
 endif
 
-CUB_LIB_PATH := /home/prabodha/cuda/libs/cub/cub-1.3.2
+CUB_LIB_PATH := /home/arosha/install/cub/cub-1.3.2
 
+PLATFORM=linux-x86_64
 ifndef PLATFORM
-#PLATFORM=linux-x86_64
 $(error PLATFORM not defined!!)
 endif
 
@@ -59,10 +59,10 @@ endif
 
 # Debug build flags
 ifeq ($(dbg),1)
-      NVCCFLAGS += -g -G --ptxas-options=-v -maxrregcount=${MAXREGCOUNT} -lineinfo
+      NVCCFLAGS += -D_FORCE_INLINES -g -G --ptxas-options=-v -maxrregcount=${MAXREGCOUNT} -lineinfo
       TARGET := debug
 else
-      NVCCFLAGS += -po -maxrregcount=${MAXREGCOUNT} -O3  --ptxas-options=-v -DNDEBUG
+      NVCCFLAGS += -D_FORCE_INLINES -po -maxrregcount=${MAXREGCOUNT} -O3  --ptxas-options=-v -DNDEBUG
       CCFLAGS += -O3
       LDFLAGS += -O3
       TARGET := release
@@ -115,7 +115,13 @@ LIBRARIES := -L.
 # CUDA code generation flags
 GENCODE_SM20    := -gencode arch=compute_20,code=sm_20
 GENCODE_SM30    := -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=\"sm_35,compute_35\"
-GENCODE_FLAGS   := $(GENCODE_SM20) 
+CUDA_ARCH := -gencode arch=compute_20,code=sm_20 \
+-gencode arch=compute_20,code=sm_21 \
+-gencode arch=compute_30,code=sm_30 \
+-gencode arch=compute_35,code=sm_35 \
+-gencode arch=compute_50,code=sm_50 \
+-gencode arch=compute_50,code=compute_50
+GENCODE_FLAGS   := $(CUDA_ARCH)
 
 ################################################################################
 .SUFFIXES: .cu
