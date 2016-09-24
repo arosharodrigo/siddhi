@@ -21,7 +21,7 @@ private static final Logger log = Logger.getLogger(GpuFilterSample.class);
         String executionPlan = "@plan:name('GpuJoinSample') @plan:parallel "
                 + "define stream cseEventStream (symbol string, price float, volume int); "
                 + "define stream twitterStream (company string, numoccur int); "
-                + "@info(name = 'query1') @gpu(block.size='128', cuda.device='1', string.sizes='symbol=8,company=8') "
+                + "@info(name = 'query1') @gpu(block.size='128', cuda.device='0', string.sizes='symbol=8,company=8') "
                 + " from cseEventStream#window.length(1000) as a join twitterStream#window.length(200) as b " 
                 + " on a.symbol== b.company " 
                 + " select a.symbol as symbol, b.numoccur, a.price, a.volume " 
