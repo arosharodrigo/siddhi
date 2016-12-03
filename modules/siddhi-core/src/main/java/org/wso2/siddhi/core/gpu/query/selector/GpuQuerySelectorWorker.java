@@ -3,6 +3,7 @@ package org.wso2.siddhi.core.gpu.query.selector;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEvent.Type;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -13,6 +14,8 @@ import org.wso2.siddhi.core.gpu.event.stream.GpuMetaStreamEvent.GpuEventAttribut
 import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 
 public class GpuQuerySelectorWorker implements Runnable {
+
+    private static final Logger log = Logger.getLogger(GpuQuerySelectorWorker.class);
 
     protected String workerId;
     
@@ -107,7 +110,7 @@ public class GpuQuerySelectorWorker implements Runnable {
                 }
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
-                //log.debug("Converted event " + borrowedEvent.toString());
+                log.debug("[GpuQuerySelectorWorker] Converted event: " + borrowedEvent.toString());
 
                 // call actual select operations
                 for (AttributeProcessor attributeProcessor : attributeProcessorList) {

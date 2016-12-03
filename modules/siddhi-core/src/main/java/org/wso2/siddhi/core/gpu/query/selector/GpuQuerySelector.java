@@ -181,7 +181,8 @@ public class GpuQuerySelector extends QuerySelector {
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
 //                log.debug("<" + queryName + "> [deserialize] Converted event " + borrowedEvent.toString());
-                
+                log.debug("[GpuQuerySelector] Converted event: " + borrowedEvent.toString());
+
                 // call actual select operations
                 for (AttributeProcessor attributeProcessor : attributeProcessorList) {
                     attributeProcessor.process(borrowedEvent);

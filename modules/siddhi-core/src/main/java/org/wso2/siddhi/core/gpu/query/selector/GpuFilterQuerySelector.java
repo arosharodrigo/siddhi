@@ -70,6 +70,7 @@ public class GpuFilterQuerySelector extends GpuQuerySelector {
                 //                }
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
+                log.debug("[GpuFilterQuerySelector] Converted event: " + borrowedEvent.toString());
 
                 for (AttributeProcessor attributeProcessor : attributeProcessorList) {
                     attributeProcessor.process(borrowedEvent);

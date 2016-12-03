@@ -108,6 +108,7 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
                 //log.debug("Converted event " + borrowedEvent.toString());
+                log.debug("[ConversionGpuEventChunk1] Converted event: " + borrowedEvent.toString());
 
                 if (first == null) {
                     first = borrowedEvent;
@@ -172,6 +173,7 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
 //                log.debug("<" + eventCount + "> Converted event " + resultsIndex + " : " + borrowedEvent.toString());
+                log.debug("[ConversionGpuEventChunk2] Converted event: " + borrowedEvent.toString());
 
                 if (first == null) {
                     first = borrowedEvent;
@@ -245,6 +247,7 @@ public class ConversionGpuEventChunk extends ConversionStreamEventChunk {
                 
                 streamEventConverter.convertData(timestamp, type, attributeData, borrowedEvent);
                 //log.debug("Converted event " + borrowedEvent.toString());
+                log.debug("[ConversionGpuEventChunk3] Converted event: " + borrowedEvent.toString());
                 
                 if (first == null) {
                     first = borrowedEvent;
